@@ -201,8 +201,8 @@ class User extends Authenticatable
      */
     public function setRoleAttribute($value): void
     {
-        $allowedRoles = [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN, self::ROLE_INSTRUCTOR, self::ROLE_STUDENT];
-        $this->attributes['role'] = in_array($value, $allowedRoles) ? $value : self::ROLE_STUDENT;
+        $allowedRoles = [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN, 'user'];
+        $this->attributes['role'] = in_array($value, $allowedRoles) ? $value : 'user';
     }
 
     // HELPER METHODS
@@ -224,18 +224,18 @@ class User extends Authenticatable
     }
 
     /**
-     * Verifica se l'utente è istruttore
+     * Verifica se l'utente è istruttore (not implemented - no instructor role in DB)
      */
     public function isInstructor(): bool
     {
-        return $this->role === self::ROLE_INSTRUCTOR;
+        return false; // No instructor role in current DB schema
     }
 
     /**
-     * Verifica se l'utente è studente
+     * Verifica se l'utente è studente (user)
      */
     public function isStudent(): bool
     {
-        return $this->role === self::ROLE_STUDENT;
+        return $this->role === 'user';
     }
 }
