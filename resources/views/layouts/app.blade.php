@@ -5,8 +5,34 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
+    <!-- SEO Meta Tags -->
     <title>@yield('title', config('app.name', 'Scuola di Danza'))</title>
     <meta name="description" content="@yield('description', 'Sistema di gestione per scuole di danza - Corsi, iscrizioni e molto altro')">
+    <meta name="keywords" content="@yield('keywords', 'scuola danza, corsi danza, iscrizioni danza, gestione scuola, ballet, hip hop, danza moderna')">
+    <meta name="author" content="@yield('author', 'Scuola di Danza')">
+    <meta name="robots" content="@yield('robots', 'index, follow')">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="@yield('og_title', config('app.name', 'Scuola di Danza'))">
+    <meta property="og:description" content="@yield('og_description', 'Sistema di gestione per scuole di danza - Corsi, iscrizioni e molto altro')">
+    <meta property="og:type" content="@yield('og_type', 'website')">
+    <meta property="og:url" content="@yield('og_url', url()->current())">
+    <meta property="og:image" content="@yield('og_image', asset('images/og-default.jpg'))">
+    <meta property="og:site_name" content="{{ config('app.name', 'Scuola di Danza') }}">
+    <meta property="og:locale" content="it_IT">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="@yield('twitter_title', config('app.name', 'Scuola di Danza'))">
+    <meta name="twitter:description" content="@yield('twitter_description', 'Sistema di gestione per scuole di danza - Corsi, iscrizioni e molto altro')">
+    <meta name="twitter:image" content="@yield('twitter_image', asset('images/og-default.jpg'))">
+    
+    <!-- Additional SEO -->
+    <link rel="canonical" href="@yield('canonical', url()->current())">
+    <meta name="theme-color" content="#e91e63">
+    
+    <!-- Structured Data -->
+    @stack('structured-data')
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
