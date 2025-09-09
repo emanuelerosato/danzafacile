@@ -1,0 +1,152 @@
+<!-- Sidebar -->
+<aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white/95 backdrop-blur-md border-r border-rose-100 shadow-lg lg:translate-x-0 transform transition-transform duration-300 ease-in-out"
+       :class="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen }"
+       x-show="sidebarOpen || window.innerWidth >= 1024"
+       x-transition:enter="transition ease-in-out duration-300"
+       x-transition:enter-start="-translate-x-full"
+       x-transition:enter-end="translate-x-0"
+       x-transition:leave="transition ease-in-out duration-300"
+       x-transition:leave-start="translate-x-0"
+       x-transition:leave-end="-translate-x-full">
+    
+    <!-- Logo -->
+    <div class="flex items-center justify-center p-6 border-b border-rose-100">
+        <a href="{{ route('dashboard') }}" class="flex items-center">
+            <div class="w-10 h-10 bg-gradient-to-r from-rose-400 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-lg mr-3">
+                SD
+            </div>
+            <div>
+                <h2 class="text-lg font-bold text-gray-900">Scuola di Danza</h2>
+                <p class="text-xs text-gray-600">{{ Auth::user()->role ?? 'Dashboard' }}</p>
+            </div>
+        </a>
+    </div>
+    
+    <!-- Navigation -->
+    <nav class="p-4 space-y-2 overflow-y-auto flex-1">
+        @if(Auth::user()->role === 'super_admin')
+            <!-- Super Admin Menu -->
+            <x-nav-item href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" icon="home">
+                Dashboard
+            </x-nav-item>
+            
+            <x-nav-group title="Gestione Sistema" icon="cog">
+                <x-nav-item href="#" :active="request()->routeIs('super-admin.schools.*')" icon="academic-cap">
+                    Scuole
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('super-admin.users.*')" icon="users">
+                    Utenti
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('super-admin.reports.*')" icon="chart-bar">
+                    Report
+                </x-nav-item>
+            </x-nav-group>
+            
+            <x-nav-group title="Amministrazione" icon="shield-check">
+                <x-nav-item href="#" :active="request()->routeIs('super-admin.settings.*')" icon="adjustments">
+                    Impostazioni
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('super-admin.logs.*')" icon="clipboard-list">
+                    Log Sistema
+                </x-nav-item>
+            </x-nav-group>
+            
+        @elseif(Auth::user()->role === 'admin')
+            <!-- Admin Menu -->
+            <x-nav-item href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" icon="home">
+                Dashboard
+            </x-nav-item>
+            
+            <x-nav-group title="Gestione Corsi" icon="academic-cap">
+                <x-nav-item href="#" :active="request()->routeIs('admin.courses.*')" icon="book-open">
+                    Corsi
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('admin.schedules.*')" icon="calendar">
+                    Orari
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('admin.instructors.*')" icon="user-group">
+                    Istruttori
+                </x-nav-item>
+            </x-nav-group>
+            
+            <x-nav-group title="Studenti" icon="users">
+                <x-nav-item href="#" :active="request()->routeIs('admin.students.*')" icon="user">
+                    Lista Studenti
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('admin.enrollments.*')" icon="clipboard-check">
+                    Iscrizioni
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('admin.attendance.*')" icon="check-circle">
+                    Presenze
+                </x-nav-item>
+            </x-nav-group>
+            
+            <x-nav-group title="Gestione" icon="briefcase">
+                <x-nav-item href="#" :active="request()->routeIs('admin.payments.*')" icon="credit-card">
+                    Pagamenti
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('admin.events.*')" icon="star">
+                    Eventi
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('admin.gallery.*')" icon="photograph">
+                    Galleria
+                </x-nav-item>
+            </x-nav-group>
+            
+        @else
+            <!-- Student Menu -->
+            <x-nav-item href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" icon="home">
+                Dashboard
+            </x-nav-item>
+            
+            <x-nav-group title="I Miei Corsi" icon="academic-cap">
+                <x-nav-item href="#" :active="request()->routeIs('student.courses.*')" icon="book-open">
+                    Corsi Disponibili
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('student.my-courses.*')" icon="clipboard-check">
+                    Le Mie Iscrizioni
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('student.schedule.*')" icon="calendar">
+                    Il Mio Programma
+                </x-nav-item>
+            </x-nav-group>
+            
+            <x-nav-group title="Profilo" icon="user">
+                <x-nav-item href="#" :active="request()->routeIs('student.payments.*')" icon="credit-card">
+                    Pagamenti
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('student.documents.*')" icon="document">
+                    Documenti
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('student.gallery.*')" icon="photograph">
+                    Galleria
+                </x-nav-item>
+            </x-nav-group>
+        @endif
+        
+        <!-- Common items for all users -->
+        <div class="border-t border-rose-100 pt-4 mt-4">
+            <x-nav-item href="#" :active="request()->routeIs('messages.*')" icon="chat">
+                Messaggi
+                <span class="ml-auto bg-rose-500 text-white text-xs px-2 py-1 rounded-full">2</span>
+            </x-nav-item>
+            
+            <x-nav-item href="#" :active="request()->routeIs('help.*')" icon="question-mark-circle">
+                Aiuto
+            </x-nav-item>
+        </div>
+    </nav>
+    
+    <!-- User Profile in Sidebar -->
+    <div class="p-4 border-t border-rose-100 bg-gradient-to-r from-rose-50 to-purple-50">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 bg-gradient-to-r from-rose-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate">{{ Auth::user()->name }}</p>
+                <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
+            </div>
+        </div>
+    </div>
+</aside>
