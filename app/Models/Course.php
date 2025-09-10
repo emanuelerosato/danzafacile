@@ -16,10 +16,9 @@ class Course extends Model
     /**
      * Enum per i livelli del corso
      */
-    const LEVEL_BEGINNER = 'principiante';
-    const LEVEL_INTERMEDIATE = 'intermedio';
-    const LEVEL_ADVANCED = 'avanzato';
-    const LEVEL_PROFESSIONAL = 'professionale';
+    const LEVEL_BEGINNER = 'beginner';
+    const LEVEL_INTERMEDIATE = 'intermediate';
+    const LEVEL_ADVANCED = 'advanced';
 
     /**
      * The attributes that are mass assignable.
@@ -254,8 +253,7 @@ class Course extends Model
         $allowedLevels = [
             self::LEVEL_BEGINNER,
             self::LEVEL_INTERMEDIATE,
-            self::LEVEL_ADVANCED,
-            self::LEVEL_PROFESSIONAL
+            self::LEVEL_ADVANCED
         ];
         
         $this->attributes['level'] = in_array($value, $allowedLevels) ? $value : self::LEVEL_BEGINNER;

@@ -14,22 +14,16 @@ class Document extends Model
     /**
      * Enum per le categorie dei documenti
      */
-    const CATEGORY_MEDICAL = 'certificato_medico';
-    const CATEGORY_IDENTITY = 'documento_identita';
-    const CATEGORY_ENROLLMENT = 'iscrizione';
-    const CATEGORY_INSURANCE = 'assicurazione';
-    const CATEGORY_PAYMENT = 'ricevuta_pagamento';
-    const CATEGORY_AUTHORIZATION = 'autorizzazione';
-    const CATEGORY_PHOTO = 'autorizzazione_foto';
-    const CATEGORY_OTHER = 'altro';
+    const CATEGORY_MEDICAL = 'medical';
+    const CATEGORY_PHOTO = 'photo';
+    const CATEGORY_AGREEMENT = 'agreement';
 
     /**
      * Enum per lo status del documento
      */
-    const STATUS_PENDING = 'in_attesa';
-    const STATUS_APPROVED = 'approvato';
-    const STATUS_REJECTED = 'rifiutato';
-    const STATUS_EXPIRED = 'scaduto';
+    const STATUS_PENDING = 'pending';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
 
     /**
      * The attributes that are mass assignable.
@@ -130,13 +124,6 @@ class Document extends Model
         return $query->where('status', self::STATUS_REJECTED);
     }
 
-    /**
-     * Filtra solo i documenti scaduti
-     */
-    public function scopeExpired(Builder $query): Builder
-    {
-        return $query->where('status', self::STATUS_EXPIRED);
-    }
 
     /**
      * Filtra i documenti per utente
@@ -284,16 +271,11 @@ class Document extends Model
     {
         $allowedCategories = [
             self::CATEGORY_MEDICAL,
-            self::CATEGORY_IDENTITY,
-            self::CATEGORY_ENROLLMENT,
-            self::CATEGORY_INSURANCE,
-            self::CATEGORY_PAYMENT,
-            self::CATEGORY_AUTHORIZATION,
             self::CATEGORY_PHOTO,
-            self::CATEGORY_OTHER
+            self::CATEGORY_AGREEMENT
         ];
         
-        $this->attributes['category'] = in_array($value, $allowedCategories) ? $value : self::CATEGORY_OTHER;
+        $this->attributes['category'] = in_array($value, $allowedCategories) ? $value : self::CATEGORY_MEDICAL;
     }
 
     /**
@@ -304,8 +286,7 @@ class Document extends Model
         $allowedStatuses = [
             self::STATUS_PENDING,
             self::STATUS_APPROVED,
-            self::STATUS_REJECTED,
-            self::STATUS_EXPIRED
+            self::STATUS_REJECTED
         ];
         
         $this->attributes['status'] = in_array($value, $allowedStatuses) ? $value : self::STATUS_PENDING;
@@ -328,13 +309,8 @@ class Document extends Model
     {
         return [
             self::CATEGORY_MEDICAL => 'Certificato Medico',
-            self::CATEGORY_IDENTITY => 'Documento d\'Identità',
-            self::CATEGORY_ENROLLMENT => 'Iscrizione',
-            self::CATEGORY_INSURANCE => 'Assicurazione',
-            self::CATEGORY_PAYMENT => 'Ricevuta Pagamento',
-            self::CATEGORY_AUTHORIZATION => 'Autorizzazione',
             self::CATEGORY_PHOTO => 'Autorizzazione Foto',
-            self::CATEGORY_OTHER => 'Altro',
+            self::CATEGORY_AGREEMENT => 'Documento di Accordo',
         ];
     }
 
@@ -347,7 +323,6 @@ class Document extends Model
             self::STATUS_PENDING => 'In Attesa',
             self::STATUS_APPROVED => 'Approvato',
             self::STATUS_REJECTED => 'Rifiutato',
-            self::STATUS_EXPIRED => 'Scaduto',
         ];
     }
 
@@ -369,14 +344,6 @@ class Document extends Model
         return $this->save();
     }
 
-    /**
-     * Marca il documento come scaduto
-     */
-    public function markAsExpired(): bool
-    {
-        $this->status = self::STATUS_EXPIRED;
-        return $this->save();
-    }
 
     /**
      * Verifica se il documento può essere cancellato
@@ -393,8 +360,7 @@ class Document extends Model
     {
         return in_array($this->category, [
             self::CATEGORY_MEDICAL,
-            self::CATEGORY_IDENTITY,
-            self::CATEGORY_INSURANCE
+            self::CATEGORY_AGREEMENT
         ]);
     }
 }

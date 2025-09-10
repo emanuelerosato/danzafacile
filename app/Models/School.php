@@ -89,11 +89,27 @@ class School extends Model
     }
 
     /**
-     * Ottiene tutti gli utenti normali della scuola (students)
+     * Ottiene tutti gli studenti della scuola
      */
     public function students(): HasMany
     {
-        return $this->users()->where('role', 'user');
+        return $this->users()->where('role', User::ROLE_STUDENT);
+    }
+
+    /**
+     * Ottiene tutti gli istruttori della scuola
+     */
+    public function instructors(): HasMany
+    {
+        return $this->users()->where('role', User::ROLE_INSTRUCTOR);
+    }
+
+    /**
+     * Ottiene tutte le iscrizioni ai corsi della scuola
+     */
+    public function courseEnrollments(): HasMany
+    {
+        return $this->hasMany(CourseEnrollment::class);
     }
 
     // SCOPES

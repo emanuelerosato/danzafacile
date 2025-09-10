@@ -14,22 +14,17 @@ class Payment extends Model
     /**
      * Enum per i metodi di pagamento
      */
-    const METHOD_CASH = 'contanti';
-    const METHOD_CREDIT_CARD = 'carta_credito';
-    const METHOD_DEBIT_CARD = 'carta_debito';
-    const METHOD_BANK_TRANSFER = 'bonifico';
-    const METHOD_PAYPAL = 'paypal';
-    const METHOD_STRIPE = 'stripe';
+    const METHOD_CASH = 'cash';
+    const METHOD_CREDIT_CARD = 'credit_card';
+    const METHOD_BANK_TRANSFER = 'bank_transfer';
 
     /**
      * Enum per lo status del pagamento
      */
-    const STATUS_PENDING = 'in_attesa';
-    const STATUS_PROCESSING = 'in_elaborazione';
-    const STATUS_COMPLETED = 'completato';
-    const STATUS_FAILED = 'fallito';
-    const STATUS_CANCELLED = 'annullato';
-    const STATUS_REFUNDED = 'rimborsato';
+    const STATUS_PENDING = 'pending';
+    const STATUS_COMPLETED = 'completed';
+    const STATUS_FAILED = 'failed';
+    const STATUS_REFUNDED = 'refunded';
 
     /**
      * The attributes that are mass assignable.
@@ -118,7 +113,7 @@ class Payment extends Model
      */
     public function scopeProcessing(Builder $query): Builder
     {
-        return $query->where('status', self::STATUS_PROCESSING);
+        return $query->where('status', 'processing');
     }
 
     /**
@@ -244,10 +239,7 @@ class Payment extends Model
         $allowedMethods = [
             self::METHOD_CASH,
             self::METHOD_CREDIT_CARD,
-            self::METHOD_DEBIT_CARD,
-            self::METHOD_BANK_TRANSFER,
-            self::METHOD_PAYPAL,
-            self::METHOD_STRIPE
+            self::METHOD_BANK_TRANSFER
         ];
         
         $this->attributes['payment_method'] = in_array($value, $allowedMethods) ? $value : self::METHOD_CASH;
@@ -260,10 +252,8 @@ class Payment extends Model
     {
         $allowedStatuses = [
             self::STATUS_PENDING,
-            self::STATUS_PROCESSING,
             self::STATUS_COMPLETED,
             self::STATUS_FAILED,
-            self::STATUS_CANCELLED,
             self::STATUS_REFUNDED
         ];
         
@@ -296,10 +286,7 @@ class Payment extends Model
         return [
             self::METHOD_CASH => 'Contanti',
             self::METHOD_CREDIT_CARD => 'Carta di Credito',
-            self::METHOD_DEBIT_CARD => 'Carta di Debito',
             self::METHOD_BANK_TRANSFER => 'Bonifico Bancario',
-            self::METHOD_PAYPAL => 'PayPal',
-            self::METHOD_STRIPE => 'Stripe',
         ];
     }
 
@@ -310,10 +297,8 @@ class Payment extends Model
     {
         return [
             self::STATUS_PENDING => 'In Attesa',
-            self::STATUS_PROCESSING => 'In Elaborazione',
             self::STATUS_COMPLETED => 'Completato',
             self::STATUS_FAILED => 'Fallito',
-            self::STATUS_CANCELLED => 'Annullato',
             self::STATUS_REFUNDED => 'Rimborsato',
         ];
     }

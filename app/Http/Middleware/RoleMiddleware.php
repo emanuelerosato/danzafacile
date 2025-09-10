@@ -20,10 +20,30 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, string $role)
     {
         if (!Auth::check()) {
+            // Handle API vs Web authentication
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthenticated',
+                    'error' => 'Authentication required'
+                ], 401);
+            }
             return redirect()->route('login');
         }
 
         $user = Auth::user();
+
+        // Check if user is active
+        if (!$user->active) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Account deactivated',
+                    'error' => 'Your account has been deactivated. Please contact support.'
+                ], 403);
+            }
+            abort(403, 'Account deactivato. Contatta il supporto.');
+        }
 
         // Super Admin può accedere ovunque
         if ($user->isSuperAdmin()) {
@@ -31,33 +51,44 @@ class RoleMiddleware
         }
 
         // Verifica il ruolo specifico
+        $hasAccess = false;
+        $errorMessage = 'Access denied';
+
         switch ($role) {
             case 'super_admin':
-                if (!$user->isSuperAdmin()) {
-                    abort(403, 'Accesso negato. Solo i Super Amministratori possono accedere.');
-                }
+                $hasAccess = $user->isSuperAdmin();
+                $errorMessage = 'Only Super Administrators can access this resource';
                 break;
             
             case 'admin':
-                if (!$user->isAdmin() && !$user->isSuperAdmin()) {
-                    abort(403, 'Accesso negato. Solo gli Amministratori possono accedere.');
-                }
+                $hasAccess = $user->isAdmin() || $user->isSuperAdmin();
+                $errorMessage = 'Only Administrators can access this resource';
                 break;
             
             case 'instructor':
-                if (!$user->isInstructor() && !$user->isAdmin() && !$user->isSuperAdmin()) {
-                    abort(403, 'Accesso negato. Solo gli Istruttori possono accedere.');
-                }
+                $hasAccess = $user->isInstructor() || $user->isAdmin() || $user->isSuperAdmin();
+                $errorMessage = 'Only Instructors can access this resource';
                 break;
             
             case 'student':
-                if (!$user->isStudent() && !$user->isInstructor() && !$user->isAdmin() && !$user->isSuperAdmin()) {
-                    abort(403, 'Accesso negato.');
-                }
+                $hasAccess = $user->isStudent() || $user->isInstructor() || $user->isAdmin() || $user->isSuperAdmin();
+                $errorMessage = 'Student access required';
                 break;
             
             default:
-                abort(403, 'Ruolo non riconosciuto.');
+                $hasAccess = false;
+                $errorMessage = 'Invalid role specified';
+        }
+
+        if (!$hasAccess) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMessage,
+                    'error' => 'Insufficient permissions'
+                ], 403);
+            }
+            abort(403, $errorMessage);
         }
 
         return $next($request);

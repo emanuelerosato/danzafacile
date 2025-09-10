@@ -8,7 +8,10 @@ use App\Models\User;
 use App\Models\Course;
 use App\Models\Payment;
 use App\Models\Document;
+use App\Models\CourseEnrollment;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class SuperAdminController extends Controller
 {
@@ -175,7 +178,226 @@ class SuperAdminController extends Controller
             'total' => Course::count(),
             'active' => Course::where('active', true)->count(),
             'inactive' => Course::where('active', false)->count(),
-            'by_level' => Course::selectRaw('level, count(*) as count')->groupBy('level')->pluck('count', 'level'),
+            'by_level' => Course::selectRaw('difficulty_level, count(*) as count')
+                ->groupBy('difficulty_level')
+                ->pluck('count', 'difficulty_level'),
+        ];
+    }
+
+    // API METHODS FOR MOBILE/EXTERNAL ACCESS
+
+    /**
+     * Get dashboard statistics for API
+     */
+    public function getStats(Request $request): JsonResponse
+    {
+        $stats = [
+            'system_overview' => [
+                'schools_total' => School::count(),
+                'schools_active' => School::where('active', true)->count(),
+                'schools_inactive' => School::where('active', false)->count(),
+                'users_total' => User::count(),
+                'admins_total' => User::where('role', User::ROLE_ADMIN)->count(),
+                'instructors_total' => User::where('role', User::ROLE_INSTRUCTOR)->count(),
+                'students_total' => User::where('role', User::ROLE_STUDENT)->count(),
+                'courses_total' => Course::count(),
+                'courses_active' => Course::where('active', true)->count(),
+                'enrollments_total' => CourseEnrollment::count(),
+                'enrollments_active' => CourseEnrollment::where('status', 'active')->count(),
+            ],
+            'financial_overview' => [
+                'total_revenue' => Payment::where('status', 'completed')->sum('amount'),
+                'monthly_revenue' => Payment::where('status', 'completed')
+                    ->whereMonth('created_at', now()->month)
+                    ->whereYear('created_at', now()->year)
+                    ->sum('amount'),
+                'pending_payments' => Payment::where('status', 'pending')->sum('amount'),
+                'average_course_price' => Course::avg('price'),
+            ],
+            'recent_activity' => [
+                'new_schools_this_month' => School::whereMonth('created_at', now()->month)->count(),
+                'new_users_this_month' => User::whereMonth('created_at', now()->month)->count(),
+                'new_enrollments_this_week' => CourseEnrollment::where('created_at', '>=', now()->subWeek())->count(),
+                'pending_documents' => Document::where('status', 'pending')->count(),
+            ],
+            'growth_metrics' => [
+                'school_growth_rate' => $this->calculateGrowthRate('schools'),
+                'user_growth_rate' => $this->calculateGrowthRate('users'),
+                'revenue_growth_rate' => $this->calculateRevenueGrowthRate(),
+            ]
+        ];
+
+        return response()->json([
+            'success' => true,
+            'data' => $stats
+        ]);
+    }
+
+    /**
+     * Calculate growth rate for given entity
+     */
+    private function calculateGrowthRate($entity): float
+    {
+        $model = match($entity) {
+            'schools' => School::class,
+            'users' => User::class,
+            default => School::class
+        };
+
+        $currentMonth = $model::whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
+        $previousMonth = $model::whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->count();
+
+        if ($previousMonth == 0) {
+            return $currentMonth > 0 ? 100 : 0;
+        }
+
+        return round((($currentMonth - $previousMonth) / $previousMonth) * 100, 2);
+    }
+
+    /**
+     * Calculate revenue growth rate
+     */
+    private function calculateRevenueGrowthRate(): float
+    {
+        $currentMonth = Payment::where('status', 'completed')
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->sum('amount');
+
+        $previousMonth = Payment::where('status', 'completed')
+            ->whereMonth('created_at', now()->subMonth()->month)
+            ->whereYear('created_at', now()->subMonth()->year)
+            ->sum('amount');
+
+        if ($previousMonth == 0) {
+            return $currentMonth > 0 ? 100 : 0;
+        }
+
+        return round((($currentMonth - $previousMonth) / $previousMonth) * 100, 2);
+    }
+
+    /**
+     * Get detailed analytics data
+     */
+    public function analytics(Request $request): JsonResponse
+    {
+        $period = $request->get('period', '30'); // days
+        $startDate = now()->subDays($period);
+
+        // Revenue trends
+        $revenueTrends = Payment::where('status', 'completed')
+            ->where('created_at', '>=', $startDate)
+            ->selectRaw('DATE(created_at) as date, SUM(amount) as total')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // Enrollment trends
+        $enrollmentTrends = CourseEnrollment::where('created_at', '>=', $startDate)
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // School performance
+        $schoolPerformance = School::with('courses')
+            ->get()
+            ->map(function ($school) {
+                return [
+                    'school_id' => $school->id,
+                    'school_name' => $school->name,
+                    'total_courses' => $school->courses->count(),
+                    'active_courses' => $school->courses->where('active', true)->count(),
+                    'total_students' => $school->users()->where('role', User::ROLE_STUDENT)->count(),
+                    'total_revenue' => $school->payments()->where('status', 'completed')->sum('amount'),
+                ];
+            });
+
+        // User distribution by role
+        $userDistribution = User::selectRaw('role, COUNT(*) as count')
+            ->groupBy('role')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [$item->role => $item->count];
+            });
+
+        // Course difficulty distribution
+        $courseDifficulty = Course::selectRaw('difficulty_level, COUNT(*) as count')
+            ->groupBy('difficulty_level')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [$item->difficulty_level => $item->count];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'period' => $period,
+                'revenue_trends' => $revenueTrends,
+                'enrollment_trends' => $enrollmentTrends,
+                'school_performance' => $schoolPerformance,
+                'user_distribution' => $userDistribution,
+                'course_difficulty_distribution' => $courseDifficulty,
+            ]
+        ]);
+    }
+
+    /**
+     * Get system reports in API format
+     */
+    public function reports(Request $request): JsonResponse
+    {
+        $type = $request->get('type', 'overview');
+        $period = $request->get('period', 'month');
+
+        $reports = [
+            'overview' => $this->getOverviewReport($period),
+            'schools' => $this->getSchoolsReport($period),
+            'users' => $this->getUsersReport($period),
+            'payments' => $this->getPaymentsReport($period),
+            'courses' => $this->getCoursesReport($period),
+        ];
+
+        $data = $reports[$type] ?? $reports['overview'];
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'type' => $type,
+                'period' => $period,
+                'report' => $data,
+                'generated_at' => now()
+            ]
+        ]);
+    }
+
+    /**
+     * Get overview report
+     */
+    private function getOverviewReport($period): array
+    {
+        return [
+            'system_health' => [
+                'total_schools' => School::count(),
+                'active_schools' => School::where('active', true)->count(),
+                'total_users' => User::count(),
+                'active_users' => User::where('active', true)->count(),
+                'total_courses' => Course::count(),
+                'active_courses' => Course::where('active', true)->count(),
+            ],
+            'business_metrics' => [
+                'total_revenue' => Payment::where('status', 'completed')->sum('amount'),
+                'total_enrollments' => CourseEnrollment::count(),
+                'active_enrollments' => CourseEnrollment::where('status', 'active')->count(),
+                'average_revenue_per_school' => School::count() > 0 
+                    ? round(Payment::where('status', 'completed')->sum('amount') / School::count(), 2) 
+                    : 0,
+            ]
         ];
     }
 }

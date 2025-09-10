@@ -9,11 +9,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * Enum per i ruoli utente
@@ -38,6 +39,9 @@ class User extends Authenticatable
         'last_name',
         'phone',
         'date_of_birth',
+        'address',
+        'emergency_contact',
+        'medical_notes',
         'profile_image_path',
         'active',
     ];
@@ -83,6 +87,14 @@ class User extends Authenticatable
     public function courseEnrollments(): HasMany
     {
         return $this->hasMany(CourseEnrollment::class);
+    }
+
+    /**
+     * Alias per courseEnrollments (for API consistency)
+     */
+    public function enrollments(): HasMany
+    {
+        return $this->courseEnrollments();
     }
 
     /**
@@ -201,7 +213,7 @@ class User extends Authenticatable
      */
     public function setRoleAttribute($value): void
     {
-        $allowedRoles = [self::ROLE_SUPER_ADMIN, self::ROLE_ADMIN, 'user'];
+        $allowedRoles = ['super_admin', 'admin', 'user']; // Match database enum
         $this->attributes['role'] = in_array($value, $allowedRoles) ? $value : 'user';
     }
 
@@ -212,7 +224,7 @@ class User extends Authenticatable
      */
     public function isSuperAdmin(): bool
     {
-        return $this->role === self::ROLE_SUPER_ADMIN;
+        return $this->role === 'super_admin';
     }
 
     /**
@@ -220,22 +232,51 @@ class User extends Authenticatable
      */
     public function isAdmin(): bool
     {
-        return $this->role === self::ROLE_ADMIN;
+        return $this->role === 'admin';
     }
 
     /**
-     * Verifica se l'utente è istruttore (not implemented - no instructor role in DB)
+     * Verifica se l'utente è istruttore (admin role in database)
      */
     public function isInstructor(): bool
     {
-        return false; // No instructor role in current DB schema
+        return $this->role === 'admin'; // Instructor is admin role in current schema
     }
 
     /**
-     * Verifica se l'utente è studente (user)
+     * Verifica se l'utente è studente (user role in database)
      */
     public function isStudent(): bool
     {
         return $this->role === 'user';
+    }
+
+    /**
+     * Verifica se l'utente può amministrare (Super Admin o Admin)
+     */
+    public function canAdministrate(): bool
+    {
+        return $this->isSuperAdmin() || $this->isAdmin();
+    }
+
+    /**
+     * Ottiene tutti i ruoli disponibili
+     */
+    public static function getAllRoles(): array
+    {
+        return ['super_admin', 'admin', 'user'];
+    }
+
+    /**
+     * Ottiene il nome leggibile del ruolo
+     */
+    public function getRoleNameAttribute(): string
+    {
+        return match($this->role) {
+            'super_admin' => 'Super Administrator',
+            'admin' => 'Administrator',
+            'user' => 'Student',
+            default => 'Student'
+        };
     }
 }

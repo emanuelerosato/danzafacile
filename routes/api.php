@@ -2,15 +2,26 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+// Mobile API Controllers (Step 2 - Flutter Integration)
+use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\Admin\AdminController;
+use App\Http\Controllers\API\Admin\CourseController as AdminCourseController;
+use App\Http\Controllers\API\Admin\StudentController as AdminStudentController;
+use App\Http\Controllers\API\Student\ProfileController as StudentProfileController;
+use App\Http\Controllers\API\Student\CourseController as StudentCourseController;
+use App\Http\Controllers\API\Student\EnrollmentController;
+
+// Legacy Web Controllers (Step 1 - Maintained for compatibility)
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\SchoolController as SuperAdminSchoolController;
 use App\Http\Controllers\SuperAdmin\SuperAdminUserController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\CourseController;
-use App\Http\Controllers\Admin\EnrollmentController;
+use App\Http\Controllers\Admin\EnrollmentController as WebEnrollmentController;
 use App\Http\Controllers\Admin\SchoolPaymentController;
 use App\Http\Controllers\Student\StudentDashboardController;
-use App\Http\Controllers\Student\StudentCourseController;
+use App\Http\Controllers\Student\StudentCourseController as WebStudentCourseController;
 use App\Http\Controllers\Student\ProfileController;
 use App\Http\Controllers\Shared\DocumentController;
 use App\Http\Controllers\Shared\MediaItemController;
@@ -168,30 +179,137 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
     });
 });
 
-// Mobile API routes (if needed for future mobile app)
-Route::prefix('mobile/v1')->middleware(['auth:sanctum', 'throttle:120,1'])->group(function () {
+// Mobile API routes for Flutter apps
+Route::prefix('mobile/v1')->middleware('throttle:120,1')->group(function () {
     
-    // Mobile-specific endpoints would go here
-    Route::get('/dashboard', function (Request $request) {
-        $user = $request->user();
+    // Authentication endpoints (public)
+    Route::post('/auth/login', [AuthController::class, 'login']);
+    Route::post('/auth/register', [AuthController::class, 'register']);
+    Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
+    
+    // Protected mobile endpoints
+    Route::middleware('auth:sanctum')->group(function () {
         
-        // Return mobile-optimized dashboard data
-        return response()->json([
-            'user' => $user->only(['id', 'name', 'email', 'role']),
-            'quick_stats' => [
-                'active_enrollments' => $user->courseEnrollments()->where('status', 'active')->count(),
-                'pending_payments' => $user->payments()->where('status', 'pending')->count(),
-                'upcoming_classes' => 5, // This would be calculated based on enrollment schedule
-            ]
-        ]);
-    });
-    
-    Route::get('/notifications', function (Request $request) {
-        // Return user notifications
-        return response()->json([
-            'notifications' => [],
-            'unread_count' => 0
-        ]);
+        // Auth user endpoints
+        Route::post('/auth/logout', [AuthController::class, 'logout']);
+        Route::post('/auth/refresh', [AuthController::class, 'refresh']);
+        Route::get('/auth/me', [AuthController::class, 'me']);
+        Route::put('/auth/profile', [AuthController::class, 'updateProfile']);
+        Route::put('/auth/password', [AuthController::class, 'updatePassword']);
+        
+        // ADMIN MOBILE ROUTES
+        Route::middleware('role:admin')->prefix('admin')->group(function () {
+            
+            // Dashboard
+            Route::get('/dashboard', [AdminController::class, 'dashboard']);
+            Route::get('/analytics', [AdminController::class, 'analytics']);
+            Route::get('/notifications', [AdminController::class, 'notifications']);
+            Route::post('/notifications/{id}/mark-read', [AdminController::class, 'markNotificationRead']);
+            
+            // Courses Management
+            Route::apiResource('courses', AdminCourseController::class);
+            Route::post('courses/{course}/toggle-status', [AdminCourseController::class, 'toggleStatus']);
+            Route::post('courses/{course}/duplicate', [AdminCourseController::class, 'duplicate']);
+            Route::get('courses/statistics', [AdminCourseController::class, 'getStatistics']);
+            
+            // Students Management
+            Route::apiResource('students', AdminStudentController::class);
+            Route::post('students/{student}/activate', [AdminStudentController::class, 'activate']);
+            Route::post('students/{student}/deactivate', [AdminStudentController::class, 'deactivate']);
+            Route::get('students/{student}/enrollments', [AdminStudentController::class, 'enrollments']);
+            Route::get('students/{student}/payments', [AdminStudentController::class, 'payments']);
+            Route::post('students/{student}/reset-password', [AdminStudentController::class, 'resetPassword']);
+            Route::get('students/statistics', [AdminStudentController::class, 'statistics']);
+        });
+        
+        // STUDENT MOBILE ROUTES
+        Route::middleware('role:student')->prefix('student')->group(function () {
+            
+            // Profile Management
+            Route::get('/profile', [StudentProfileController::class, 'show']);
+            Route::put('/profile', [StudentProfileController::class, 'update']);
+            Route::put('/profile/password', [StudentProfileController::class, 'updatePassword']);
+            Route::put('/profile/email', [StudentProfileController::class, 'updateEmail']);
+            Route::get('/profile/dashboard', [StudentProfileController::class, 'dashboard']);
+            Route::match(['GET', 'PUT', 'PATCH'], '/profile/preferences', [StudentProfileController::class, 'preferences']);
+            
+            // Course Browsing
+            Route::get('/courses', [StudentCourseController::class, 'index']);
+            Route::get('/courses/{course}', [StudentCourseController::class, 'show']);
+            Route::get('/courses/enrolled/me', [StudentCourseController::class, 'enrolled']);
+            Route::get('/courses/recommendations', [StudentCourseController::class, 'recommendations']);
+            Route::get('/courses/categories', [StudentCourseController::class, 'categories']);
+            
+            // Enrollment Management
+            Route::post('/enrollments', [EnrollmentController::class, 'store']);
+            Route::get('/enrollments/{enrollment}', [EnrollmentController::class, 'show']);
+            Route::post('/enrollments/{enrollment}/cancel', [EnrollmentController::class, 'cancel']);
+            Route::get('/enrollments/history', [EnrollmentController::class, 'history']);
+        });
+        
+        // Quick mobile dashboard for any authenticated user
+        Route::get('/dashboard-quick', function (Request $request) {
+            $user = $request->user();
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'user' => $user->only(['id', 'name', 'email', 'role']),
+                    'school' => $user->school ? $user->school->only(['id', 'name']) : null,
+                    'quick_stats' => [
+                        'active_enrollments' => $user->courseEnrollments()->where('status', 'active')->count(),
+                        'pending_payments' => $user->payments()->where('status', 'pending')->count(),
+                        'total_courses' => $user->role === 'student' 
+                            ? $user->courseEnrollments()->count()
+                            : ($user->role === 'admin' ? $user->school->courses()->count() : 0),
+                    ]
+                ]
+            ]);
+        });
+        
+        Route::get('/notifications', function (Request $request) {
+            $user = $request->user();
+            $notifications = [];
+            
+            if ($user->isStudent()) {
+                // Student notifications
+                $pendingPayments = $user->payments()->where('status', 'pending')->count();
+                if ($pendingPayments > 0) {
+                    $notifications[] = [
+                        'id' => 'payment_' . $user->id,
+                        'type' => 'payment',
+                        'title' => 'Pending Payments',
+                        'message' => "You have {$pendingPayments} pending payment(s)",
+                        'priority' => 'high',
+                        'created_at' => now()
+                    ];
+                }
+            } elseif ($user->isAdmin()) {
+                // Admin notifications
+                $newEnrollments = $user->school->courseEnrollments()
+                    ->where('created_at', '>', now()->subDays(7))
+                    ->count();
+                if ($newEnrollments > 0) {
+                    $notifications[] = [
+                        'id' => 'enrollment_' . $user->school_id,
+                        'type' => 'enrollment',
+                        'title' => 'New Enrollments',
+                        'message' => "{$newEnrollments} new enrollment(s) this week",
+                        'priority' => 'medium',
+                        'created_at' => now()
+                    ];
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'notifications' => $notifications,
+                    'unread_count' => count($notifications)
+                ]
+            ]);
+        });
     });
 });
 

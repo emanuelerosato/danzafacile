@@ -14,7 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
-            'school.ownership' => \App\Http\Middleware\SchoolOwnershipMiddleware::class,
+            'school.ownership' => \App\Http\Middleware\SchoolOwnership::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

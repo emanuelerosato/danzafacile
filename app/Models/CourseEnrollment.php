@@ -14,19 +14,17 @@ class CourseEnrollment extends Model
     /**
      * Enum per lo status dell'iscrizione
      */
-    const STATUS_PENDING = 'in_attesa';
-    const STATUS_ACTIVE = 'attiva';
-    const STATUS_SUSPENDED = 'sospesa';
-    const STATUS_CANCELLED = 'annullata';
-    const STATUS_COMPLETED = 'completata';
+    const STATUS_PENDING = 'pending';
+    const STATUS_ACTIVE = 'active';
+    const STATUS_CANCELLED = 'cancelled';
+    const STATUS_COMPLETED = 'completed';
 
     /**
      * Enum per lo status del pagamento
      */
-    const PAYMENT_STATUS_PENDING = 'in_attesa';
-    const PAYMENT_STATUS_PARTIAL = 'parziale';
-    const PAYMENT_STATUS_PAID = 'pagato';
-    const PAYMENT_STATUS_OVERDUE = 'scaduto';
+    const PAYMENT_STATUS_PENDING = 'pending';
+    const PAYMENT_STATUS_PAID = 'paid';
+    const PAYMENT_STATUS_REFUNDED = 'refunded';
 
     /**
      * The attributes that are mass assignable.
@@ -110,7 +108,7 @@ class CourseEnrollment extends Model
      */
     public function scopeSuspended(Builder $query): Builder
     {
-        return $query->where('status', self::STATUS_SUSPENDED);
+        return $query->where('status', 'suspended');
     }
 
     /**
@@ -171,7 +169,6 @@ class CourseEnrollment extends Model
         $allowedStatuses = [
             self::STATUS_PENDING,
             self::STATUS_ACTIVE,
-            self::STATUS_SUSPENDED,
             self::STATUS_CANCELLED,
             self::STATUS_COMPLETED
         ];
@@ -186,9 +183,8 @@ class CourseEnrollment extends Model
     {
         $allowedStatuses = [
             self::PAYMENT_STATUS_PENDING,
-            self::PAYMENT_STATUS_PARTIAL,
             self::PAYMENT_STATUS_PAID,
-            self::PAYMENT_STATUS_OVERDUE
+            self::PAYMENT_STATUS_REFUNDED
         ];
         
         $this->attributes['payment_status'] = in_array($value, $allowedStatuses) ? $value : self::PAYMENT_STATUS_PENDING;
@@ -204,7 +200,6 @@ class CourseEnrollment extends Model
         return [
             self::STATUS_PENDING => 'In Attesa',
             self::STATUS_ACTIVE => 'Attiva',
-            self::STATUS_SUSPENDED => 'Sospesa',
             self::STATUS_CANCELLED => 'Annullata',
             self::STATUS_COMPLETED => 'Completata',
         ];
@@ -217,9 +212,8 @@ class CourseEnrollment extends Model
     {
         return [
             self::PAYMENT_STATUS_PENDING => 'In Attesa',
-            self::PAYMENT_STATUS_PARTIAL => 'Parziale',
             self::PAYMENT_STATUS_PAID => 'Pagato',
-            self::PAYMENT_STATUS_OVERDUE => 'Scaduto',
+            self::PAYMENT_STATUS_REFUNDED => 'Rimborsato',
         ];
     }
 
@@ -277,7 +271,7 @@ class CourseEnrollment extends Model
      */
     public function suspend(): bool
     {
-        $this->status = self::STATUS_SUSPENDED;
+        $this->status = 'suspended';
         return $this->save();
     }
 
