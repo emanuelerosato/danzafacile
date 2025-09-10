@@ -52,7 +52,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
         
         // Dashboard statistics
         Route::get('/dashboard/stats', [SuperAdminController::class, 'getStats']);
-        Route::get('/reports', [SuperAdminController::class, 'reports']);
+        Route::get('/reports', [SuperAdminController::class, 'reportsApi']);
         
         // Schools API
         Route::apiResource('schools', SuperAdminSchoolController::class);

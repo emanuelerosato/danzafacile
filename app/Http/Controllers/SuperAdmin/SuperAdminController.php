@@ -350,7 +350,7 @@ class SuperAdminController extends Controller
     /**
      * Get system reports in API format
      */
-    public function reports(Request $request): JsonResponse
+    public function reportsApi(Request $request): JsonResponse
     {
         $type = $request->get('type', 'overview');
         $period = $request->get('period', 'month');
