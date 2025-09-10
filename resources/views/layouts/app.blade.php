@@ -174,7 +174,11 @@
             
             <!-- Main Content Area -->
             <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
-                {{ $slot }}
+                @if(isset($slot))
+                    {{ $slot }}
+                @else
+                    @yield('content')
+                @endif
             </main>
         </div>
     </div>
