@@ -52,6 +52,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [SuperAdminController::class, 'index'])->name('dashboard');
         Route::get('/stats', [SuperAdminController::class, 'stats'])->name('stats');
         Route::get('/export/{type}', [SuperAdminController::class, 'export'])->name('export');
+        Route::get('/reports', [SuperAdminController::class, 'reports'])->name('reports');
+        Route::get('/settings', [SuperAdminController::class, 'settings'])->name('settings');
         
         // Schools management
         Route::resource('schools', SchoolController::class);

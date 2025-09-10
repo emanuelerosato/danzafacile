@@ -206,7 +206,7 @@
                             <div>
                                 <h6 class="font-weight-bold">Documenti in Attesa</h6>
                                 <p class="mb-2">{{ $stats['documents_pending'] }} documenti richiedono approvazione</p>
-                                <a href="{{ route('super-admin.documents.index') }}" class="btn btn-warning btn-sm">
+                                <a href="{{ route('super-admin.users.index') }}" class="btn btn-warning btn-sm">
                                     Verifica Ora
                                 </a>
                             </div>
