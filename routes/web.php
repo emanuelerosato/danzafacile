@@ -49,7 +49,7 @@ Route::middleware('auth')->group(function () {
     
     // SUPER ADMIN ROUTES
     Route::middleware('role:super_admin')->prefix('super-admin')->name('super-admin.')->group(function () {
-        Route::get('/dashboard', [SuperAdminController::class, 'dashboard'])->name('dashboard');
+        Route::get('/dashboard', [SuperAdminController::class, 'index'])->name('dashboard');
         Route::get('/stats', [SuperAdminController::class, 'stats'])->name('stats');
         Route::get('/export/{type}', [SuperAdminController::class, 'export'])->name('export');
         
