@@ -26,24 +26,24 @@
     <nav class="p-4 space-y-2 overflow-y-auto flex-1">
         @if(Auth::user()->role === 'super_admin')
             <!-- Super Admin Menu -->
-            <x-nav-item href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" icon="home">
+            <x-nav-item href="{{ route('super-admin.dashboard') }}" :active="request()->routeIs('super-admin.dashboard')" icon="home">
                 Dashboard
             </x-nav-item>
             
             <x-nav-group title="Gestione Sistema" icon="cog">
-                <x-nav-item href="#" :active="request()->routeIs('super-admin.schools.*')" icon="academic-cap">
+                <x-nav-item href="{{ route('super-admin.schools.index') }}" :active="request()->routeIs('super-admin.schools.*')" icon="academic-cap">
                     Scuole
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('super-admin.users.*')" icon="users">
+                <x-nav-item href="{{ route('super-admin.users.index') }}" :active="request()->routeIs('super-admin.users.*')" icon="users">
                     Utenti
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('super-admin.reports.*')" icon="chart-bar">
+                <x-nav-item href="{{ route('super-admin.reports') }}" :active="request()->routeIs('super-admin.reports')" icon="chart-bar">
                     Report
                 </x-nav-item>
             </x-nav-group>
             
             <x-nav-group title="Amministrazione" icon="shield-check">
-                <x-nav-item href="#" :active="request()->routeIs('super-admin.settings.*')" icon="adjustments">
+                <x-nav-item href="{{ route('super-admin.settings') }}" :active="request()->routeIs('super-admin.settings')" icon="adjustments">
                     Impostazioni
                 </x-nav-item>
                 <x-nav-item href="#" :active="request()->routeIs('super-admin.logs.*')" icon="clipboard-list">
