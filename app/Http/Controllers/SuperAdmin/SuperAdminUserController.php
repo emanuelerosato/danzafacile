@@ -216,22 +216,52 @@ class SuperAdminUserController extends Controller
     /**
      * Toggle user active status
      */
-    public function toggleStatus(User $user)
+    public function toggleActive(User $user)
     {
-        $user->update(['active' => !$user->active]);
+        try {
+            // Prevent Super Admins from disabling themselves
+            if ($user->isSuperAdmin() && $user->id === auth()->id()) {
+                if (request()->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Non puoi disattivare il tuo account Super Admin'
+                    ], 422);
+                }
+                return redirect()->back()->with('error', 'Non puoi disattivare il tuo account Super Admin');
+            }
+            
+            // Log current status before toggle
+            \Log::info("Toggling user {$user->id} status from " . ($user->active ? 'active' : 'inactive'));
+            
+            $user->update(['active' => !$user->active]);
 
-        $status = $user->active ? 'attivato' : 'disattivato';
-        $message = "Utente {$status} con successo.";
+            $status = $user->active ? 'attivato' : 'disattivato';
+            $message = "Utente {$status} con successo.";
 
-        if (request()->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => $message,
-                'status' => $user->active
-            ]);
+            // Log successful toggle
+            \Log::info("User {$user->id} status toggled to " . ($user->active ? 'active' : 'inactive'));
+
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'status' => $user->active
+                ]);
+            }
+
+            return redirect()->back()->with('success', $message);
+        } catch (\Exception $e) {
+            \Log::error("Error toggling user {$user->id} status: " . $e->getMessage());
+            
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Errore durante l\'aggiornamento dello status utente: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            return redirect()->back()->with('error', 'Errore durante l\'aggiornamento dello status utente');
         }
-
-        return redirect()->back()->with('success', $message);
     }
 
     /**
@@ -349,7 +379,7 @@ class SuperAdminUserController extends Controller
             
             // Header
             fputcsv($file, [
-                'ID', 'Nome', 'Nome', 'Cognome', 'Email', 'Telefono', 
+                'ID', 'Nome Completo', 'Nome', 'Cognome', 'Email', 'Telefono', 
                 'Ruolo', 'Scuola', 'Attivo', 'Data Nascita', 'Data Registrazione'
             ]);
 

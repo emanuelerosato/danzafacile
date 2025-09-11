@@ -31,6 +31,13 @@ Route::get('/', function () {
 // Authentication routes
 require __DIR__.'/auth.php';
 
+// CSRF Token refresh endpoint
+Route::get('/csrf-token', function () {
+    return response()->json([
+        'csrf_token' => csrf_token()
+    ]);
+})->middleware('auth');
+
 // Dashboard redirect based on role
 Route::get('/dashboard', function () {
     $user = auth()->user();
@@ -62,6 +69,7 @@ Route::middleware('auth')->group(function () {
         Route::get('schools/{school}/export', [SchoolController::class, 'export'])->name('schools.export');
         
         // Super Admin Users management
+        Route::get('users/export', [SuperAdminUserController::class, 'export'])->name('users.export');
         Route::resource('users', SuperAdminUserController::class);
         Route::patch('users/{user}/toggle-active', [SuperAdminUserController::class, 'toggleActive'])->name('users.toggle-active');
         Route::post('users/bulk-action', [SuperAdminUserController::class, 'bulkAction'])->name('users.bulk-action');

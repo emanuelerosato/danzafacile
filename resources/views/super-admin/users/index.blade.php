@@ -14,6 +14,14 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <span class="text-sm text-gray-500">Totale: {{ $users->total() }} utenti</span>
+                    <a href="{{ route('super-admin.users.export', request()->query()) }}" 
+                       onclick="this.style.pointerEvents='none'; this.innerHTML='<svg class=\\'animate-spin h-4 w-4 mr-2\\' fill=\\'none\\' stroke=\\'currentColor\\' viewBox=\\'0 0 24 24\\'><circle class=\\'opacity-25\\' cx=\\'12\\' cy=\\'12\\' r=\\'10\\' stroke=\\'currentColor\\' stroke-width=\\'4\\'></circle><path class=\\'opacity-75\\' fill=\\'currentColor\\' d=\\'M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\\'></path></svg>Generazione...';"
+                       class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Esporta CSV
+                    </a>
                     <a href="{{ route('super-admin.users.create') }}" 
                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-rose-500 to-pink-600 rounded-lg hover:from-rose-600 hover:to-pink-700 transition-all duration-200 shadow-md hover:shadow-lg">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -290,6 +298,22 @@ function usersManagement() {
         },
         
         async toggleUserStatus(userId, status) {
+            // Set loading state for the toggle button
+            const toggleButton = document.querySelector(`[data-user-id="${userId}"]`);
+            const originalHTML = toggleButton?.innerHTML;
+            const originalClasses = toggleButton?.className;
+            
+            if (toggleButton) {
+                toggleButton.disabled = true;
+                toggleButton.className = originalClasses.replace(/(bg-green-500|bg-red-500)/, 'bg-gray-400');
+                toggleButton.innerHTML = `
+                    <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                `;
+            }
+            
             try {
                 const response = await fetch(`/super-admin/users/${userId}/toggle-active`, {
                     method: 'PATCH',
@@ -300,25 +324,66 @@ function usersManagement() {
                     body: JSON.stringify({ active: status })
                 });
                 
-                if (response.ok) {
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    Toast.success(result.message || 'Status aggiornato con successo');
                     window.location.reload();
                 } else {
-                    alert('Errore durante l\'aggiornamento dello status utente');
+                    const errorMessage = result.message || 'Errore durante l\'aggiornamento dello status utente';
+                    Toast.error(errorMessage);
+                    console.error('Toggle error:', result);
+                    
+                    // Restore button state on error
+                    if (toggleButton && originalHTML && originalClasses) {
+                        toggleButton.disabled = false;
+                        toggleButton.className = originalClasses;
+                        toggleButton.innerHTML = originalHTML;
+                    }
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('Errore durante l\'aggiornamento dello status utente');
+                console.error('Network Error:', error);
+                Toast.error('Errore di connessione durante l\'aggiornamento dello status utente');
+                
+                // Restore button state on network error
+                if (toggleButton && originalHTML && originalClasses) {
+                    toggleButton.disabled = false;
+                    toggleButton.className = originalClasses;
+                    toggleButton.innerHTML = originalHTML;
+                }
             }
         },
         
         async bulkAction(action) {
             if (this.selectedUsers.length === 0) {
-                alert('Seleziona almeno un utente');
+                Toast.warning('Seleziona almeno un utente');
                 return;
             }
             
             if (!confirm(`Sei sicuro di voler ${action === 'activate' ? 'attivare' : 'disattivare'} ${this.selectedUsers.length} utenti?`)) {
                 return;
+            }
+            
+            // Set loading state for bulk action buttons
+            const activateBtn = document.querySelector('[data-bulk-action="activate"]');
+            const deactivateBtn = document.querySelector('[data-bulk-action="deactivate"]');
+            const originalActivateHTML = activateBtn?.innerHTML;
+            const originalDeactivateHTML = deactivateBtn?.innerHTML;
+            
+            if (activateBtn) activateBtn.disabled = true;
+            if (deactivateBtn) deactivateBtn.disabled = true;
+            
+            const activeButton = action === 'activate' ? activateBtn : deactivateBtn;
+            if (activeButton) {
+                activeButton.innerHTML = `
+                    <div class="flex items-center">
+                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Elaborazione...
+                    </div>
+                `;
             }
             
             try {
@@ -335,13 +400,34 @@ function usersManagement() {
                 });
                 
                 if (response.ok) {
+                    Toast.success(`Operazione ${action === 'activate' ? 'attivazione' : 'disattivazione'} completata con successo`);
                     window.location.reload();
                 } else {
-                    alert('Errore durante l\'operazione bulk');
+                    Toast.error('Errore durante l\'operazione bulk');
+                    
+                    // Restore button states on error
+                    if (activateBtn && originalActivateHTML) {
+                        activateBtn.disabled = false;
+                        activateBtn.innerHTML = originalActivateHTML;
+                    }
+                    if (deactivateBtn && originalDeactivateHTML) {
+                        deactivateBtn.disabled = false;
+                        deactivateBtn.innerHTML = originalDeactivateHTML;
+                    }
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Errore durante l\'operazione bulk');
+                Toast.error('Errore di connessione durante l\'operazione bulk');
+                
+                // Restore button states on network error
+                if (activateBtn && originalActivateHTML) {
+                    activateBtn.disabled = false;
+                    activateBtn.innerHTML = originalActivateHTML;
+                }
+                if (deactivateBtn && originalDeactivateHTML) {
+                    deactivateBtn.disabled = false;
+                    deactivateBtn.innerHTML = originalDeactivateHTML;
+                }
             }
         }
     }

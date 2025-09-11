@@ -64,8 +64,8 @@
                                 {{ $user->role === 'super_admin' ? 'bg-purple-100 text-purple-800' : '' }}
                                 {{ $user->role === 'admin' ? 'bg-blue-100 text-blue-800' : '' }}
                                 {{ $user->role === 'instructor' ? 'bg-green-100 text-green-800' : '' }}
-                                {{ $user->role === 'student' ? 'bg-gray-100 text-gray-800' : '' }}">
-                                {{ ucfirst(str_replace('_', ' ', $user->role)) }}
+                                {{ $user->role === 'student' || $user->role === 'user' ? 'bg-gray-100 text-gray-800' : '' }}">
+                                {{ ucfirst(str_replace('_', ' ', $user->role === 'user' ? 'student' : $user->role)) }}
                             </span>
                             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
                                 {{ $user->active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
@@ -441,15 +441,20 @@ function userDetails() {
                     body: JSON.stringify({ active: !this.userActive })
                 });
                 
-                if (response.ok) {
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
                     this.userActive = !this.userActive;
+                    alert(result.message || 'Status aggiornato con successo');
                     window.location.reload();
                 } else {
-                    alert('Errore durante l\'aggiornamento dello status utente');
+                    const errorMessage = result.message || 'Errore durante l\'aggiornamento dello status utente';
+                    alert(errorMessage);
+                    console.error('Toggle error:', result);
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('Errore durante l\'aggiornamento dello status utente');
+                console.error('Network Error:', error);
+                alert('Errore di connessione durante l\'aggiornamento dello status utente');
             }
         }
     }

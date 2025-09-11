@@ -197,7 +197,301 @@
     
     @stack('scripts')
     
-    <!-- Toast Notifications -->
+    <!-- CSRF Token Refresh Script -->
+    <script>
+        // Enhanced CSRF Token Management
+        window.csrfTokenManager = {
+            token: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            
+            // Refresh CSRF token from server
+            refresh() {
+                return fetch('/csrf-token', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.csrf_token) {
+                        this.token = data.csrf_token;
+                        // Update meta tag
+                        document.querySelector('meta[name="csrf-token"]').setAttribute('content', data.csrf_token);
+                        // Update axios defaults if available
+                        if (window.axios) {
+                            window.axios.defaults.headers.common['X-CSRF-TOKEN'] = data.csrf_token;
+                        }
+                        // Update all forms with new token
+                        document.querySelectorAll('input[name="_token"]').forEach(input => {
+                            input.value = data.csrf_token;
+                        });
+                        console.log('CSRF token refreshed successfully');
+                        return data.csrf_token;
+                    }
+                    throw new Error('No CSRF token received');
+                })
+                .catch(error => {
+                    console.error('Failed to refresh CSRF token:', error);
+                    throw error;
+                });
+            },
+            
+            // Handle form submission with fresh token
+            submitFormWithFreshToken(form) {
+                return this.refresh().then(() => {
+                    // Submit the form after token refresh
+                    if (form.requestSubmit) {
+                        form.requestSubmit();
+                    } else {
+                        form.submit();
+                    }
+                });
+            },
+            
+            // Auto-refresh token every 110 minutes (before 120min session expires)
+            startAutoRefresh() {
+                setInterval(() => {
+                    this.refresh().catch(() => {
+                        console.warn('Auto CSRF token refresh failed');
+                    });
+                }, 110 * 60 * 1000); // 110 minutes
+            }
+        };
+        
+        // Start auto-refresh when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            window.csrfTokenManager.startAutoRefresh();
+            
+            // Show Laravel flash messages as toasts
+            @if(session('success'))
+                Toast.success('{{ session('success') }}');
+            @endif
+            
+            @if(session('error'))
+                Toast.error('{{ session('error') }}');
+            @endif
+            
+            @if(session('warning'))
+                Toast.warning('{{ session('warning') }}');
+            @endif
+            
+            @if(session('info'))
+                Toast.info('{{ session('info') }}');
+            @endif
+        });
+        
+        // Enhanced form submission error handling
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            
+            // Add retry mechanism for CSRF failures
+            if (form.dataset.csrfRetry === 'true') {
+                return; // Already retrying
+            }
+            
+            // Override submit to handle CSRF errors
+            if (form.method.toLowerCase() === 'post') {
+                e.preventDefault();
+                
+                // Add loading state to submit button
+                const submitButton = form.querySelector('button[type="submit"], input[type="submit"]');
+                const originalButtonText = submitButton?.innerHTML || submitButton?.value;
+                const originalDisabled = submitButton?.disabled;
+                
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    if (submitButton.innerHTML !== undefined) {
+                        submitButton.innerHTML = `
+                            <div class="flex items-center justify-center">
+                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Elaborazione...
+                            </div>
+                        `;
+                    } else {
+                        submitButton.value = 'Elaborazione...';
+                    }
+                }
+                
+                const formData = new FormData(form);
+                const url = form.action || window.location.href;
+                
+                fetch(url, {
+                    method: form.method,
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+                    }
+                })
+                .then(response => {
+                    if (response.status === 419) {
+                        // CSRF token mismatch - refresh and retry once
+                        console.log('CSRF token mismatch detected, refreshing token...');
+                        return window.csrfTokenManager.refresh().then(() => {
+                            form.dataset.csrfRetry = 'true';
+                            form.submit();
+                        });
+                    } else if (response.ok || response.status === 302 || response.status === 422) {
+                        // Success, redirect, or validation errors - follow normal flow
+                        window.location.href = response.url || form.action || window.location.href;
+                    } else {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Form submission error:', error);
+                    Toast.error('Si è verificato un errore durante l\'invio del form. Riprova.');
+                    
+                    // Restore button state on error
+                    if (submitButton && originalButtonText !== undefined) {
+                        submitButton.disabled = originalDisabled || false;
+                        if (submitButton.innerHTML !== undefined) {
+                            submitButton.innerHTML = originalButtonText;
+                        } else {
+                            submitButton.value = originalButtonText;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+    
+    <!-- Toast Notifications System -->
     <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+    
+    <script>
+        // Enhanced Toast Notification System
+        window.Toast = {
+            // Create and show a toast notification
+            show(message, type = 'info', duration = 5000) {
+                const toast = this.create(message, type);
+                this.display(toast, duration);
+                return toast;
+            },
+            
+            // Create toast element
+            create(message, type) {
+                const toast = document.createElement('div');
+                const id = 'toast-' + Date.now() + Math.random().toString(36).substr(2, 9);
+                toast.id = id;
+                
+                // Base classes
+                const baseClasses = 'max-w-sm w-full rounded-lg shadow-lg transform transition-all duration-300 ease-in-out';
+                
+                // Type-specific classes and icons
+                const typeConfig = {
+                    success: {
+                        classes: 'bg-green-500 text-white',
+                        icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                               </svg>`
+                    },
+                    error: {
+                        classes: 'bg-red-500 text-white',
+                        icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                               </svg>`
+                    },
+                    warning: {
+                        classes: 'bg-yellow-500 text-white',
+                        icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                               </svg>`
+                    },
+                    info: {
+                        classes: 'bg-blue-500 text-white',
+                        icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                               </svg>`
+                    }
+                };
+                
+                const config = typeConfig[type] || typeConfig.info;
+                toast.className = `${baseClasses} ${config.classes} translate-x-full opacity-0`;
+                
+                toast.innerHTML = `
+                    <div class="flex items-start p-4">
+                        <div class="flex-shrink-0">
+                            ${config.icon}
+                        </div>
+                        <div class="ml-3 flex-1">
+                            <p class="text-sm font-medium">${message}</p>
+                        </div>
+                        <div class="ml-4 flex-shrink-0">
+                            <button type="button" onclick="Toast.hide('${id}')" 
+                                    class="inline-flex text-white hover:text-gray-200 focus:outline-none focus:text-gray-200 transition ease-in-out duration-150">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                return toast;
+            },
+            
+            // Display toast with animation
+            display(toast, duration) {
+                const container = document.getElementById('toast-container');
+                container.appendChild(toast);
+                
+                // Trigger enter animation
+                setTimeout(() => {
+                    toast.classList.remove('translate-x-full', 'opacity-0');
+                    toast.classList.add('translate-x-0', 'opacity-100');
+                }, 10);
+                
+                // Auto-hide after duration
+                if (duration > 0) {
+                    setTimeout(() => {
+                        this.hide(toast.id);
+                    }, duration);
+                }
+            },
+            
+            // Hide specific toast
+            hide(toastId) {
+                const toast = document.getElementById(toastId);
+                if (toast) {
+                    toast.classList.add('translate-x-full', 'opacity-0');
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }
+            },
+            
+            // Convenience methods
+            success(message, duration = 5000) {
+                return this.show(message, 'success', duration);
+            },
+            
+            error(message, duration = 7000) {
+                return this.show(message, 'error', duration);
+            },
+            
+            warning(message, duration = 6000) {
+                return this.show(message, 'warning', duration);
+            },
+            
+            info(message, duration = 5000) {
+                return this.show(message, 'info', duration);
+            },
+            
+            // Clear all toasts
+            clear() {
+                const container = document.getElementById('toast-container');
+                while (container.firstChild) {
+                    container.removeChild(container.firstChild);
+                }
+            }
+        };
+    </script>
 </body>
 </html>
