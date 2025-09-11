@@ -382,7 +382,7 @@
                                         </div>
                                         <div>
                                             <h4 class="text-sm font-medium text-gray-900">{{ $payment->description ?? ($payment->course ? $payment->course->name : 'Pagamento') }}</h4>
-                                            <p class="text-sm text-gray-500">{{ $payment->payment_method }} • {{ $payment->payment_date->format('d/m/Y') }}</p>
+                                            <p class="text-sm text-gray-500">{{ $payment->payment_method }} • {{ $payment->payment_date?->format('d/m/Y') ?? 'Data non disponibile' }}</p>
                                         </div>
                                     </div>
                                     <div class="flex items-center space-x-3">
