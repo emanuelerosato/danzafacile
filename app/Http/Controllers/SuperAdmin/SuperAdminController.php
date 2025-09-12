@@ -169,10 +169,191 @@ class SuperAdminController extends Controller
      */
     public function logs(Request $request)
     {
-        // This would typically integrate with Laravel's logging system
-        // or a custom activity log package like spatie/laravel-activitylog
+        try {
+            $level = $request->get('level', 'all');
+            $date = $request->get('date');
+            $search = $request->get('search');
+            $perPage = $request->get('per_page', 50);
+            
+            // Get logs from Laravel log file
+            $logs = $this->parseLogFile($level, $date, $search);
+            
+            // Paginate results
+            $currentPage = $request->get('page', 1);
+            $offset = ($currentPage - 1) * $perPage;
+            $paginatedLogs = array_slice($logs, $offset, $perPage);
+            
+            // Create pagination info
+            $totalLogs = count($logs);
+            $pagination = [
+                'current_page' => $currentPage,
+                'per_page' => $perPage,
+                'total' => $totalLogs,
+                'last_page' => ceil($totalLogs / $perPage),
+                'from' => $offset + 1,
+                'to' => min($offset + $perPage, $totalLogs)
+            ];
+            
+            // Get log statistics
+            $stats = $this->getLogStats($logs);
+            
+            return view('super-admin.logs', compact('paginatedLogs', 'pagination', 'stats', 'level', 'date', 'search'));
+            
+        } catch (\Exception $e) {
+            \Log::error('Error loading system logs', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id()
+            ]);
+            
+            return view('super-admin.logs', [
+                'paginatedLogs' => [],
+                'pagination' => ['current_page' => 1, 'per_page' => 50, 'total' => 0, 'last_page' => 1, 'from' => 0, 'to' => 0],
+                'stats' => ['total' => 0, 'error' => 0, 'warning' => 0, 'info' => 0, 'debug' => 0],
+                'error' => 'Errore durante il caricamento dei log di sistema.',
+                'level' => $request->get('level', 'all'),
+                'date' => $request->get('date'),
+                'search' => $request->get('search')
+            ]);
+        }
+    }
+    
+    /**
+     * Parse Laravel log file
+     */
+    private function parseLogFile($level = 'all', $date = null, $search = null)
+    {
+        $logPath = storage_path('logs/laravel.log');
+        $logs = [];
         
-        return view('super-admin.logs');
+        if (!file_exists($logPath)) {
+            return $logs;
+        }
+        
+        $content = file_get_contents($logPath);
+        $lines = explode("\n", $content);
+        
+        $currentLog = null;
+        
+        foreach ($lines as $line) {
+            if (empty(trim($line))) continue;
+            
+            // Check if line starts with timestamp pattern [YYYY-MM-DD HH:MM:SS]
+            if (preg_match('/^\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\]\s+(\w+)\.(\w+):\s+(.*)$/', $line, $matches)) {
+                // Save previous log if exists
+                if ($currentLog) {
+                    $logs[] = $currentLog;
+                }
+                
+                // Start new log entry
+                $currentLog = [
+                    'datetime' => $matches[1],
+                    'environment' => $matches[2],
+                    'level' => strtolower($matches[3]),
+                    'message' => $matches[4],
+                    'context' => '',
+                    'formatted_time' => \Carbon\Carbon::parse($matches[1])->format('d/m/Y H:i:s'),
+                    'time_ago' => \Carbon\Carbon::parse($matches[1])->diffForHumans(),
+                    'level_color' => $this->getLogLevelColor($matches[3])
+                ];
+            } else {
+                // Continuation of previous log (stack trace, context, etc.)
+                if ($currentLog) {
+                    $currentLog['context'] .= $line . "\n";
+                }
+            }
+        }
+        
+        // Don't forget the last log
+        if ($currentLog) {
+            $logs[] = $currentLog;
+        }
+        
+        // Sort by datetime descending (newest first)
+        usort($logs, function($a, $b) {
+            return strtotime($b['datetime']) - strtotime($a['datetime']);
+        });
+        
+        // Apply filters
+        if ($level !== 'all') {
+            $logs = array_filter($logs, function($log) use ($level) {
+                return $log['level'] === $level;
+            });
+        }
+        
+        if ($date) {
+            $filterDate = \Carbon\Carbon::parse($date)->format('Y-m-d');
+            $logs = array_filter($logs, function($log) use ($filterDate) {
+                return strpos($log['datetime'], $filterDate) === 0;
+            });
+        }
+        
+        if ($search) {
+            $logs = array_filter($logs, function($log) use ($search) {
+                return stripos($log['message'], $search) !== false || 
+                       stripos($log['context'], $search) !== false;
+            });
+        }
+        
+        return array_values($logs); // Reindex array
+    }
+    
+    /**
+     * Get log level color for UI
+     */
+    private function getLogLevelColor($level)
+    {
+        $colors = [
+            'emergency' => 'bg-red-100 text-red-800 border-red-200',
+            'alert' => 'bg-red-100 text-red-800 border-red-200',
+            'critical' => 'bg-red-100 text-red-800 border-red-200',
+            'error' => 'bg-red-50 text-red-700 border-red-200',
+            'warning' => 'bg-yellow-50 text-yellow-700 border-yellow-200',
+            'notice' => 'bg-blue-50 text-blue-700 border-blue-200',
+            'info' => 'bg-blue-50 text-blue-600 border-blue-200',
+            'debug' => 'bg-gray-50 text-gray-600 border-gray-200'
+        ];
+        
+        return $colors[strtolower($level)] ?? 'bg-gray-50 text-gray-600 border-gray-200';
+    }
+    
+    /**
+     * Get log statistics
+     */
+    private function getLogStats($logs)
+    {
+        $stats = [
+            'total' => count($logs),
+            'error' => 0,
+            'warning' => 0,
+            'info' => 0,
+            'debug' => 0,
+            'other' => 0
+        ];
+        
+        foreach ($logs as $log) {
+            switch ($log['level']) {
+                case 'error':
+                case 'emergency':
+                case 'alert':
+                case 'critical':
+                    $stats['error']++;
+                    break;
+                case 'warning':
+                    $stats['warning']++;
+                    break;
+                case 'info':
+                case 'notice':
+                    $stats['info']++;
+                    break;
+                case 'debug':
+                    $stats['debug']++;
+                    break;
+                default:
+                    $stats['other']++;
+            }
+        }
+        
+        return $stats;
     }
 
     /**

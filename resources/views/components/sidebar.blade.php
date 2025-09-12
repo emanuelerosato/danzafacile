@@ -46,7 +46,7 @@
                 <x-nav-item href="{{ route('super-admin.settings') }}" :active="request()->routeIs('super-admin.settings')" icon="adjustments">
                     Impostazioni
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('super-admin.logs.*')" icon="clipboard-list">
+                <x-nav-item href="{{ route('super-admin.logs') }}" :active="request()->routeIs('super-admin.logs')" icon="clipboard-list">
                     Log Sistema
                 </x-nav-item>
             </x-nav-group>
