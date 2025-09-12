@@ -62,6 +62,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/reports', [SuperAdminController::class, 'reports'])->name('reports');
         Route::get('/reports-api', [SuperAdminController::class, 'reportsApi'])->name('reports-api');
         Route::get('/settings', [SuperAdminController::class, 'settings'])->name('settings');
+        Route::post('/settings', [SuperAdminController::class, 'updateSettings'])->name('settings.update');
         
         // Schools management
         Route::get('schools/export', [SchoolController::class, 'exportAll'])->name('schools.export-all');

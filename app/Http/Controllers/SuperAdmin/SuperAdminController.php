@@ -49,7 +49,42 @@ class SuperAdminController extends Controller
      */
     public function settings()
     {
-        return view('super-admin.settings');
+        // Get current settings from database or use defaults
+        $currentSettings = [
+            'app_name' => \App\Models\Setting::get('app_name', config('app.name')),
+            'app_description' => \App\Models\Setting::get('app_description', 'Sistema di gestione per scuole di danza'),
+            'contact_email' => \App\Models\Setting::get('contact_email', 'info@scuoladanza.it'),
+            'contact_phone' => \App\Models\Setting::get('contact_phone', '+39 123 456 7890'),
+            'timezone' => \App\Models\Setting::get('timezone', 'Europe/Rome'),
+            'default_language' => \App\Models\Setting::get('default_language', 'it'),
+            'maintenance_mode' => \App\Models\Setting::get('maintenance_mode', false),
+            'maintenance_message' => \App\Models\Setting::get('maintenance_message', 'Il sistema è temporaneamente in manutenzione. Riprova più tardi.'),
+            
+            // Email settings
+            'email_enabled' => \App\Models\Setting::get('email_enabled', true),
+            'smtp_host' => \App\Models\Setting::get('smtp_host', 'smtp.mailtrap.io'),
+            'smtp_port' => \App\Models\Setting::get('smtp_port', 587),
+            'smtp_username' => \App\Models\Setting::get('smtp_username', ''),
+            'smtp_encryption' => \App\Models\Setting::get('smtp_encryption', 'tls'),
+            'mail_from_name' => \App\Models\Setting::get('mail_from_name', 'Scuola di Danza'),
+            'mail_from_address' => \App\Models\Setting::get('mail_from_address', 'noreply@scuoladanza.it'),
+            
+            // Security settings
+            'session_timeout' => \App\Models\Setting::get('session_timeout', 120),
+            'max_login_attempts' => \App\Models\Setting::get('max_login_attempts', 5),
+            'lockout_duration' => \App\Models\Setting::get('lockout_duration', 15),
+            'password_min_length' => \App\Models\Setting::get('password_min_length', 8),
+            'password_expiry_days' => \App\Models\Setting::get('password_expiry_days', 90),
+            'require_uppercase' => \App\Models\Setting::get('require_uppercase', true),
+            'require_lowercase' => \App\Models\Setting::get('require_lowercase', true),
+            'require_numbers' => \App\Models\Setting::get('require_numbers', true),
+            'require_symbols' => \App\Models\Setting::get('require_symbols', false),
+            'enable_2fa' => \App\Models\Setting::get('enable_2fa', false),
+            'force_2fa_admin' => \App\Models\Setting::get('force_2fa_admin', false),
+            'force_2fa_superadmin' => \App\Models\Setting::get('force_2fa_superadmin', true),
+        ];
+        
+        return view('super-admin.settings', compact('currentSettings'));
     }
 
     /**
@@ -62,13 +97,71 @@ class SuperAdminController extends Controller
             'app_description' => 'nullable|string|max:500',
             'contact_email' => 'required|email',
             'contact_phone' => 'nullable|string|max:20',
-            'maintenance_mode' => 'boolean',
+            'timezone' => 'required|string',
+            'default_language' => 'required|string',
+            'maintenance_mode' => 'sometimes|boolean',
+            'maintenance_message' => 'nullable|string|max:1000',
+            
+            // Email settings
+            'email_enabled' => 'sometimes|boolean',
+            'smtp_host' => 'nullable|string|max:255',
+            'smtp_port' => 'nullable|integer|min:1|max:65535',
+            'smtp_username' => 'nullable|string|max:255',
+            'smtp_password' => 'nullable|string|max:255',
+            'smtp_encryption' => 'nullable|in:tls,ssl',
+            'mail_from_name' => 'nullable|string|max:255',
+            'mail_from_address' => 'nullable|email|max:255',
+            
+            // Security settings
+            'session_timeout' => 'sometimes|integer|min:5|max:1440',
+            'max_login_attempts' => 'sometimes|integer|min:1|max:10',
+            'lockout_duration' => 'sometimes|integer|min:1|max:60',
+            'password_min_length' => 'sometimes|integer|min:6|max:20',
+            'password_expiry_days' => 'sometimes|integer|min:0|max:365',
+            'require_uppercase' => 'sometimes|boolean',
+            'require_lowercase' => 'sometimes|boolean',
+            'require_numbers' => 'sometimes|boolean',
+            'require_symbols' => 'sometimes|boolean',
+            'enable_2fa' => 'sometimes|boolean',
+            'force_2fa_admin' => 'sometimes|boolean',
+            'force_2fa_superadmin' => 'sometimes|boolean',
         ]);
 
-        // Logic to update system settings
-        // This could be implemented using a Settings model or configuration files
-
-        return redirect()->back()->with('success', 'Impostazioni sistema aggiornate con successo.');
+        try {
+            // Save all settings to database
+            foreach ($request->all() as $key => $value) {
+                if ($key === '_token' || $key === '_method') {
+                    continue;
+                }
+                
+                // Determine type and save setting
+                $type = 'string';
+                if (is_bool($value) || in_array($key, ['maintenance_mode', 'email_enabled', 'require_uppercase', 'require_lowercase', 'require_numbers', 'require_symbols', 'enable_2fa', 'force_2fa_admin', 'force_2fa_superadmin'])) {
+                    $type = 'boolean';
+                    $value = (bool) $value;
+                } elseif (is_numeric($value) && in_array($key, ['smtp_port', 'session_timeout', 'max_login_attempts', 'lockout_duration', 'password_min_length', 'password_expiry_days'])) {
+                    $type = 'integer';
+                    $value = (int) $value;
+                }
+                
+                \App\Models\Setting::set($key, $value, $type);
+            }
+            
+            // Clear config cache to reflect changes
+            \Artisan::call('config:clear');
+            
+            return redirect()->back()->with('success', 'Impostazioni sistema aggiornate con successo.');
+            
+        } catch (\Exception $e) {
+            \Log::error('Settings update failed', [
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id()
+            ]);
+            
+            return redirect()->back()
+                ->with('error', 'Errore durante l\'aggiornamento delle impostazioni.')
+                ->withInput();
+        }
     }
 
     /**
