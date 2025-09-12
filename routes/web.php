@@ -63,6 +63,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/settings', [SuperAdminController::class, 'settings'])->name('settings');
         
         // Schools management
+        Route::get('schools/export', [SchoolController::class, 'exportAll'])->name('schools.export-all');
         Route::resource('schools', SchoolController::class);
         Route::patch('schools/{school}/toggle-active', [SchoolController::class, 'toggleActive'])->name('schools.toggle-active');
         Route::post('schools/bulk-action', [SchoolController::class, 'bulkAction'])->name('schools.bulk-action');

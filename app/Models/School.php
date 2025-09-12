@@ -20,8 +20,11 @@ class School extends Model
         'name',
         'description',
         'address',
+        'city',
+        'postal_code',
         'phone',
         'email',
+        'website',
         'logo_path',
         'active',
     ];

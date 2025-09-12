@@ -94,29 +94,56 @@ class SchoolController extends Controller
      */
     public function show(School $school)
     {
-        $school->load([
-            'users',
-            'courses.enrollments',
-            'courses.instructor',
-            'payments' => function($q) {
-                $q->latest()->take(10);
+        try {
+            // Load basic relationships first
+            $school->load(['users']);
+
+            // Calculate stats with safe fallbacks
+            $stats = [
+                'admins_count' => $school->users()->where('role', User::ROLE_ADMIN)->count() ?? 0,
+                'instructors_count' => $school->users()->where('role', User::ROLE_INSTRUCTOR)->count() ?? 0,
+                'students_count' => $school->users()->where('role', User::ROLE_STUDENT)->count() ?? 0,
+                'courses_count' => 0,
+                'active_courses' => 0,
+                'total_revenue' => 0,
+                'monthly_revenue' => 0,
+            ];
+
+            // Try to load courses if they exist
+            try {
+                $stats['courses_count'] = $school->courses()->count() ?? 0;
+                $stats['active_courses'] = $school->courses()->where('active', true)->count() ?? 0;
+            } catch (\Exception $e) {
+                // Courses relationship might not exist yet
+                $stats['courses_count'] = 0;
+                $stats['active_courses'] = 0;
             }
-        ]);
 
-        $stats = [
-            'admins_count' => $school->users()->where('role', User::ROLE_ADMIN)->count(),
-            'instructors_count' => $school->users()->where('role', User::ROLE_INSTRUCTOR)->count(),
-            'students_count' => $school->users()->where('role', User::ROLE_STUDENT)->count(),
-            'courses_count' => $school->courses()->count(),
-            'active_courses' => $school->courses()->where('active', true)->count(),
-            'total_revenue' => $school->payments()->where('status', 'completed')->sum('amount'),
-            'monthly_revenue' => $school->payments()
-                                      ->where('status', 'completed')
-                                      ->whereMonth('payment_date', now()->month)
-                                      ->sum('amount'),
-        ];
+            // Try to load payments if they exist
+            try {
+                $stats['total_revenue'] = $school->payments()->where('status', 'completed')->sum('amount') ?? 0;
+                $stats['monthly_revenue'] = $school->payments()
+                                              ->where('status', 'completed')
+                                              ->whereMonth('payment_date', now()->month)
+                                              ->sum('amount') ?? 0;
+            } catch (\Exception $e) {
+                // Payments relationship might not exist yet
+                $stats['total_revenue'] = 0;
+                $stats['monthly_revenue'] = 0;
+            }
 
-        return view('super-admin.schools.show', compact('school', 'stats'));
+            return view('super-admin.schools.show', compact('school', 'stats'));
+        } catch (\Exception $e) {
+            if (request()->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Errore durante il caricamento dei dettagli della scuola.'
+                ], 500);
+            }
+
+            return redirect()->route('super-admin.schools.index')
+                            ->with('error', 'Errore durante il caricamento dei dettagli della scuola.');
+        }
     }
 
     /**
@@ -210,6 +237,14 @@ class SchoolController extends Controller
     }
 
     /**
+     * Alias for toggleStatus to match route naming
+     */
+    public function toggleActive(School $school)
+    {
+        return $this->toggleStatus($school);
+    }
+
+    /**
      * Bulk actions for multiple schools
      */
     public function bulkAction(Request $request)
@@ -262,6 +297,72 @@ class SchoolController extends Controller
         $schools = School::with('users')->get();
 
         $filename = 'schools_export_' . now()->format('Y-m-d_H-i-s') . '.csv';
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function() use ($schools) {
+            $file = fopen('php://output', 'w');
+            
+            // Header
+            fputcsv($file, [
+                'ID', 'Nome', 'Indirizzo', 'Città', 'CAP', 'Telefono', 
+                'Email', 'Sito Web', 'Attiva', 'Amministratori', 'Studenti', 'Data Creazione'
+            ]);
+
+            foreach ($schools as $school) {
+                fputcsv($file, [
+                    $school->id,
+                    $school->name,
+                    $school->address,
+                    $school->city,
+                    $school->postal_code,
+                    $school->phone,
+                    $school->email,
+                    $school->website,
+                    $school->active ? 'Sì' : 'No',
+                    $school->users()->where('role', User::ROLE_ADMIN)->count(),
+                    $school->users()->where('role', User::ROLE_STUDENT)->count(),
+                    $school->created_at->format('d/m/Y H:i')
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    /**
+     * Export all schools data to CSV
+     */
+    public function exportAll(Request $request)
+    {
+        $query = School::with('users');
+        
+        // Apply same filters as index page
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('city', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $status = $request->get('status') === 'active';
+            $query->where('active', $status);
+        }
+
+        if ($request->filled('city')) {
+            $query->where('city', $request->get('city'));
+        }
+
+        $schools = $query->orderBy('name')->get();
+
+        $filename = 'schools_all_export_' . now()->format('Y-m-d_H-i-s') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
