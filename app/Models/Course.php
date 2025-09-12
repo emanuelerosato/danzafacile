@@ -83,6 +83,14 @@ class Course extends Model
     }
 
     /**
+     * Alias per courseEnrollments per compatibilità
+     */
+    public function enrollments(): HasMany
+    {
+        return $this->courseEnrollments();
+    }
+
+    /**
      * Ottiene tutti i pagamenti relativi al corso
      */
     public function payments(): HasMany
