@@ -30,19 +30,16 @@
                 Dashboard
             </x-nav-item>
             
-            <x-nav-group title="Gestione Sistema" icon="cog">
+            <x-nav-group title="Gestione Dati" icon="database">
                 <x-nav-item href="{{ route('super-admin.schools.index') }}" :active="request()->routeIs('super-admin.schools.*')" icon="academic-cap">
                     Scuole
                 </x-nav-item>
                 <x-nav-item href="{{ route('super-admin.users.index') }}" :active="request()->routeIs('super-admin.users.*')" icon="users">
                     Utenti
                 </x-nav-item>
-                <x-nav-item href="{{ route('super-admin.reports') }}" :active="request()->routeIs('super-admin.reports')" icon="chart-bar">
-                    Report
-                </x-nav-item>
             </x-nav-group>
             
-            <x-nav-group title="Amministrazione" icon="shield-check">
+            <x-nav-group title="Sistema & Monitoring" icon="shield-check">
                 <x-nav-item href="{{ route('super-admin.helpdesk.index') }}" :active="request()->routeIs('super-admin.helpdesk.*')" icon="chat-alt">
                     Messaggi
                     @php
@@ -52,11 +49,14 @@
                     <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">{{ $unreadTickets }}</span>
                     @endif
                 </x-nav-item>
-                <x-nav-item href="{{ route('super-admin.settings') }}" :active="request()->routeIs('super-admin.settings')" icon="adjustments">
-                    Impostazioni
+                <x-nav-item href="{{ route('super-admin.reports') }}" :active="request()->routeIs('super-admin.reports')" icon="chart-bar">
+                    Report & Analytics
                 </x-nav-item>
                 <x-nav-item href="{{ route('super-admin.logs') }}" :active="request()->routeIs('super-admin.logs')" icon="clipboard-list">
                     Log Sistema
+                </x-nav-item>
+                <x-nav-item href="{{ route('super-admin.settings') }}" :active="request()->routeIs('super-admin.settings')" icon="adjustments">
+                    Impostazioni
                 </x-nav-item>
             </x-nav-group>
             
@@ -133,7 +133,8 @@
             </x-nav-group>
         @endif
         
-        <!-- Common items for all users -->
+        <!-- Common items for non-super-admin users only -->
+        @if(Auth::user()->role !== 'super_admin')
         <div class="border-t border-rose-100 pt-4 mt-4">
             <x-nav-item href="#" :active="request()->routeIs('messages.*')" icon="chat">
                 Messaggi
@@ -144,6 +145,7 @@
                 Aiuto
             </x-nav-item>
         </div>
+        @endif
     </nav>
     
     <!-- User Profile in Sidebar -->

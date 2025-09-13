@@ -127,6 +127,7 @@
                                 required
                                 class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 bg-white/50 @error('role') border-red-300 @enderror">
                             <option value="">Seleziona un ruolo</option>
+                            <option value="super_admin" {{ old('role') == 'super_admin' ? 'selected' : '' }}>👑 Super Admin</option>
                             <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>👨‍💼 Admin Scuola</option>
                             <option value="instructor" {{ old('role') == 'instructor' ? 'selected' : '' }}>🎭 Istruttore</option>
                             <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>🎓 Studente</option>
@@ -137,6 +138,11 @@
                         
                         <!-- Role Descriptions -->
                         <div class="mt-3 space-y-2">
+                            <div x-show="selectedRole === 'super_admin'" x-transition class="p-3 bg-red-50 rounded-lg border border-red-200">
+                                <p class="text-sm text-red-800">
+                                    <strong>👑 Super Admin:</strong> Ha accesso completo a tutto il sistema. Può gestire tutte le scuole, utenti e configurazioni globali. <strong>Non richiede assegnazione scuola.</strong>
+                                </p>
+                            </div>
                             <div x-show="selectedRole === 'admin'" x-transition class="p-3 bg-blue-50 rounded-lg border border-blue-200">
                                 <p class="text-sm text-blue-800">
                                     <strong>Admin Scuola:</strong> Gestisce corsi, studenti e istruttori della propria scuola. Ha accesso completo ai dati della scuola assegnata.

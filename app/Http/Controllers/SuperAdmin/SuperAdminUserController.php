@@ -72,7 +72,8 @@ class SuperAdminUserController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        // Validazione dinamica basata sul ruolo
+        $rules = [
             'name' => 'required|string|max:255',
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
@@ -80,12 +81,21 @@ class SuperAdminUserController extends Controller
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'nullable|string|max:20',
             'date_of_birth' => 'nullable|date|before:today',
-            'school_id' => 'nullable|exists:schools,id',
-            'role' => ['required', Rule::in([User::ROLE_ADMIN, User::ROLE_INSTRUCTOR, User::ROLE_STUDENT])],
+            'role' => ['required', Rule::in([User::ROLE_SUPER_ADMIN, User::ROLE_ADMIN, User::ROLE_INSTRUCTOR, User::ROLE_STUDENT])],
             'active' => 'boolean',
-        ]);
+        ];
 
-        $user = User::create([
+        // School_id è obbligatorio per tutti i ruoli tranne super_admin
+        if ($request->role !== User::ROLE_SUPER_ADMIN) {
+            $rules['school_id'] = 'required|exists:schools,id';
+        } else {
+            $rules['school_id'] = 'nullable|exists:schools,id';
+        }
+
+        $request->validate($rules);
+
+        // Preparazione dati per la creazione
+        $userData = [
             'name' => $request->name,
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
@@ -93,10 +103,18 @@ class SuperAdminUserController extends Controller
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'date_of_birth' => $request->date_of_birth,
-            'school_id' => $request->school_id,
             'role' => $request->role,
             'active' => $request->boolean('active', true),
-        ]);
+        ];
+
+        // Super Admin non ha school_id (può gestire tutte le scuole)
+        if ($request->role !== User::ROLE_SUPER_ADMIN) {
+            $userData['school_id'] = $request->school_id;
+        } else {
+            $userData['school_id'] = null;
+        }
+
+        $user = User::create($userData);
 
         if ($request->ajax()) {
             return response()->json([
