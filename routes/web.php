@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\SchoolController;
 use App\Http\Controllers\SuperAdmin\SuperAdminUserController;
+use App\Http\Controllers\SuperAdmin\HelpdeskController;
 
 // Controllers Admin
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -78,6 +79,18 @@ Route::middleware('auth')->group(function () {
         Route::patch('users/{user}/toggle-active', [SuperAdminUserController::class, 'toggleActive'])->name('users.toggle-active');
         Route::post('users/bulk-action', [SuperAdminUserController::class, 'bulkAction'])->name('users.bulk-action');
         Route::post('users/{user}/impersonate', [SuperAdminUserController::class, 'impersonate'])->name('users.impersonate');
+        
+        // Helpdesk/Messaggi management
+        Route::prefix('helpdesk')->name('helpdesk.')->group(function () {
+            Route::get('/', [HelpdeskController::class, 'index'])->name('index');
+            Route::get('/{ticket}', [HelpdeskController::class, 'show'])->name('show');
+            Route::put('/{ticket}', [HelpdeskController::class, 'update'])->name('update');
+            Route::delete('/{ticket}', [HelpdeskController::class, 'destroy'])->name('destroy');
+            Route::post('/{ticket}/reply', [HelpdeskController::class, 'reply'])->name('reply');
+            Route::patch('/{ticket}/close', [HelpdeskController::class, 'close'])->name('close');
+            Route::patch('/{ticket}/reopen', [HelpdeskController::class, 'reopen'])->name('reopen');
+            Route::get('/export/{format}', [HelpdeskController::class, 'export'])->name('export');
+        });
     });
     
     // ADMIN ROUTES

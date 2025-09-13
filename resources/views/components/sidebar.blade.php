@@ -43,6 +43,15 @@
             </x-nav-group>
             
             <x-nav-group title="Amministrazione" icon="shield-check">
+                <x-nav-item href="{{ route('super-admin.helpdesk.index') }}" :active="request()->routeIs('super-admin.helpdesk.*')" icon="chat-alt">
+                    Messaggi
+                    @php
+                        $unreadTickets = \App\Models\Ticket::where('status', '!=', 'closed')->count();
+                    @endphp
+                    @if($unreadTickets > 0)
+                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">{{ $unreadTickets }}</span>
+                    @endif
+                </x-nav-item>
                 <x-nav-item href="{{ route('super-admin.settings') }}" :active="request()->routeIs('super-admin.settings')" icon="adjustments">
                     Impostazioni
                 </x-nav-item>
