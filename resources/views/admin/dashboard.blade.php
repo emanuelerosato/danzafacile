@@ -3,68 +3,94 @@
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Dashboard Admin - {{ Auth::user()->school->name ?? 'Scuola di Danza' }}
+                    Dashboard Admin - {{ $currentSchool->name }}
                 </h2>
                 <p class="text-sm text-gray-600 mt-1">
-                    Gestione della tua scuola di danza
+                    Panoramica completa della tua scuola di danza
                 </p>
             </div>
             <div class="flex items-center space-x-3">
-                <span class="text-sm text-gray-500">
-                    Anno scolastico 2024/2025
-                </span>
-                <button @click="location.reload()" 
-                        class="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button onclick="refreshDashboard()"
+                        class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
+                    Aggiorna
                 </button>
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open"
+                            class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Esporta
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+
+                    <div x-show="open" @click.away="open = false" x-transition
+                         class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                        <div class="py-1">
+                            <a href="{{ route('admin.export', 'students') }}"
+                               class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-.5a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                </svg>
+                                Studenti
+                            </a>
+                            <a href="{{ route('admin.export', 'courses') }}"
+                               class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                                Corsi
+                            </a>
+                            <a href="{{ route('admin.export', 'payments') }}"
+                               class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                </svg>
+                                Pagamenti
+                            </a>
+                            <div class="border-t border-gray-200"></div>
+                            <a href="{{ route('admin.export', 'summary') }}"
+                               class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 font-medium">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                Riepilogo Completo
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </x-slot>
 
+    <x-slot name="breadcrumb">
+        <li class="flex items-center">
+            <a href="{{ route('dashboard') }}" class="text-gray-500 hover:text-gray-700">Dashboard</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="text-gray-900 font-medium">Admin</li>
+    </x-slot>
+
     <div class="space-y-6">
-        <!-- Key Statistics -->
+        <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <x-stats-card 
-                title="Studenti Attivi"
-                :value="156"
-                icon="users"
-                color="rose"
-                :change="8"
-                changeType="increase"
-                subtitle="12 nuovi questo mese"
-            />
-            
-            <x-stats-card 
-                title="Corsi Attivi"
-                :value="12"
-                icon="academic-cap"
-                color="purple"
-                :change="2"
-                changeType="increase"
-                subtitle="3 in partenza a breve"
-            />
-            
-            <x-stats-card 
-                title="Ricavi Mensili"
-                :value="'€12,450'"
-                icon="currency-dollar"
-                color="green"
-                :change="15"
-                changeType="increase"
-                subtitle="Target: €15,000"
-            />
-            
-            <x-stats-card 
-                title="Presenze Media"
-                :value="'92%'"
-                icon="check-circle"
-                color="blue"
-                :change="3"
-                changeType="increase"
-                subtitle="Ultima settimana"
-            />
+            @foreach($quickStats as $stat)
+                <x-stats-card
+                    :title="$stat['title']"
+                    :value="$stat['value']"
+                    :icon="$stat['icon']"
+                    :color="$stat['color']"
+                    :subtitle="$stat['subtitle']"
+                    :change="$stat['change']"
+                />
+            @endforeach
         </div>
 
         <!-- Quick Actions and Calendar -->
@@ -289,67 +315,251 @@
             </div>
         </div>
 
-        <!-- Financial Overview -->
-        <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">Panoramica Finanziaria</h3>
-                <div class="flex items-center space-x-2">
-                    <select class="text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                        <option>Settembre 2024</option>
-                        <option>Agosto 2024</option>
-                        <option>Luglio 2024</option>
-                    </select>
+        <!-- Activity and Events Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Recent Activity -->
+            <div class="lg:col-span-2 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Attività Recente</h3>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-6">
+                        <!-- Recent Enrollments -->
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                                </svg>
+                                Nuove Iscrizioni
+                            </h4>
+                            <div class="space-y-2">
+                                @forelse($recentEnrollments as $enrollment)
+                                    <div class="flex items-center justify-between p-3 bg-blue-50/50 rounded-lg">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                                                {{ strtoupper(substr($enrollment->user->name, 0, 1)) }}
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">{{ $enrollment->user->name }}</p>
+                                                <p class="text-xs text-gray-500">{{ $enrollment->course->name }}</p>
+                                            </div>
+                                        </div>
+                                        <span class="text-xs text-gray-400">{{ $enrollment->enrollment_date->diffForHumans() }}</span>
+                                    </div>
+                                @empty
+                                    <p class="text-sm text-gray-500 italic">Nessuna iscrizione recente</p>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        <!-- Recent Payments -->
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                Pagamenti Recenti
+                            </h4>
+                            <div class="space-y-2">
+                                @forelse($recentPayments as $payment)
+                                    <div class="flex items-center justify-between p-3 bg-green-50/50 rounded-lg">
+                                        <div class="flex items-center">
+                                            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">
+                                                €
+                                            </div>
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">{{ $payment->user->name }}</p>
+                                                <p class="text-xs text-gray-500">€ {{ number_format($payment->amount, 2, ',', '.') }}</p>
+                                            </div>
+                                        </div>
+                                        <span class="text-xs text-gray-400">{{ $payment->payment_date->diffForHumans() }}</span>
+                                    </div>
+                                @empty
+                                    <p class="text-sm text-gray-500 italic">Nessun pagamento recente</p>
+                                @endforelse
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="h-64">
-                <canvas id="financialChart"></canvas>
+
+            <!-- Upcoming Events -->
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900">Prossimi Eventi</h3>
+                        <a href="{{ route('admin.events.index') }}" class="text-sm text-rose-600 hover:text-rose-700">
+                            Vedi tutti
+                        </a>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        @forelse($upcomingEvents as $event)
+                            <div class="border-l-4 border-purple-400 pl-4">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <h4 class="text-sm font-medium text-gray-900">{{ $event->name }}</h4>
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            {{ $event->start_date->format('d M Y, H:i') }}
+                                        </p>
+                                        @if($event->location)
+                                            <p class="text-xs text-gray-400 mt-1">
+                                                <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                </svg>
+                                                {{ $event->location }}
+                                            </p>
+                                        @endif
+                                    </div>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        {{ ucfirst($event->type) }}
+                                    </span>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-center py-8">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3a2 2 0 012-2h4a2 2 0 012 2v4m-6 4v10l6-3 6 3V11M8 11h8"/>
+                                </svg>
+                                <p class="text-sm text-gray-500 mt-2">Nessun evento in programma</p>
+                                <a href="{{ route('admin.events.create') }}" class="inline-flex items-center mt-4 px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-rose-700 bg-rose-100 hover:bg-rose-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500">
+                                    Crea Evento
+                                </a>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Revenue Chart -->
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Andamento Incassi</h3>
+                    <div class="flex items-center text-sm text-gray-500">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                        </svg>
+                        Ultimi 12 mesi
+                    </div>
+                </div>
+                <div class="h-64">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Enrollments Chart -->
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Iscrizioni Mensili</h3>
+                    <div class="flex items-center text-sm text-gray-500">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        Nuovi studenti
+                    </div>
+                </div>
+                <div class="h-64">
+                    <canvas id="enrollmentsChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
-    @push('scripts')
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
-        // Financial Chart
-        const financialCtx = document.getElementById('financialChart').getContext('2d');
-        new Chart(financialCtx, {
+        // Dashboard data from backend
+        const analyticsData = @json($analytics);
+
+        // Revenue Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: analyticsData.monthly_revenue.map(item => item.month),
+                datasets: [{
+                    label: 'Incassi (€)',
+                    data: analyticsData.monthly_revenue.map(item => item.revenue),
+                    borderColor: 'rgb(236, 72, 153)',
+                    backgroundColor: 'rgba(236, 72, 153, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '€' + value.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Enrollments Chart
+        const enrollmentsCtx = document.getElementById('enrollmentsChart').getContext('2d');
+        new Chart(enrollmentsCtx, {
             type: 'bar',
             data: {
-                labels: ['Sett 1', 'Sett 2', 'Sett 3', 'Sett 4'],
+                labels: analyticsData.enrollment_trends.map(item => item.month),
                 datasets: [{
-                    label: 'Entrate',
-                    data: [2800, 3200, 2950, 3500],
-                    backgroundColor: 'rgba(244, 63, 94, 0.8)',
-                    borderColor: 'rgb(244, 63, 94)',
-                    borderWidth: 1
-                }, {
-                    label: 'Spese',
-                    data: [1200, 1400, 1300, 1500],
-                    backgroundColor: 'rgba(147, 51, 234, 0.8)',
-                    borderColor: 'rgb(147, 51, 234)',
+                    label: 'Iscrizioni',
+                    data: analyticsData.enrollment_trends.map(item => item.enrollments),
+                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    borderColor: 'rgb(59, 130, 246)',
                     borderWidth: 1
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
                 scales: {
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            callback: function(value) {
-                                return '€' + value;
-                            }
+                            stepSize: 1
                         }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
                     }
                 }
             }
         });
+
+        // Refresh Dashboard
+        function refreshDashboard() {
+            fetch('{{ route('admin.stats') }}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update charts with new data
+                        location.reload(); // Simple approach for now
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Auto refresh every 5 minutes
+        setInterval(refreshDashboard, 300000);
     </script>
-    @endpush
 </x-app-layout>
