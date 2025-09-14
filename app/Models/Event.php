@@ -80,6 +80,11 @@ class Event extends Model
         return $this->hasMany(Payment::class, 'event_id');
     }
 
+    public function attendanceRecords()
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
     // Scopes
     public function scopeActive(Builder $query): Builder
     {

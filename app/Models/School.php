@@ -92,6 +92,14 @@ class School extends Model
     }
 
     /**
+     * Ottiene tutti i record di presenza della scuola
+     */
+    public function attendanceRecords(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    /**
      * Ottiene tutti gli amministratori della scuola
      */
     public function admins(): HasMany

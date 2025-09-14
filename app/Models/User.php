@@ -145,6 +145,22 @@ class User extends Authenticatable
         return $this->hasMany(EventRegistration::class);
     }
 
+    /**
+     * Ottiene tutti i record di presenza dell'utente
+     */
+    public function attendanceRecords(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    /**
+     * Ottiene i record di presenza segnati da questo utente (se è un Admin/Instructor)
+     */
+    public function markedAttendanceRecords(): HasMany
+    {
+        return $this->hasMany(Attendance::class, 'marked_by_user_id');
+    }
+
     // SCOPES
 
     /**

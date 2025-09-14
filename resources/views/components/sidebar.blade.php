@@ -92,7 +92,7 @@
                 <x-nav-item href="#" :active="request()->routeIs('admin.enrollments.*')" icon="clipboard-check">
                     Iscrizioni
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('admin.attendance.*')" icon="check-circle">
+                <x-nav-item href="{{ route('admin.attendance.index') }}" :active="request()->routeIs('admin.attendance.*')" icon="check-circle">
                     Presenze
                 </x-nav-item>
             </x-nav-group>

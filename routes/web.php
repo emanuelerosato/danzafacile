@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminStudentController;
 use App\Http\Controllers\Admin\AdminCourseController;
 use App\Http\Controllers\Admin\AdminEventController;
+use App\Http\Controllers\Admin\AdminAttendanceController;
 use App\Http\Controllers\Admin\EnrollmentController;
 use App\Http\Controllers\Admin\SchoolPaymentController;
 use App\Http\Controllers\Admin\SchoolUserController;
@@ -117,6 +118,18 @@ Route::middleware('auth')->group(function () {
         Route::post('events/bulk-action', [AdminEventController::class, 'bulkAction'])->name('events.bulk-action');
         Route::get('events-export', [AdminEventController::class, 'export'])->name('events.export');
         Route::post('events/{event}/register-user', [AdminEventController::class, 'registerUser'])->name('events.register-user');
+
+        // Attendance management
+        Route::prefix('attendance')->name('attendance.')->group(function () {
+            Route::get('/', [AdminAttendanceController::class, 'index'])->name('index');
+            Route::get('/course/{course}', [AdminAttendanceController::class, 'courseAttendance'])->name('course');
+            Route::get('/event/{event}', [AdminAttendanceController::class, 'eventAttendance'])->name('event');
+            Route::post('/mark', [AdminAttendanceController::class, 'mark'])->name('mark');
+            Route::post('/bulk-mark', [AdminAttendanceController::class, 'bulkMark'])->name('bulk-mark');
+            Route::get('/user/{user}/stats', [AdminAttendanceController::class, 'userStats'])->name('user-stats');
+            Route::get('/export', [AdminAttendanceController::class, 'export'])->name('export');
+            Route::delete('/{attendance}', [AdminAttendanceController::class, 'destroy'])->name('destroy');
+        });
         
         // Enrollments management
         Route::get('enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');

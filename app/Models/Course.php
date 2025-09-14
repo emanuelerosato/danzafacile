@@ -107,6 +107,14 @@ class Course extends Model
     }
 
     /**
+     * Ottiene tutti i record di presenza per questo corso
+     */
+    public function attendanceRecords(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    /**
      * Ottiene tutte le gallerie media del corso
      */
     public function mediaGalleries(): HasMany
