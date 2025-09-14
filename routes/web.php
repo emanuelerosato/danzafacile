@@ -17,7 +17,7 @@ use App\Http\Controllers\Admin\AdminCourseController;
 use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\Admin\AdminAttendanceController;
 use App\Http\Controllers\Admin\EnrollmentController;
-use App\Http\Controllers\Admin\SchoolPaymentController;
+use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\SchoolUserController;
 
 // Controllers Student
@@ -139,10 +139,29 @@ Route::middleware('auth')->group(function () {
         Route::get('enrollments/export', [EnrollmentController::class, 'export'])->name('enrollments.export');
         
         // Payments management
-        Route::get('payments', [SchoolPaymentController::class, 'index'])->name('payments.index');
-        Route::get('payments/{payment}', [SchoolPaymentController::class, 'show'])->name('payments.show');
-        Route::post('payments/{payment}/refund', [SchoolPaymentController::class, 'refund'])->name('payments.refund');
-        Route::get('payments/export', [SchoolPaymentController::class, 'export'])->name('payments.export');
+        Route::prefix('payments')->name('payments.')->group(function () {
+            Route::get('/', [AdminPaymentController::class, 'index'])->name('index');
+            Route::get('/create', [AdminPaymentController::class, 'create'])->name('create');
+            Route::post('/', [AdminPaymentController::class, 'store'])->name('store');
+            Route::get('/{payment}', [AdminPaymentController::class, 'show'])->name('show');
+            Route::get('/{payment}/edit', [AdminPaymentController::class, 'edit'])->name('edit');
+            Route::put('/{payment}', [AdminPaymentController::class, 'update'])->name('update');
+            Route::delete('/{payment}', [AdminPaymentController::class, 'destroy'])->name('destroy');
+
+            // Payment actions
+            Route::post('/{payment}/mark-completed', [AdminPaymentController::class, 'markCompleted'])->name('mark-completed');
+            Route::post('/{payment}/refund', [AdminPaymentController::class, 'refund'])->name('refund');
+            Route::get('/{payment}/receipt', [AdminPaymentController::class, 'generateReceipt'])->name('receipt');
+            Route::post('/{payment}/send-receipt', [AdminPaymentController::class, 'sendReceipt'])->name('send-receipt');
+
+            // Bulk operations
+            Route::post('/bulk-action', [AdminPaymentController::class, 'bulkAction'])->name('bulk-action');
+            Route::get('/export', [AdminPaymentController::class, 'export'])->name('export');
+
+            // Statistics and reports
+            Route::get('/stats', [AdminPaymentController::class, 'getStats'])->name('stats');
+            Route::get('/overdue', [AdminPaymentController::class, 'getOverdue'])->name('overdue');
+        });
         
         // School Users management
         Route::resource('users', SchoolUserController::class)->except(['create', 'store']);

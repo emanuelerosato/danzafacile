@@ -19,7 +19,7 @@ use App\Http\Controllers\SuperAdmin\SuperAdminUserController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminCourseController as WebAdminCourseController;
 use App\Http\Controllers\Admin\EnrollmentController as WebEnrollmentController;
-use App\Http\Controllers\Admin\SchoolPaymentController;
+use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\StudentCourseController as WebStudentCourseController;
 use App\Http\Controllers\Student\ProfileController;
@@ -111,17 +111,25 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
         Route::get('enrollments/statistics', [EnrollmentController::class, 'getStatistics'])->name('api.admin.enrollments.statistics');
         
         // Payments API
-        Route::apiResource('payments', SchoolPaymentController::class)->names([
+        Route::apiResource('payments', AdminPaymentController::class)->names([
             'index' => 'api.admin.payments.index',
             'store' => 'api.admin.payments.store',
             'show' => 'api.admin.payments.show',
             'update' => 'api.admin.payments.update',
             'destroy' => 'api.admin.payments.destroy'
         ]);
-        Route::post('payments/{payment}/mark-completed', [SchoolPaymentController::class, 'markCompleted'])->name('api.admin.payments.mark-completed');
-        Route::post('payments/{payment}/refund', [SchoolPaymentController::class, 'refund'])->name('api.admin.payments.refund');
-        Route::post('payments/bulk-action', [SchoolPaymentController::class, 'bulkAction'])->name('api.admin.payments.bulk-action');
-        Route::get('payments/statistics', [SchoolPaymentController::class, 'getStatistics'])->name('api.admin.payments.statistics');
+
+        // Payment actions
+        Route::post('payments/{payment}/mark-completed', [AdminPaymentController::class, 'markCompleted'])->name('api.admin.payments.mark-completed');
+        Route::post('payments/{payment}/refund', [AdminPaymentController::class, 'refund'])->name('api.admin.payments.refund');
+        Route::get('payments/{payment}/receipt', [AdminPaymentController::class, 'generateReceipt'])->name('api.admin.payments.receipt');
+        Route::post('payments/{payment}/send-receipt', [AdminPaymentController::class, 'sendReceipt'])->name('api.admin.payments.send-receipt');
+
+        // Bulk operations and reports
+        Route::post('payments/bulk-action', [AdminPaymentController::class, 'bulkAction'])->name('api.admin.payments.bulk-action');
+        Route::get('payments/statistics', [AdminPaymentController::class, 'getStats'])->name('api.admin.payments.statistics');
+        Route::get('payments/export', [AdminPaymentController::class, 'export'])->name('api.admin.payments.export');
+        Route::get('payments/overdue', [AdminPaymentController::class, 'getOverdue'])->name('api.admin.payments.overdue');
     });
 
     // STUDENT API ROUTES

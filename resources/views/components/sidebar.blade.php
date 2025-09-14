@@ -107,7 +107,7 @@
             </x-nav-group>
             
             <x-nav-group title="Gestione" icon="briefcase">
-                <x-nav-item href="#" :active="request()->routeIs('admin.payments.*')" icon="credit-card">
+                <x-nav-item href="{{ route('admin.payments.index') }}" :active="request()->routeIs('admin.payments.*')" icon="credit-card">
                     Pagamenti
                 </x-nav-item>
                 <x-nav-item href="#" :active="request()->routeIs('admin.events.*')" icon="star">

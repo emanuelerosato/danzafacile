@@ -1,0 +1,505 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="py-6" x-data="paymentManager()">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-6 flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Gestione Pagamenti</h1>
+                <p class="text-sm text-gray-600 mt-1">Amministra i pagamenti degli studenti della tua scuola</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button @click="openBulkModal()"
+                        class="bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-tasks mr-2"></i>
+                    Azioni Multiple
+                </button>
+                <button @click="exportPayments()"
+                        class="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-download mr-2"></i>
+                    Esporta
+                </button>
+                <a href="{{ route('admin.payments.create') }}"
+                   class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-lg transition-colors duration-200">
+                    <i class="fas fa-plus mr-2"></i>
+                    Nuovo Pagamento
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-md text-white p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold">{{ number_format($stats['total_payments'] ?? 0) }}</h3>
+                        <p class="text-blue-100 text-sm">Pagamenti Totali</p>
+                    </div>
+                    <div class="bg-blue-400 bg-opacity-50 rounded-lg p-3">
+                        <i class="fas fa-receipt text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-md text-white p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold">€{{ number_format($stats['completed_amount'] ?? 0, 2, ',', '.') }}</h3>
+                        <p class="text-green-100 text-sm">Incasso Totale</p>
+                    </div>
+                    <div class="bg-green-400 bg-opacity-50 rounded-lg p-3">
+                        <i class="fas fa-euro-sign text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg shadow-md text-white p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold">{{ number_format($stats['pending_payments'] ?? 0) }}</h3>
+                        <p class="text-yellow-100 text-sm">In Attesa</p>
+                    </div>
+                    <div class="bg-yellow-400 bg-opacity-50 rounded-lg p-3">
+                        <i class="fas fa-clock text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-lg shadow-md text-white p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-2xl font-bold">{{ number_format($stats['overdue_payments'] ?? 0) }}</h3>
+                        <p class="text-red-100 text-sm">Scaduti</p>
+                    </div>
+                    <div class="bg-red-400 bg-opacity-50 rounded-lg p-3">
+                        <i class="fas fa-exclamation-triangle text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Filters and Search -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Filtri e Ricerca</h5>
+        </div>
+        <div class="card-body">
+            <form id="filtersForm" method="GET">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="search" class="form-label">Ricerca</label>
+                        <input type="text" class="form-control" id="search" name="search"
+                               placeholder="Nome, email, ricevuta..."
+                               value="{{ request('search') }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="status" class="form-label">Stato</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="">Tutti</option>
+                            @foreach($filterOptions['statuses'] ?? [] as $key => $label)
+                                <option value="{{ $key }}"
+                                        {{ request('status') == $key ? 'selected' : '' }}>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="payment_method" class="form-label">Metodo</label>
+                        <select class="form-select" id="payment_method" name="payment_method">
+                            <option value="">Tutti</option>
+                            @foreach($filterOptions['methods'] ?? [] as $key => $label)
+                                <option value="{{ $key }}"
+                                        {{ request('payment_method') == $key ? 'selected' : '' }}>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="payment_type" class="form-label">Tipo</label>
+                        <select class="form-select" id="payment_type" name="payment_type">
+                            <option value="">Tutti</option>
+                            @foreach($filterOptions['types'] ?? [] as $key => $label)
+                                <option value="{{ $key }}"
+                                        {{ request('payment_type') == $key ? 'selected' : '' }}>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="date_range" class="form-label">Periodo</label>
+                        <div class="input-group">
+                            <input type="date" class="form-control" name="date_from"
+                                   value="{{ request('date_from') }}" placeholder="Da">
+                            <input type="date" class="form-control" name="date_to"
+                                   value="{{ request('date_to') }}" placeholder="A">
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col">
+                        <button type="submit" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-search me-1"></i>Filtra
+                        </button>
+                        <a href="{{ route('admin.payments.index') }}" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-times me-1"></i>Reset
+                        </a>
+                        <a href="{{ route('admin.payments.export', request()->all()) }}" class="btn btn-outline-success">
+                            <i class="fas fa-download me-1"></i>Esporta CSV
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payments Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Lista Pagamenti</h5>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary btn-sm" id="bulkActionBtn"
+                        disabled data-bs-toggle="dropdown">
+                    <i class="fas fa-tasks me-1"></i>Azioni Multiple
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" data-action="mark_completed">Segna come Completati</a></li>
+                    <li><a class="dropdown-item" href="#" data-action="mark_pending">Segna come In Attesa</a></li>
+                    <li><a class="dropdown-item" href="#" data-action="send_receipts">Invia Ricevute</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="#" data-action="delete">Elimina</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="40">
+                                <input type="checkbox" id="selectAll" class="form-check-input">
+                            </th>
+                            <th>Studente</th>
+                            <th>Tipo/Dettagli</th>
+                            <th>Importo</th>
+                            <th>Metodo</th>
+                            <th>Stato</th>
+                            <th>Data</th>
+                            <th>Scadenza</th>
+                            <th width="120">Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($payments as $payment)
+                        <tr>
+                            <td>
+                                <input type="checkbox" class="form-check-input payment-checkbox"
+                                       value="{{ $payment->id }}">
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    @if($payment->user->profile_image_path)
+                                        <img src="{{ $payment->user->profile_image_url }}"
+                                             class="rounded-circle me-2" width="32" height="32" alt="Avatar">
+                                    @else
+                                        <div class="bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center"
+                                             style="width: 32px; height: 32px;">
+                                            <i class="fas fa-user text-white"></i>
+                                        </div>
+                                    @endif
+                                    <div>
+                                        <div class="fw-semibold">{{ $payment->user->full_name ?? $payment->user->name }}</div>
+                                        <small class="text-muted">{{ $payment->user->email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <span class="badge bg-info">{{ $payment->payment_type_name }}</span>
+                                    @if($payment->is_installment)
+                                        <span class="badge bg-warning">Rata {{ $payment->installment_number }}/{{ $payment->total_installments }}</span>
+                                    @endif
+                                </div>
+                                <div class="mt-1">
+                                    @if($payment->course)
+                                        <small class="text-muted">Corso: {{ $payment->course->name }}</small>
+                                    @elseif($payment->event)
+                                        <small class="text-muted">Evento: {{ $payment->event->name }}</small>
+                                    @endif
+                                </div>
+                                @if($payment->receipt_number)
+                                    <small class="text-muted">Ric: {{ $payment->receipt_number }}</small>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="fw-semibold">{{ $payment->formatted_full_amount }}</div>
+                                @if($payment->installments && $payment->installments->count() > 0)
+                                    <small class="text-muted">
+                                        Pagato: € {{ number_format($payment->getTotalPaidForInstallments(), 2, ',', '.') }}
+                                    </small>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark">{{ $payment->payment_method_name }}</span>
+                            </td>
+                            <td>
+                                @php
+                                    $statusClasses = [
+                                        'pending' => 'bg-warning',
+                                        'completed' => 'bg-success',
+                                        'failed' => 'bg-danger',
+                                        'refunded' => 'bg-info',
+                                        'cancelled' => 'bg-secondary',
+                                        'processing' => 'bg-primary',
+                                        'partial' => 'bg-warning'
+                                    ];
+                                @endphp
+                                <span class="badge {{ $statusClasses[$payment->status] ?? 'bg-secondary' }}">
+                                    {{ $payment->status_name }}
+                                </span>
+                                @if($payment->is_overdue)
+                                    <br><small class="text-danger"><i class="fas fa-exclamation-triangle"></i> Scaduto</small>
+                                @endif
+                            </td>
+                            <td>
+                                @if($payment->payment_date)
+                                    {{ $payment->payment_date->format('d/m/Y') }}
+                                    <br><small class="text-muted">{{ $payment->payment_date->format('H:i') }}</small>
+                                @else
+                                    <span class="text-muted">N/A</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($payment->due_date)
+                                    {{ $payment->due_date->format('d/m/Y') }}
+                                    @if($payment->is_overdue)
+                                        <br><small class="text-danger">Scaduto</small>
+                                    @endif
+                                @else
+                                    <span class="text-muted">N/A</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle"
+                                            data-bs-toggle="dropdown">
+                                        <i class="fas fa-cog"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="{{ route('admin.payments.show', $payment) }}">
+                                            <i class="fas fa-eye me-1"></i>Visualizza
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="{{ route('admin.payments.edit', $payment) }}">
+                                            <i class="fas fa-edit me-1"></i>Modifica
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        @if($payment->status === 'pending')
+                                        <li><a class="dropdown-item" href="#" onclick="markCompleted({{ $payment->id }})">
+                                            <i class="fas fa-check me-1"></i>Segna Completato
+                                        </a></li>
+                                        @endif
+                                        @if($payment->canBeRefunded())
+                                        <li><a class="dropdown-item" href="#" onclick="processRefund({{ $payment->id }})">
+                                            <i class="fas fa-undo me-1"></i>Rimborsa
+                                        </a></li>
+                                        @endif
+                                        @if($payment->receipt_number)
+                                        <li><a class="dropdown-item" href="{{ route('admin.payments.receipt', $payment) }}" target="_blank">
+                                            <i class="fas fa-file-pdf me-1"></i>Scarica Ricevuta
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="sendReceipt({{ $payment->id }})">
+                                            <i class="fas fa-envelope me-1"></i>Invia Ricevuta
+                                        </a></li>
+                                        @endif
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="#" onclick="deletePayment({{ $payment->id }})">
+                                            <i class="fas fa-trash me-1"></i>Elimina
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                <div class="text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                                    <p>Nessun pagamento trovato</p>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @if($payments->hasPages())
+        <div class="card-footer">
+            {{ $payments->links() }}
+        </div>
+        @endif
+    </div>
+</div>
+
+@include('admin.payments.modals.refund')
+@endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Select all functionality
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const paymentCheckboxes = document.querySelectorAll('.payment-checkbox');
+    const bulkActionBtn = document.getElementById('bulkActionBtn');
+
+    selectAllCheckbox.addEventListener('change', function() {
+        paymentCheckboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        updateBulkActionBtn();
+    });
+
+    paymentCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateBulkActionBtn);
+    });
+
+    function updateBulkActionBtn() {
+        const checkedBoxes = document.querySelectorAll('.payment-checkbox:checked');
+        bulkActionBtn.disabled = checkedBoxes.length === 0;
+    }
+
+    // Bulk actions
+    document.querySelectorAll('.dropdown-menu a[data-action]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const action = this.dataset.action;
+            const checkedPayments = Array.from(document.querySelectorAll('.payment-checkbox:checked'))
+                                         .map(cb => cb.value);
+
+            if (checkedPayments.length === 0) {
+                alert('Seleziona almeno un pagamento');
+                return;
+            }
+
+            if (action === 'delete' && !confirm('Sei sicuro di voler eliminare i pagamenti selezionati?')) {
+                return;
+            }
+
+            bulkAction(action, checkedPayments);
+        });
+    });
+
+    function bulkAction(action, paymentIds) {
+        fetch('{{ route("admin.payments.bulk-action") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                action: action,
+                payment_ids: paymentIds
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Errore: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Si è verificato un errore');
+        });
+    }
+});
+
+function markCompleted(paymentId) {
+    if (!confirm('Sei sicuro di voler segnare questo pagamento come completato?')) {
+        return;
+    }
+
+    fetch(`/admin/payments/${paymentId}/mark-completed`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Errore: ' + data.message);
+        }
+    });
+}
+
+function processRefund(paymentId) {
+    const reason = prompt('Inserisci il motivo del rimborso:');
+    if (!reason) return;
+
+    fetch(`/admin/payments/${paymentId}/refund`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+            refund_reason: reason
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Errore: ' + data.message);
+        }
+    });
+}
+
+function sendReceipt(paymentId) {
+    fetch(`/admin/payments/${paymentId}/send-receipt`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Ricevuta inviata con successo!');
+        } else {
+            alert('Errore: ' + data.message);
+        }
+    });
+}
+
+function deletePayment(paymentId) {
+    if (!confirm('Sei sicuro di voler eliminare questo pagamento? Questa azione non può essere annullata.')) {
+        return;
+    }
+
+    fetch(`/admin/payments/${paymentId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Errore: ' + data.message);
+        }
+    });
+}
+</script>
+@endpush
