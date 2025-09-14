@@ -84,6 +84,14 @@ class School extends Model
     }
 
     /**
+     * Ottiene tutti gli eventi organizzati dalla scuola
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(Event::class);
+    }
+
+    /**
      * Ottiene tutti gli amministratori della scuola
      */
     public function admins(): HasMany

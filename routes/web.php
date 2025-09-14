@@ -12,7 +12,9 @@ use App\Http\Controllers\SuperAdmin\SuperAdminHelpController;
 
 // Controllers Admin
 use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Admin\CourseController;
+use App\Http\Controllers\Admin\AdminStudentController;
+use App\Http\Controllers\Admin\AdminCourseController;
+use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\Admin\EnrollmentController;
 use App\Http\Controllers\Admin\SchoolPaymentController;
 use App\Http\Controllers\Admin\SchoolUserController;
@@ -104,11 +106,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/export/{type}', [AdminDashboardController::class, 'export'])->name('export');
         
         // Courses management
-        Route::resource('courses', CourseController::class);
-        Route::patch('courses/{course}/toggle-active', [CourseController::class, 'toggleActive'])->name('courses.toggle-active');
-        Route::post('courses/bulk-action', [CourseController::class, 'bulkAction'])->name('courses.bulk-action');
-        Route::get('courses/{course}/students', [CourseController::class, 'students'])->name('courses.students');
-        Route::get('courses/{course}/export', [CourseController::class, 'export'])->name('courses.export');
+        Route::resource('courses', AdminCourseController::class);
+        Route::patch('courses/{course}/toggle-active', [AdminCourseController::class, 'toggleActive'])->name('courses.toggle-active');
+        Route::post('courses/bulk-action', [AdminCourseController::class, 'bulkAction'])->name('courses.bulk-action');
+        Route::get('courses-export', [AdminCourseController::class, 'export'])->name('courses.export');
+
+        // Events management
+        Route::resource('events', AdminEventController::class);
+        Route::patch('events/{event}/toggle-active', [AdminEventController::class, 'toggleActive'])->name('events.toggle-active');
+        Route::post('events/bulk-action', [AdminEventController::class, 'bulkAction'])->name('events.bulk-action');
+        Route::get('events-export', [AdminEventController::class, 'export'])->name('events.export');
+        Route::post('events/{event}/register-user', [AdminEventController::class, 'registerUser'])->name('events.register-user');
         
         // Enrollments management
         Route::get('enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
@@ -127,6 +135,12 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', SchoolUserController::class)->except(['create', 'store']);
         Route::patch('users/{user}/toggle-active', [SchoolUserController::class, 'toggleActive'])->name('users.toggle-active');
         Route::post('users/bulk-action', [SchoolUserController::class, 'bulkAction'])->name('users.bulk-action');
+
+        // Students management
+        Route::resource('students', AdminStudentController::class);
+        Route::patch('students/{student}/toggle-active', [AdminStudentController::class, 'toggleActive'])->name('students.toggle-active');
+        Route::post('students/bulk-action', [AdminStudentController::class, 'bulkAction'])->name('students.bulk-action');
+        Route::get('students-export', [AdminStudentController::class, 'export'])->name('students.export');
     });
     
     // STUDENT ROUTES

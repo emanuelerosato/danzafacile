@@ -121,6 +121,30 @@ class User extends Authenticatable
         return $this->hasMany(MediaItem::class);
     }
 
+    /**
+     * Ottiene tutti i ruoli staff dell'utente
+     */
+    public function staffRoles(): HasMany
+    {
+        return $this->hasMany(StaffRole::class);
+    }
+
+    /**
+     * Ottiene le presenze dell'utente
+     */
+    public function attendance(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    /**
+     * Ottiene tutte le registrazioni agli eventi dell'utente
+     */
+    public function eventRegistrations(): HasMany
+    {
+        return $this->hasMany(EventRegistration::class);
+    }
+
     // SCOPES
 
     /**

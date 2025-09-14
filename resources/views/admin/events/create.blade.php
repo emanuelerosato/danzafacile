@@ -1,0 +1,262 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-6 flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900">Crea Nuovo Evento</h1>
+                <p class="text-sm text-gray-600 mt-1">
+                    Crea un nuovo evento per la tua scuola
+                </p>
+            </div>
+            <a href="{{ route('admin.events.index') }}" class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors duration-200">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Torna agli Eventi
+            </a>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md">
+            <form action="{{ route('admin.events.store') }}" method="POST" id="createEventForm" class="p-6">
+                @csrf
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Informazioni Base -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-medium text-gray-900 border-b pb-2">Informazioni Base</h3>
+
+                        <!-- Nome -->
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+                                Nome Evento *
+                            </label>
+                            <input type="text" id="name" name="name"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('name') border-red-500 @enderror"
+                                   value="{{ old('name') }}" required>
+                            @error('name')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Descrizione -->
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700 mb-1">
+                                Descrizione
+                            </label>
+                            <textarea id="description" name="description" rows="4"
+                                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('description') border-red-500 @enderror">{{ old('description') }}</textarea>
+                            @error('description')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Tipo -->
+                        <div>
+                            <label for="type" class="block text-sm font-medium text-gray-700 mb-1">
+                                Tipo Evento *
+                            </label>
+                            <select id="type" name="type"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('type') border-red-500 @enderror" required>
+                                <option value="">Seleziona tipo...</option>
+                                @foreach($eventTypes as $eventType)
+                                    <option value="{{ $eventType }}" {{ old('type') == $eventType ? 'selected' : '' }}>
+                                        {{ $eventType }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('type')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Localizzazione -->
+                        <div>
+                            <label for="location" class="block text-sm font-medium text-gray-700 mb-1">
+                                Luogo
+                            </label>
+                            <input type="text" id="location" name="location"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('location') border-red-500 @enderror"
+                                   value="{{ old('location') }}">
+                            @error('location')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <!-- Date e Configurazione -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-medium text-gray-900 border-b pb-2">Date e Configurazione</h3>
+
+                        <!-- Data Inizio -->
+                        <div>
+                            <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">
+                                Data e Ora Inizio *
+                            </label>
+                            <input type="datetime-local" id="start_date" name="start_date"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('start_date') border-red-500 @enderror"
+                                   value="{{ old('start_date') }}" required>
+                            @error('start_date')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Data Fine -->
+                        <div>
+                            <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">
+                                Data e Ora Fine *
+                            </label>
+                            <input type="datetime-local" id="end_date" name="end_date"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('end_date') border-red-500 @enderror"
+                                   value="{{ old('end_date') }}" required>
+                            @error('end_date')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Numero Max Partecipanti -->
+                        <div>
+                            <label for="max_participants" class="block text-sm font-medium text-gray-700 mb-1">
+                                Numero Massimo Partecipanti
+                            </label>
+                            <input type="number" id="max_participants" name="max_participants" min="1"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('max_participants') border-red-500 @enderror"
+                                   value="{{ old('max_participants') }}"
+                                   placeholder="Lascia vuoto per illimitato">
+                            @error('max_participants')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Prezzo -->
+                        <div>
+                            <label for="price" class="block text-sm font-medium text-gray-700 mb-1">
+                                Prezzo (€)
+                            </label>
+                            <input type="number" id="price" name="price" min="0" step="0.01"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('price') border-red-500 @enderror"
+                                   value="{{ old('price') }}"
+                                   placeholder="0.00 per evento gratuito">
+                            @error('price')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Data Limite Registrazione -->
+                        <div x-data="{ requiresRegistration: {{ old('requires_registration', 'true') === 'true' ? 'true' : 'false' }} }">
+                            <div class="flex items-center mb-2">
+                                <input type="checkbox" id="requires_registration" name="requires_registration" value="1"
+                                       class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded"
+                                       x-model="requiresRegistration" {{ old('requires_registration', true) ? 'checked' : '' }}>
+                                <label for="requires_registration" class="ml-2 text-sm font-medium text-gray-700">
+                                    Richiede Registrazione
+                                </label>
+                            </div>
+
+                            <div x-show="requiresRegistration" x-transition>
+                                <label for="registration_deadline" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Scadenza Registrazione
+                                </label>
+                                <input type="datetime-local" id="registration_deadline" name="registration_deadline"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('registration_deadline') border-red-500 @enderror"
+                                       value="{{ old('registration_deadline') }}">
+                                @error('registration_deadline')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Requisiti -->
+                <div class="mt-6">
+                    <h3 class="text-lg font-medium text-gray-900 border-b pb-2 mb-4">Requisiti (Opzionale)</h3>
+                    <div x-data="{ requirements: {{ json_encode(old('requirements', [])) }} }">
+                        <div class="space-y-2" id="requirements-container">
+                            <template x-for="(requirement, index) in requirements" :key="index">
+                                <div class="flex items-center space-x-2">
+                                    <input type="text" :name="`requirements[${index}]`" x-model="requirements[index]"
+                                           class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                                           placeholder="Inserisci un requisito...">
+                                    <button type="button" @click="requirements.splice(index, 1)"
+                                            class="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-md transition-colors duration-200">
+                                        <i class="fas fa-trash text-sm"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                        <button type="button" @click="requirements.push('')"
+                                class="mt-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md transition-colors duration-200">
+                            <i class="fas fa-plus mr-2"></i>
+                            Aggiungi Requisito
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Impostazioni Visibilità -->
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="is_public" name="is_public" value="1"
+                               class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded" {{ old('is_public', true) ? 'checked' : '' }}>
+                        <label for="is_public" class="ml-2 text-sm font-medium text-gray-700">
+                            Evento Pubblico
+                        </label>
+                        <p class="ml-2 text-xs text-gray-500">(visibile a tutti)</p>
+                    </div>
+
+                    <div class="flex items-center">
+                        <input type="checkbox" id="active" name="active" value="1"
+                               class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded" {{ old('active', true) ? 'checked' : '' }}>
+                        <label for="active" class="ml-2 text-sm font-medium text-gray-700">
+                            Evento Attivo
+                        </label>
+                        <p class="ml-2 text-xs text-gray-500">(disponibile per registrazioni)</p>
+                    </div>
+                </div>
+
+                <!-- Pulsanti Azione -->
+                <div class="mt-8 flex items-center justify-end space-x-3 border-t pt-6">
+                    <a href="{{ route('admin.events.index') }}"
+                       class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200">
+                        Annulla
+                    </a>
+                    <button type="submit"
+                            class="px-6 py-2 bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg">
+                        <i class="fas fa-save mr-2"></i>
+                        Crea Evento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-update end date when start date changes
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+
+    startDateInput.addEventListener('change', function() {
+        if (this.value && !endDateInput.value) {
+            const startDate = new Date(this.value);
+            startDate.setHours(startDate.getHours() + 2); // Add 2 hours by default
+            const endDateTime = startDate.toISOString().slice(0, 16);
+            endDateInput.value = endDateTime;
+        }
+    });
+
+    // Auto-update registration deadline when start date changes
+    const registrationDeadlineInput = document.getElementById('registration_deadline');
+
+    startDateInput.addEventListener('change', function() {
+        if (this.value && document.getElementById('requires_registration').checked && !registrationDeadlineInput.value) {
+            const startDate = new Date(this.value);
+            startDate.setDate(startDate.getDate() - 1); // 1 day before event
+            const deadlineDateTime = startDate.toISOString().slice(0, 16);
+            registrationDeadlineInput.value = deadlineDateTime;
+        }
+    });
+});
+</script>
+@endsection

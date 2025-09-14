@@ -1,14 +1,15 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Gestione Corsi
-                </h2>
-                <p class="text-sm text-gray-600 mt-1">
-                    Tutti i corsi della tua scuola di danza
-                </p>
-            </div>
+@extends('layouts.admin')
+
+@section('title', 'Gestione Corsi')
+
+@section('content')
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Gestione Corsi</h1>
+            <p class="text-gray-600">Tutti i corsi della tua scuola di danza</p>
+        </div>
             <div class="flex items-center space-x-3">
                 <button @click="$dispatch('open-modal', 'bulk-actions')" 
                         class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">

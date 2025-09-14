@@ -17,7 +17,7 @@ use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\SchoolController as SuperAdminSchoolController;
 use App\Http\Controllers\SuperAdmin\SuperAdminUserController;
 use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Admin\CourseController;
+use App\Http\Controllers\Admin\AdminCourseController as WebAdminCourseController;
 use App\Http\Controllers\Admin\EnrollmentController as WebEnrollmentController;
 use App\Http\Controllers\Admin\SchoolPaymentController;
 use App\Http\Controllers\Student\StudentDashboardController;
@@ -55,15 +55,27 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
         Route::get('/reports', [SuperAdminController::class, 'reportsApi']);
         
         // Schools API
-        Route::apiResource('schools', SuperAdminSchoolController::class);
-        Route::post('schools/{school}/toggle-status', [SuperAdminSchoolController::class, 'toggleStatus']);
-        Route::post('schools/bulk-action', [SuperAdminSchoolController::class, 'bulkAction']);
-        
+        Route::apiResource('schools', SuperAdminSchoolController::class)->names([
+            'index' => 'api.super-admin.schools.index',
+            'store' => 'api.super-admin.schools.store',
+            'show' => 'api.super-admin.schools.show',
+            'update' => 'api.super-admin.schools.update',
+            'destroy' => 'api.super-admin.schools.destroy'
+        ]);
+        Route::post('schools/{school}/toggle-status', [SuperAdminSchoolController::class, 'toggleStatus'])->name('api.super-admin.schools.toggle-status');
+        Route::post('schools/bulk-action', [SuperAdminSchoolController::class, 'bulkAction'])->name('api.super-admin.schools.bulk-action');
+
         // Users API
-        Route::apiResource('users', SuperAdminUserController::class);
-        Route::post('users/{user}/toggle-status', [SuperAdminUserController::class, 'toggleStatus']);
-        Route::post('users/bulk-action', [SuperAdminUserController::class, 'bulkAction']);
-        Route::post('users/{user}/impersonate', [SuperAdminUserController::class, 'impersonate']);
+        Route::apiResource('users', SuperAdminUserController::class)->names([
+            'index' => 'api.super-admin.users.index',
+            'store' => 'api.super-admin.users.store',
+            'show' => 'api.super-admin.users.show',
+            'update' => 'api.super-admin.users.update',
+            'destroy' => 'api.super-admin.users.destroy'
+        ]);
+        Route::post('users/{user}/toggle-status', [SuperAdminUserController::class, 'toggleStatus'])->name('api.super-admin.users.toggle-status');
+        Route::post('users/bulk-action', [SuperAdminUserController::class, 'bulkAction'])->name('api.super-admin.users.bulk-action');
+        Route::post('users/{user}/impersonate', [SuperAdminUserController::class, 'impersonate'])->name('api.super-admin.users.impersonate');
     });
 
     // ADMIN API ROUTES
@@ -73,25 +85,43 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
         Route::get('/dashboard/stats', [AdminDashboardController::class, 'getStats']);
         
         // Courses API
-        Route::apiResource('courses', CourseController::class);
-        Route::post('courses/{course}/toggle-status', [CourseController::class, 'toggleStatus']);
-        Route::post('courses/{course}/duplicate', [CourseController::class, 'duplicate']);
-        Route::get('courses/statistics', [CourseController::class, 'getStatistics']);
-        Route::post('courses/bulk-action', [CourseController::class, 'bulkAction']);
+        Route::apiResource('courses', WebAdminCourseController::class)->names([
+            'index' => 'api.admin.courses.index',
+            'store' => 'api.admin.courses.store',
+            'show' => 'api.admin.courses.show',
+            'update' => 'api.admin.courses.update',
+            'destroy' => 'api.admin.courses.destroy'
+        ]);
+        Route::post('courses/{course}/toggle-status', [WebAdminCourseController::class, 'toggleStatus'])->name('api.admin.courses.toggle-status');
+        Route::post('courses/{course}/duplicate', [WebAdminCourseController::class, 'duplicate'])->name('api.admin.courses.duplicate');
+        Route::get('courses/statistics', [WebAdminCourseController::class, 'getStatistics'])->name('api.admin.courses.statistics');
+        Route::post('courses/bulk-action', [WebAdminCourseController::class, 'bulkAction'])->name('api.admin.courses.bulk-action');
         
         // Enrollments API
-        Route::apiResource('enrollments', EnrollmentController::class);
-        Route::post('enrollments/{enrollment}/cancel', [EnrollmentController::class, 'cancel']);
-        Route::post('enrollments/{enrollment}/reactivate', [EnrollmentController::class, 'reactivate']);
-        Route::post('enrollments/bulk-action', [EnrollmentController::class, 'bulkAction']);
-        Route::get('enrollments/statistics', [EnrollmentController::class, 'getStatistics']);
+        Route::apiResource('enrollments', EnrollmentController::class)->names([
+            'index' => 'api.admin.enrollments.index',
+            'store' => 'api.admin.enrollments.store',
+            'show' => 'api.admin.enrollments.show',
+            'update' => 'api.admin.enrollments.update',
+            'destroy' => 'api.admin.enrollments.destroy'
+        ]);
+        Route::post('enrollments/{enrollment}/cancel', [EnrollmentController::class, 'cancel'])->name('api.admin.enrollments.cancel');
+        Route::post('enrollments/{enrollment}/reactivate', [EnrollmentController::class, 'reactivate'])->name('api.admin.enrollments.reactivate');
+        Route::post('enrollments/bulk-action', [EnrollmentController::class, 'bulkAction'])->name('api.admin.enrollments.bulk-action');
+        Route::get('enrollments/statistics', [EnrollmentController::class, 'getStatistics'])->name('api.admin.enrollments.statistics');
         
         // Payments API
-        Route::apiResource('payments', SchoolPaymentController::class);
-        Route::post('payments/{payment}/mark-completed', [SchoolPaymentController::class, 'markCompleted']);
-        Route::post('payments/{payment}/refund', [SchoolPaymentController::class, 'refund']);
-        Route::post('payments/bulk-action', [SchoolPaymentController::class, 'bulkAction']);
-        Route::get('payments/statistics', [SchoolPaymentController::class, 'getStatistics']);
+        Route::apiResource('payments', SchoolPaymentController::class)->names([
+            'index' => 'api.admin.payments.index',
+            'store' => 'api.admin.payments.store',
+            'show' => 'api.admin.payments.show',
+            'update' => 'api.admin.payments.update',
+            'destroy' => 'api.admin.payments.destroy'
+        ]);
+        Route::post('payments/{payment}/mark-completed', [SchoolPaymentController::class, 'markCompleted'])->name('api.admin.payments.mark-completed');
+        Route::post('payments/{payment}/refund', [SchoolPaymentController::class, 'refund'])->name('api.admin.payments.refund');
+        Route::post('payments/bulk-action', [SchoolPaymentController::class, 'bulkAction'])->name('api.admin.payments.bulk-action');
+        Route::get('payments/statistics', [SchoolPaymentController::class, 'getStatistics'])->name('api.admin.payments.statistics');
     });
 
     // STUDENT API ROUTES
@@ -121,17 +151,29 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
     // SHARED API ROUTES
     
     // Documents API (access controlled within controller)
-    Route::apiResource('documents', DocumentController::class);
-    Route::post('documents/{document}/approve', [DocumentController::class, 'approve']);
-    Route::post('documents/{document}/reject', [DocumentController::class, 'reject']);
-    Route::post('documents/bulk-action', [DocumentController::class, 'bulkAction']);
-    
+    Route::apiResource('documents', DocumentController::class)->names([
+        'index' => 'api.documents.index',
+        'store' => 'api.documents.store',
+        'show' => 'api.documents.show',
+        'update' => 'api.documents.update',
+        'destroy' => 'api.documents.destroy'
+    ]);
+    Route::post('documents/{document}/approve', [DocumentController::class, 'approve'])->name('api.documents.approve');
+    Route::post('documents/{document}/reject', [DocumentController::class, 'reject'])->name('api.documents.reject');
+    Route::post('documents/bulk-action', [DocumentController::class, 'bulkAction'])->name('api.documents.bulk-action');
+
     // Media API (access controlled within controller)
-    Route::apiResource('media', MediaItemController::class);
-    Route::get('media/{mediaItem}/view', [MediaItemController::class, 'view']);
-    Route::get('galleries/{gallery}/media', [MediaItemController::class, 'getByGallery']);
-    Route::post('media/bulk-action', [MediaItemController::class, 'bulkAction']);
-    Route::get('media/statistics', [MediaItemController::class, 'getStatistics']);
+    Route::apiResource('media', MediaItemController::class)->names([
+        'index' => 'api.media.index',
+        'store' => 'api.media.store',
+        'show' => 'api.media.show',
+        'update' => 'api.media.update',
+        'destroy' => 'api.media.destroy'
+    ]);
+    Route::get('media/{mediaItem}/view', [MediaItemController::class, 'view'])->name('api.media.view');
+    Route::get('galleries/{gallery}/media', [MediaItemController::class, 'getByGallery'])->name('api.media.by-gallery');
+    Route::post('media/bulk-action', [MediaItemController::class, 'bulkAction'])->name('api.media.bulk-action');
+    Route::get('media/statistics', [MediaItemController::class, 'getStatistics'])->name('api.media.statistics');
 
     // General utility endpoints
     Route::get('/schools', function () {
@@ -208,19 +250,31 @@ Route::prefix('mobile/v1')->middleware('throttle:120,1')->group(function () {
             Route::post('/notifications/{id}/mark-read', [AdminController::class, 'markNotificationRead']);
             
             // Courses Management
-            Route::apiResource('courses', AdminCourseController::class);
-            Route::post('courses/{course}/toggle-status', [AdminCourseController::class, 'toggleStatus']);
-            Route::post('courses/{course}/duplicate', [AdminCourseController::class, 'duplicate']);
-            Route::get('courses/statistics', [AdminCourseController::class, 'getStatistics']);
+            Route::apiResource('courses', AdminCourseController::class)->names([
+                'index' => 'api.mobile.admin.courses.index',
+                'store' => 'api.mobile.admin.courses.store',
+                'show' => 'api.mobile.admin.courses.show',
+                'update' => 'api.mobile.admin.courses.update',
+                'destroy' => 'api.mobile.admin.courses.destroy'
+            ]);
+            Route::post('courses/{course}/toggle-status', [AdminCourseController::class, 'toggleStatus'])->name('api.mobile.admin.courses.toggle-status');
+            Route::post('courses/{course}/duplicate', [AdminCourseController::class, 'duplicate'])->name('api.mobile.admin.courses.duplicate');
+            Route::get('courses/statistics', [AdminCourseController::class, 'getStatistics'])->name('api.mobile.admin.courses.statistics');
             
             // Students Management
-            Route::apiResource('students', AdminStudentController::class);
-            Route::post('students/{student}/activate', [AdminStudentController::class, 'activate']);
-            Route::post('students/{student}/deactivate', [AdminStudentController::class, 'deactivate']);
-            Route::get('students/{student}/enrollments', [AdminStudentController::class, 'enrollments']);
-            Route::get('students/{student}/payments', [AdminStudentController::class, 'payments']);
-            Route::post('students/{student}/reset-password', [AdminStudentController::class, 'resetPassword']);
-            Route::get('students/statistics', [AdminStudentController::class, 'statistics']);
+            Route::apiResource('students', AdminStudentController::class)->names([
+                'index' => 'api.mobile.admin.students.index',
+                'store' => 'api.mobile.admin.students.store',
+                'show' => 'api.mobile.admin.students.show',
+                'update' => 'api.mobile.admin.students.update',
+                'destroy' => 'api.mobile.admin.students.destroy'
+            ]);
+            Route::post('students/{student}/activate', [AdminStudentController::class, 'activate'])->name('api.mobile.admin.students.activate');
+            Route::post('students/{student}/deactivate', [AdminStudentController::class, 'deactivate'])->name('api.mobile.admin.students.deactivate');
+            Route::get('students/{student}/enrollments', [AdminStudentController::class, 'enrollments'])->name('api.mobile.admin.students.enrollments');
+            Route::get('students/{student}/payments', [AdminStudentController::class, 'payments'])->name('api.mobile.admin.students.payments');
+            Route::post('students/{student}/reset-password', [AdminStudentController::class, 'resetPassword'])->name('api.mobile.admin.students.reset-password');
+            Route::get('students/statistics', [AdminStudentController::class, 'statistics'])->name('api.mobile.admin.students.statistics');
         });
         
         // STUDENT MOBILE ROUTES
@@ -242,10 +296,10 @@ Route::prefix('mobile/v1')->middleware('throttle:120,1')->group(function () {
             Route::get('/courses/categories', [StudentCourseController::class, 'categories']);
             
             // Enrollment Management
-            Route::post('/enrollments', [EnrollmentController::class, 'store']);
-            Route::get('/enrollments/{enrollment}', [EnrollmentController::class, 'show']);
-            Route::post('/enrollments/{enrollment}/cancel', [EnrollmentController::class, 'cancel']);
-            Route::get('/enrollments/history', [EnrollmentController::class, 'history']);
+            Route::post('/enrollments', [EnrollmentController::class, 'store'])->name('api.mobile.student.enrollments.store');
+            Route::get('/enrollments/{enrollment}', [EnrollmentController::class, 'show'])->name('api.mobile.student.enrollments.show');
+            Route::post('/enrollments/{enrollment}/cancel', [EnrollmentController::class, 'cancel'])->name('api.mobile.student.enrollments.cancel');
+            Route::get('/enrollments/history', [EnrollmentController::class, 'history'])->name('api.mobile.student.enrollments.history');
         });
         
         // Quick mobile dashboard for any authenticated user

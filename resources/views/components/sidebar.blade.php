@@ -86,7 +86,7 @@
             </x-nav-group>
             
             <x-nav-group title="Studenti" icon="users">
-                <x-nav-item href="#" :active="request()->routeIs('admin.students.*')" icon="user">
+                <x-nav-item href="{{ route('admin.students.index') }}" :active="request()->routeIs('admin.students.*')" icon="user">
                     Lista Studenti
                 </x-nav-item>
                 <x-nav-item href="#" :active="request()->routeIs('admin.enrollments.*')" icon="clipboard-check">
@@ -94,6 +94,15 @@
                 </x-nav-item>
                 <x-nav-item href="#" :active="request()->routeIs('admin.attendance.*')" icon="check-circle">
                     Presenze
+                </x-nav-item>
+            </x-nav-group>
+
+            <x-nav-group title="Eventi" icon="calendar">
+                <x-nav-item href="{{ route('admin.events.index') }}" :active="request()->routeIs('admin.events.*')" icon="calendar">
+                    Lista Eventi
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('admin.event-registrations.*')" icon="user-plus">
+                    Registrazioni
                 </x-nav-item>
             </x-nav-group>
             
