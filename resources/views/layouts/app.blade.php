@@ -77,33 +77,6 @@
                         
                         <!-- Right side -->
                         <div class="flex items-center space-x-4">
-                            <!-- Notifications -->
-                            <div x-data="{ open: false }" class="relative">
-                                <button @click="open = !open" 
-                                        class="p-2 text-rose-600 hover:bg-rose-100 rounded-full focus:outline-none focus:ring-2 focus:ring-rose-500">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5M4 7h16l-2 9H6L4 7zm0 0L2 3"/>
-                                    </svg>
-                                    <span class="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
-                                </button>
-                                
-                                <div x-show="open" @click.away="open = false" x-transition
-                                     class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-rose-100 z-50">
-                                    <div class="p-4">
-                                        <h3 class="font-semibold text-gray-900 mb-3">Notifiche</h3>
-                                        <div class="space-y-2">
-                                            <div class="p-3 bg-rose-50 rounded-lg">
-                                                <p class="text-sm text-gray-800">Nuova iscrizione al corso di Danza Moderna</p>
-                                                <p class="text-xs text-gray-500 mt-1">2 ore fa</p>
-                                            </div>
-                                            <div class="p-3 bg-purple-50 rounded-lg">
-                                                <p class="text-sm text-gray-800">Pagamento ricevuto da Maria Rossi</p>
-                                                <p class="text-xs text-gray-500 mt-1">5 ore fa</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                             
                             <!-- User Menu -->
                             <div x-data="{ open: false }" class="relative">

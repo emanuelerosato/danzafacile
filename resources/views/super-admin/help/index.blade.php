@@ -53,21 +53,21 @@
         <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 mb-6">
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
                 <!-- Search -->
-                <div class="flex-1 max-w-2xl">
+                <div class="flex-1 max-w-lg">
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                             </svg>
                         </div>
-                        <input type="text" 
+                        <input type="text"
                                x-model="searchQuery"
                                @input="filterSections()"
-                               class="block w-full pl-12 pr-4 py-3 text-gray-900 bg-white border border-gray-300 rounded-xl leading-5 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors duration-200"
-                               placeholder="🔍 Cerca nella guida... (es. 'utenti', 'sicurezza', 'troubleshooting')">
+                               class="block w-full pl-10 pr-3 py-2 text-gray-900 bg-white border border-gray-300 rounded-lg leading-5 placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-rose-500 focus:border-rose-500 transition-colors duration-200"
+                               placeholder="Cerca nella guida... (es. 'utenti', 'sicurezza', 'troubleshooting')">
                     </div>
                     <!-- Search Results -->
-                    <div x-show="searchResults.length > 0" x-transition class="absolute z-20 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 max-w-2xl w-full">
+                    <div x-show="searchResults.length > 0" x-transition class="absolute z-20 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 w-full">
                         <div class="p-2 max-h-64 overflow-y-auto">
                             <template x-for="result in searchResults" :key="result.key">
                                 <button @click="scrollToSection(result.key)" 
@@ -84,19 +84,25 @@
                 </div>
                 
                 <!-- Quick Stats -->
-                <div class="flex items-center space-x-6 text-sm text-gray-600">
-                    <div class="flex items-center">
-                        <span class="font-medium text-rose-600">{{ $systemStats['total_schools'] }}</span>
-                        <span class="ml-1">Scuole</span>
+                <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-6">
+                    <div class="flex items-center px-3 py-2 bg-rose-50 rounded-lg">
+                        <svg class="h-5 w-5 text-rose-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                        <span class="text-sm font-medium text-rose-700">{{ $systemStats['total_schools'] }} Scuole</span>
                     </div>
-                    <div class="flex items-center">
-                        <span class="font-medium text-blue-600">{{ $systemStats['total_users'] }}</span>
-                        <span class="ml-1">Utenti</span>
+                    <div class="flex items-center px-3 py-2 bg-blue-50 rounded-lg">
+                        <svg class="h-5 w-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                        </svg>
+                        <span class="text-sm font-medium text-blue-700">{{ $systemStats['total_users'] }} Utenti</span>
                     </div>
                     @if($systemStats['open_tickets'] > 0)
-                    <div class="flex items-center">
-                        <span class="font-medium text-red-600">{{ $systemStats['open_tickets'] }}</span>
-                        <span class="ml-1">Ticket Aperti</span>
+                    <div class="flex items-center px-3 py-2 bg-red-50 rounded-lg">
+                        <svg class="h-5 w-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                        </svg>
+                        <span class="text-sm font-medium text-red-700">{{ $systemStats['open_tickets'] }} Ticket Aperti</span>
                     </div>
                     @endif
                 </div>

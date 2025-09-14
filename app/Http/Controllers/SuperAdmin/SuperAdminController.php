@@ -149,7 +149,10 @@ class SuperAdminController extends Controller
             
             // Clear config cache to reflect changes
             \Artisan::call('config:clear');
-            
+
+            // Clear app settings cache to reflect sidebar changes immediately
+            \App\View\Composers\AppSettingsComposer::clearCache();
+
             return redirect()->back()->with('success', 'Impostazioni sistema aggiornate con successo.');
             
         } catch (\Exception $e) {

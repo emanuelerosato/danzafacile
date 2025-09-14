@@ -13,10 +13,10 @@
     <div class="flex items-center justify-center p-6 border-b border-rose-100">
         <a href="{{ route('dashboard') }}" class="flex items-center">
             <div class="w-10 h-10 bg-gradient-to-r from-rose-400 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-lg mr-3">
-                SD
+                {{ $appSettings['app_logo'] ?? 'SMS' }}
             </div>
             <div>
-                <h2 class="text-lg font-bold text-gray-900">Scuola di Danza</h2>
+                <h2 class="text-lg font-bold text-gray-900">{{ $appSettings['app_name'] ?? 'School Management System' }}</h2>
                 <p class="text-xs text-gray-600">{{ Auth::user()->role ?? 'Dashboard' }}</p>
             </div>
         </a>
@@ -40,7 +40,7 @@
             </x-nav-group>
             
             <x-nav-group title="Sistema & Monitoring" icon="shield-check">
-                <x-nav-item href="{{ route('super-admin.helpdesk.index') }}" :active="request()->routeIs('super-admin.helpdesk.*')" icon="chat-alt">
+                <x-nav-item href="{{ route('super-admin.helpdesk.index') }}" :active="request()->routeIs('super-admin.helpdesk.*')" icon="chat">
                     Messaggi
                     @php
                         $unreadTickets = \App\Models\Ticket::where('status', '!=', 'closed')->count();
@@ -63,7 +63,7 @@
             <!-- Help Section for Super Admin -->
             <div class="border-t border-rose-100 pt-4 mt-4">
                 <x-nav-item href="{{ route('super-admin.help') }}" :active="request()->routeIs('super-admin.help')" icon="question-mark-circle">
-                    📚 Aiuto
+                    Aiuto
                 </x-nav-item>
             </div>
             

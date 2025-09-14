@@ -22,6 +22,12 @@ class DatabaseSeeder extends Seeder
         $this->command->info('🌱 Starting comprehensive database seeding...');
 
         // ===========================================
+        // STEP 0: Seed Basic App Settings
+        // ===========================================
+        $this->command->info('⚙️ Setting up basic app configuration...');
+        $this->call(SettingsSeeder::class);
+
+        // ===========================================
         // STEP 1: Create Schools
         // ===========================================
         $this->command->info('📚 Creating schools...');
