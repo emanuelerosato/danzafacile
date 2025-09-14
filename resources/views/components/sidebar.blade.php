@@ -60,6 +60,13 @@
                 </x-nav-item>
             </x-nav-group>
             
+            <!-- Help Section for Super Admin -->
+            <div class="border-t border-rose-100 pt-4 mt-4">
+                <x-nav-item href="{{ route('super-admin.help') }}" :active="request()->routeIs('super-admin.help')" icon="question-mark-circle">
+                    📚 Aiuto
+                </x-nav-item>
+            </div>
+            
         @elseif(Auth::user()->role === 'admin')
             <!-- Admin Menu -->
             <x-nav-item href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" icon="home">

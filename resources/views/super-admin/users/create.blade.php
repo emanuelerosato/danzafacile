@@ -1,36 +1,48 @@
-@extends('layouts.app')
-
-@section('title', 'Nuovo Utente - Super Admin')
-
-@section('content')
-<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50" x-data="userForm()">
-    <!-- Header Section -->
-    <div class="bg-white/30 backdrop-blur-sm border-b border-white/20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('super-admin.users.index') }}" 
-                       class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                        Torna alla lista
-                    </a>
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900">👤 Nuovo Utente</h1>
-                        <p class="text-sm text-gray-600">Crea un nuovo utente nel sistema</p>
-                    </div>
-                </div>
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    Nuovo Utente
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">
+                    Crea un nuovo utente nel sistema
+                </p>
             </div>
+            <a href="{{ route('super-admin.users.index') }}" 
+               class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Torna alla Lista
+            </a>
         </div>
-    </div>
+    </x-slot>
 
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <form action="{{ route('super-admin.users.store') }}" method="POST" class="space-y-6">
+    <x-slot name="breadcrumb">
+        <li class="flex items-center">
+            <a href="{{ route('dashboard') }}" class="text-gray-500 hover:text-gray-700">Dashboard</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="flex items-center">
+            <a href="{{ route('super-admin.users.index') }}" class="text-gray-500 hover:text-gray-700">Utenti</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="text-gray-900 font-medium">Nuovo</li>
+    </x-slot>
+
+    <div x-data="userForm()">
+
+        <div class="max-w-4xl mx-auto">
+        <form action="{{ route('super-admin.users.store') }}" method="POST" class="space-y-8">
             @csrf
             
             <!-- Personal Information -->
-            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-rose-50 to-pink-50">
                     <h3 class="text-lg font-semibold text-gray-900">📋 Informazioni Personali</h3>
                     <p class="text-sm text-gray-600">Inserisci i dati personali dell'utente</p>
@@ -110,7 +122,7 @@
             </div>
 
             <!-- Role and Permissions -->
-            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50">
                     <h3 class="text-lg font-semibold text-gray-900">🎭 Ruolo e Permessi</h3>
                     <p class="text-sm text-gray-600">Configura il ruolo e i permessi dell'utente</p>
@@ -198,7 +210,7 @@
             </div>
 
             <!-- Account Credentials -->
-            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
                     <h3 class="text-lg font-semibold text-gray-900">🔐 Credenziali Account</h3>
                     <p class="text-sm text-gray-600">Configura le credenziali di accesso</p>
@@ -249,7 +261,7 @@
             </div>
 
             <!-- Additional Information -->
-            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-yellow-50 to-orange-50">
                     <h3 class="text-lg font-semibold text-gray-900">📝 Informazioni Aggiuntive</h3>
                     <p class="text-sm text-gray-600">Dettagli opzionali per il profilo utente</p>
@@ -284,43 +296,50 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-                <a href="{{ route('super-admin.users.index') }}" 
-                   class="inline-flex items-center px-6 py-3 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-colors">
-                    Annulla
-                </a>
-                <button type="submit" 
-                        class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-all duration-200 shadow-md hover:shadow-lg">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                    </svg>
-                    Crea Utente
-                </button>
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+                <div class="flex items-center justify-between">
+                    <button type="button" 
+                            onclick="window.history.back()"
+                            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        Annulla
+                    </button>
+                    
+                    <button type="submit" 
+                            class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        Crea Utente
+                    </button>
+                </div>
             </div>
         </form>
+        </div>
     </div>
-</div>
 
-<!-- Alpine.js User Form -->
-<script>
-function userForm() {
-    return {
-        selectedRole: '{{ old('role') }}',
-        
-        updateSchoolVisibility() {
-            const schoolField = document.getElementById('school_id');
-            if (this.selectedRole === 'super_admin') {
-                schoolField.removeAttribute('required');
-            } else {
-                schoolField.setAttribute('required', 'required');
+    @push('scripts')
+    <script>
+    function userForm() {
+        return {
+            selectedRole: '{{ old('role') }}',
+            
+            updateSchoolVisibility() {
+                const schoolField = document.getElementById('school_id');
+                if (this.selectedRole === 'super_admin') {
+                    schoolField.removeAttribute('required');
+                } else {
+                    schoolField.setAttribute('required', 'required');
+                }
+            },
+            
+            init() {
+                this.updateSchoolVisibility();
             }
-        },
-        
-        init() {
-            this.updateSchoolVisibility();
         }
     }
-}
-</script>
-
-@endsection
+    </script>
+    @endpush
+</x-app-layout>

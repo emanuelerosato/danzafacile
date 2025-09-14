@@ -1,56 +1,57 @@
-@extends('layouts.app')
-
-@section('title', 'Impostazioni Sistema - Super Admin')
-
-@section('content')
-<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50" x-data="settingsManager()">
-    <!-- Header Section -->
-    <div class="bg-white/30 backdrop-blur-sm border-b border-white/20 sticky top-0 z-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('super-admin.dashboard') }}" 
-                       class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                        Torna al Dashboard
-                    </a>
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900">⚙️ Impostazioni Sistema</h1>
-                        <p class="text-sm text-gray-600">Configurazione globale e amministrazione sistema</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <div class="flex items-center space-x-2 text-sm text-gray-500">
-                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        Sistema operativo
-                    </div>
-                </div>
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    Impostazioni Sistema
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">
+                    Configurazione globale e amministrazione sistema
+                </p>
+            </div>
+            <div class="flex items-center space-x-2 text-sm text-gray-500">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                Sistema operativo
             </div>
         </div>
-    </div>
+    </x-slot>
+
+    <x-slot name="breadcrumb">
+        <li class="flex items-center">
+            <a href="{{ route('dashboard') }}" class="text-gray-500 hover:text-gray-700">Dashboard</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="flex items-center">
+            <a href="{{ route('super-admin.dashboard') }}" class="text-gray-500 hover:text-gray-700">Super Admin</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="text-gray-900 font-medium">Impostazioni</li>
+    </x-slot>
 
     <!-- Success/Error Messages -->
     @if(session('success'))
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        <div class="mb-4">
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
                 {{ session('success') }}
             </div>
         </div>
     @endif
 
     @if(session('error'))
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div class="mb-4">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                 {{ session('error') }}
             </div>
         </div>
     @endif
 
     @if($errors->any())
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div class="mb-4">
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                 <ul class="list-disc list-inside">
                     @foreach($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -60,7 +61,7 @@
         </div>
     @endif
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div x-data="settingsManager()" class="space-y-6">
         <!-- Settings Navigation Tabs -->
         <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 mb-6">
             <div class="px-6 py-4">
@@ -589,15 +590,14 @@
             </div>
         </div>
     </div>
-</div>
 
-<!-- Alpine.js Settings Manager -->
-<script>
-function settingsManager() {
-    return {
-        activeTab: 'system'
+    @push('scripts')
+    <script>
+    function settingsManager() {
+        return {
+            activeTab: 'system'
+        }
     }
-}
-</script>
-
-@endsection
+    </script>
+    @endpush
+</x-app-layout>

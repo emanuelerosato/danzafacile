@@ -1,34 +1,40 @@
-@extends('layouts.app')
-
-@section('title', 'Super Admin Dashboard')
-
-@section('content')
-<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50" x-data="dashboard()">
-    <!-- Header Section -->
-    <div class="bg-white/30 backdrop-blur-sm border-b border-white/20 sticky top-0 z-10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-900">🏛️ Dashboard Super Admin</h1>
-                    <p class="text-sm text-gray-600">Panoramica generale del sistema</p>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <span class="text-sm text-gray-500">Aggiornato: {{ now()->format('d/m/Y H:i') }}</span>
-                    <button 
-                        @click="refreshData()"
-                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white/80 border border-gray-300 rounded-lg hover:bg-white hover:shadow-sm transition-all duration-200"
-                    >
-                        <svg class="w-4 h-4 mr-2" :class="{ 'animate-spin': refreshing }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                        </svg>
-                        Aggiorna
-                    </button>
-                </div>
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    Super Admin Dashboard
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">
+                    Panoramica generale del sistema
+                </p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span class="text-sm text-gray-500">Aggiornato: {{ now()->format('d/m/Y H:i') }}</span>
+                <button 
+                    @click="refreshData()"
+                    class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white/80 border border-gray-300 rounded-lg hover:bg-white hover:shadow-sm transition-all duration-200"
+                >
+                    <svg class="w-4 h-4 mr-2" :class="{ 'animate-spin': refreshing }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Aggiorna
+                </button>
             </div>
         </div>
-    </div>
+    </x-slot>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <x-slot name="breadcrumb">
+        <li class="flex items-center">
+            <a href="{{ route('dashboard') }}" class="text-gray-500 hover:text-gray-700">Dashboard</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="text-gray-900 font-medium">Super Admin</li>
+    </x-slot>
+
+    <div x-data="dashboard()" class="space-y-8">
         <!-- Key Statistics -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <x-stats-card 
@@ -257,24 +263,23 @@
             </div>
         </div>
     </div>
-</div>
 
-<!-- Alpine.js Dashboard Data -->
-<script>
-function dashboard() {
-    return {
-        refreshing: false,
-        refreshData() {
-            this.refreshing = true;
-            
-            // Simulate API call
-            setTimeout(() => {
-                this.refreshing = false;
-                location.reload();
-            }, 1000);
+    @push('scripts')
+    <script>
+    function dashboard() {
+        return {
+            refreshing: false,
+            refreshData() {
+                this.refreshing = true;
+                
+                // Simulate API call
+                setTimeout(() => {
+                    this.refreshing = false;
+                    location.reload();
+                }, 1000);
+            }
         }
     }
-}
-</script>
-
-@endsection
+    </script>
+    @endpush
+</x-app-layout>

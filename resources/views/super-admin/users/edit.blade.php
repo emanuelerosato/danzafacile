@@ -1,43 +1,61 @@
-@extends('layouts.app')
-
-@section('title', 'Modifica Utente - Super Admin')
-
-@section('content')
-<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50" x-data="userEditForm()">
-    <!-- Header Section -->
-    <div class="bg-white/30 backdrop-blur-sm border-b border-white/20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('super-admin.users.index') }}" 
-                       class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                        Torna alla lista
-                    </a>
-                    <div>
-                        <h1 class="text-2xl font-bold text-gray-900">✏️ Modifica Utente</h1>
-                        <p class="text-sm text-gray-600">Aggiorna i dati di {{ $user->name }}</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <a href="{{ route('super-admin.users.show', $user) }}" 
-                       class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                        </svg>
-                        Visualizza
-                    </a>
-                </div>
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    Modifica Utente
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">
+                    Aggiorna i dati di {{ $user->name }}
+                </p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="{{ route('super-admin.users.show', $user) }}" 
+                   class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                    </svg>
+                    Visualizza
+                </a>
+                <a href="{{ route('super-admin.users.index') }}" 
+                   class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Torna alla Lista
+                </a>
             </div>
         </div>
-    </div>
+    </x-slot>
 
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <x-slot name="breadcrumb">
+        <li class="flex items-center">
+            <a href="{{ route('dashboard') }}" class="text-gray-500 hover:text-gray-700">Dashboard</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="flex items-center">
+            <a href="{{ route('super-admin.users.index') }}" class="text-gray-500 hover:text-gray-700">Utenti</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="flex items-center">
+            <a href="{{ route('super-admin.users.show', $user) }}" class="text-gray-500 hover:text-gray-700">{{ $user->name }}</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="text-gray-900 font-medium">Modifica</li>
+    </x-slot>
+
+    <div x-data="userEditForm()">
+
+        <div class="max-w-4xl mx-auto">
         <!-- User Info Card -->
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden mb-6">
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden mb-6">
             <div class="px-6 py-4 bg-gradient-to-r from-gray-50 to-gray-100">
                 <div class="flex items-center space-x-4">
                     <div class="flex-shrink-0">
@@ -71,12 +89,12 @@
             </div>
         </div>
 
-        <form action="{{ route('super-admin.users.update', $user) }}" method="POST" class="space-y-6">
+        <form action="{{ route('super-admin.users.update', $user) }}" method="POST" class="space-y-8">
             @csrf
             @method('PUT')
             
             <!-- Personal Information -->
-            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-rose-50 to-pink-50">
                     <h3 class="text-lg font-semibold text-gray-900">📋 Informazioni Personali</h3>
                     <p class="text-sm text-gray-600">Aggiorna i dati personali dell'utente</p>
@@ -157,7 +175,7 @@
 
             <!-- Role and Permissions -->
             @if($user->role !== 'super_admin' || auth()->user()->role === 'super_admin')
-            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-pink-50">
                     <div class="flex items-center justify-between">
                         <div>
@@ -257,7 +275,7 @@
             @endif
 
             <!-- Password Update -->
-            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
                     <h3 class="text-lg font-semibold text-gray-900">🔐 Aggiorna Password</h3>
                     <p class="text-sm text-gray-600">Lascia vuoto per mantenere la password corrente</p>
@@ -305,7 +323,7 @@
             </div>
 
             <!-- Additional Information -->
-            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-yellow-50 to-orange-50">
                     <h3 class="text-lg font-semibold text-gray-900">📝 Informazioni Aggiuntive</h3>
                     <p class="text-sm text-gray-600">Aggiorna dettagli e note</p>
@@ -340,7 +358,7 @@
             </div>
 
             <!-- Last Activity Info -->
-            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-slate-50">
                     <h3 class="text-lg font-semibold text-gray-900">📊 Informazioni Account</h3>
                     <p class="text-sm text-gray-600">Statistiche e attività dell'utente</p>
@@ -367,63 +385,70 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex items-center justify-between pt-6 border-t border-gray-200">
-                <div class="flex items-center space-x-3">
-                    @if($user->role !== 'super_admin' && $user->id !== auth()->id())
-                        <form action="{{ route('super-admin.users.destroy', $user) }}" method="POST" 
-                              onsubmit="return confirm('Sei sicuro di voler eliminare questo utente? Questa azione non può essere annullata.')" 
-                              class="inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" 
-                                    class="inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-lg text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                                Elimina Utente
-                            </button>
-                        </form>
-                    @endif
-                </div>
-                
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('super-admin.users.index') }}" 
-                       class="inline-flex items-center px-6 py-3 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-colors">
-                        Annulla
-                    </a>
-                    <button type="submit" 
-                            class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-all duration-200 shadow-md hover:shadow-lg">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                        Salva Modifiche
-                    </button>
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        @if($user->role !== 'super_admin' && $user->id !== auth()->id())
+                            <form action="{{ route('super-admin.users.destroy', $user) }}" method="POST" 
+                                  onsubmit="return confirm('Sei sicuro di voler eliminare questo utente? Questa azione non può essere annullata.')" 
+                                  class="inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" 
+                                        class="inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-lg text-red-700 bg-red-50 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                    Elimina Utente
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                    
+                    <div class="flex items-center space-x-4">
+                        <button type="button" 
+                                onclick="window.history.back()"
+                                class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                            </svg>
+                            Annulla
+                        </button>
+                        
+                        <button type="submit" 
+                                class="inline-flex items-center px-6 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            Salva Modifiche
+                        </button>
+                    </div>
                 </div>
             </div>
         </form>
+        </div>
     </div>
-</div>
 
-<!-- Alpine.js User Edit Form -->
-<script>
-function userEditForm() {
-    return {
-        selectedRole: '{{ old('role', $user->role) }}',
-        
-        updateSchoolVisibility() {
-            const schoolField = document.getElementById('school_id');
-            if (this.selectedRole === 'super_admin') {
-                schoolField.removeAttribute('required');
-            } else {
-                schoolField.setAttribute('required', 'required');
+    @push('scripts')
+    <script>
+    function userEditForm() {
+        return {
+            selectedRole: '{{ old('role', $user->role) }}',
+            
+            updateSchoolVisibility() {
+                const schoolField = document.getElementById('school_id');
+                if (this.selectedRole === 'super_admin') {
+                    schoolField.removeAttribute('required');
+                } else {
+                    schoolField.setAttribute('required', 'required');
+                }
+            },
+            
+            init() {
+                this.updateSchoolVisibility();
             }
-        },
-        
-        init() {
-            this.updateSchoolVisibility();
         }
     }
-}
-</script>
-
-@endsection
+    </script>
+    @endpush
+</x-app-layout>

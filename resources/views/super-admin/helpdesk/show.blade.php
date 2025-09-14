@@ -1,11 +1,5 @@
-@extends('layouts.app')
-
-@section('title', 'Ticket #' . $ticket->id . ' - ' . $ticket->title)
-
-@section('content')
-<div class="p-8" x-data="ticketDetail()">
-    <!-- Header -->
-    <div class="mb-8">
+<x-app-layout>
+    <x-slot name="header">
         <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
                 <a href="{{ route('super-admin.helpdesk.index') }}" class="text-gray-600 hover:text-gray-800">
@@ -14,8 +8,8 @@
                     </svg>
                 </a>
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-800">Ticket #{{ $ticket->id }}</h1>
-                    <p class="text-gray-600">{{ $ticket->title }}</p>
+                    <h2 class="font-semibold text-xl text-gray-800 leading-tight">Ticket #{{ $ticket->id }}</h2>
+                    <p class="text-sm text-gray-600 mt-1">{{ $ticket->title }}</p>
                 </div>
             </div>
             
@@ -37,7 +31,31 @@
                 @endif
             </div>
         </div>
-    </div>
+    </x-slot>
+
+    <x-slot name="breadcrumb">
+        <li class="flex items-center">
+            <a href="{{ route('dashboard') }}" class="text-gray-500 hover:text-gray-700">Dashboard</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="flex items-center">
+            <a href="{{ route('super-admin.dashboard') }}" class="text-gray-500 hover:text-gray-700">Super Admin</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="flex items-center">
+            <a href="{{ route('super-admin.helpdesk.index') }}" class="text-gray-500 hover:text-gray-700">Helpdesk</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="text-gray-900 font-medium">Ticket #{{ $ticket->id }}</li>
+    </x-slot>
+
+    <div x-data="ticketDetail()" class="space-y-6">
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Content -->
@@ -428,58 +446,58 @@
             <img :src="imageModal.src" class="max-w-full max-h-full object-contain">
         </div>
     </div>
-</div>
 
-<script>
-function ticketDetail() {
-    return {
-        showCloseModal: false,
-        showDeleteModal: false,
-        imageModal: {
-            show: false,
-            src: ''
-        },
-        
-        openImageModal(src) {
-            this.imageModal.src = src;
-            this.imageModal.show = true;
+    @push('scripts')
+    <script>
+    function ticketDetail() {
+        return {
+            showCloseModal: false,
+            showDeleteModal: false,
+            imageModal: {
+                show: false,
+                src: ''
+            },
+            
+            openImageModal(src) {
+                this.imageModal.src = src;
+                this.imageModal.show = true;
+            }
         }
     }
-}
 
-function replyForm() {
-    return {
-        imagesPreviews: [],
-        
-        previewImages(event) {
-            this.imagesPreviews = [];
-            const files = event.target.files;
+    function replyForm() {
+        return {
+            imagesPreviews: [],
             
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.imagesPreviews.push({
-                            name: file.name,
-                            url: e.target.result
-                        });
-                    };
-                    reader.readAsDataURL(file);
+            previewImages(event) {
+                this.imagesPreviews = [];
+                const files = event.target.files;
+                
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.imagesPreviews.push({
+                                name: file.name,
+                                url: e.target.result
+                            });
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+            },
+            
+            removePreview(fileName) {
+                this.imagesPreviews = this.imagesPreviews.filter(preview => preview.name !== fileName);
+                // Reset file input if no previews left
+                if (this.imagesPreviews.length === 0) {
+                    const fileInput = document.querySelector('input[name="attachments[]"]');
+                    fileInput.value = '';
                 }
             }
-        },
-        
-        removePreview(fileName) {
-            this.imagesPreviews = this.imagesPreviews.filter(preview => preview.name !== fileName);
-            // Reset file input if no previews left
-            if (this.imagesPreviews.length === 0) {
-                const fileInput = document.querySelector('input[name="attachments[]"]');
-                fileInput.value = '';
-            }
         }
     }
-}
-</script>
-
-@endsection
+    </script>
+    @endpush
+</x-app-layout>

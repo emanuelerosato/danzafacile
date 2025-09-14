@@ -8,6 +8,7 @@ use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\SchoolController;
 use App\Http\Controllers\SuperAdmin\SuperAdminUserController;
 use App\Http\Controllers\SuperAdmin\HelpdeskController;
+use App\Http\Controllers\SuperAdmin\SuperAdminHelpController;
 
 // Controllers Admin
 use App\Http\Controllers\Admin\AdminDashboardController;
@@ -91,6 +92,9 @@ Route::middleware('auth')->group(function () {
             Route::patch('/{ticket}/reopen', [HelpdeskController::class, 'reopen'])->name('reopen');
             Route::get('/export/{format}', [HelpdeskController::class, 'export'])->name('export');
         });
+        
+        // Help/Guide system
+        Route::get('/help', [SuperAdminHelpController::class, 'index'])->name('help');
     });
     
     // ADMIN ROUTES
