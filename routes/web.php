@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\AdminDocumentController;
 use App\Http\Controllers\Admin\SchoolUserController;
 use App\Http\Controllers\Admin\MediaGalleryController;
 use App\Http\Controllers\Admin\StaffController;
+use App\Http\Controllers\Admin\ReportsController;
 
 // Controllers Student
 use App\Http\Controllers\Student\StudentDashboardController;
@@ -199,6 +200,14 @@ Route::middleware('auth')->group(function () {
         Route::get('staff-export', [StaffController::class, 'export'])->name('staff.export');
         Route::post('staff/{staff}/assign-course', [StaffController::class, 'assignToCourse'])->name('staff.assign-course');
         Route::delete('staff/{staff}/assignments/{assignment}', [StaffController::class, 'removeAssignment'])->name('staff.remove-assignment');
+
+        // Reports and Analytics
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/', [ReportsController::class, 'index'])->name('index');
+            Route::get('/charts-data', [ReportsController::class, 'chartsData'])->name('charts-data');
+            Route::get('/export-pdf', [ReportsController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('/export-excel', [ReportsController::class, 'exportExcel'])->name('export-excel');
+        });
     });
     
     // STUDENT ROUTES

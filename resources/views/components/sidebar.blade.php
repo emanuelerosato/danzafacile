@@ -129,6 +129,15 @@
                     Gallerie
                 </x-nav-item>
             </x-nav-group>
+
+            <x-nav-group title="Analytics" icon="chart-bar">
+                <x-nav-item href="{{ route('admin.reports.index') }}" :active="request()->routeIs('admin.reports.*')" icon="chart-line">
+                    Reports & Analytics
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('admin.dashboards.*')" icon="presentation-chart-bar">
+                    Dashboard Personalizzati
+                </x-nav-item>
+            </x-nav-group>
             
         @else
             <!-- Student Menu -->
