@@ -6,17 +6,33 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class Document extends Model
 {
     use HasFactory;
 
     /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        // Global scope per multi-tenant security
+        static::addGlobalScope('school', function (Builder $builder) {
+            if (auth()->check() && auth()->user()->school_id) {
+                $builder->where('school_id', auth()->user()->school_id);
+            }
+        });
+    }
+
+    /**
      * Enum per le categorie dei documenti
      */
+    const CATEGORY_GENERAL = 'general';
     const CATEGORY_MEDICAL = 'medical';
-    const CATEGORY_PHOTO = 'photo';
-    const CATEGORY_AGREEMENT = 'agreement';
+    const CATEGORY_CONTRACT = 'contract';
+    const CATEGORY_IDENTIFICATION = 'identification';
+    const CATEGORY_OTHER = 'other';
 
     /**
      * Enum per lo status del documento
@@ -31,16 +47,24 @@ class Document extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'user_id',
         'school_id',
-        'course_id',
-        'name',
+        'uploaded_by',
+        'title',
+        'description',
+        'original_filename',
+        'stored_filename',
         'file_path',
-        'file_type',
+        'mime_type',
         'file_size',
         'category',
         'status',
-        'uploaded_at',
+        'approved_by',
+        'approved_at',
+        'rejection_reason',
+        'is_public',
+        'requires_approval',
+        'metadata',
+        'expires_at',
     ];
 
     /**
@@ -52,18 +76,30 @@ class Document extends Model
     {
         return [
             'file_size' => 'integer',
-            'uploaded_at' => 'datetime',
+            'is_public' => 'boolean',
+            'requires_approval' => 'boolean',
+            'metadata' => 'array',
+            'approved_at' => 'datetime',
+            'expires_at' => 'datetime',
         ];
     }
 
     // RELAZIONI
 
     /**
-     * Ottiene l'utente proprietario del documento
+     * Ottiene l'utente che ha caricato il documento
      */
-    public function user(): BelongsTo
+    public function uploadedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    /**
+     * Ottiene l'utente che ha approvato il documento
+     */
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     /**
@@ -74,13 +110,6 @@ class Document extends Model
         return $this->belongsTo(School::class);
     }
 
-    /**
-     * Ottiene il corso a cui è associato il documento (opzionale)
-     */
-    public function course(): BelongsTo
-    {
-        return $this->belongsTo(Course::class);
-    }
 
     // SCOPES
 
@@ -126,11 +155,54 @@ class Document extends Model
 
 
     /**
-     * Filtra i documenti per utente
+     * Filtra i documenti per utente che li ha caricati
      */
-    public function scopeByUser(Builder $query, int $userId): Builder
+    public function scopeByUploader(Builder $query, int $userId): Builder
     {
-        return $query->where('user_id', $userId);
+        return $query->where('uploaded_by', $userId);
+    }
+
+    /**
+     * Filtra i documenti pubblici
+     */
+    public function scopePublic(Builder $query): Builder
+    {
+        return $query->where('is_public', true);
+    }
+
+    /**
+     * Filtra i documenti privati
+     */
+    public function scopePrivate(Builder $query): Builder
+    {
+        return $query->where('is_public', false);
+    }
+
+    /**
+     * Filtra i documenti che richiedono approvazione
+     */
+    public function scopeRequiringApproval(Builder $query): Builder
+    {
+        return $query->where('requires_approval', true);
+    }
+
+    /**
+     * Filtra i documenti scaduti
+     */
+    public function scopeExpired(Builder $query): Builder
+    {
+        return $query->where('expires_at', '<', now());
+    }
+
+    /**
+     * Filtra i documenti non scaduti
+     */
+    public function scopeNotExpired(Builder $query): Builder
+    {
+        return $query->where(function($q) {
+            $q->whereNull('expires_at')
+              ->orWhere('expires_at', '>=', now());
+        });
     }
 
     /**
@@ -142,19 +214,11 @@ class Document extends Model
     }
 
     /**
-     * Filtra i documenti per corso
+     * Filtra i documenti per MIME type
      */
-    public function scopeByCourse(Builder $query, int $courseId): Builder
+    public function scopeByMimeType(Builder $query, string $mimeType): Builder
     {
-        return $query->where('course_id', $courseId);
-    }
-
-    /**
-     * Filtra i documenti per tipo di file
-     */
-    public function scopeByFileType(Builder $query, string $fileType): Builder
-    {
-        return $query->where('file_type', $fileType);
+        return $query->where('mime_type', $mimeType);
     }
 
     /**
@@ -162,7 +226,7 @@ class Document extends Model
      */
     public function scopeImages(Builder $query): Builder
     {
-        return $query->whereIn('file_type', ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+        return $query->where('mime_type', 'like', 'image/%');
     }
 
     /**
@@ -170,7 +234,15 @@ class Document extends Model
      */
     public function scopePdfs(Builder $query): Builder
     {
-        return $query->where('file_type', 'pdf');
+        return $query->where('mime_type', 'application/pdf');
+    }
+
+    /**
+     * Ordina per data di creazione più recente
+     */
+    public function scopeLatest(Builder $query): Builder
+    {
+        return $query->orderBy('created_at', 'desc');
     }
 
     // ACCESSORS
@@ -213,7 +285,7 @@ class Document extends Model
      */
     public function getIsImageAttribute(): bool
     {
-        return in_array($this->file_type, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+        return str_starts_with($this->mime_type ?? '', 'image/');
     }
 
     /**
@@ -221,7 +293,23 @@ class Document extends Model
      */
     public function getIsPdfAttribute(): bool
     {
-        return $this->file_type === 'pdf';
+        return $this->mime_type === 'application/pdf';
+    }
+
+    /**
+     * Verifica se il documento è scaduto
+     */
+    public function getIsExpiredAttribute(): bool
+    {
+        return $this->expires_at && $this->expires_at->isPast();
+    }
+
+    /**
+     * Verifica se il documento richiede approvazione
+     */
+    public function getRequiresApprovalAttribute(): bool
+    {
+        return (bool) $this->attributes['requires_approval'];
     }
 
     /**
@@ -241,7 +329,7 @@ class Document extends Model
     }
 
     /**
-     * Ottiene l'icona basata sul tipo di file
+     * Ottiene l'icona basata sul MIME type
      */
     public function getFileIconAttribute(): string
     {
@@ -253,52 +341,48 @@ class Document extends Model
             return 'fas fa-file-pdf';
         }
 
-        return match($this->file_type) {
-            'doc', 'docx' => 'fas fa-file-word',
-            'xls', 'xlsx' => 'fas fa-file-excel',
-            'ppt', 'pptx' => 'fas fa-file-powerpoint',
-            'zip', 'rar', '7z' => 'fas fa-file-archive',
+        return match($this->mime_type) {
+            'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'fas fa-file-word',
+            'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'fas fa-file-excel',
+            'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'fas fa-file-powerpoint',
+            'application/zip', 'application/x-rar-compressed', 'application/x-7z-compressed' => 'fas fa-file-archive',
+            'text/plain' => 'fas fa-file-alt',
             default => 'fas fa-file'
+        };
+    }
+
+    /**
+     * Ottiene il nome della categoria localizzato
+     */
+    public function getCategoryNameAttribute(): string
+    {
+        $categories = self::getAvailableCategories();
+        return $categories[$this->category] ?? 'Generale';
+    }
+
+    /**
+     * Ottiene il nome dello status localizzato
+     */
+    public function getStatusNameAttribute(): string
+    {
+        $statuses = self::getAvailableStatuses();
+        return $statuses[$this->status] ?? 'In Attesa';
+    }
+
+    /**
+     * Ottiene la classe CSS per lo status
+     */
+    public function getStatusClassAttribute(): string
+    {
+        return match($this->status) {
+            self::STATUS_APPROVED => 'bg-green-100 text-green-800',
+            self::STATUS_REJECTED => 'bg-red-100 text-red-800',
+            default => 'bg-yellow-100 text-yellow-800'
         };
     }
 
     // MUTATORS
 
-    /**
-     * Imposta la categoria con validazione
-     */
-    public function setCategoryAttribute($value): void
-    {
-        $allowedCategories = [
-            self::CATEGORY_MEDICAL,
-            self::CATEGORY_PHOTO,
-            self::CATEGORY_AGREEMENT
-        ];
-        
-        $this->attributes['category'] = in_array($value, $allowedCategories) ? $value : self::CATEGORY_MEDICAL;
-    }
-
-    /**
-     * Imposta lo status con validazione
-     */
-    public function setStatusAttribute($value): void
-    {
-        $allowedStatuses = [
-            self::STATUS_PENDING,
-            self::STATUS_APPROVED,
-            self::STATUS_REJECTED
-        ];
-        
-        $this->attributes['status'] = in_array($value, $allowedStatuses) ? $value : self::STATUS_PENDING;
-    }
-
-    /**
-     * Imposta il tipo di file in minuscolo
-     */
-    public function setFileTypeAttribute($value): void
-    {
-        $this->attributes['file_type'] = $value ? strtolower($value) : null;
-    }
 
     // HELPER METHODS
 
@@ -308,9 +392,11 @@ class Document extends Model
     public static function getAvailableCategories(): array
     {
         return [
+            self::CATEGORY_GENERAL => 'Generale',
             self::CATEGORY_MEDICAL => 'Certificato Medico',
-            self::CATEGORY_PHOTO => 'Autorizzazione Foto',
-            self::CATEGORY_AGREEMENT => 'Documento di Accordo',
+            self::CATEGORY_CONTRACT => 'Contratto/Accordo',
+            self::CATEGORY_IDENTIFICATION => 'Documento di Identità',
+            self::CATEGORY_OTHER => 'Altro',
         ];
     }
 
@@ -329,38 +415,57 @@ class Document extends Model
     /**
      * Approva il documento
      */
-    public function approve(): bool
+    public function approve(?User $approver = null): bool
     {
         $this->status = self::STATUS_APPROVED;
+        $this->approved_at = now();
+        $this->approved_by = $approver?->id ?? auth()->id();
+        $this->rejection_reason = null;
         return $this->save();
     }
 
     /**
      * Rifiuta il documento
      */
-    public function reject(): bool
+    public function reject(?string $reason = null, ?User $rejector = null): bool
     {
         $this->status = self::STATUS_REJECTED;
+        $this->rejection_reason = $reason;
+        $this->approved_at = null;
+        $this->approved_by = null;
         return $this->save();
     }
 
 
     /**
-     * Verifica se il documento può essere cancellato
+     * Verifica se il documento può essere eliminato
      */
     public function canBeDeleted(): bool
     {
-        return $this->status !== self::STATUS_APPROVED;
+        return auth()->user()?->can('delete', $this) ?? false;
     }
 
     /**
-     * Verifica se il documento richiede approvazione
+     * Verifica se il documento può essere scaricato
      */
-    public function requiresApproval(): bool
+    public function canBeDownloaded(): bool
     {
-        return in_array($this->category, [
-            self::CATEGORY_MEDICAL,
-            self::CATEGORY_AGREEMENT
-        ]);
+        return auth()->user()?->can('view', $this) ?? false;
+    }
+
+    /**
+     * Ottiene il percorso completo del file
+     */
+    public function getFullFilePathAttribute(): string
+    {
+        return storage_path('app/' . $this->file_path);
+    }
+
+    /**
+     * Verifica se il file esiste fisicamente
+     */
+    public function fileExists(): bool
+    {
+        return file_exists($this->full_file_path);
     }
 }

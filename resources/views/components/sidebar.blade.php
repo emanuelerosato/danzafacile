@@ -110,8 +110,8 @@
                 <x-nav-item href="{{ route('admin.payments.index') }}" :active="request()->routeIs('admin.payments.*')" icon="credit-card">
                     Pagamenti
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('admin.events.*')" icon="star">
-                    Eventi
+                <x-nav-item href="{{ route('admin.documents.index') }}" :active="request()->routeIs('admin.documents.*')" icon="document">
+                    Documenti
                 </x-nav-item>
                 <x-nav-item href="#" :active="request()->routeIs('admin.gallery.*')" icon="photograph">
                     Galleria

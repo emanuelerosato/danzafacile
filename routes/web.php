@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\Admin\AdminAttendanceController;
 use App\Http\Controllers\Admin\EnrollmentController;
 use App\Http\Controllers\Admin\AdminPaymentController;
+use App\Http\Controllers\Admin\AdminDocumentController;
 use App\Http\Controllers\Admin\SchoolUserController;
 
 // Controllers Student
@@ -173,6 +174,13 @@ Route::middleware('auth')->group(function () {
         Route::patch('students/{student}/toggle-active', [AdminStudentController::class, 'toggleActive'])->name('students.toggle-active');
         Route::post('students/bulk-action', [AdminStudentController::class, 'bulkAction'])->name('students.bulk-action');
         Route::get('students-export', [AdminStudentController::class, 'export'])->name('students.export');
+
+        // Documents management
+        Route::resource('documents', AdminDocumentController::class);
+        Route::get('documents/{document}/download', [AdminDocumentController::class, 'download'])->name('documents.download');
+        Route::post('documents/{document}/approve', [AdminDocumentController::class, 'approve'])->name('documents.approve');
+        Route::post('documents/{document}/reject', [AdminDocumentController::class, 'reject'])->name('documents.reject');
+        Route::post('documents/bulk-action', [AdminDocumentController::class, 'bulkAction'])->name('documents.bulk-action');
     });
     
     // STUDENT ROUTES
