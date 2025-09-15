@@ -59,24 +59,36 @@ class AuthController extends Controller
 
     public function register(Request $request): JsonResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'date_of_birth' => ['nullable', 'date'],
-            'address' => ['nullable', 'string', 'max:500'],
-            'school_id' => ['required', 'exists:schools,id'],
-        ]);
+        try {
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'first_name' => ['nullable', 'string', 'max:255'],
+                'last_name' => ['nullable', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+                'password' => ['required', 'confirmed', Rules\Password::defaults()],
+                'phone' => ['nullable', 'string', 'max:20'],
+                'date_of_birth' => ['nullable', 'date'],
+                'address' => ['nullable', 'string', 'max:500'],
+                'school_id' => ['required', 'exists:schools,id'],
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        }
 
         $user = User::create([
             'name' => $request->name,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone' => $request->phone,
             'date_of_birth' => $request->date_of_birth,
             'address' => $request->address,
-            'role' => 'student',
+            'role' => 'user',
             'school_id' => $request->school_id,
             'active' => true,
         ]);
@@ -113,7 +125,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function profile(Request $request): JsonResponse
+    public function me(Request $request): JsonResponse
     {
         $user = $request->user();
 
@@ -141,18 +153,25 @@ class AuthController extends Controller
         ]);
     }
 
+    public function profile(Request $request): JsonResponse
+    {
+        return $this->me($request);
+    }
+
     public function updateProfile(Request $request): JsonResponse
     {
         $user = $request->user();
 
         $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
+            'first_name' => ['sometimes', 'string', 'max:255'],
+            'last_name' => ['sometimes', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
             'date_of_birth' => ['nullable', 'date'],
             'address' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $user->update($request->only(['name', 'phone', 'date_of_birth', 'address']));
+        $user->update($request->only(['name', 'first_name', 'last_name', 'phone', 'date_of_birth', 'address']));
 
         return response()->json([
             'success' => true,
@@ -160,6 +179,8 @@ class AuthController extends Controller
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
                 'email' => $user->email,
                 'phone' => $user->phone,
                 'date_of_birth' => $user->date_of_birth,
@@ -167,6 +188,37 @@ class AuthController extends Controller
                 'role' => $user->role,
                 'school_id' => $user->school_id,
             ]
+        ]);
+    }
+
+    public function changePassword(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        // Verify current password
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Current password is incorrect',
+                'errors' => [
+                    'current_password' => ['The current password is incorrect.']
+                ]
+            ], 422);
+        }
+
+        // Update password
+        $user->update([
+            'password' => Hash::make($request->password)
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password updated successfully'
         ]);
     }
 

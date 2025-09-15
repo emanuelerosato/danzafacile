@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseApiController;
 use App\Models\User;
 use App\Models\CourseEnrollment;
 use Illuminate\Http\JsonResponse;
@@ -11,13 +11,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
-class StudentController extends Controller
+class StudentController extends BaseApiController
 {
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum');
-        $this->middleware('role:admin');
-    }
 
     public function index(Request $request): JsonResponse
     {
@@ -25,7 +20,7 @@ class StudentController extends Controller
         $schoolId = $user->school_id;
 
         $query = User::where('school_id', $schoolId)
-            ->where('role', 'student')
+            ->where('role', 'user')
             ->withCount(['enrollments', 'payments']);
 
         // Filtering
@@ -53,14 +48,16 @@ class StudentController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $students->items(),
-            'pagination' => [
-                'current_page' => $students->currentPage(),
-                'last_page' => $students->lastPage(),
-                'per_page' => $students->perPage(),
-                'total' => $students->total(),
-                'from' => $students->firstItem(),
-                'to' => $students->lastItem(),
+            'data' => [
+                'students' => $students->items(),
+                'pagination' => [
+                    'current_page' => $students->currentPage(),
+                    'last_page' => $students->lastPage(),
+                    'per_page' => $students->perPage(),
+                    'total' => $students->total(),
+                    'from' => $students->firstItem(),
+                    'to' => $students->lastItem(),
+                ]
             ]
         ]);
     }
@@ -70,11 +67,11 @@ class StudentController extends Controller
         $user = $request->user();
         
         // Check if student belongs to admin's school
-        if ($student->school_id !== $user->school_id || $student->role !== 'student') {
+        if ($student->school_id !== $user->school_id || $student->role !== 'user') {
             return response()->json([
                 'success' => false,
-                'message' => 'Student not found or access denied'
-            ], 404);
+                'message' => 'Access denied to this student'
+            ], 403);
         }
 
         $student->load([
@@ -111,8 +108,10 @@ class StudentController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => 'required|string|min:8',
             'phone' => 'nullable|string|max:20',
             'date_of_birth' => 'nullable|date|before:today',
             'address' => 'nullable|string|max:500',
@@ -131,7 +130,15 @@ class StudentController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Student created successfully',
-            'data' => $student->fresh(['school:id,name'])
+            'data' => [
+                'student' => [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'email' => $student->email,
+                    'phone' => $student->phone,
+                    'active' => $student->active,
+                ]
+            ]
         ], 201);
     }
 
@@ -140,11 +147,11 @@ class StudentController extends Controller
         $user = $request->user();
         
         // Check if student belongs to admin's school
-        if ($student->school_id !== $user->school_id || $student->role !== 'student') {
+        if ($student->school_id !== $user->school_id || $student->role !== 'user') {
             return response()->json([
                 'success' => false,
-                'message' => 'Student not found or access denied'
-            ], 404);
+                'message' => 'Access denied to this student'
+            ], 403);
         }
 
         $validated = $request->validate([
@@ -170,7 +177,14 @@ class StudentController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Student updated successfully',
-            'data' => $student->refresh()
+            'data' => [
+                'student' => [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'phone' => $student->phone,
+                    'active' => $student->active,
+                ]
+            ]
         ]);
     }
 
@@ -179,11 +193,11 @@ class StudentController extends Controller
         $user = $request->user();
         
         // Check if student belongs to admin's school
-        if ($student->school_id !== $user->school_id || $student->role !== 'student') {
+        if ($student->school_id !== $user->school_id || $student->role !== 'user') {
             return response()->json([
                 'success' => false,
-                'message' => 'Student not found or access denied'
-            ], 404);
+                'message' => 'Access denied to this student'
+            ], 403);
         }
 
         // Check if student has active enrollments

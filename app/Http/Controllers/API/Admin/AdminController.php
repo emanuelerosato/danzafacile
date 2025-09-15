@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\API\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseApiController;
 use App\Models\Course;
 use App\Models\CourseEnrollment;
 use App\Models\Payment;
@@ -11,13 +11,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
-class AdminController extends Controller
+class AdminController extends BaseApiController
 {
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum');
-        $this->middleware('role:admin');
-    }
 
     public function dashboard(Request $request): JsonResponse
     {
@@ -25,29 +20,20 @@ class AdminController extends Controller
         $schoolId = $user->school_id;
 
         // Get dashboard statistics
+        $totalStudents = User::where('school_id', $schoolId)->where('role', 'user')->count();
+        $activeStudents = User::where('school_id', $schoolId)->where('role', 'user')->where('active', true)->count();
+        $activeCourses = Course::where('school_id', $schoolId)->where('active', true)->count();
+        $monthlyRevenue = Payment::whereHas('course', function($query) use ($schoolId) {
+            $query->where('school_id', $schoolId);
+        })->where('status', 'completed')
+          ->whereMonth('created_at', Carbon::now()->month)
+          ->sum('amount');
+
         $stats = [
-            'total_students' => User::where('school_id', $schoolId)
-                ->where('role', 'student')
-                ->where('active', true)
-                ->count(),
-                
-            'total_courses' => Course::where('school_id', $schoolId)
-                ->where('active', true)
-                ->count(),
-                
-            'active_enrollments' => CourseEnrollment::whereHas('course', function($query) use ($schoolId) {
-                $query->where('school_id', $schoolId);
-            })->where('status', 'active')->count(),
-            
-            'monthly_revenue' => Payment::whereHas('course', function($query) use ($schoolId) {
-                $query->where('school_id', $schoolId);
-            })->where('status', 'completed')
-              ->whereMonth('created_at', Carbon::now()->month)
-              ->sum('amount'),
-              
-            'pending_payments' => Payment::whereHas('course', function($query) use ($schoolId) {
-                $query->where('school_id', $schoolId);
-            })->where('status', 'pending')->count(),
+            'students_total' => $totalStudents,
+            'students_active' => $activeStudents,
+            'courses_active' => $activeCourses,
+            'revenue_this_month' => $monthlyRevenue,
         ];
 
         // Recent activities
@@ -66,6 +52,17 @@ class AdminController extends Controller
             ->limit(5)
             ->get(['id', 'name', 'max_students', 'price']);
 
+        // Pending payments
+        $pending_payments = Payment::whereHas('course', function($query) use ($schoolId) {
+            $query->where('school_id', $schoolId);
+        })->where('status', 'pending')
+          ->with(['user:id,name,email', 'course:id,name'])
+          ->limit(5)
+          ->get();
+
+        // Upcoming events (we'll mock this for now)
+        $upcoming_events = [];
+
         return response()->json([
             'success' => true,
             'data' => [
@@ -77,6 +74,8 @@ class AdminController extends Controller
                 ],
                 'stats' => $stats,
                 'recent_enrollments' => $recent_enrollments,
+                'pending_payments' => $pending_payments,
+                'upcoming_events' => $upcoming_events,
                 'popular_courses' => $popular_courses,
                 'admin_info' => [
                     'name' => $user->name,

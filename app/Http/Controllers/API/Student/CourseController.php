@@ -2,19 +2,14 @@
 
 namespace App\Http\Controllers\API\Student;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseApiController;
 use App\Models\Course;
 use App\Models\CourseEnrollment;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class CourseController extends Controller
+class CourseController extends BaseApiController
 {
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum');
-        $this->middleware('role:student');
-    }
 
     public function index(Request $request): JsonResponse
     {
@@ -23,6 +18,7 @@ class CourseController extends Controller
 
         $query = Course::where('school_id', $schoolId)
             ->where('active', true)
+            ->with(['instructor:id,name'])
             ->withCount(['enrollments' => function($q) {
                 $q->where('status', 'active');
             }]);
@@ -60,24 +56,35 @@ class CourseController extends Controller
                 ->where('user_id', $user->id)
                 ->first();
 
-            $course->user_enrollment_status = $enrollment ? $enrollment->status : 'not_enrolled';
-            $course->is_enrolled = (bool) $enrollment;
-            $course->available_spots = max(0, $course->max_students - $course->enrollments_count);
-            $course->is_full = $course->enrollments_count >= $course->max_students;
-            
-            return $course;
+            $courseData = [
+                'id' => $course->id,
+                'name' => $course->name,
+                'description' => $course->description,
+                'instructor_name' => $course->instructor ? $course->instructor->name : 'TBD',
+                'price' => $course->price,
+                'schedule' => $course->schedule,
+                'available_spots' => max(0, $course->max_students - $course->enrollments_count),
+                'can_enroll' => $this->canUserEnroll($user, $course, $enrollment),
+                'user_enrollment_status' => $enrollment ? $enrollment->status : 'not_enrolled',
+                'is_enrolled' => (bool) $enrollment,
+                'is_full' => $course->enrollments_count >= $course->max_students,
+            ];
+
+            return $courseData;
         });
 
         return response()->json([
             'success' => true,
-            'data' => $coursesWithStatus,
-            'pagination' => [
-                'current_page' => $courses->currentPage(),
-                'last_page' => $courses->lastPage(),
-                'per_page' => $courses->perPage(),
-                'total' => $courses->total(),
-                'from' => $courses->firstItem(),
-                'to' => $courses->lastItem(),
+            'data' => [
+                'courses' => $coursesWithStatus,
+                'pagination' => [
+                    'current_page' => $courses->currentPage(),
+                    'last_page' => $courses->lastPage(),
+                    'per_page' => $courses->perPage(),
+                    'total' => $courses->total(),
+                    'from' => $courses->firstItem(),
+                    'to' => $courses->lastItem(),
+                ]
             ]
         ]);
     }
@@ -85,7 +92,7 @@ class CourseController extends Controller
     public function show(Request $request, Course $course): JsonResponse
     {
         $user = $request->user();
-        
+
         // Check if course belongs to student's school
         if ($course->school_id !== $user->school_id) {
             return response()->json([
@@ -93,6 +100,9 @@ class CourseController extends Controller
                 'message' => 'Course not found'
             ], 404);
         }
+
+        // Load instructor relationship
+        $course->load(['instructor:id,name']);
 
         // Check user's enrollment status
         $enrollment = CourseEnrollment::where('course_id', $course->id)
@@ -108,29 +118,29 @@ class CourseController extends Controller
             'id' => $course->id,
             'name' => $course->name,
             'description' => $course->description,
-            'instructor' => $course->instructor,
+            'instructor_name' => $course->instructor ? $course->instructor->name : 'TBD',
             'schedule' => $course->schedule,
             'max_students' => $course->max_students,
             'price' => $course->price,
-            'duration_weeks' => $course->duration_weeks,
-            'difficulty_level' => $course->difficulty_level,
+            'level' => $course->level,
             'start_date' => $course->start_date,
             'end_date' => $course->end_date,
             'active' => $course->active,
+            'location' => $course->location ?? null,
             'created_at' => $course->created_at,
             'updated_at' => $course->updated_at,
-            
+
             // Enrollment info
             'user_enrollment_status' => $enrollment ? $enrollment->status : 'not_enrolled',
             'is_enrolled' => (bool) $enrollment,
             'enrollment_date' => $enrollment ? $enrollment->enrollment_date : null,
-            
+
             // Availability info
             'enrolled_students' => $activeEnrollments,
             'available_spots' => max(0, $course->max_students - $activeEnrollments),
             'is_full' => $activeEnrollments >= $course->max_students,
             'enrollment_open' => $course->active && $activeEnrollments < $course->max_students,
-            
+
             // Additional info
             'can_enroll' => $this->canUserEnroll($user, $course, $enrollment),
             'enrollment_deadline' => $course->start_date->subDays(1)->format('Y-m-d'),
@@ -139,7 +149,9 @@ class CourseController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $courseData
+            'data' => [
+                'course' => $courseData
+            ]
         ]);
     }
 
@@ -149,7 +161,8 @@ class CourseController extends Controller
 
         $enrollments = CourseEnrollment::where('user_id', $user->id)
             ->with(['course' => function($query) {
-                $query->select('id', 'name', 'description', 'instructor', 'schedule', 'price', 'start_date', 'end_date', 'active');
+                $query->select('id', 'name', 'description', 'instructor_id', 'schedule', 'price', 'start_date', 'end_date', 'active')
+                      ->with(['instructor:id,name']);
             }])
             ->orderBy('created_at', 'desc')
             ->get();
@@ -172,10 +185,22 @@ class CourseController extends Controller
                 : 0
         ];
 
+        // Transform enrollments to match expected format
+        $enrolledCoursesData = $enrollments->map(function($enrollment) {
+            return [
+                'id' => $enrollment->id,
+                'course_name' => $enrollment->course->name,
+                'instructor_name' => $enrollment->course->instructor ? $enrollment->course->instructor->name : 'TBD',
+                'schedule' => $enrollment->course->schedule,
+                'enrollment_date' => $enrollment->enrollment_date,
+                'status' => $enrollment->status,
+            ];
+        });
+
         return response()->json([
             'success' => true,
             'data' => [
-                'enrollments' => $groupedEnrollments,
+                'enrolled_courses' => $enrolledCoursesData,
                 'stats' => $stats
             ]
         ]);

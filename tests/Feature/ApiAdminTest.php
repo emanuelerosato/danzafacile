@@ -123,6 +123,7 @@ class ApiAdminTest extends TestCase
             'email' => 'newstudent@example.com',
             'first_name' => 'New',
             'last_name' => 'Student',
+            'password' => 'password123',
             'phone' => '+1234567890',
             'date_of_birth' => '1995-01-01',
             'address' => 'Student Street 123',
@@ -266,6 +267,8 @@ class ApiAdminTest extends TestCase
             'price' => 150.00,
             'max_students' => 12,
             'location' => 'Studio B',
+            'duration_weeks' => 8,
+            'difficulty_level' => 'advanced',
             'active' => true,
         ];
 

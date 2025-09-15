@@ -37,6 +37,7 @@ class CourseEnrollment extends Model
         'enrollment_date',
         'status',
         'payment_status',
+        'notes',
     ];
 
     /**

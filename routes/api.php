@@ -246,7 +246,7 @@ Route::prefix('mobile/v1')->middleware('throttle:120,1')->group(function () {
         Route::post('/auth/refresh', [AuthController::class, 'refresh']);
         Route::get('/auth/me', [AuthController::class, 'me']);
         Route::put('/auth/profile', [AuthController::class, 'updateProfile']);
-        Route::put('/auth/password', [AuthController::class, 'updatePassword']);
+        Route::put('/auth/password', [AuthController::class, 'changePassword']);
         
         // ADMIN MOBILE ROUTES
         Route::middleware('role:admin')->prefix('admin')->group(function () {
@@ -258,6 +258,7 @@ Route::prefix('mobile/v1')->middleware('throttle:120,1')->group(function () {
             Route::post('/notifications/{id}/mark-read', [AdminController::class, 'markNotificationRead']);
             
             // Courses Management
+            Route::get('courses/statistics', [AdminCourseController::class, 'statistics'])->name('api.mobile.admin.courses.statistics');
             Route::apiResource('courses', AdminCourseController::class)->names([
                 'index' => 'api.mobile.admin.courses.index',
                 'store' => 'api.mobile.admin.courses.store',
@@ -267,7 +268,6 @@ Route::prefix('mobile/v1')->middleware('throttle:120,1')->group(function () {
             ]);
             Route::post('courses/{course}/toggle-status', [AdminCourseController::class, 'toggleStatus'])->name('api.mobile.admin.courses.toggle-status');
             Route::post('courses/{course}/duplicate', [AdminCourseController::class, 'duplicate'])->name('api.mobile.admin.courses.duplicate');
-            Route::get('courses/statistics', [AdminCourseController::class, 'getStatistics'])->name('api.mobile.admin.courses.statistics');
             
             // Students Management
             Route::apiResource('students', AdminStudentController::class)->names([

@@ -2,19 +2,14 @@
 
 namespace App\Http\Controllers\API\Admin;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\API\BaseApiController;
 use App\Models\Course;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
-class CourseController extends Controller
+class CourseController extends BaseApiController
 {
-    public function __construct()
-    {
-        $this->middleware('auth:sanctum');
-        $this->middleware('role:admin');
-    }
 
     public function index(Request $request): JsonResponse
     {
@@ -22,7 +17,8 @@ class CourseController extends Controller
         $schoolId = $user->school_id;
 
         $query = Course::where('school_id', $schoolId)
-            ->withCount(['enrollments', 'payments']);
+            ->withCount(['enrollments', 'payments'])
+            ->with('instructor:id,name');
 
         // Filtering
         if ($request->has('active')) {
@@ -46,16 +42,31 @@ class CourseController extends Controller
         $perPage = $request->get('per_page', 15);
         $courses = $query->paginate($perPage);
 
+        // Transform courses to include instructor_name
+        $transformedCourses = $courses->getCollection()->map(function ($course) {
+            return [
+                'id' => $course->id,
+                'name' => $course->name,
+                'instructor_name' => $course->instructor ? $course->instructor->name : 'No Instructor',
+                'price' => $course->price,
+                'enrolled_students' => $course->enrollments_count,
+                'max_students' => $course->max_students,
+                'active' => $course->active,
+            ];
+        });
+
         return response()->json([
             'success' => true,
-            'data' => $courses->items(),
-            'pagination' => [
-                'current_page' => $courses->currentPage(),
-                'last_page' => $courses->lastPage(),
-                'per_page' => $courses->perPage(),
-                'total' => $courses->total(),
-                'from' => $courses->firstItem(),
-                'to' => $courses->lastItem(),
+            'data' => [
+                'courses' => $transformedCourses,
+                'pagination' => [
+                    'current_page' => $courses->currentPage(),
+                    'last_page' => $courses->lastPage(),
+                    'per_page' => $courses->perPage(),
+                    'total' => $courses->total(),
+                    'from' => $courses->firstItem(),
+                    'to' => $courses->lastItem(),
+                ]
             ]
         ]);
     }
@@ -103,7 +114,7 @@ class CourseController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'instructor' => 'required|string|max:255',
+            'instructor_id' => 'required|exists:users,id',
             'schedule' => 'required|string|max:255',
             'max_students' => 'required|integer|min:1|max:100',
             'price' => 'required|numeric|min:0',
@@ -122,7 +133,15 @@ class CourseController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Course created successfully',
-            'data' => $course
+            'data' => [
+                'course' => [
+                    'id' => $course->id,
+                    'name' => $course->name,
+                    'price' => $course->price,
+                    'max_students' => $course->max_students,
+                    'active' => $course->active,
+                ]
+            ]
         ], 201);
     }
 
@@ -213,7 +232,7 @@ class CourseController extends Controller
     public function deactivate(Request $request, Course $course): JsonResponse
     {
         $user = $request->user();
-        
+
         if ($course->school_id !== $user->school_id) {
             return response()->json([
                 'success' => false,
@@ -227,6 +246,30 @@ class CourseController extends Controller
             'success' => true,
             'message' => 'Course deactivated successfully',
             'data' => $course
+        ]);
+    }
+
+    public function toggleStatus(Request $request, Course $course): JsonResponse
+    {
+        $user = $request->user();
+
+        if ($course->school_id !== $user->school_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Course not found or access denied'
+            ], 404);
+        }
+
+        $course->update(['active' => !$course->active]);
+        $status = $course->active ? 'activated' : 'deactivated';
+
+        return response()->json([
+            'success' => true,
+            'message' => "Course {$status} successfully",
+            'data' => [
+                'course' => $course,
+                'status' => $course->active ? 'active' : 'inactive'
+            ]
         ]);
     }
 
@@ -291,7 +334,14 @@ class CourseController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $stats
+            'data' => [
+                'stats' => [
+                    'total_courses' => $stats['total_courses'],
+                    'active_courses' => $stats['active_courses'],
+                    'total_enrollments' => $stats['avg_enrollment_per_course'] * $stats['total_courses'],
+                    'revenue_this_month' => $stats['revenue_by_course'][0]['revenue'] ?? 0,
+                ]
+            ]
         ]);
     }
 }

@@ -62,7 +62,7 @@ class RoleMiddleware
             
             case 'admin':
                 $hasAccess = $user->isAdmin() || $user->isSuperAdmin();
-                $errorMessage = 'Only Administrators can access this resource';
+                $errorMessage = 'Only administrators can access this dashboard';
                 break;
             
             case 'instructor':

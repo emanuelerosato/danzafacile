@@ -112,7 +112,7 @@ class ApiAuthenticationTest extends TestCase
             'password' => 'wrongpassword',
         ]);
 
-        $response->assertStatus(401)
+        $response->assertStatus(422)
                 ->assertJson([
                     'success' => false,
                     'message' => 'Invalid credentials',
@@ -180,7 +180,7 @@ class ApiAuthenticationTest extends TestCase
         $response->assertStatus(200)
                 ->assertJson([
                     'success' => true,
-                    'message' => 'Successfully logged out',
+                    'message' => 'Logged out successfully',
                 ]);
 
         // Verify token is revoked
