@@ -393,6 +393,26 @@ Route::prefix('mobile/v1')->middleware('throttle:120,1')->group(function () {
             Route::post('/qr-code', [App\Http\Controllers\Api\AttendanceController::class, 'generateQrCode']);
             Route::post('/qr-check-in', [App\Http\Controllers\Api\AttendanceController::class, 'qrCheckIn'])->middleware('role:admin');
         });
+
+        // STAFF API - Admin only
+        Route::middleware('role:admin')->prefix('staff')->group(function () {
+            Route::get('/', [App\Http\Controllers\Api\StaffController::class, 'index']);
+            Route::post('/', [App\Http\Controllers\Api\StaffController::class, 'store']);
+            Route::get('/statistics', [App\Http\Controllers\Api\StaffController::class, 'statistics']);
+            Route::get('/{staff}', [App\Http\Controllers\Api\StaffController::class, 'show']);
+            Route::put('/{staff}', [App\Http\Controllers\Api\StaffController::class, 'update']);
+            Route::delete('/{staff}', [App\Http\Controllers\Api\StaffController::class, 'destroy']);
+            Route::post('/{staff}/toggle-status', [App\Http\Controllers\Api\StaffController::class, 'toggleStatus']);
+            Route::get('/{staff}/schedule', [App\Http\Controllers\Api\StaffController::class, 'schedule']);
+        });
+
+        // ANALYTICS API - Available to all authenticated users
+        Route::prefix('analytics')->group(function () {
+            Route::get('/dashboard', [App\Http\Controllers\Api\AnalyticsController::class, 'dashboard']);
+            Route::get('/attendance', [App\Http\Controllers\Api\AnalyticsController::class, 'attendance']);
+            Route::get('/revenue', [App\Http\Controllers\Api\AnalyticsController::class, 'revenue'])->middleware('role:admin');
+            Route::get('/export', [App\Http\Controllers\Api\AnalyticsController::class, 'export'])->middleware('role:admin');
+        });
     });
 });
 
