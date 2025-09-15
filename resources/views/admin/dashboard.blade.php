@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Dashboard Admin - {{ $currentSchool->name }}
+                    Dashboard Admin - {{ $school->name }}
                 </h2>
                 <p class="text-sm text-gray-600 mt-1">
                     Panoramica completa della tua scuola di danza
