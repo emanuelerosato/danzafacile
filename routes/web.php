@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\EnrollmentController;
 use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\AdminDocumentController;
 use App\Http\Controllers\Admin\SchoolUserController;
+use App\Http\Controllers\Admin\MediaGalleryController;
 
 // Controllers Student
 use App\Http\Controllers\Student\StudentDashboardController;
@@ -181,6 +182,14 @@ Route::middleware('auth')->group(function () {
         Route::post('documents/{document}/approve', [AdminDocumentController::class, 'approve'])->name('documents.approve');
         Route::post('documents/{document}/reject', [AdminDocumentController::class, 'reject'])->name('documents.reject');
         Route::post('documents/bulk-action', [AdminDocumentController::class, 'bulkAction'])->name('documents.bulk-action');
+
+        // Gallery management
+        Route::resource('galleries', MediaGalleryController::class);
+        Route::post('galleries/{gallery}/upload', [MediaGalleryController::class, 'uploadMedia'])->name('galleries.upload');
+        Route::post('galleries/{gallery}/external-link', [MediaGalleryController::class, 'addExternalLink'])->name('galleries.external-link');
+        Route::patch('galleries/{gallery}/media/{mediaItem}', [MediaGalleryController::class, 'updateMediaItem'])->name('galleries.media.update');
+        Route::delete('galleries/{gallery}/media/{mediaItem}', [MediaGalleryController::class, 'deleteMediaItem'])->name('galleries.media.delete');
+        Route::post('galleries/{gallery}/cover-image', [MediaGalleryController::class, 'setCoverImage'])->name('galleries.cover-image');
     });
     
     // STUDENT ROUTES

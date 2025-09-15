@@ -13,6 +13,19 @@ class MediaGallery extends Model
     use HasFactory;
 
     /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        // Global scope per multi-tenant security
+        static::addGlobalScope('school', function (Builder $builder) {
+            if (auth()->check() && auth()->user()->school_id) {
+                $builder->where('school_id', auth()->user()->school_id);
+            }
+        });
+    }
+
+    /**
      * Enum per i tipi di galleria
      */
     const TYPE_PHOTOS = 'foto';
@@ -30,10 +43,27 @@ class MediaGallery extends Model
     protected $fillable = [
         'school_id',
         'course_id',
+        'created_by',
         'title',
         'description',
         'type',
+        'is_public',
+        'is_featured',
+        'cover_image_id',
+        'settings',
     ];
+
+    /**
+     * The attributes that should be cast.
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_public' => 'boolean',
+            'is_featured' => 'boolean',
+            'settings' => 'array',
+        ];
+    }
 
     // RELAZIONI
 
@@ -51,6 +81,22 @@ class MediaGallery extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
+    }
+
+    /**
+     * Ottiene l'utente che ha creato la galleria
+     */
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * Ottiene l'immagine di copertina specifica
+     */
+    public function coverImage(): BelongsTo
+    {
+        return $this->belongsTo(MediaItem::class, 'cover_image_id');
     }
 
     /**
@@ -157,6 +203,38 @@ class MediaGallery extends Model
     public function scopeEvents(Builder $query): Builder
     {
         return $query->where('type', self::TYPE_EVENTS);
+    }
+
+    /**
+     * Filtra solo le gallerie pubbliche
+     */
+    public function scopePublic(Builder $query): Builder
+    {
+        return $query->where('is_public', true);
+    }
+
+    /**
+     * Filtra solo le gallerie private
+     */
+    public function scopePrivate(Builder $query): Builder
+    {
+        return $query->where('is_public', false);
+    }
+
+    /**
+     * Filtra solo le gallerie in evidenza
+     */
+    public function scopeFeatured(Builder $query): Builder
+    {
+        return $query->where('is_featured', true);
+    }
+
+    /**
+     * Filtra le gallerie per creatore
+     */
+    public function scopeByCreator(Builder $query, int $userId): Builder
+    {
+        return $query->where('created_by', $userId);
     }
 
     // MUTATORS

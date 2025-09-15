@@ -12,6 +12,30 @@ class MediaItem extends Model
     use HasFactory;
 
     /**
+     * Enum per i tipi di media
+     */
+    const TYPE_FILE = 'file';
+    const TYPE_EXTERNAL_LINK = 'external_link';
+    const TYPE_YOUTUBE = 'youtube';
+    const TYPE_VIMEO = 'vimeo';
+    const TYPE_INSTAGRAM = 'instagram';
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        // Global scope per multi-tenant security tramite gallery
+        static::addGlobalScope('school', function (Builder $builder) {
+            if (auth()->check() && auth()->user()->school_id) {
+                $builder->whereHas('mediaGallery', function ($query) {
+                    $query->where('school_id', auth()->user()->school_id);
+                });
+            }
+        });
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -19,12 +43,18 @@ class MediaItem extends Model
     protected $fillable = [
         'gallery_id',
         'user_id',
+        'type',
         'file_path',
         'file_type',
         'file_size',
+        'external_url',
+        'external_id',
+        'thumbnail_url',
         'title',
         'description',
         'order',
+        'is_featured',
+        'metadata',
     ];
 
     /**
@@ -37,6 +67,8 @@ class MediaItem extends Model
         return [
             'file_size' => 'integer',
             'order' => 'integer',
+            'is_featured' => 'boolean',
+            'metadata' => 'array',
         ];
     }
 
@@ -115,6 +147,10 @@ class MediaItem extends Model
      */
     public function getFileUrlAttribute(): ?string
     {
+        if ($this->is_external) {
+            return $this->external_url;
+        }
+
         if (!$this->file_path) {
             return null;
         }
@@ -156,7 +192,29 @@ class MediaItem extends Model
      */
     public function getIsVideoAttribute(): bool
     {
-        return str_starts_with($this->file_type, 'video/');
+        return str_starts_with($this->file_type ?? '', 'video/') ||
+               in_array($this->type, [self::TYPE_YOUTUBE, self::TYPE_VIMEO]);
+    }
+
+    /**
+     * Verifica se il media item è un link esterno
+     */
+    public function getIsExternalAttribute(): bool
+    {
+        return in_array($this->type, [
+            self::TYPE_EXTERNAL_LINK,
+            self::TYPE_YOUTUBE,
+            self::TYPE_VIMEO,
+            self::TYPE_INSTAGRAM
+        ]);
+    }
+
+    /**
+     * Verifica se il media item è un file caricato
+     */
+    public function getIsFileAttribute(): bool
+    {
+        return $this->type === self::TYPE_FILE;
     }
 
     /**
@@ -164,13 +222,28 @@ class MediaItem extends Model
      */
     public function getThumbnailUrlAttribute(): ?string
     {
-        if (!$this->is_image) {
-            return null;
+        // Se è un link esterno e ha una thumbnail URL, usala
+        if ($this->is_external && $this->thumbnail_url) {
+            return $this->thumbnail_url;
+        }
+
+        // Se è YouTube, genera la thumbnail automaticamente
+        if ($this->type === self::TYPE_YOUTUBE && $this->external_id) {
+            return "https://img.youtube.com/vi/{$this->external_id}/mqdefault.jpg";
+        }
+
+        // Se è Vimeo, usa l'API per ottenere la thumbnail (salvata in thumbnail_url)
+        if ($this->type === self::TYPE_VIMEO && $this->thumbnail_url) {
+            return $this->thumbnail_url;
+        }
+
+        if (!$this->is_image || !$this->file_path) {
+            return $this->file_url;
         }
 
         // Assumendo che le thumbnail siano salvate in una cartella specifica
         $thumbnailPath = str_replace('/media/', '/media/thumbnails/', $this->file_path);
-        
+
         if (file_exists(storage_path('app/public/' . $thumbnailPath))) {
             return asset('storage/' . $thumbnailPath);
         }
@@ -333,18 +406,18 @@ class MediaItem extends Model
      */
     public function getImageDimensions(): ?array
     {
-        if (!$this->is_image) {
+        if (!$this->is_image || $this->is_external) {
             return null;
         }
 
         $fullPath = storage_path('app/public/' . $this->file_path);
-        
+
         if (!file_exists($fullPath)) {
             return null;
         }
 
         $imageSize = getimagesize($fullPath);
-        
+
         if ($imageSize === false) {
             return null;
         }
@@ -353,5 +426,71 @@ class MediaItem extends Model
             'width' => $imageSize[0],
             'height' => $imageSize[1]
         ];
+    }
+
+    /**
+     * Ottiene l'URL embed per i video esterni
+     */
+    public function getEmbedUrlAttribute(): ?string
+    {
+        if ($this->type === self::TYPE_YOUTUBE && $this->external_id) {
+            return "https://www.youtube.com/embed/{$this->external_id}";
+        }
+
+        if ($this->type === self::TYPE_VIMEO && $this->external_id) {
+            return "https://player.vimeo.com/video/{$this->external_id}";
+        }
+
+        return null;
+    }
+
+    /**
+     * Estrae l'ID del video da un URL YouTube
+     */
+    public static function extractYouTubeId(string $url): ?string
+    {
+        $pattern = '/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/';
+        if (preg_match($pattern, $url, $matches)) {
+            return $matches[1];
+        }
+        return null;
+    }
+
+    /**
+     * Estrae l'ID del video da un URL Vimeo
+     */
+    public static function extractVimeoId(string $url): ?string
+    {
+        $pattern = '/vimeo\.com\/(?:.*#|.*\/)?([0-9]+)/';
+        if (preg_match($pattern, $url, $matches)) {
+            return $matches[1];
+        }
+        return null;
+    }
+
+    /**
+     * Ottiene i tipi di media disponibili
+     */
+    public static function getAvailableTypes(): array
+    {
+        return [
+            self::TYPE_FILE => 'File Caricato',
+            self::TYPE_EXTERNAL_LINK => 'Link Esterno',
+            self::TYPE_YOUTUBE => 'Video YouTube',
+            self::TYPE_VIMEO => 'Video Vimeo',
+            self::TYPE_INSTAGRAM => 'Post Instagram',
+        ];
+    }
+
+    /**
+     * Ottiene l'URL per la visualizzazione
+     */
+    public function getDisplayUrlAttribute(): string
+    {
+        if ($this->is_external) {
+            return $this->external_url;
+        }
+
+        return $this->file_url ?? '#';
     }
 }
