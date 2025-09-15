@@ -373,6 +373,34 @@ class Staff extends Model
     }
 
     /**
+     * Ottiene tutti i metodi di pagamento disponibili
+     */
+    public static function getAvailablePaymentMethods(): array
+    {
+        return [
+            'bank_transfer' => 'Bonifico Bancario',
+            'cash' => 'Contanti',
+            'check' => 'Assegno',
+            'paypal' => 'PayPal',
+        ];
+    }
+
+    /**
+     * Ottiene tutti i titoli disponibili
+     */
+    public static function getAvailableTitles(): array
+    {
+        return [
+            'mr' => 'Sig.',
+            'ms' => 'Sig.ra',
+            'dr' => 'Dott.',
+            'prof' => 'Prof.',
+            'maestro' => 'Maestro',
+            'maestra' => 'Maestra',
+        ];
+    }
+
+    /**
      * Ottiene tutti gli status disponibili
      */
     public static function getAvailableStatuses(): array
@@ -421,9 +449,11 @@ class Staff extends Model
     public function getCurrentWeeklyHours(): float
     {
         // Calcola le ore basate sui corsi assegnati
-        return $this->activeCourseAssignments()
-            ->join('courses', 'staff_course_assignments.course_id', '=', 'courses.id')
-            ->sum('courses.duration_hours') ?? 0;
+        // Poiché la tabella courses non ha duration_hours, usa un valore predefinito
+        $activeCourses = $this->activeCourseAssignments()->count();
+
+        // Assumiamo 3 ore per corso a settimana come default
+        return $activeCourses * 3;
     }
 
     /**
@@ -449,5 +479,84 @@ class Staff extends Model
         }
 
         return $this->getCurrentWeeklyHours() * $this->hourly_rate;
+    }
+
+    /**
+     * Alias del metodo getEstimatedWeeklyEarnings per compatibilità con le viste
+     */
+    public function estimatedWeeklyEarnings(): float
+    {
+        return $this->getEstimatedWeeklyEarnings();
+    }
+
+
+    /**
+     * Verifica se lo staff member è disponibile in un giorno specifico
+     */
+    public function isAvailableOnDay(string $day): bool
+    {
+        if (!$this->availability) {
+            return false;
+        }
+
+        $availability = is_string($this->availability)
+            ? json_decode($this->availability, true)
+            : $this->availability;
+
+        return isset($availability[$day]['available']) && $availability[$day]['available'];
+    }
+
+    /**
+     * Ottiene le ore di disponibilità per un giorno specifico
+     */
+    public function getAvailabilityForDay(string $day): ?array
+    {
+        if (!$this->isAvailableOnDay($day)) {
+            return null;
+        }
+
+        $availability = is_string($this->availability)
+            ? json_decode($this->availability, true)
+            : $this->availability;
+
+        return $availability[$day] ?? null;
+    }
+
+    /**
+     * Conta il numero totale di ore disponibili a settimana
+     */
+    public function getTotalWeeklyAvailableHours(): int
+    {
+        if (!$this->availability) {
+            return 0;
+        }
+
+        $availability = is_string($this->availability)
+            ? json_decode($this->availability, true)
+            : $this->availability;
+
+        $totalHours = 0;
+        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+        foreach ($days as $day) {
+            if (isset($availability[$day]['available']) && $availability[$day]['available']) {
+                $startTime = $availability[$day]['start_time'] ?? '09:00';
+                $endTime = $availability[$day]['end_time'] ?? '18:00';
+
+                try {
+                    $start = \Carbon\Carbon::createFromFormat('H:i', $startTime);
+                    $end = \Carbon\Carbon::createFromFormat('H:i', $endTime);
+
+                    if ($end->greaterThan($start)) {
+                        $totalHours += $start->diffInHours($end);
+                    }
+                } catch (\Exception $e) {
+                    // Se il formato dell'ora non è valido, assume 8 ore per giorno
+                    $totalHours += 8;
+                }
+            }
+        }
+
+        return $totalHours;
     }
 }

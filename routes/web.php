@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\AdminDocumentController;
 use App\Http\Controllers\Admin\SchoolUserController;
 use App\Http\Controllers\Admin\MediaGalleryController;
+use App\Http\Controllers\Admin\StaffController;
 
 // Controllers Student
 use App\Http\Controllers\Student\StudentDashboardController;
@@ -190,6 +191,14 @@ Route::middleware('auth')->group(function () {
         Route::patch('galleries/{gallery}/media/{mediaItem}', [MediaGalleryController::class, 'updateMediaItem'])->name('galleries.media.update');
         Route::delete('galleries/{gallery}/media/{mediaItem}', [MediaGalleryController::class, 'deleteMediaItem'])->name('galleries.media.delete');
         Route::post('galleries/{gallery}/cover-image', [MediaGalleryController::class, 'setCoverImage'])->name('galleries.cover-image');
+
+        // Staff management
+        Route::resource('staff', StaffController::class);
+        Route::patch('staff/{staff}/toggle-active', [StaffController::class, 'toggleActive'])->name('staff.toggle-active');
+        Route::post('staff/bulk-action', [StaffController::class, 'bulkAction'])->name('staff.bulk-action');
+        Route::get('staff-export', [StaffController::class, 'export'])->name('staff.export');
+        Route::post('staff/{staff}/assign-course', [StaffController::class, 'assignToCourse'])->name('staff.assign-course');
+        Route::delete('staff/{staff}/assignments/{assignment}', [StaffController::class, 'removeAssignment'])->name('staff.remove-assignment');
     });
     
     // STUDENT ROUTES

@@ -106,6 +106,18 @@
                 </x-nav-item>
             </x-nav-group>
             
+            <x-nav-group title="Staff" icon="user-group">
+                <x-nav-item href="{{ route('admin.staff.index') }}" :active="request()->routeIs('admin.staff.*')" icon="users">
+                    Gestione Staff
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('admin.schedules.*')" icon="calendar">
+                    Orari & Turni
+                </x-nav-item>
+                <x-nav-item href="#" :active="request()->routeIs('admin.payroll.*')" icon="calculator">
+                    Buste Paga
+                </x-nav-item>
+            </x-nav-group>
+
             <x-nav-group title="Gestione" icon="briefcase">
                 <x-nav-item href="{{ route('admin.payments.index') }}" :active="request()->routeIs('admin.payments.*')" icon="credit-card">
                     Pagamenti
