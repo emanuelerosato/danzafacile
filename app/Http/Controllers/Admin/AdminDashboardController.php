@@ -90,12 +90,49 @@ class AdminDashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Quick stats for dashboard cards
+        $quickStats = [
+            [
+                'title' => 'Studenti Totali',
+                'value' => number_format($stats['students_total']),
+                'icon' => 'fas fa-user-graduate',
+                'color' => 'blue',
+                'subtitle' => 'Attivi: ' . number_format($stats['students_active']),
+                'change' => $stats['students_active'] > 0 ? '+' . number_format(($stats['students_active'] / max($stats['students_total'], 1)) * 100, 1) . '%' : '0%'
+            ],
+            [
+                'title' => 'Corsi Attivi',
+                'value' => number_format($stats['courses_active']),
+                'icon' => 'fas fa-book-open',
+                'color' => 'green',
+                'subtitle' => 'Totali: ' . number_format($stats['courses_total']),
+                'change' => $stats['courses_total'] > 0 ? '+' . number_format(($stats['courses_active'] / max($stats['courses_total'], 1)) * 100, 1) . '%' : '0%'
+            ],
+            [
+                'title' => 'Fatturato Totale',
+                'value' => '€' . number_format($stats['revenue_total'], 2),
+                'icon' => 'fas fa-euro-sign',
+                'color' => 'purple',
+                'subtitle' => 'Questo mese: €' . number_format($stats['revenue_this_month'], 2),
+                'change' => $stats['revenue_this_month'] > 0 ? '+€' . number_format($stats['revenue_this_month'], 2) : '€0'
+            ],
+            [
+                'title' => 'Documenti Pending',
+                'value' => number_format($stats['documents_pending']),
+                'icon' => 'fas fa-file-alt',
+                'color' => 'orange',
+                'subtitle' => 'Da approvare',
+                'change' => $stats['documents_pending'] > 0 ? 'Attenzione' : 'Tutto OK'
+            ]
+        ];
+
         return view('admin.dashboard', compact(
-            'school', 
-            'stats', 
-            'recent_enrollments', 
-            'recent_payments', 
-            'pending_documents', 
+            'school',
+            'stats',
+            'quickStats',
+            'recent_enrollments',
+            'recent_payments',
+            'pending_documents',
             'upcoming_courses'
         ));
     }
