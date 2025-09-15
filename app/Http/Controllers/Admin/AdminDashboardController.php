@@ -97,6 +97,39 @@ class AdminDashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Analytics data for charts
+        $analytics = [
+            'monthly_revenue' => Payment::whereHas('user', function($q) use ($school) {
+                $q->where('school_id', $school->id);
+            })->where('status', 'completed')
+            ->selectRaw('MONTH(payment_date) as month, SUM(amount) as revenue')
+            ->whereYear('payment_date', now()->year)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'month' => now()->month($item->month)->format('M'),
+                    'revenue' => (float) $item->revenue
+                ];
+            }),
+
+            'enrollment_trends' => CourseEnrollment::whereHas('course', function($q) use ($school) {
+                $q->where('school_id', $school->id);
+            })
+            ->selectRaw('MONTH(enrollment_date) as month, COUNT(*) as count')
+            ->whereYear('enrollment_date', now()->year)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->map(function($item) {
+                return [
+                    'month' => now()->month($item->month)->format('M'),
+                    'count' => (int) $item->count
+                ];
+            })
+        ];
+
         // Quick stats for dashboard cards
         $quickStats = [
             [
@@ -141,7 +174,8 @@ class AdminDashboardController extends Controller
             'recentPayments',
             'pendingDocuments',
             'upcomingCourses',
-            'upcomingEvents'
+            'upcomingEvents',
+            'analytics'
         ));
     }
 
