@@ -372,6 +372,27 @@ Route::prefix('mobile/v1')->middleware('throttle:120,1')->group(function () {
                 ]
             ]);
         });
+
+        // EVENTS API - Available to all authenticated users
+        Route::prefix('events')->group(function () {
+            Route::get('/', [App\Http\Controllers\Api\EventController::class, 'index']);
+            Route::get('/categories', [App\Http\Controllers\Api\EventController::class, 'categories']);
+            Route::get('/{event}', [App\Http\Controllers\Api\EventController::class, 'show']);
+            Route::post('/{event}/register', [App\Http\Controllers\Api\EventController::class, 'register']);
+            Route::delete('/{event}/cancel', [App\Http\Controllers\Api\EventController::class, 'cancelRegistration']);
+        });
+
+        Route::get('/my-events', [App\Http\Controllers\Api\EventController::class, 'myEvents']);
+
+        // ATTENDANCE API - Available to all authenticated users
+        Route::prefix('attendance')->group(function () {
+            Route::get('/my-attendance', [App\Http\Controllers\Api\AttendanceController::class, 'myAttendance']);
+            Route::get('/my-stats', [App\Http\Controllers\Api\AttendanceController::class, 'myStats']);
+            Route::get('/upcoming-sessions', [App\Http\Controllers\Api\AttendanceController::class, 'upcomingSessions']);
+            Route::post('/check-in', [App\Http\Controllers\Api\AttendanceController::class, 'checkIn']);
+            Route::post('/qr-code', [App\Http\Controllers\Api\AttendanceController::class, 'generateQrCode']);
+            Route::post('/qr-check-in', [App\Http\Controllers\Api\AttendanceController::class, 'qrCheckIn'])->middleware('role:admin');
+        });
     });
 });
 
