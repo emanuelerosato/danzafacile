@@ -103,6 +103,14 @@ class Document extends Model
     }
 
     /**
+     * Ottiene l'utente che ha caricato il documento (alias di uploadedBy per compatibilità)
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    /**
      * Ottiene la scuola a cui appartiene il documento
      */
     public function school(): BelongsTo
