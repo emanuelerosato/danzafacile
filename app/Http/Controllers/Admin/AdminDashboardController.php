@@ -17,6 +17,14 @@ class AdminDashboardController extends Controller
      */
     public function index()
     {
+        return $this->dashboard();
+    }
+
+    /**
+     * Display Admin dashboard for specific school (alternative route)
+     */
+    public function dashboard()
+    {
         $user = auth()->user();
         $school = $user->school;
 
