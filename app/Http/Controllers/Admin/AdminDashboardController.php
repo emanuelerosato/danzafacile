@@ -8,6 +8,7 @@ use App\Models\CourseEnrollment;
 use App\Models\User;
 use App\Models\Payment;
 use App\Models\Document;
+use App\Models\Event;
 use Illuminate\Http\Request;
 
 class AdminDashboardController extends Controller
@@ -90,6 +91,12 @@ class AdminDashboardController extends Controller
             ->take(5)
             ->get();
 
+        $upcomingEvents = Event::where('school_id', $school->id)
+            ->where('start_date', '>', now())
+            ->orderBy('start_date')
+            ->take(5)
+            ->get();
+
         // Quick stats for dashboard cards
         $quickStats = [
             [
@@ -133,7 +140,8 @@ class AdminDashboardController extends Controller
             'recentEnrollments',
             'recentPayments',
             'pendingDocuments',
-            'upcomingCourses'
+            'upcomingCourses',
+            'upcomingEvents'
         ));
     }
 
