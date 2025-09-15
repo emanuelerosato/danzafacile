@@ -36,7 +36,9 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Accademia Danza Eleganza',
                 'description' => 'La scuola di danza più prestigiosa di Milano, specializzata in danza classica e moderna',
-                'address' => 'Via Brera 15, 20121 Milano MI',
+                'address' => 'Via Brera 15',
+                'city' => 'Milano',
+                'postal_code' => '20121',
                 'phone' => '+39 02 1234567',
                 'email' => 'info@eleganza.it',
                 'active' => true,
@@ -44,7 +46,9 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Centro Danza Roma',
                 'description' => 'Scuola di danza nel cuore di Roma con corsi per tutte le età',
-                'address' => 'Via del Corso 45, 00186 Roma RM',
+                'address' => 'Via del Corso 45',
+                'city' => 'Roma',
+                'postal_code' => '00186',
                 'phone' => '+39 06 9876543',
                 'email' => 'contatti@centrodanzaroma.it',
                 'active' => true,
@@ -52,7 +56,9 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Studio Danza Firenze',
                 'description' => 'Corsi di danza contemporanea e hip hop nel centro storico di Firenze',
-                'address' => 'Piazza della Signoria 12, 50122 Firenze FI',
+                'address' => 'Piazza della Signoria 12',
+                'city' => 'Firenze',
+                'postal_code' => '50122',
                 'phone' => '+39 055 5555555',
                 'email' => 'info@studiodanzafirenze.it',
                 'active' => true,
