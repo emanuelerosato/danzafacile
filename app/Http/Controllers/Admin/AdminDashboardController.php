@@ -58,7 +58,7 @@ class AdminDashboardController extends Controller
         ];
 
         // Recent activities
-        $recent_enrollments = CourseEnrollment::with(['user', 'course'])
+        $recentEnrollments = CourseEnrollment::with(['user', 'course'])
             ->whereHas('course', function($q) use ($school) {
                 $q->where('school_id', $school->id);
             })
@@ -66,7 +66,7 @@ class AdminDashboardController extends Controller
             ->take(5)
             ->get();
 
-        $recent_payments = Payment::with('user')
+        $recentPayments = Payment::with('user')
             ->whereHas('user', function($q) use ($school) {
                 $q->where('school_id', $school->id);
             })
@@ -74,7 +74,7 @@ class AdminDashboardController extends Controller
             ->take(5)
             ->get();
 
-        $pending_documents = Document::with('user')
+        $pendingDocuments = Document::with('user')
             ->whereHas('user', function($q) use ($school) {
                 $q->where('school_id', $school->id);
             })
@@ -83,7 +83,7 @@ class AdminDashboardController extends Controller
             ->take(5)
             ->get();
 
-        $upcoming_courses = Course::where('school_id', $school->id)
+        $upcomingCourses = Course::where('school_id', $school->id)
             ->where('active', true)
             ->where('start_date', '>', now())
             ->orderBy('start_date')
@@ -130,10 +130,10 @@ class AdminDashboardController extends Controller
             'school',
             'stats',
             'quickStats',
-            'recent_enrollments',
-            'recent_payments',
-            'pending_documents',
-            'upcoming_courses'
+            'recentEnrollments',
+            'recentPayments',
+            'pendingDocuments',
+            'upcomingCourses'
         ));
     }
 
