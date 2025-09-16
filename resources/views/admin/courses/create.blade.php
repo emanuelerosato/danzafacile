@@ -30,33 +30,34 @@
             <!-- Basic Information -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
-                        Titolo Corso *
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Nome Corso *
                     </label>
-                    <input type="text" name="title" id="title" required
+                    <input type="text" name="name" id="name" required
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                            placeholder="Es. Danza Classica Livello Base"
-                           value="{{ old('title') }}">
-                    @error('title')
+                           value="{{ old('name') }}">
+                    @error('name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
-                    <label for="type" class="block text-sm font-medium text-gray-700 mb-2">
-                        Tipo di Corso *
+                    <label for="instructor_id" class="block text-sm font-medium text-gray-700 mb-2">
+                        Istruttore
                     </label>
-                    <select name="type" id="type" required
+                    <select name="instructor_id" id="instructor_id"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">Seleziona tipo</option>
-                        <option value="classica" {{ old('type') == 'classica' ? 'selected' : '' }}>Danza Classica</option>
-                        <option value="moderna" {{ old('type') == 'moderna' ? 'selected' : '' }}>Danza Moderna</option>
-                        <option value="jazz" {{ old('type') == 'jazz' ? 'selected' : '' }}>Jazz</option>
-                        <option value="hip_hop" {{ old('type') == 'hip_hop' ? 'selected' : '' }}>Hip Hop</option>
-                        <option value="latino" {{ old('type') == 'latino' ? 'selected' : '' }}>Latino</option>
-                        <option value="altro" {{ old('type') == 'altro' ? 'selected' : '' }}>Altro</option>
+                        <option value="">Seleziona istruttore</option>
+                        @if(isset($instructors))
+                            @foreach($instructors as $instructor)
+                                <option value="{{ $instructor->id }}" {{ old('instructor_id') == $instructor->id ? 'selected' : '' }}>
+                                    {{ $instructor->name }}
+                                </option>
+                            @endforeach
+                        @endif
                     </select>
-                    @error('type')
+                    @error('instructor_id')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
@@ -84,9 +85,9 @@
                     <select name="level" id="level" required
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <option value="">Seleziona livello</option>
-                        <option value="principiante" {{ old('level') == 'principiante' ? 'selected' : '' }}>Principiante</option>
-                        <option value="intermedio" {{ old('level') == 'intermedio' ? 'selected' : '' }}>Intermedio</option>
-                        <option value="avanzato" {{ old('level') == 'avanzato' ? 'selected' : '' }}>Avanzato</option>
+                        <option value="beginner" {{ old('level') == 'beginner' ? 'selected' : '' }}>Principiante</option>
+                        <option value="intermediate" {{ old('level') == 'intermediate' ? 'selected' : '' }}>Intermedio</option>
+                        <option value="advanced" {{ old('level') == 'advanced' ? 'selected' : '' }}>Avanzato</option>
                     </select>
                     @error('level')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -172,17 +173,33 @@
                 </div>
             </div>
 
-            <!-- Notes -->
-            <div>
-                <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
-                    Note Aggiuntive
-                </label>
-                <textarea name="notes" id="notes" rows="3"
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="Eventuali note, requisiti o informazioni aggiuntive...">{{ old('notes') }}</textarea>
-                @error('notes')
-                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                @enderror
+            <!-- Duration -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="duration_weeks" class="block text-sm font-medium text-gray-700 mb-2">
+                        Durata (settimane)
+                    </label>
+                    <input type="number" name="duration_weeks" id="duration_weeks" min="1" max="52"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="12"
+                           value="{{ old('duration_weeks', 12) }}">
+                    @error('duration_weeks')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="schedule" class="block text-sm font-medium text-gray-700 mb-2">
+                        Programma/Orari
+                    </label>
+                    <input type="text" name="schedule" id="schedule"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                           placeholder="Es. Lun-Mer-Ven 18:00-19:30"
+                           value="{{ old('schedule') }}">
+                    @error('schedule')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
             </div>
 
             <!-- Form Actions -->
