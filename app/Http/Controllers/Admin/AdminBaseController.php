@@ -15,19 +15,7 @@ abstract class AdminBaseController extends Controller
 
     public function __construct()
     {
-        // Auto-initialize school context on first access
-        $this->middleware(function ($request, $next) {
-            if (auth()->check()) {
-                $this->user = auth()->user();
-                $this->school = $this->user->school;
-
-                if ($this->school) {
-                    view()->share('currentSchool', $this->school);
-                }
-                view()->share('currentUser', $this->user);
-            }
-            return $next($request);
-        });
+        // Initialize context will be called by magic getter when needed
     }
 
     /**
@@ -47,6 +35,14 @@ abstract class AdminBaseController extends Controller
             view()->share('currentSchool', $this->school);
         }
         view()->share('currentUser', $this->user);
+    }
+
+    /**
+     * Call this method at the beginning of every controller action
+     */
+    protected function setupContext(): void
+    {
+        $this->initializeSchoolContext();
     }
 
     /**
