@@ -97,6 +97,7 @@ class AdminCourseController extends AdminBaseController
             'end_date' => 'required|date|after:start_date',
             'schedule' => 'nullable|string|max:500',
             'location' => 'nullable|string|max:255',
+            'duration_weeks' => 'nullable|integer|min:1|max:52',
             'active' => 'boolean'
         ]);
 
@@ -113,7 +114,7 @@ class AdminCourseController extends AdminBaseController
             ]);
         }
 
-        return redirect()->route('admin.courses.show', $course)
+        return redirect()->route('admin.courses.index')
                         ->with('success', 'Corso creato con successo.');
     }
 
