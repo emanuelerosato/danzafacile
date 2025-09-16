@@ -10,12 +10,12 @@ use Illuminate\Support\Facades\Cache;
 
 abstract class AdminBaseController extends Controller
 {
-    protected $school;
-    protected $user;
+    private $school;
+    private $user;
 
     public function __construct()
     {
-        // Initialize context will be called by magic getter when needed
+        // Initialize context will be set up when needed
     }
 
     /**
@@ -46,9 +46,9 @@ abstract class AdminBaseController extends Controller
     }
 
     /**
-     * Get the school property, auto-initializing if needed
+     * Get school property with lazy initialization
      */
-    protected function getSchool()
+    public function getSchoolProperty()
     {
         if (!$this->school) {
             $this->initializeSchoolContext();
@@ -57,9 +57,9 @@ abstract class AdminBaseController extends Controller
     }
 
     /**
-     * Get the user property, auto-initializing if needed
+     * Get user property with lazy initialization
      */
-    protected function getUser()
+    public function getUserProperty()
     {
         if (!$this->user) {
             $this->initializeSchoolContext();
@@ -68,16 +68,22 @@ abstract class AdminBaseController extends Controller
     }
 
     /**
-     * Magic getter to auto-initialize context
+     * Magic getter to auto-initialize context when accessed
      */
     public function __get($property)
     {
         if ($property === 'school') {
-            return $this->getSchool();
+            if (!$this->school) {
+                $this->initializeSchoolContext();
+            }
+            return $this->school;
         }
 
         if ($property === 'user') {
-            return $this->getUser();
+            if (!$this->user) {
+                $this->initializeSchoolContext();
+            }
+            return $this->user;
         }
 
         return null;
