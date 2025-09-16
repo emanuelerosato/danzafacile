@@ -15,18 +15,76 @@ abstract class AdminBaseController extends Controller
 
     public function __construct()
     {
-        $this->middleware(['auth', 'role:admin', 'school.ownership']);
-
+        // Auto-initialize school context on first access
         $this->middleware(function ($request, $next) {
-            $this->user = Auth::user();
-            $this->school = $this->user->school;
+            if (auth()->check()) {
+                $this->user = auth()->user();
+                $this->school = $this->user->school;
 
-            // Share school context with all views
-            view()->share('currentSchool', $this->school);
-            view()->share('currentUser', $this->user);
-
+                if ($this->school) {
+                    view()->share('currentSchool', $this->school);
+                }
+                view()->share('currentUser', $this->user);
+            }
             return $next($request);
         });
+    }
+
+    /**
+     * Initialize school context for the current request
+     */
+    protected function initializeSchoolContext(): void
+    {
+        if (!$this->user) {
+            $this->user = Auth::user();
+        }
+        if (!$this->school && $this->user) {
+            $this->school = $this->user->school ?? null;
+        }
+
+        // Share school context with all views
+        if ($this->school) {
+            view()->share('currentSchool', $this->school);
+        }
+        view()->share('currentUser', $this->user);
+    }
+
+    /**
+     * Get the school property, auto-initializing if needed
+     */
+    protected function getSchool()
+    {
+        if (!$this->school) {
+            $this->initializeSchoolContext();
+        }
+        return $this->school;
+    }
+
+    /**
+     * Get the user property, auto-initializing if needed
+     */
+    protected function getUser()
+    {
+        if (!$this->user) {
+            $this->initializeSchoolContext();
+        }
+        return $this->user;
+    }
+
+    /**
+     * Magic getter to auto-initialize context
+     */
+    public function __get($property)
+    {
+        if ($property === 'school') {
+            return $this->getSchool();
+        }
+
+        if ($property === 'user') {
+            return $this->getUser();
+        }
+
+        return null;
     }
 
     /**

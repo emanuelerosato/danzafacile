@@ -48,23 +48,15 @@ class Document extends Model
      */
     protected $fillable = [
         'school_id',
-        'uploaded_by',
-        'title',
-        'description',
-        'original_filename',
-        'stored_filename',
+        'user_id',
+        'course_id',
+        'name',
         'file_path',
-        'mime_type',
+        'file_type',
         'file_size',
         'category',
         'status',
-        'approved_by',
-        'approved_at',
-        'rejection_reason',
-        'is_public',
-        'requires_approval',
-        'metadata',
-        'expires_at',
+        'uploaded_at',
     ];
 
     /**
@@ -91,7 +83,7 @@ class Document extends Model
      */
     public function uploadedBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'uploaded_by');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
@@ -107,7 +99,7 @@ class Document extends Model
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'uploaded_by');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
@@ -167,7 +159,7 @@ class Document extends Model
      */
     public function scopeByUploader(Builder $query, int $userId): Builder
     {
-        return $query->where('uploaded_by', $userId);
+        return $query->where('user_id', $userId);
     }
 
     /**
@@ -426,9 +418,7 @@ class Document extends Model
     public function approve(?User $approver = null): bool
     {
         $this->status = self::STATUS_APPROVED;
-        $this->approved_at = now();
-        $this->approved_by = $approver?->id ?? auth()->id();
-        $this->rejection_reason = null;
+        $this->uploaded_at = now();
         return $this->save();
     }
 
@@ -438,9 +428,6 @@ class Document extends Model
     public function reject(?string $reason = null, ?User $rejector = null): bool
     {
         $this->status = self::STATUS_REJECTED;
-        $this->rejection_reason = $reason;
-        $this->approved_at = null;
-        $this->approved_by = null;
         return $this->save();
     }
 

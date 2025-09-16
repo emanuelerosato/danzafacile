@@ -1,5 +1,5 @@
-<x-app-layout>
-    <x-slot name="header">
+@extends('layouts.app')
+    @section('content')
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -27,7 +27,7 @@
                 </button>
             </div>
         </div>
-    </x-slot>
+    @endsection
 
     <x-slot name="breadcrumb">
         <li class="flex items-center">
@@ -49,7 +49,7 @@
             </svg>
         </li>
         <li class="text-gray-900 font-medium">Modifica</li>
-    </x-slot>
+    @endsection
 
     <div class="space-y-6">
         <!-- Course Status Alert -->
@@ -799,4 +799,4 @@
             </div>
         </div>
     </x-modal>
-</x-app-layout>
+@endsection

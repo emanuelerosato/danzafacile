@@ -1,5 +1,5 @@
-<x-app-layout>
-    <x-slot name="header">
+@extends('layouts.app')
+    @section('content')
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -66,7 +66,7 @@
                 </div>
             </div>
         </div>
-    </x-slot>
+    @endsection
 
     <x-slot name="breadcrumb">
         <li class="flex items-center">
@@ -76,7 +76,7 @@
             </svg>
         </li>
         <li class="text-gray-900 font-medium">Admin</li>
-    </x-slot>
+    @endsection
 
     <div class="space-y-6">
         <!-- Stats Cards -->
@@ -562,4 +562,4 @@
         // Auto refresh every 5 minutes
         setInterval(refreshDashboard, 300000);
     </script>
-</x-app-layout>
+@endsection

@@ -69,12 +69,12 @@
             
         @elseif(Auth::user()->role === 'admin')
             <!-- Admin Menu -->
-            <x-nav-item href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" icon="home">
+            <x-nav-item href="{{ route('admin.dashboard') }}" :active="request()->routeIs('admin.dashboard')" icon="home">
                 Dashboard
             </x-nav-item>
             
             <x-nav-group title="Gestione Corsi" icon="academic-cap">
-                <x-nav-item href="#" :active="request()->routeIs('admin.courses.*')" icon="book-open">
+                <x-nav-item href="{{ route('admin.courses.index') }}" :active="request()->routeIs('admin.courses.*')" icon="book-open">
                     Corsi
                 </x-nav-item>
                 <x-nav-item href="#" :active="request()->routeIs('admin.schedules.*')" icon="calendar">
@@ -89,7 +89,7 @@
                 <x-nav-item href="{{ route('admin.students.index') }}" :active="request()->routeIs('admin.students.*')" icon="user">
                     Lista Studenti
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('admin.enrollments.*')" icon="clipboard-check">
+                <x-nav-item href="{{ route('admin.enrollments.index') }}" :active="request()->routeIs('admin.enrollments.*')" icon="clipboard-check">
                     Iscrizioni
                 </x-nav-item>
                 <x-nav-item href="{{ route('admin.attendance.index') }}" :active="request()->routeIs('admin.attendance.*')" icon="check-circle">

@@ -1,79 +1,113 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Gestione Studenti
-                </h2>
-                <p class="text-sm text-gray-600 mt-1">
-                    Tutti gli studenti iscritti alla scuola di danza
-                </p>
-            </div>
-            <div class="flex items-center space-x-3">
-                <button @click="$dispatch('open-modal', 'bulk-actions')" 
-                        class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                    </svg>
-                    Azioni Multiple
-                </button>
-                <a href="{{ route('admin.users.export') }}" 
-                   class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Esporta CSV
-                </a>
-            </div>
-        </div>
-    </x-slot>
+@extends('layouts.app')
 
-    <x-slot name="breadcrumb">
-        <li class="flex items-center">
-            <a href="{{ route('dashboard') }}" class="text-gray-500 hover:text-gray-700">Dashboard</a>
-            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-        </li>
-        <li class="text-gray-900 font-medium">Studenti</li>
-    </x-slot>
+@section('content')
+<div class="container mx-auto px-4 py-6">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                Gestione Studenti
+            </h2>
+            <p class="text-sm text-gray-600 mt-1">
+                Tutti gli studenti iscritti alla scuola di danza
+            </p>
+        </div>
+        <div class="flex items-center space-x-3">
+            <button onclick="openBulkActionsModal()"
+                    class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                </svg>
+                Azioni Multiple
+            </button>
+            <a href="{{ route('admin.users.export') }}"
+               class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Esporta CSV
+            </a>
+        </div>
+    </div>
 
     <div class="space-y-6">
         <!-- Quick Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <x-stats-card 
-                title="Totale Studenti"
-                :value="$stats['total'] ?? 0"
-                icon="users"
-                color="rose"
-                :subtitle="($stats['active'] ?? 0) . ' attivi, ' . ($stats['inactive'] ?? 0) . ' non attivi'"
-            />
-            
-            <x-stats-card 
-                title="Nuove Iscrizioni"
-                :value="$stats['new_enrollments'] ?? 0"
-                icon="academic-cap"
-                color="purple"
-                :change="$stats['enrollment_change'] ?? null"
-                changeType="increase"
-                subtitle="Questo mese"
-            />
-            
-            <x-stats-card 
-                title="Pagamenti in Sospeso"
-                :value="$stats['pending_payments'] ?? 0"
-                icon="currency-dollar"
-                color="orange"
-                subtitle="Richieste di pagamento"
-            />
-            
-            <x-stats-card 
-                title="Tasso Attività"
-                :value="($stats['activity_rate'] ?? 0) . '%'"
-                icon="chart-bar"
-                color="blue"
-                subtitle="Studenti attivi su totale"
-            />
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-rose-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Totale Studenti</dt>
+                            <dd class="text-lg font-medium text-gray-900">{{ $stats['total'] ?? 0 }}</dd>
+                            <dd class="text-sm text-gray-500">{{ ($stats['active'] ?? 0) }} attivi, {{ ($stats['inactive'] ?? 0) }} non attivi</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Nuove Iscrizioni</dt>
+                            <dd class="text-lg font-medium text-gray-900">{{ $stats['new_enrollments'] ?? 0 }}</dd>
+                            <dd class="text-sm text-gray-500">Questo mese</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Pagamenti in Sospeso</dt>
+                            <dd class="text-lg font-medium text-gray-900">{{ $stats['pending_payments'] ?? 0 }}</dd>
+                            <dd class="text-sm text-gray-500">Richieste di pagamento</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Tasso Attività</dt>
+                            <dd class="text-lg font-medium text-gray-900">{{ ($stats['activity_rate'] ?? 0) }}%</dd>
+                            <dd class="text-sm text-gray-500">Studenti attivi su totale</dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Filters and Search -->
@@ -303,16 +337,16 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                             </svg>
                                         </a>
-                                        <div class="relative" x-data="{ open: false }">
-                                            <button @click="open = !open" 
+                                        <div class="relative">
+                                            <button onclick="toggleDropdown({{ $user->id }})"
                                                     class="text-gray-400 hover:text-gray-600 transition-colors duration-200"
                                                     title="Altre azioni">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
                                                 </svg>
                                             </button>
-                                            
-                                            <div x-show="open" @click.away="open = false" x-transition
+
+                                            <div id="dropdown-{{ $user->id }}" style="display: none;"
                                                  class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                                                 <div class="py-1">
                                                     @if($user->status !== 'active')
@@ -387,17 +421,22 @@
     </div>
 
     <!-- Bulk Actions Modal -->
-    <x-modal name="bulk-actions" maxWidth="lg">
-        <div class="p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">Azioni Multiple</h3>
-                <button @click="$dispatch('close-modal', 'bulk-actions')" 
-                        class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
+    <div id="bulk-actions-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50" onclick="closeBulkActionsModal()">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full" onclick="event.stopPropagation()">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Azioni Multiple</h3>
+                        <button onclick="closeBulkActionsModal()"
+                                class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
             
             <div class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
@@ -432,13 +471,32 @@
                         </svg>
                         Elimina Selezionati
                     </button>
+                    </div>
                 </div>
             </div>
         </div>
-    </x-modal>
+    </div>
+</div>
 
     @push('scripts')
     <script>
+        function openBulkActionsModal() {
+            document.getElementById('bulk-actions-modal').classList.remove('hidden');
+        }
+
+        function closeBulkActionsModal() {
+            document.getElementById('bulk-actions-modal').classList.add('hidden');
+        }
+
+        function toggleDropdown(userId) {
+            const dropdown = document.getElementById('dropdown-' + userId);
+            if (dropdown.style.display === 'none') {
+                dropdown.style.display = 'block';
+            } else {
+                dropdown.style.display = 'none';
+            }
+        }
+
         function toggleSelectAll(checkbox) {
             const userCheckboxes = document.querySelectorAll('.user-checkbox');
             userCheckboxes.forEach(cb => {
@@ -534,9 +592,9 @@
                 form.submit();
                 document.body.removeChild(form);
             }
-            
+
             // Close modal
-            document.dispatchEvent(new CustomEvent('close-modal', { detail: 'bulk-actions' }));
+            closeBulkActionsModal();
         }
 
         function resetFilters() {
@@ -544,4 +602,5 @@
         }
     </script>
     @endpush
-</x-app-layout>
+</div>
+@endsection
