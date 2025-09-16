@@ -77,10 +77,10 @@
                 <x-nav-item href="{{ route('admin.courses.index') }}" :active="request()->routeIs('admin.courses.*')" icon="book-open">
                     Corsi
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('admin.schedules.*')" icon="calendar">
+                <x-nav-item href="{{ route('admin.courses.index') }}" :active="request()->routeIs('admin.schedules.*')" icon="calendar">
                     Orari
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('admin.instructors.*')" icon="user-group">
+                <x-nav-item href="{{ route('admin.staff.index') }}" :active="request()->routeIs('admin.staff.*')" icon="user-group">
                     Istruttori
                 </x-nav-item>
             </x-nav-group>
