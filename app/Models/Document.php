@@ -68,11 +68,7 @@ class Document extends Model
     {
         return [
             'file_size' => 'integer',
-            'is_public' => 'boolean',
-            'requires_approval' => 'boolean',
-            'metadata' => 'array',
-            'approved_at' => 'datetime',
-            'expires_at' => 'datetime',
+            'uploaded_at' => 'datetime',
         ];
     }
 
@@ -163,46 +159,48 @@ class Document extends Model
     }
 
     /**
-     * Filtra i documenti pubblici
+     * Filtra i documenti pubblici (placeholder - nessuna logica di visibilità)
      */
     public function scopePublic(Builder $query): Builder
     {
-        return $query->where('is_public', true);
+        // Tutti i documenti sono considerati privati nella struttura attuale
+        return $query->whereRaw('1 = 0'); // Restituisce sempre zero documenti
     }
 
     /**
-     * Filtra i documenti privati
+     * Filtra i documenti privati (placeholder - nessuna logica di visibilità)
      */
     public function scopePrivate(Builder $query): Builder
     {
-        return $query->where('is_public', false);
+        // Tutti i documenti sono considerati privati nella struttura attuale
+        return $query; // Restituisce tutti i documenti
     }
 
     /**
-     * Filtra i documenti che richiedono approvazione
+     * Filtra i documenti che richiedono approvazione (tutti richiedono approvazione)
      */
     public function scopeRequiringApproval(Builder $query): Builder
     {
-        return $query->where('requires_approval', true);
+        // Tutti i documenti richiedono approvazione nella struttura attuale
+        return $query; // Restituisce tutti i documenti
     }
 
     /**
-     * Filtra i documenti scaduti
+     * Filtra i documenti scaduti (placeholder - nessuna logica di scadenza)
      */
     public function scopeExpired(Builder $query): Builder
     {
-        return $query->where('expires_at', '<', now());
+        // Nessun documento ha scadenza nella struttura attuale
+        return $query->whereRaw('1 = 0'); // Restituisce sempre zero documenti
     }
 
     /**
-     * Filtra i documenti non scaduti
+     * Filtra i documenti non scaduti (placeholder - nessuna logica di scadenza)
      */
     public function scopeNotExpired(Builder $query): Builder
     {
-        return $query->where(function($q) {
-            $q->whereNull('expires_at')
-              ->orWhere('expires_at', '>=', now());
-        });
+        // Tutti i documenti sono considerati non scaduti
+        return $query; // Restituisce tutti i documenti
     }
 
     /**
@@ -214,27 +212,27 @@ class Document extends Model
     }
 
     /**
-     * Filtra i documenti per MIME type
+     * Filtra i documenti per tipo di file (usa file_type invece di mime_type)
      */
-    public function scopeByMimeType(Builder $query, string $mimeType): Builder
+    public function scopeByFileType(Builder $query, string $fileType): Builder
     {
-        return $query->where('mime_type', $mimeType);
+        return $query->where('file_type', $fileType);
     }
 
     /**
-     * Filtra solo i documenti immagine
+     * Filtra solo i documenti immagine (usa file_type)
      */
     public function scopeImages(Builder $query): Builder
     {
-        return $query->where('mime_type', 'like', 'image/%');
+        return $query->whereIn('file_type', ['jpg', 'jpeg', 'png', 'gif', 'webp']);
     }
 
     /**
-     * Filtra solo i documenti PDF
+     * Filtra solo i documenti PDF (usa file_type)
      */
     public function scopePdfs(Builder $query): Builder
     {
-        return $query->where('mime_type', 'application/pdf');
+        return $query->where('file_type', 'pdf');
     }
 
     /**
@@ -281,35 +279,35 @@ class Document extends Model
     }
 
     /**
-     * Verifica se il documento è un'immagine
+     * Verifica se il documento è un'immagine (usa file_type)
      */
     public function getIsImageAttribute(): bool
     {
-        return str_starts_with($this->mime_type ?? '', 'image/');
+        return in_array(strtolower($this->file_type ?? ''), ['jpg', 'jpeg', 'png', 'gif', 'webp']);
     }
 
     /**
-     * Verifica se il documento è un PDF
+     * Verifica se il documento è un PDF (usa file_type)
      */
     public function getIsPdfAttribute(): bool
     {
-        return $this->mime_type === 'application/pdf';
+        return strtolower($this->file_type ?? '') === 'pdf';
     }
 
     /**
-     * Verifica se il documento è scaduto
+     * Verifica se il documento è scaduto (sempre false - nessuna logica di scadenza)
      */
     public function getIsExpiredAttribute(): bool
     {
-        return $this->expires_at && $this->expires_at->isPast();
+        return false; // Nessun documento ha scadenza nella struttura attuale
     }
 
     /**
-     * Verifica se il documento richiede approvazione
+     * Verifica se il documento richiede approvazione (sempre true)
      */
     public function getRequiresApprovalAttribute(): bool
     {
-        return (bool) $this->attributes['requires_approval'];
+        return true; // Tutti i documenti richiedono approvazione nella struttura attuale
     }
 
     /**
@@ -329,7 +327,7 @@ class Document extends Model
     }
 
     /**
-     * Ottiene l'icona basata sul MIME type
+     * Ottiene l'icona basata sul tipo di file
      */
     public function getFileIconAttribute(): string
     {
@@ -341,12 +339,12 @@ class Document extends Model
             return 'fas fa-file-pdf';
         }
 
-        return match($this->mime_type) {
-            'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'fas fa-file-word',
-            'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'fas fa-file-excel',
-            'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'fas fa-file-powerpoint',
-            'application/zip', 'application/x-rar-compressed', 'application/x-7z-compressed' => 'fas fa-file-archive',
-            'text/plain' => 'fas fa-file-alt',
+        return match(strtolower($this->file_type ?? '')) {
+            'doc', 'docx' => 'fas fa-file-word',
+            'xls', 'xlsx' => 'fas fa-file-excel',
+            'ppt', 'pptx' => 'fas fa-file-powerpoint',
+            'zip', 'rar', '7z' => 'fas fa-file-archive',
+            'txt' => 'fas fa-file-alt',
             default => 'fas fa-file'
         };
     }
