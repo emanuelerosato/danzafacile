@@ -11,15 +11,6 @@ use Carbon\Carbon;
 
 class StaffScheduleController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            if (!Auth::check() || Auth::user()->role !== 'admin') {
-                abort(403, 'Accesso negato');
-            }
-            return $next($request);
-        });
-    }
 
     public function index(Request $request)
     {
