@@ -1,7 +1,30 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    Gestione Iscrizioni
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">
+                    Gestione iscrizioni della tua scuola
+                </p>
+            </div>
+        </div>
+    </x-slot>
 
-@section('content')
-<div class="container mx-auto px-4 py-6">
+    <x-slot name="breadcrumb">
+        <li class="flex items-center">
+            <a href="{{ route('admin.dashboard') }}" class="text-gray-500 hover:text-gray-700">Dashboard</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="text-gray-900 font-medium">Iscrizioni</li>
+    </x-slot>
+
+
+
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -29,87 +52,51 @@
         </div>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="ml-5 w-0 flex-1">
-                    <dl>
-                        <dt class="text-sm font-medium text-gray-500 truncate">Totale Iscrizioni</dt>
-                        <dd class="text-lg font-medium text-gray-900">{{ $stats['total_enrollments'] ?? 0 }}</dd>
-                        <dd class="text-sm text-gray-500">{{ $stats['active_enrollments'] ?? 0 }} attive</dd>
-                    </dl>
-                </div>
-            </div>
-        </div>
+    <!-- Key Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <x-stats-card
+            title="Totale Iscrizioni"
+            :value="number_format($stats['total_enrollments'] ?? 0)"
+            :subtitle="($stats['active_enrollments'] ?? 0) . ' attive'"
+            icon="clipboard-list"
+            color="blue"
+            :change="15"
+            changeType="increase"
+        />
 
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="ml-5 w-0 flex-1">
-                    <dl>
-                        <dt class="text-sm font-medium text-gray-500 truncate">Iscrizioni Attive</dt>
-                        <dd class="text-lg font-medium text-gray-900">{{ $stats['active_enrollments'] ?? 0 }}</dd>
-                        <dd class="text-sm text-gray-500">In corso</dd>
-                    </dl>
-                </div>
-            </div>
-        </div>
+        <x-stats-card
+            title="Iscrizioni Attive"
+            :value="number_format($stats['active_enrollments'] ?? 0)"
+            :subtitle="'In corso'"
+            icon="check"
+            color="green"
+            :change="8"
+            changeType="increase"
+        />
 
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="ml-5 w-0 flex-1">
-                    <dl>
-                        <dt class="text-sm font-medium text-gray-500 truncate">In Attesa</dt>
-                        <dd class="text-lg font-medium text-gray-900">{{ $stats['pending_enrollments'] ?? 0 }}</dd>
-                        <dd class="text-sm text-gray-500">Da confermare</dd>
-                    </dl>
-                </div>
-            </div>
-        </div>
+        <x-stats-card
+            title="In Attesa"
+            :value="number_format($stats['pending_enrollments'] ?? 0)"
+            :subtitle="'Da confermare'"
+            icon="clock"
+            color="yellow"
+            :change="3"
+            changeType="increase"
+        />
 
-        <div class="bg-white rounded-lg shadow p-6">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
-                        </svg>
-                    </div>
-                </div>
-                <div class="ml-5 w-0 flex-1">
-                    <dl>
-                        <dt class="text-sm font-medium text-gray-500 truncate">Ricavi Mensili</dt>
-                        <dd class="text-lg font-medium text-gray-900">€{{ number_format($stats['monthly_revenue'] ?? 0, 2) }}</dd>
-                        <dd class="text-sm text-gray-500">Questo mese</dd>
-                    </dl>
-                </div>
-            </div>
-        </div>
+        <x-stats-card
+            title="Ricavi Mensili"
+            :value="'€' . number_format($stats['monthly_revenue'] ?? 0, 2)"
+            :subtitle="'Questo mese'"
+            icon="currency-dollar"
+            color="purple"
+            :change="22"
+            changeType="increase"
+        />
     </div>
 
     <!-- Enrollments List -->
-    <div class="bg-white rounded-lg shadow">
+    <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
         <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-medium text-gray-900">Lista Iscrizioni ({{ $enrollments->total() ?? 0 }})</h3>
         </div>
@@ -191,4 +178,3 @@
         @endif
     </div>
 </div>
-@endsection

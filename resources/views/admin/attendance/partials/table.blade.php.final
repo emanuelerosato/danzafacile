@@ -1,0 +1,284 @@
+<div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Studente
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Corso/Evento
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Data
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Stato
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Orari
+                </th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Segnato da
+                </th>
+                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Azioni
+                </th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            @forelse($attendances as $attendance)
+                <tr class="hover:bg-gray-50 transition-colors duration-150">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gradient-to-r from-rose-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold">
+                                {{ strtoupper(substr($attendance->user->name ?? 'N/A', 0, 1)) }}
+                            </div></div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">
+                                    {{ $attendance->user->name ?? 'N/A' }}
+                                </div></div>
+                                <div class="text-sm text-gray-500">
+                                    {{ $attendance->user->email ?? 'N/A' }}
+                                </div></div>
+                            </div></div>
+                        </div></div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">
+                            {{ $attendance->attendance_subject_name }}
+                        </div></div>
+                        <div class="text-sm text-gray-500">
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                {{ $attendance->attendance_type === 'course' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
+                                <i class="fas {{ $attendance->attendance_type === 'course' ? 'fa-book-open' : 'fa-calendar-alt' }} mr-1"></i>
+                                {{ ucfirst($attendance->attendance_type) }}
+                            </span>
+                        </div></div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div class="flex items-center">
+                            <i class="fas fa-calendar text-gray-400 mr-2"></i>
+                            {{ $attendance->attendance_date->format('d/m/Y') }}
+                        </div></div>
+                        <div class="text-xs text-gray-500">
+                            {{ $attendance->attendance_date->format('l') }}
+                        </div></div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                            @switch($attendance->status)
+                                @case('present')
+                                    bg-green-100 text-green-800
+                                    @break
+                                @case('absent')
+                                    bg-red-100 text-red-800
+                                    @break
+                                @case('late')
+                                    bg-yellow-100 text-yellow-800
+                                    @break
+                                @case('excused')
+                                    bg-blue-100 text-blue-800
+                                    @break
+                                @default
+                                    bg-gray-100 text-gray-800
+                            @endswitch
+                        ">
+                            <i class="fas
+                                @switch($attendance->status)
+                                    @case('present')
+                                        fa-check
+                                        @break
+                                    @case('absent')
+                                        fa-times
+                                        @break
+                                    @case('late')
+                                        fa-clock
+                                        @break
+                                    @case('excused')
+                                        fa-user-check
+                                        @break
+                                    @default
+                                        fa-question
+                                @endswitch
+                            mr-1"></i>
+                            {{ ucfirst($attendance->status) }}
+                        </span>
+                        @if($attendance->notes)
+                            <div class="text-xs text-gray-500 mt-1" title="{{ $attendance->notes }}">
+                                <i class="fas fa-sticky-note mr-1"></i>
+                                {{ Str::limit($attendance->notes, 30) }}
+                            </div></div>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        @if($attendance->check_in_time)
+                            <div class="flex items-center">
+                                <i class="fas fa-sign-in-alt text-green-500 mr-2"></i>
+                                <span>{{ \Carbon\Carbon::createFromFormat('H:i:s', $attendance->check_in_time)->format('H:i') }}</span>
+                            </div></div>
+                        @endif
+                        @if($attendance->check_out_time)
+                            <div class="flex items-center mt-1">
+                                <i class="fas fa-sign-out-alt text-red-500 mr-2"></i>
+                                <span>{{ \Carbon\Carbon::createFromFormat('H:i:s', $attendance->check_out_time)->format('H:i') }}</span>
+                            </div></div>
+                        @endif
+                        @if($attendance->duration_minutes)
+                            <div class="text-xs text-gray-500 mt-1">
+                                <i class="fas fa-hourglass-half mr-1"></i>
+                                {{ $attendance->duration_minutes }} min
+                            </div></div>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <div class="flex flex-col">
+                            <span class="font-medium">{{ $attendance->markedByUser->name ?? 'Sistema' }}</span>
+                            <span class="text-xs">
+                                <i class="fas
+                                    @switch($attendance->marked_by_method)
+                                        @case('manual')
+                                            fa-hand-pointer
+                                            @break
+                                        @case('qr_code')
+                                            fa-qrcode
+                                            @break
+                                        @case('auto')
+                                            fa-robot
+                                            @break
+                                        @default
+                                            fa-user
+                                    @endswitch
+                                mr-1"></i>
+                                {{ ucfirst(str_replace('_', ' ', $attendance->marked_by_method)) }}
+                            </span>
+                        </div></div>
+                        <div class="text-xs text-gray-400 mt-1">
+                            {{ $attendance->created_at->format('d/m H:i') }}
+                        </div></div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div class="flex items-center justify-end space-x-2">
+                            <button onclick="editAttendance({{ $attendance->id }})"
+                                    class="text-blue-600 hover:text-blue-900 p-1 rounded transition-colors duration-200"
+                                    title="Modifica presenza">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="viewUserStats({{ $attendance->user_id }})"
+                                    class="text-green-600 hover:text-green-900 p-1 rounded transition-colors duration-200"
+                                    title="Statistiche utente">
+                                <i class="fas fa-chart-line"></i>
+                            </button>
+                            <button onclick="deleteAttendance({{ $attendance->id }})"
+                                    class="text-red-600 hover:text-red-900 p-1 rounded transition-colors duration-200"
+                                    title="Elimina presenza">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div></div>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="7" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <i class="fas fa-users-slash text-gray-300 text-4xl mb-4"></i>
+                            <p class="text-gray-500 text-lg font-medium">Nessuna presenza trovata</p>
+                            <p class="text-gray-400 text-sm mt-1">
+                                Prova a modificare i filtri o a creare nuove presenze
+                            </p>
+                        </div></div>
+                    </td>
+                </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div></div>
+
+@if($attendances->hasPages())
+    <div class="px-6 py-3 bg-gray-50 border-t border-gray-200">
+        {{ $attendances->links() }}
+    </div></div>
+@endif
+
+<script>
+function editAttendance(attendanceId) {
+    // Open edit modal or redirect to edit page
+    // For now, we'll use a simple prompt
+    if (confirm('Modificare questa presenza?')) {
+        // Implementation for edit functionality
+        console.log('Edit attendance:', attendanceId);
+    }
+}
+
+function viewUserStats(userId) {
+    // Fetch and show user statistics
+    fetch(`{{ url('admin/attendance/user') }}/${userId}/stats`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const stats = data.data.stats;
+            const message = `Statistiche Ultimo Mese:
+• Sessioni totali: ${stats.total_sessions}
+• Presenze: ${stats.present_sessions}
+• Assenze: ${stats.absent_sessions}
+• Ritardi: ${stats.late_sessions}
+• Tasso di presenza: ${stats.attendance_rate}%`;
+
+            alert(message);
+        } else {
+            showAlert(data.message || 'Errore nel caricamento delle statistiche', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Errore nel caricamento delle statistiche', 'error');
+    });
+}
+
+function deleteAttendance(attendanceId) {
+    if (!confirm('Sei sicuro di voler eliminare questa presenza? Questa azione non può essere annullata.')) {
+        return;
+    }
+
+    fetch(`{{ url('admin/attendance') }}/${attendanceId}`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(data.message, 'success');
+            // Refresh the table
+            if (typeof applyFilters === 'function') {
+                applyFilters();
+            } else {
+                location.reload();
+            }
+        } else {
+            showAlert(data.message || 'Errore durante l\'eliminazione', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Errore durante l\'eliminazione', 'error');
+    });
+}
+
+function showAlert(message, type = 'info') {
+    // Simple alert for now - you can replace with a better notification system
+    if (type === 'success') {
+        alert('✅ ' + message);
+    } else if (type === 'error') {
+        alert('❌ ' + message);
+    } else {
+        alert('ℹ️ ' + message);
+    }
+}
+</script>

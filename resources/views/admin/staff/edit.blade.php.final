@@ -1,0 +1,551 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    Modifica Staff
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">
+                    Gestione modifica della tua scuola
+                </p>
+            </div></div>
+        </div></div>
+    </x-slot>
+
+    <x-slot name="breadcrumb">
+        <li class="flex items-center">
+            <a href="{{ route('admin.dashboard') }}" class="text-gray-500 hover:text-gray-700">Dashboard</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="text-gray-900 font-medium">Modifica</li>
+    </x-slot>
+
+
+
+
+<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Modifica Staff</h1>
+                <p class="text-gray-600">{{ $staff->user->first_name }} {{ $staff->user->last_name }} ({{ $staff->employee_id }})</p>
+            </div></div>
+            <a href="{{ route('admin.staff.show', $staff) }}"
+               class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200">
+                <i class="fas fa-eye mr-2"></i>Visualizza
+            </a>
+        </div></div>
+    </div></div>
+
+    <form action="{{ route('admin.staff.update', $staff) }}" method="POST" class="space-y-8">
+        @csrf
+        @method('PUT')
+
+        <!-- Account Utente -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">
+                    <i class="fas fa-user-circle text-blue-600 mr-2"></i>Account Utente
+                </h2>
+            </div></div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="first_name" class="block text-sm font-medium text-gray-700">Nome *</label>
+                        <input type="text" name="first_name" id="first_name"
+                               value="{{ old('first_name', $staff->user->first_name) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('first_name') border-red-300 @enderror"
+                               required>
+                        @error('first_name')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="last_name" class="block text-sm font-medium text-gray-700">Cognome *</label>
+                        <input type="text" name="last_name" id="last_name"
+                               value="{{ old('last_name', $staff->user->last_name) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('last_name') border-red-300 @enderror"
+                               required>
+                        @error('last_name')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email *</label>
+                        <input type="email" name="email" id="email"
+                               value="{{ old('email', $staff->user->email) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('email') border-red-300 @enderror"
+                               required>
+                        @error('email')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                        <input type="password" name="password" id="password"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('password') border-red-300 @enderror">
+                        <p class="mt-1 text-xs text-gray-500">Lascia vuoto per mantenere la password attuale</p>
+                        @error('password')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                </div></div>
+            </div></div>
+        </div></div>
+
+        <!-- Informazioni Staff -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">
+                    <i class="fas fa-id-badge text-green-600 mr-2"></i>Informazioni Staff
+                </h2>
+            </div></div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="employee_id" class="block text-sm font-medium text-gray-700">ID Dipendente</label>
+                        <input type="text" name="employee_id" id="employee_id"
+                               value="{{ old('employee_id', $staff->employee_id) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('employee_id') border-red-300 @enderror">
+                        @error('employee_id')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="role" class="block text-sm font-medium text-gray-700">Ruolo *</label>
+                        <select name="role" id="role"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('role') border-red-300 @enderror"
+                                required>
+                            <option value="">Seleziona ruolo</option>
+                            @foreach(\App\Models\Staff::getAvailableRoles() as $key => $label)
+                            <option value="{{ $key }}" {{ old('role', $staff->role) == $key ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('role')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="department" class="block text-sm font-medium text-gray-700">Dipartimento</label>
+                        <select name="department" id="department"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('department') border-red-300 @enderror">
+                            <option value="">Seleziona dipartimento</option>
+                            @foreach(\App\Models\Staff::getAvailableDepartments() as $key => $label)
+                            <option value="{{ $key }}" {{ old('department', $staff->department) == $key ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('department')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="employment_type" class="block text-sm font-medium text-gray-700">Tipo Impiego *</label>
+                        <select name="employment_type" id="employment_type"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('employment_type') border-red-300 @enderror"
+                                required>
+                            @foreach(\App\Models\Staff::getAvailableEmploymentTypes() as $key => $label)
+                            <option value="{{ $key }}" {{ old('employment_type', $staff->employment_type) == $key ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('employment_type')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700">Status *</label>
+                        <select name="status" id="status"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('status') border-red-300 @enderror"
+                                required>
+                            @foreach(\App\Models\Staff::getAvailableStatuses() as $key => $label)
+                            <option value="{{ $key }}" {{ old('status', $staff->status) == $key ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('status')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                </div></div>
+            </div></div>
+        </div></div>
+
+        <!-- Informazioni Personali -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">
+                    <i class="fas fa-user text-purple-600 mr-2"></i>Informazioni Personali
+                </h2>
+            </div></div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-700">Titolo</label>
+                        <select name="title" id="title"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('title') border-red-300 @enderror">
+                            <option value="">Seleziona titolo</option>
+                            @foreach(\App\Models\Staff::getAvailableTitles() as $key => $label)
+                            <option value="{{ $key }}" {{ old('title', $staff->title) == $key ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('title')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="date_of_birth" class="block text-sm font-medium text-gray-700">Data di Nascita</label>
+                        <input type="date" name="date_of_birth" id="date_of_birth"
+                               value="{{ old('date_of_birth', $staff->date_of_birth?->format('Y-m-d')) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('date_of_birth') border-red-300 @enderror">
+                        @error('date_of_birth')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700">Telefono</label>
+                        <input type="tel" name="phone" id="phone"
+                               value="{{ old('phone', $staff->phone) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('phone') border-red-300 @enderror">
+                        @error('phone')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700">Nome Contatto Emergenza</label>
+                        <input type="text" name="emergency_contact_name" id="emergency_contact_name"
+                               value="{{ old('emergency_contact_name', $staff->emergency_contact_name) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('emergency_contact_name') border-red-300 @enderror">
+                        @error('emergency_contact_name')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="emergency_contact_phone" class="block text-sm font-medium text-gray-700">Telefono Contatto Emergenza</label>
+                        <input type="tel" name="emergency_contact_phone" id="emergency_contact_phone"
+                               value="{{ old('emergency_contact_phone', $staff->emergency_contact_phone) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('emergency_contact_phone') border-red-300 @enderror">
+                        @error('emergency_contact_phone')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div class="md:col-span-2">
+                        <label for="address" class="block text-sm font-medium text-gray-700">Indirizzo</label>
+                        <textarea name="address" id="address" rows="3"
+                                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('address') border-red-300 @enderror">{{ old('address', $staff->address) }}</textarea>
+                        @error('address')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                </div></div>
+            </div></div>
+        </div></div>
+
+        <!-- Informazioni Professionali -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">
+                    <i class="fas fa-briefcase text-orange-600 mr-2"></i>Informazioni Professionali
+                </h2>
+            </div></div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="hire_date" class="block text-sm font-medium text-gray-700">Data Assunzione</label>
+                        <input type="date" name="hire_date" id="hire_date"
+                               value="{{ old('hire_date', $staff->hire_date?->format('Y-m-d')) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('hire_date') border-red-300 @enderror">
+                        @error('hire_date')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="termination_date" class="block text-sm font-medium text-gray-700">Data Termine</label>
+                        <input type="date" name="termination_date" id="termination_date"
+                               value="{{ old('termination_date', $staff->termination_date?->format('Y-m-d')) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('termination_date') border-red-300 @enderror">
+                        @error('termination_date')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="years_experience" class="block text-sm font-medium text-gray-700">Anni Esperienza</label>
+                        <input type="number" name="years_experience" id="years_experience" min="0" max="50"
+                               value="{{ old('years_experience', $staff->years_experience) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('years_experience') border-red-300 @enderror">
+                        @error('years_experience')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div class="md:col-span-2">
+                        <label for="qualifications" class="block text-sm font-medium text-gray-700">Qualifiche</label>
+                        <textarea name="qualifications" id="qualifications" rows="3"
+                                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('qualifications') border-red-300 @enderror">{{ old('qualifications', $staff->qualifications) }}</textarea>
+                        @error('qualifications')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div class="md:col-span-2">
+                        <label for="certifications" class="block text-sm font-medium text-gray-700">Certificazioni</label>
+                        <textarea name="certifications" id="certifications" rows="3"
+                                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('certifications') border-red-300 @enderror">{{ old('certifications', $staff->certifications) }}</textarea>
+                        @error('certifications')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div class="md:col-span-2">
+                        <label for="specializations" class="block text-sm font-medium text-gray-700">Specializzazioni</label>
+                        <input type="text" name="specializations" id="specializations"
+                               value="{{ old('specializations', $staff->specializations) }}"
+                               placeholder="es. jazz, ballet, hip_hop, contemporary"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('specializations') border-red-300 @enderror">
+                        @error('specializations')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                </div></div>
+            </div></div>
+        </div></div>
+
+        <!-- Informazioni Finanziarie -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">
+                    <i class="fas fa-euro-sign text-green-600 mr-2"></i>Informazioni Finanziarie
+                </h2>
+            </div></div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="hourly_rate" class="block text-sm font-medium text-gray-700">Tariffa Oraria (€)</label>
+                        <input type="number" name="hourly_rate" id="hourly_rate" step="0.01" min="0" max="999.99"
+                               value="{{ old('hourly_rate', $staff->hourly_rate) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('hourly_rate') border-red-300 @enderror">
+                        @error('hourly_rate')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="monthly_salary" class="block text-sm font-medium text-gray-700">Stipendio Mensile (€)</label>
+                        <input type="number" name="monthly_salary" id="monthly_salary" step="0.01" min="0" max="99999.99"
+                               value="{{ old('monthly_salary', $staff->monthly_salary) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('monthly_salary') border-red-300 @enderror">
+                        @error('monthly_salary')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="payment_method" class="block text-sm font-medium text-gray-700">Metodo Pagamento</label>
+                        <select name="payment_method" id="payment_method"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('payment_method') border-red-300 @enderror">
+                            @foreach(\App\Models\Staff::getAvailablePaymentMethods() as $key => $label)
+                            <option value="{{ $key }}" {{ old('payment_method', $staff->payment_method) == $key ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                            @endforeach
+                        </select>
+                        @error('payment_method')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="bank_account" class="block text-sm font-medium text-gray-700">Conto Bancario</label>
+                        <input type="text" name="bank_account" id="bank_account"
+                               value="{{ old('bank_account', $staff->bank_account) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('bank_account') border-red-300 @enderror">
+                        @error('bank_account')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div>
+                        <label for="tax_id" class="block text-sm font-medium text-gray-700">Codice Fiscale</label>
+                        <input type="text" name="tax_id" id="tax_id"
+                               value="{{ old('tax_id', $staff->tax_id) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('tax_id') border-red-300 @enderror">
+                        @error('tax_id')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                </div></div>
+            </div></div>
+        </div></div>
+
+        <!-- Disponibilità & Orari -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">
+                    <i class="fas fa-calendar-alt text-blue-600 mr-2"></i>Disponibilità & Orari
+                </h2>
+            </div></div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="max_hours_per_week" class="block text-sm font-medium text-gray-700">Ore Max/Settimana</label>
+                        <input type="number" name="max_hours_per_week" id="max_hours_per_week" min="1" max="168"
+                               value="{{ old('max_hours_per_week', $staff->max_hours_per_week) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('max_hours_per_week') border-red-300 @enderror">
+                        @error('max_hours_per_week')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div></div>
+                    <div class="flex items-center">
+                        <input type="checkbox" name="can_substitute" id="can_substitute" value="1"
+                               {{ old('can_substitute', $staff->can_substitute) ? 'checked' : '' }}
+                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="can_substitute" class="ml-2 block text-sm text-gray-900">
+                            Disponibile per sostituzioni
+                        </label>
+                    </div></div>
+                </div></div>
+
+                <!-- Disponibilità Settimanale -->
+                <div class="border-t border-gray-200 pt-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Disponibilità Settimanale</h3>
+                    @php
+                        $availability = old('availability', $staff->availability);
+                        if (is_string($availability)) {
+                            $availability = json_decode($availability, true);
+                        }
+                        $days = [
+                            'monday' => 'Lunedì',
+                            'tuesday' => 'Martedì',
+                            'wednesday' => 'Mercoledì',
+                            'thursday' => 'Giovedì',
+                            'friday' => 'Venerdì',
+                            'saturday' => 'Sabato',
+                            'sunday' => 'Domenica'
+                        ];
+                    @endphp
+
+                    <div class="space-y-4">
+                        @foreach($days as $day => $dayName)
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <input type="checkbox"
+                                           name="availability[{{ $day }}][available]"
+                                           id="availability_{{ $day }}_available"
+                                           value="1"
+                                           {{ isset($availability[$day]['available']) && $availability[$day]['available'] ? 'checked' : '' }}
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                           onchange="toggleDayInputs('{{ $day }}')">
+                                    <label for="availability_{{ $day }}_available" class="ml-2 block text-sm font-medium text-gray-900">
+                                        {{ $dayName }}
+                                    </label>
+                                </div></div>
+                                <div id="time_inputs_{{ $day }}" class="flex space-x-2 {{ isset($availability[$day]['available']) && $availability[$day]['available'] ? '' : 'hidden' }}">
+                                    <input type="time"
+                                           name="availability[{{ $day }}][start_time]"
+                                           value="{{ $availability[$day]['start_time'] ?? '09:00' }}"
+                                           class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                    <span class="text-gray-500">-</span>
+                                    <input type="time"
+                                           name="availability[{{ $day }}][end_time]"
+                                           value="{{ $availability[$day]['end_time'] ?? '18:00' }}"
+                                           class="block w-24 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
+                                </div></div>
+                            </div></div>
+                        </div></div>
+                        @endforeach
+                    </div></div>
+                </div></div>
+            </div></div>
+        </div></div>
+
+        <!-- Note -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">
+                    <i class="fas fa-sticky-note text-yellow-600 mr-2"></i>Note
+                </h2>
+            </div></div>
+            <div class="p-6">
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-700">Note Aggiuntive</label>
+                    <textarea name="notes" id="notes" rows="4"
+                              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('notes') border-red-300 @enderror">{{ old('notes', $staff->notes) }}</textarea>
+                    @error('notes')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div></div>
+            </div></div>
+        </div></div>
+
+        <!-- Pulsanti Azione -->
+        <div class="flex justify-end space-x-4">
+            <a href="{{ route('admin.staff.show', $staff) }}"
+               class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+                Annulla
+            </a>
+            <button type="submit"
+                    class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                <i class="fas fa-save mr-2"></i>Salva Modifiche
+            </button>
+        </div></div>
+    </form>
+</div></div>
+
+<script>
+function toggleDayInputs(day) {
+    const checkbox = document.getElementById(`availability_${day}_available`);
+    const timeInputs = document.getElementById(`time_inputs_${day}`);
+
+    if (checkbox.checked) {
+        timeInputs.classList.remove('hidden');
+    } else {
+        timeInputs.classList.add('hidden');
+    }
+}
+
+// Auto-generate employee ID based on role selection
+document.getElementById('role').addEventListener('change', function() {
+    const employeeIdField = document.getElementById('employee_id');
+    if (!employeeIdField.value) {
+        // Auto-suggest employee ID based on role
+        const role = this.value;
+        if (role) {
+            const prefixes = {
+                'instructor': 'INS',
+                'coordinator': 'COORD',
+                'admin_assistant': 'ADMIN',
+                'receptionist': 'REC',
+                'cleaner': 'CLEAN',
+                'maintenance': 'MAINT'
+            };
+            const prefix = prefixes[role] || 'EMP';
+            // In a real application, you would fetch the next available number via AJAX
+            employeeIdField.placeholder = `${prefix}XXXX (auto-generato)`;
+        }
+    }
+});
+
+// Initialize availability toggles on page load
+document.addEventListener('DOMContentLoaded', function() {
+    @foreach($days as $day => $dayName)
+    toggleDayInputs('{{ $day }}');
+    @endforeach
+});
+
+// Financial fields logic
+document.getElementById('employment_type').addEventListener('change', function() {
+    const hourlyRateField = document.getElementById('hourly_rate');
+    const monthlySalaryField = document.getElementById('monthly_salary');
+
+    if (this.value === 'full_time') {
+        monthlySalaryField.setAttribute('required', '');
+        hourlyRateField.removeAttribute('required');
+    } else {
+        hourlyRateField.setAttribute('required', '');
+        monthlySalaryField.removeAttribute('required');
+    }
+});
+</script>
