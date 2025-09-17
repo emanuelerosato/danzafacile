@@ -211,7 +211,7 @@ function editAttendance(attendanceId) {
 
 function viewUserStats(userId) {
     // Fetch and show user statistics
-    fetch(`{{ route('admin.attendance.user-stats', '') }}/${userId}`, {
+    fetch(`{{ url('admin/attendance/user') }}/${userId}/stats`, {
         headers: {
             'X-Requested-With': 'XMLHttpRequest'
         }
@@ -243,7 +243,7 @@ function deleteAttendance(attendanceId) {
         return;
     }
 
-    fetch(`{{ route('admin.attendance.destroy', '') }}/${attendanceId}`, {
+    fetch(`{{ url('admin/attendance') }}/${attendanceId}`, {
         method: 'DELETE',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),

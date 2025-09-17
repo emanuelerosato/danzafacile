@@ -447,7 +447,7 @@ function toggleEventStatus(eventId, newStatus) {
         return;
     }
 
-    fetch(`{{ route('admin.events.toggle-active', '') }}/${eventId}`, {
+    fetch(`{{ url('admin/events') }}/${eventId}/toggle-active`, {
         method: 'PATCH',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -474,7 +474,7 @@ function deleteEvent(eventId) {
         return;
     }
 
-    fetch(`{{ route('admin.events.destroy', '') }}/${eventId}`, {
+    fetch(`{{ url('admin/events') }}/${eventId}`, {
         method: 'DELETE',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),

@@ -17,19 +17,18 @@ class Attendance extends Model
     protected $fillable = [
         'user_id',
         'school_id',
-        'course_id',
-        'event_id',
-        'attendance_date',
+        'attendable_type',
+        'attendable_id',
+        'date',
         'check_in_time',
         'check_out_time',
         'status',
         'notes',
-        'marked_by_method',
-        'marked_by_user_id'
+        'marked_by'
     ];
 
     protected $casts = [
-        'attendance_date' => 'date'
+        'date' => 'date'
     ];
 
     // Automatically filter by school for non-super-admin users
@@ -62,19 +61,24 @@ class Attendance extends Model
         return $this->belongsTo(School::class);
     }
 
+    public function attendable()
+    {
+        return $this->morphTo();
+    }
+
     public function course(): BelongsTo
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Course::class, 'attendable_id')->where('attendable_type', Course::class);
     }
 
     public function event(): BelongsTo
     {
-        return $this->belongsTo(Event::class);
+        return $this->belongsTo(Event::class, 'attendable_id')->where('attendable_type', Event::class);
     }
 
     public function markedByUser(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'marked_by_user_id');
+        return $this->belongsTo(User::class, 'marked_by');
     }
 
     // Scopes
@@ -100,32 +104,32 @@ class Attendance extends Model
 
     public function scopeForDate(Builder $query, $date): Builder
     {
-        return $query->whereDate('attendance_date', $date);
+        return $query->whereDate('date', $date);
     }
 
     public function scopeForDateRange(Builder $query, $startDate, $endDate): Builder
     {
-        return $query->whereBetween('attendance_date', [$startDate, $endDate]);
+        return $query->whereBetween('date', [$startDate, $endDate]);
     }
 
     public function scopeForCourse(Builder $query, int $courseId): Builder
     {
-        return $query->where('course_id', $courseId);
+        return $query->where('attendable_type', Course::class)->where('attendable_id', $courseId);
     }
 
     public function scopeForEvent(Builder $query, int $eventId): Builder
     {
-        return $query->where('event_id', $eventId);
+        return $query->where('attendable_type', Event::class)->where('attendable_id', $eventId);
     }
 
     public function scopeForCourses(Builder $query): Builder
     {
-        return $query->whereNotNull('course_id');
+        return $query->where('attendable_type', Course::class);
     }
 
     public function scopeForEvents(Builder $query): Builder
     {
-        return $query->whereNotNull('event_id');
+        return $query->where('attendable_type', Event::class);
     }
 
     // Accessors
@@ -164,9 +168,9 @@ class Attendance extends Model
 
     public function getAttendanceTypeAttribute(): string
     {
-        if ($this->course_id) {
+        if ($this->attendable_type === Course::class) {
             return 'course';
-        } elseif ($this->event_id) {
+        } elseif ($this->attendable_type === Event::class) {
             return 'event';
         }
         return 'unknown';
@@ -174,12 +178,7 @@ class Attendance extends Model
 
     public function getAttendanceSubjectAttribute(): ?Model
     {
-        if ($this->course_id) {
-            return $this->course;
-        } elseif ($this->event_id) {
-            return $this->event;
-        }
-        return null;
+        return $this->attendable;
     }
 
     public function getAttendanceSubjectNameAttribute(): string
@@ -191,21 +190,20 @@ class Attendance extends Model
     // Helper methods
     public function isForCourse(): bool
     {
-        return !is_null($this->course_id);
+        return $this->attendable_type === Course::class;
     }
 
     public function isForEvent(): bool
     {
-        return !is_null($this->event_id);
+        return $this->attendable_type === Event::class;
     }
 
-    public function markPresent(?string $checkInTime = null, ?string $method = 'manual'): void
+    public function markPresent(?string $checkInTime = null): void
     {
         $this->update([
             'status' => 'present',
             'check_in_time' => $checkInTime ?? now()->format('H:i:s'),
-            'marked_by_method' => $method,
-            'marked_by_user_id' => auth()->id(),
+            'marked_by' => auth()->id(),
         ]);
     }
 
@@ -216,18 +214,16 @@ class Attendance extends Model
             'check_in_time' => null,
             'check_out_time' => null,
             'notes' => $notes,
-            'marked_by_method' => 'manual',
-            'marked_by_user_id' => auth()->id(),
+            'marked_by' => auth()->id(),
         ]);
     }
 
-    public function markLate(?string $checkInTime = null, ?string $method = 'manual'): void
+    public function markLate(?string $checkInTime = null): void
     {
         $this->update([
             'status' => 'late',
             'check_in_time' => $checkInTime ?? now()->format('H:i:s'),
-            'marked_by_method' => $method,
-            'marked_by_user_id' => auth()->id(),
+            'marked_by' => auth()->id(),
         ]);
     }
 }

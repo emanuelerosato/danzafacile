@@ -365,8 +365,8 @@ function attendanceManager() {
             });
 
             const route = this.bulkMark.type === 'course' ?
-                `{{ route('admin.attendance.course', '') }}/${this.bulkMark.subject_id}?${params.toString()}` :
-                `{{ route('admin.attendance.event', '') }}/${this.bulkMark.subject_id}?${params.toString()}`;
+                `{{ url('admin/attendance/course') }}/${this.bulkMark.subject_id}?${params.toString()}` :
+                `{{ url('admin/attendance/event') }}/${this.bulkMark.subject_id}?${params.toString()}`;
 
             window.location.href = route;
         },

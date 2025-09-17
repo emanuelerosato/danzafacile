@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\SchoolUserController;
 use App\Http\Controllers\Admin\MediaGalleryController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\ReportsController;
+use App\Http\Controllers\Admin\ScheduleController;
 
 // Controllers Student
 use App\Http\Controllers\Student\StudentDashboardController;
@@ -200,6 +201,15 @@ Route::middleware('auth')->group(function () {
         Route::get('staff-export', [StaffController::class, 'export'])->name('staff.export');
         Route::post('staff/{staff}/assign-course', [StaffController::class, 'assignToCourse'])->name('staff.assign-course');
         Route::delete('staff/{staff}/assignments/{assignment}', [StaffController::class, 'removeAssignment'])->name('staff.remove-assignment');
+
+        // Schedules management
+        Route::prefix('schedules')->name('schedules.')->group(function () {
+            Route::get('/', [ScheduleController::class, 'index'])->name('index');
+            Route::get('/manage', [ScheduleController::class, 'manage'])->name('manage');
+            Route::get('/course/{course}', [ScheduleController::class, 'show'])->name('show');
+            Route::put('/course/{course}', [ScheduleController::class, 'updateCourseSchedule'])->name('update-course');
+            Route::get('/export', [ScheduleController::class, 'export'])->name('export');
+        });
 
         // Reports and Analytics
         Route::prefix('reports')->name('reports.')->group(function () {
