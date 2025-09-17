@@ -110,7 +110,7 @@
                 <x-nav-item href="{{ route('admin.staff.index') }}" :active="request()->routeIs('admin.staff.*')" icon="users">
                     Gestione Staff
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('admin.schedules.*')" icon="calendar">
+                <x-nav-item href="{{ route('admin.staff-schedules.index') }}" :active="request()->routeIs('admin.staff-schedules.*')" icon="calendar">
                     Orari & Turni
                 </x-nav-item>
                 <x-nav-item href="#" :active="request()->routeIs('admin.payroll.*')" icon="calculator">

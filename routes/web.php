@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\EventRegistrationController;
+use App\Http\Controllers\Admin\StaffScheduleController;
 
 // Controllers Student
 use App\Http\Controllers\Student\StudentDashboardController;
@@ -222,6 +223,27 @@ Route::middleware('auth')->group(function () {
             Route::get('/course/{course}', [ScheduleController::class, 'show'])->name('show');
             Route::put('/course/{course}', [ScheduleController::class, 'updateCourseSchedule'])->name('update-course');
             Route::get('/export', [ScheduleController::class, 'export'])->name('export');
+        });
+
+        // Staff Schedules management
+        Route::prefix('staff-schedules')->name('staff-schedules.')->group(function () {
+            Route::get('/', [StaffScheduleController::class, 'index'])->name('index');
+            Route::get('/create', [StaffScheduleController::class, 'create'])->name('create');
+            Route::post('/', [StaffScheduleController::class, 'store'])->name('store');
+            Route::get('/{staffSchedule}', [StaffScheduleController::class, 'show'])->name('show');
+            Route::get('/{staffSchedule}/edit', [StaffScheduleController::class, 'edit'])->name('edit');
+            Route::put('/{staffSchedule}', [StaffScheduleController::class, 'update'])->name('update');
+            Route::delete('/{staffSchedule}', [StaffScheduleController::class, 'destroy'])->name('destroy');
+
+            // Actions
+            Route::patch('/{staffSchedule}/confirm', [StaffScheduleController::class, 'confirm'])->name('confirm');
+            Route::patch('/{staffSchedule}/complete', [StaffScheduleController::class, 'complete'])->name('complete');
+            Route::patch('/{staffSchedule}/cancel', [StaffScheduleController::class, 'cancel'])->name('cancel');
+            Route::patch('/{staffSchedule}/no-show', [StaffScheduleController::class, 'markNoShow'])->name('no-show');
+
+            // Views
+            Route::get('/calendar/view', [StaffScheduleController::class, 'calendar'])->name('calendar');
+            Route::get('/export', [StaffScheduleController::class, 'export'])->name('export');
         });
 
         // Reports and Analytics
