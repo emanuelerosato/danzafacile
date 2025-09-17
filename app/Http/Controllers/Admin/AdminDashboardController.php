@@ -138,13 +138,20 @@ class AdminDashboardController extends Controller
             'active_courses' => $stats['courses_active'],
             'monthly_revenue' => $stats['revenue_this_month'],
             'upcoming_events' => $upcomingEvents->count(),
-            'total_events' => Event::where('school_id', $school->id)->count()
+            'total_events' => Event::where('school_id', $school->id)->count(),
+            'pending_payments' => Payment::whereHas('user', function($q) use ($school) {
+                $q->where('school_id', $school->id);
+            })->where('status', 'pending')->count()
         ];
+
+        // Add recent enrollments to variable name expected by template
+        $recent_enrollments = $recentEnrollments;
 
         return view('admin.dashboard', compact(
             'school',
             'stats',
             'quickStats',
+            'recent_enrollments',
             'recentEnrollments',
             'recentPayments',
             'pendingDocuments',
