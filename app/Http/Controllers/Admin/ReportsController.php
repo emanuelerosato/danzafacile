@@ -111,7 +111,7 @@ class ReportsController extends Controller
      */
     private function calculateMetrics(Carbon $startDate, Carbon $endDate): array
     {
-        $schoolId = auth()->user()->admin_school_id;
+        $schoolId = auth()->user()->school_id;
 
         return [
             // Studenti
@@ -217,7 +217,7 @@ class ReportsController extends Controller
      */
     private function getOverviewData(string $period): array
     {
-        $schoolId = auth()->user()->admin_school_id;
+        $schoolId = auth()->user()->school_id;
         $dates = $this->generateDateRange($period);
 
         $studentsData = [];
@@ -317,7 +317,7 @@ class ReportsController extends Controller
      */
     private function getCoursesData(string $period): array
     {
-        $schoolId = auth()->user()->admin_school_id;
+        $schoolId = auth()->user()->school_id;
 
         $courses = Course::where('school_id', $schoolId)
             ->withCount('enrollments')
@@ -347,7 +347,7 @@ class ReportsController extends Controller
      */
     private function getPaymentsData(string $period): array
     {
-        $schoolId = auth()->user()->admin_school_id;
+        $schoolId = auth()->user()->school_id;
         $dates = $this->generateDateRange($period);
 
         $completedPayments = [];
@@ -390,7 +390,7 @@ class ReportsController extends Controller
      */
     private function getAttendanceData(string $period): array
     {
-        $schoolId = auth()->user()->admin_school_id;
+        $schoolId = auth()->user()->school_id;
         $dates = $this->generateDateRange($period);
 
         $attendanceData = [];
@@ -432,7 +432,7 @@ class ReportsController extends Controller
      */
     private function getStaffData(string $period): array
     {
-        $schoolId = auth()->user()->admin_school_id;
+        $schoolId = auth()->user()->school_id;
 
         $staffByRole = Staff::where('school_id', $schoolId)
             ->select('role', DB::raw('count(*) as count'))

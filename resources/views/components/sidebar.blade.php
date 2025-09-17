@@ -113,9 +113,6 @@
                 <x-nav-item href="{{ route('admin.staff-schedules.index') }}" :active="request()->routeIs('admin.staff-schedules.*')" icon="calendar">
                     Orari & Turni
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('admin.payroll.*')" icon="calculator">
-                    Buste Paga
-                </x-nav-item>
             </x-nav-group>
 
             <x-nav-group title="Gestione" icon="briefcase">
