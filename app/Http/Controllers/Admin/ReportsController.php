@@ -138,10 +138,10 @@ class ReportsController extends Controller
             'events' => [
                 'total' => Event::where('school_id', $schoolId)->count(),
                 'upcoming' => Event::where('school_id', $schoolId)
-                    ->where('event_date', '>=', Carbon::now())
+                    ->where('start_date', '>=', Carbon::now())
                     ->count(),
                 'this_period' => Event::where('school_id', $schoolId)
-                    ->whereBetween('event_date', [$startDate, $endDate])
+                    ->whereBetween('start_date', [$startDate, $endDate])
                     ->count(),
             ],
 
