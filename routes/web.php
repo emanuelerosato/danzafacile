@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\MediaGalleryController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\ScheduleController;
+use App\Http\Controllers\Admin\EventRegistrationController;
 
 // Controllers Student
 use App\Http\Controllers\Student\StudentDashboardController;
@@ -123,6 +124,18 @@ Route::middleware('auth')->group(function () {
         Route::post('events/bulk-action', [AdminEventController::class, 'bulkAction'])->name('events.bulk-action');
         Route::get('events-export', [AdminEventController::class, 'export'])->name('events.export');
         Route::post('events/{event}/register-user', [AdminEventController::class, 'registerUser'])->name('events.register-user');
+
+        // Event Registrations management
+        Route::prefix('event-registrations')->name('event-registrations.')->group(function () {
+            Route::get('/', [EventRegistrationController::class, 'index'])->name('index');
+            Route::get('/event/{event}', [EventRegistrationController::class, 'byEvent'])->name('by-event');
+            Route::get('/{registration}', [EventRegistrationController::class, 'show'])->name('show');
+            Route::post('/', [EventRegistrationController::class, 'store'])->name('store');
+            Route::patch('/{registration}/status', [EventRegistrationController::class, 'updateStatus'])->name('update-status');
+            Route::post('/bulk-update', [EventRegistrationController::class, 'bulkUpdate'])->name('bulk-update');
+            Route::delete('/{registration}', [EventRegistrationController::class, 'destroy'])->name('destroy');
+            Route::get('/export', [EventRegistrationController::class, 'export'])->name('export');
+        });
 
         // Attendance management
         Route::prefix('attendance')->name('attendance.')->group(function () {

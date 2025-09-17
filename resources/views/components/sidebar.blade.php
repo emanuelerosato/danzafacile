@@ -101,7 +101,7 @@
                 <x-nav-item href="{{ route('admin.events.index') }}" :active="request()->routeIs('admin.events.*')" icon="calendar">
                     Lista Eventi
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('admin.event-registrations.*')" icon="user-plus">
+                <x-nav-item href="{{ route('admin.event-registrations.index') }}" :active="request()->routeIs('admin.event-registrations.*')" icon="user-plus">
                     Registrazioni
                 </x-nav-item>
             </x-nav-group>
