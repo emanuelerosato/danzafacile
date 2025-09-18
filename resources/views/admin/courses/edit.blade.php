@@ -32,7 +32,7 @@
                     Aggiorna le informazioni del corso
                 </p>
             </div>
-            <div class="flex items-center space-x-3">
+            <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                 <a href="{{ route('admin.courses.show', $course ?? 1) }}" 
                    class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -384,7 +384,7 @@
                             @foreach ($students as $student)
                                 <div class="bg-white p-4 rounded-lg border border-gray-200 hover:border-rose-300 transition-colors">
                                     <div class="flex items-center justify-between mb-3">
-                                        <div class="flex items-center space-x-3">
+                                        <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                                             <div class="w-10 h-10 bg-gradient-to-r from-rose-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                                                 {{ strtoupper(substr($student['name'], 0, 1) . substr(explode(' ', $student['name'])[1], 0, 1)) }}
                                             </div>
@@ -619,7 +619,7 @@
                                 <div class="space-y-4">
                                     <div class="p-4 bg-green-50 rounded-lg border border-green-200">
                                         <div class="text-center">
-                                            <div class="text-2xl font-bold text-green-800">€85,00</div>
+                                            <div class="text-xl md:text-2xl font-bold text-green-800">€85,00</div>
                                             <p class="text-sm text-green-600">Quota mensile</p>
                                             <p class="text-xs text-green-600 mt-1">28 studenti paganti</p>
                                         </div>
@@ -738,7 +738,7 @@
                     </a>
                 </div>
 
-                <div class="flex items-center space-x-3">
+                <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                     <button type="submit" name="action" value="draft" 
                             class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200">
                         Salva come Bozza

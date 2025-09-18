@@ -485,7 +485,7 @@
                         @enderror
                     </div>
 
-                    <div class="flex items-center space-x-3">
+                    <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                         <input type="hidden" name="can_substitute" value="0">
                         <input type="checkbox"
                                id="can_substitute"

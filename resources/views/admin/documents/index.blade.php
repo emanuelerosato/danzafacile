@@ -31,7 +31,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-6">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Gestione Documenti</h1>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900">Gestione Documenti</h1>
                     <p class="text-sm text-gray-600 mt-1">Gestisci e approva i documenti della scuola</p>
                 </div>
                 <div class="flex space-x-3">
@@ -54,7 +54,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Totale Documenti</p>
-                        <p class="text-2xl font-bold text-gray-900">{{ $statistics['total'] }}</p>
+                        <p class="text-xl md:text-2xl font-bold text-gray-900">{{ $statistics['total'] }}</p>
                     </div>
                     <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                         <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,7 +68,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">In Attesa</p>
-                        <p class="text-2xl font-bold text-yellow-600">{{ $statistics['pending'] }}</p>
+                        <p class="text-xl md:text-2xl font-bold text-yellow-600">{{ $statistics['pending'] }}</p>
                     </div>
                     <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                         <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,7 +82,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Approvati</p>
-                        <p class="text-2xl font-bold text-green-600">{{ $statistics['approved'] }}</p>
+                        <p class="text-xl md:text-2xl font-bold text-green-600">{{ $statistics['approved'] }}</p>
                     </div>
                     <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                         <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -96,7 +96,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-600">Spazio Occupato</p>
-                        <p class="text-2xl font-bold text-purple-600">{{ $statistics['total_size'] }}</p>
+                        <p class="text-xl md:text-2xl font-bold text-purple-600">{{ $statistics['total_size'] }}</p>
                     </div>
                     <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                         <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

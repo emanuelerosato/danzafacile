@@ -32,7 +32,7 @@
                     Informazioni complete sul corso
                 </p>
             </div>
-            <div class="flex items-center space-x-3">
+            <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                 <a href="{{ route('admin.courses.edit', $course ?? 1) }}" 
                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,7 +74,7 @@
                         DC
                     </div>
                     <div class="flex-1 text-white">
-                        <h1 class="text-2xl font-bold">Danza Classica Intermedio</h1>
+                        <h1 class="text-xl md:text-2xl font-bold">Danza Classica Intermedio</h1>
                         <p class="text-rose-100 mt-1">Corso per allievi con esperienza di base • Prof.ssa Martina Rossi</p>
                         <div class="flex items-center mt-2">
                             <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
@@ -86,7 +86,7 @@
                         </div>
                     </div>
                     <div class="text-right">
-                        <div class="text-2xl font-bold">28/30</div>
+                        <div class="text-xl md:text-2xl font-bold">28/30</div>
                         <p class="text-rose-100 text-sm">studenti iscritti</p>
                         <div class="w-24 bg-white/20 rounded-full h-2 mt-2">
                             <div class="bg-white h-2 rounded-full" style="width: 93%"></div>
@@ -344,7 +344,7 @@
                         @endphp
                         @foreach ($students as $student)
                             <div class="bg-white p-4 rounded-lg border border-gray-200 hover:border-rose-300 transition-colors">
-                                <div class="flex items-center space-x-3 mb-3">
+                                <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0 mb-3">
                                     <div class="w-10 h-10 bg-gradient-to-r from-rose-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                                         {{ strtoupper(substr($student['name'], 0, 1) . substr(explode(' ', $student['name'])[1], 0, 1)) }}
                                     </div>

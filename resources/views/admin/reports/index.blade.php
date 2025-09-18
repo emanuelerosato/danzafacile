@@ -74,7 +74,7 @@
                 <h1 class="text-3xl font-bold text-gray-900">Reports e Analytics</h1>
                 <p class="text-gray-600">Dashboard completo delle performance della scuola</p>
             </div>
-            <div class="flex items-center space-x-3">
+            <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                 <!-- Period Selector -->
                 <select id="periodSelector" class="rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                     <option value="day" {{ $period === 'day' ? 'selected' : '' }}>Ultimi 7 giorni</option>

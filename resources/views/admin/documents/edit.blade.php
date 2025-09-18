@@ -37,7 +37,7 @@
                             </li>
                         </ol>
                     </nav>
-                    <h1 class="text-2xl font-bold text-gray-900 mt-1">Modifica Documento</h1>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 mt-1">Modifica Documento</h1>
                     <p class="text-sm text-gray-600 mt-1">Aggiorna le informazioni del documento</p>
                 </div>
             </div>

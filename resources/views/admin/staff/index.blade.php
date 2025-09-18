@@ -46,19 +46,19 @@
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-blue-600">{{ $stats['total'] }}</div>
+                    <div class="text-xl md:text-2xl font-bold text-blue-600">{{ $stats['total'] }}</div>
                     <div class="text-sm text-gray-600">Staff Totale</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-green-600">{{ $stats['active'] }}</div>
+                    <div class="text-xl md:text-2xl font-bold text-green-600">{{ $stats['active'] }}</div>
                     <div class="text-sm text-gray-600">Attivi</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-purple-600">{{ $stats['instructors'] }}</div>
+                    <div class="text-xl md:text-2xl font-bold text-purple-600">{{ $stats['instructors'] }}</div>
                     <div class="text-sm text-gray-600">Istruttori</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-orange-600">{{ $stats['on_leave'] }}</div>
+                    <div class="text-xl md:text-2xl font-bold text-orange-600">{{ $stats['on_leave'] }}</div>
                     <div class="text-sm text-gray-600">In Congedo</div>
                 </div>
             </div>

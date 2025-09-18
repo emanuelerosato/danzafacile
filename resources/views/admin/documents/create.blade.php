@@ -27,7 +27,7 @@
                             </li>
                         </ol>
                     </nav>
-                    <h1 class="text-2xl font-bold text-gray-900 mt-1">Carica Nuovo Documento</h1>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 mt-1">Carica Nuovo Documento</h1>
                     <p class="text-sm text-gray-600 mt-1">Aggiungi un nuovo documento alla scuola</p>
                 </div>
             </div>
@@ -223,13 +223,14 @@
                    class="px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200">
                     Annulla
                 </a>
-                <button type="submit"
-                        class="px-6 py-2 text-sm font-medium text-white bg-rose-600 rounded-lg hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
-                    </svg>
+                <x-loading-button
+                    type="submit"
+                    variant="primary"
+                    icon="upload"
+                    size="lg"
+                    loading-text="Caricamento...">
                     Carica Documento
-                </button>
+                </x-loading-button>
             </div>
         </form>
     </div>

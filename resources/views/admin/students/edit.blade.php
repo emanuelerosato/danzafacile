@@ -43,14 +43,14 @@
                     </div>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Modifica Studente</h1>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900">Modifica Studente</h1>
                     <p class="text-gray-600">{{ $student->name }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Quick Actions -->
-        <div class="flex items-center space-x-3">
+        <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
             <a href="{{ route('admin.students.show', $student) }}"
                class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -336,7 +336,7 @@
 
             <!-- Action Buttons -->
             <div class="flex items-center justify-between pt-6 border-t border-gray-200">
-                <div class="flex items-center space-x-3">
+                <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                     <a href="{{ route('admin.students.show', $student) }}"
                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-colors">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -27,7 +27,7 @@
                             </li>
                         </ol>
                     </nav>
-                    <h1 class="text-2xl font-bold text-gray-900 mt-1">{{ $document->title }}</h1>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 mt-1">{{ $document->title }}</h1>
                     <div class="flex items-center space-x-4 mt-2">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $document->status_class }}">
                             {{ $document->status_name }}

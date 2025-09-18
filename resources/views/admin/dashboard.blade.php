@@ -135,7 +135,7 @@
                                                 <p class="text-xs text-gray-400">{{ $enrollment->created_at->format('d/m/Y') }}</p>
                                             </div>
                                         </div>
-                                        <div class="flex items-center space-x-3">
+                                        <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                 Attiva
                                             </span>

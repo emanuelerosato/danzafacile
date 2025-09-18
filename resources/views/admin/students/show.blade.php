@@ -43,7 +43,7 @@
                     </div>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">{{ $student->name }}</h1>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900">{{ $student->name }}</h1>
                     <div class="flex items-center space-x-4 mt-1">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $student->active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                             <span class="w-2 h-2 mr-1.5 rounded-full {{ $student->active ? 'bg-green-400' : 'bg-red-400' }}"></span>
@@ -63,7 +63,7 @@
         </div>
 
         <!-- Actions -->
-        <div class="flex items-center space-x-3">
+        <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
             <button @click="toggleStatus"
                     class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors {{ $student->active ? 'text-red-700 bg-red-100 hover:bg-red-200' : 'text-green-700 bg-green-100 hover:bg-green-200' }}">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -133,7 +133,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Corsi Totali</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $stats['total_courses'] }}</p>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900">{{ $stats['total_courses'] }}</p>
                 </div>
                 <div class="p-3 bg-blue-100 rounded-full">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,7 +149,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Pagamenti</p>
-                    <p class="text-2xl font-bold text-gray-900">€{{ number_format($stats['total_payments'], 2, ',', '.') }}</p>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900">€{{ number_format($stats['total_payments'], 2, ',', '.') }}</p>
                 </div>
                 <div class="p-3 bg-green-100 rounded-full">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,7 +169,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Presenza</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $stats['attendance_rate'] }}%</p>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900">{{ $stats['attendance_rate'] }}%</p>
                 </div>
                 <div class="p-3 bg-purple-100 rounded-full">
                     <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,7 +185,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Documenti</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $stats['documents_status']['total'] }}</p>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900">{{ $stats['documents_status']['total'] }}</p>
                 </div>
                 <div class="p-3 bg-orange-100 rounded-full">
                     <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -326,7 +326,7 @@
                                         Iscritto il {{ $enrollment->created_at->format('d/m/Y') }}
                                     </p>
                                 </div>
-                                <div class="flex items-center space-x-3">
+                                <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                         @if($enrollment->status === 'active') bg-green-100 text-green-800
                                         @elseif($enrollment->status === 'enrolled') bg-blue-100 text-blue-800

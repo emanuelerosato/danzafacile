@@ -8,7 +8,7 @@
                     Profilo completo di {{ $user->name }}
                 </p>
             </div>
-            <div class="flex items-center space-x-3">
+            <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                 <a href="{{ route('admin.users.edit', $user) }}" 
                    class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-200">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -76,7 +76,7 @@
                         @endif
                     </div>
                     <div class="ml-6">
-                        <h1 class="text-2xl font-bold text-gray-900">{{ $user->name }}</h1>
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-900">{{ $user->name }}</h1>
                         <p class="text-lg text-gray-600 mt-1">{{ $user->email }}</p>
                         <div class="flex items-center space-x-4 mt-3">
                             @switch($user->status ?? 'active')

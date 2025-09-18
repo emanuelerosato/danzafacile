@@ -46,19 +46,19 @@
         <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-blue-600">{{ $galleries->total() }}</div>
+                    <div class="text-xl md:text-2xl font-bold text-blue-600">{{ $galleries->total() }}</div>
                     <div class="text-sm text-gray-600">Gallerie Totali</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-green-600">{{ $galleries->where('is_public', true)->count() }}</div>
+                    <div class="text-xl md:text-2xl font-bold text-green-600">{{ $galleries->where('is_public', true)->count() }}</div>
                     <div class="text-sm text-gray-600">Pubbliche</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-purple-600">{{ $galleries->where('is_featured', true)->count() }}</div>
+                    <div class="text-xl md:text-2xl font-bold text-purple-600">{{ $galleries->where('is_featured', true)->count() }}</div>
                     <div class="text-sm text-gray-600">In Evidenza</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-2xl font-bold text-orange-600">{{ $galleries->sum('media_items_count') }}</div>
+                    <div class="text-xl md:text-2xl font-bold text-orange-600">{{ $galleries->sum('media_items_count') }}</div>
                     <div class="text-sm text-gray-600">Media Totali</div>
                 </div>
             </div>

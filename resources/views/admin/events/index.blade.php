@@ -29,11 +29,11 @@
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Gestione Eventi</h1>
+            <h1 class="text-xl md:text-2xl font-bold text-gray-900">Gestione Eventi</h1>
             <p class="text-gray-600">Tutti gli eventi della tua scuola di danza</p>
         </div>
 
-        <div class="flex items-center space-x-3">
+        <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
             <button @click="bulkActionModal = true"
                     x-show="selectedItems.length > 0"
                     class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-colors">
@@ -82,7 +82,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Eventi Totali</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $stats['total_events'] }}</p>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900">{{ $stats['total_events'] }}</p>
                 </div>
                 <div class="p-3 bg-blue-100 rounded-full">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,7 +98,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Eventi in Arrivo</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $stats['upcoming_events'] }}</p>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900">{{ $stats['upcoming_events'] }}</p>
                 </div>
                 <div class="p-3 bg-green-100 rounded-full">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,7 +114,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Registrazioni</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $stats['total_registrations'] }}</p>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900">{{ $stats['total_registrations'] }}</p>
                 </div>
                 <div class="p-3 bg-purple-100 rounded-full">
                     <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,7 +130,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600">Eventi Attivi</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $stats['active_events'] }}</p>
+                    <p class="text-xl md:text-2xl font-bold text-gray-900">{{ $stats['active_events'] }}</p>
                 </div>
                 <div class="p-3 bg-orange-100 rounded-full">
                     <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -34,7 +34,7 @@
                 Visualizza e gestisci gli orari dei corsi
             </p>
         </div>
-        <div class="flex items-center space-x-3">
+        <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
             <button onclick="previousWeek()"
                     class="inline-flex items-center px-3 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-all duration-200">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

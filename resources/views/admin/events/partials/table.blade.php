@@ -59,7 +59,7 @@
                             </div>
                             <div class="ml-4">
                                 <div class="text-sm font-medium text-gray-900">{{ $event->name }}</div>
-                                <div class="text-sm text-gray-500 flex items-center space-x-3">
+                                <div class="text-sm text-gray-500 flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
                                         @if($event->type === 'Saggio') bg-purple-100 text-purple-800
                                         @elseif($event->type === 'Workshop') bg-blue-100 text-blue-800

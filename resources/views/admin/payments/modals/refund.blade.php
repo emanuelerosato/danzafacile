@@ -2,7 +2,12 @@
 <div x-data="{ open: false }"
      x-on:open-modal="open = true"
      x-on:close-modal="open = false"
-     x-show="open" x-cloak id="refundModal"
+     x-show="open" x-cloak
+     x-trap="open"
+     id="refundModal"
+     role="dialog"
+     aria-labelledby="refund-modal-title"
+     aria-describedby="refund-modal-description"
      class="fixed inset-0 z-50 overflow-y-auto"
      x-transition:enter="ease-out duration-300"
      x-transition:enter-start="opacity-0"
@@ -27,15 +32,16 @@
             <!-- Modal Header -->
             <div class="px-6 py-4 border-b border-gray-200/80">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <h3 id="refund-modal-title" class="text-lg font-semibold text-gray-900 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
                         </svg>
                         Elabora Rimborso
                     </h3>
                     <button @click="open = false" type="button"
+                            aria-label="Chiudi modal"
                             class="rounded-lg p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100/50 transition-colors duration-200">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
@@ -53,7 +59,7 @@
                         <textarea id="refund_reason" name="refund_reason" rows="4" required
                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none"
                                   placeholder="Inserisci il motivo del rimborso..."></textarea>
-                        <p class="text-xs text-gray-500 mt-1">Specifica il motivo per cui viene elaborato questo rimborso.</p>
+                        <p id="refund-modal-description" class="text-xs text-gray-500 mt-1">Specifica il motivo per cui viene elaborato questo rimborso.</p>
                     </div>
 
                     <!-- Warning Alert -->
@@ -76,13 +82,13 @@
                             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200">
                         Annulla
                     </button>
-                    <button type="submit"
-                            class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-lg hover:from-amber-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 transition-all duration-200">
-                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
-                        </svg>
+                    <x-loading-button
+                        type="submit"
+                        variant="warning"
+                        icon="refund"
+                        loading-text="Elaborando...">
                         Elabora Rimborso
-                    </button>
+                    </x-loading-button>
                 </div>
             </form>
         </div>

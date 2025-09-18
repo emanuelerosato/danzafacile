@@ -29,12 +29,12 @@
         <!-- Header -->
         <div class="mb-6 flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Modifica Evento</h1>
+                <h1 class="text-xl md:text-2xl font-bold text-gray-900">Modifica Evento</h1>
                 <p class="text-sm text-gray-600 mt-1">
                     Modifica i dettagli dell'evento: <strong>{{ $event->name }}</strong>
                 </p>
             </div>
-            <div class="flex items-center space-x-3">
+            <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                 <a href="{{ route('admin.events.show', $event) }}" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg transition-colors duration-200">
                     <i class="fas fa-eye mr-2"></i>
                     Visualizza

@@ -241,13 +241,13 @@
                     @if($staff->hourly_rate)
                     <div>
                         <label class="block text-sm font-medium text-gray-500">Tariffa Oraria</label>
-                        <p class="text-2xl font-bold text-green-600">€{{ number_format($staff->hourly_rate, 2) }}</p>
+                        <p class="text-xl md:text-2xl font-bold text-green-600">€{{ number_format($staff->hourly_rate, 2) }}</p>
                     </div>
                     @endif
                     @if($staff->monthly_salary)
                     <div>
                         <label class="block text-sm font-medium text-gray-500">Stipendio Mensile</label>
-                        <p class="text-2xl font-bold text-green-600">€{{ number_format($staff->monthly_salary, 2) }}</p>
+                        <p class="text-xl md:text-2xl font-bold text-green-600">€{{ number_format($staff->monthly_salary, 2) }}</p>
                     </div>
                     @endif
                     <div>

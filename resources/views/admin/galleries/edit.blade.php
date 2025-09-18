@@ -179,19 +179,19 @@
 
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div class="bg-blue-50 rounded-lg p-4 text-center">
-                            <div class="text-2xl font-bold text-blue-600">{{ $gallery->mediaItems->count() }}</div>
+                            <div class="text-xl md:text-2xl font-bold text-blue-600">{{ $gallery->mediaItems->count() }}</div>
                             <div class="text-sm text-blue-700">Media Totali</div>
                         </div>
                         <div class="bg-green-50 rounded-lg p-4 text-center">
-                            <div class="text-2xl font-bold text-green-600">{{ $gallery->mediaItems->where('file_type', 'LIKE', 'image/%')->count() }}</div>
+                            <div class="text-xl md:text-2xl font-bold text-green-600">{{ $gallery->mediaItems->where('file_type', 'LIKE', 'image/%')->count() }}</div>
                             <div class="text-sm text-green-700">Immagini</div>
                         </div>
                         <div class="bg-purple-50 rounded-lg p-4 text-center">
-                            <div class="text-2xl font-bold text-purple-600">{{ $gallery->mediaItems->where('file_type', 'LIKE', 'video/%')->count() + $gallery->mediaItems->whereIn('type', ['youtube', 'vimeo'])->count() }}</div>
+                            <div class="text-xl md:text-2xl font-bold text-purple-600">{{ $gallery->mediaItems->where('file_type', 'LIKE', 'video/%')->count() + $gallery->mediaItems->whereIn('type', ['youtube', 'vimeo'])->count() }}</div>
                             <div class="text-sm text-purple-700">Video</div>
                         </div>
                         <div class="bg-orange-50 rounded-lg p-4 text-center">
-                            <div class="text-2xl font-bold text-orange-600">{{ $gallery->mediaItems->whereIn('type', ['external_link', 'youtube', 'vimeo', 'instagram'])->count() }}</div>
+                            <div class="text-xl md:text-2xl font-bold text-orange-600">{{ $gallery->mediaItems->whereIn('type', ['external_link', 'youtube', 'vimeo', 'instagram'])->count() }}</div>
                             <div class="text-sm text-orange-700">Link Esterni</div>
                         </div>
                     </div>

@@ -29,7 +29,7 @@
         <!-- Header -->
         <div class="mb-6 flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Crea Nuovo Evento</h1>
+                <h1 class="text-xl md:text-2xl font-bold text-gray-900">Crea Nuovo Evento</h1>
                 <p class="text-sm text-gray-600 mt-1">
                     Crea un nuovo evento per la tua scuola
                 </p>

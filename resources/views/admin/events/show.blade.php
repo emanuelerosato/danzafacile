@@ -29,8 +29,8 @@
         <!-- Header -->
         <div class="mb-6 flex items-center justify-between">
             <div>
-                <div class="flex items-center space-x-3">
-                    <h1 class="text-2xl font-bold text-gray-900">{{ $event->name }}</h1>
+                <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900">{{ $event->name }}</h1>
                     @if($event->active)
                         <span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Attivo</span>
                     @else
@@ -42,7 +42,7 @@
                     Creato il {{ $event->created_at->format('d/m/Y H:i') }}
                 </p>
             </div>
-            <div class="flex items-center space-x-3">
+            <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                 <a href="{{ route('admin.events.edit', $event) }}"
                    class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg transition-colors duration-200">
                     <i class="fas fa-edit mr-2"></i>
@@ -342,7 +342,7 @@
                     <div class="divide-y divide-gray-200 max-h-64 overflow-y-auto">
                         @foreach($event->registrations()->with('user')->latest()->take(5)->get() as $registration)
                             <div class="p-4 flex items-center justify-between">
-                                <div class="flex items-center space-x-3">
+                                <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                                     <div class="w-8 h-8 bg-gradient-to-r from-rose-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                                         {{ strtoupper(substr($registration->user->name, 0, 1)) }}
                                     </div>

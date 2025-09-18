@@ -27,10 +27,10 @@
 <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Gestione Corsi</h1>
+            <h1 class="text-xl md:text-2xl font-bold text-gray-900">Gestione Corsi</h1>
             <p class="text-gray-600">Tutti i corsi della tua scuola di danza</p>
         </div>
-        <div class="flex items-center space-x-3">
+        <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
             <a href="{{ route('admin.courses.create') }}"
                class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,7 +141,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex items-center space-x-3">
+                            <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $course->active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
                                     {{ $course->active ? 'Attivo' : 'Non attivo' }}
                                 </span>
