@@ -72,13 +72,20 @@ class DocumentController extends Controller
         }
 
         if ($request->ajax()) {
+            // TODO: Create shared document partials
             return response()->json([
-                'html' => view('shared.documents.partials.table', compact('documents'))->render(),
+                'html' => '<div class="p-4 text-center">AJAX loading non ancora implementato</div>',
                 'pagination' => $documents->links()->render()
             ]);
         }
 
-        return view('shared.documents.index', compact('documents', 'users'));
+        // Route to appropriate view based on user role
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return view('admin.documents.index', compact('documents', 'users'));
+        } else {
+            // For students, redirect to dashboard for now - TODO: create student documents view
+            return redirect()->route('student.dashboard')->with('info', 'Hai ' . $documents->count() . ' documenti.');
+        }
     }
 
     /**
@@ -99,7 +106,13 @@ class DocumentController extends Controller
                         ->get();
         }
 
-        return view('shared.documents.create', compact('users'));
+        // Route to appropriate view based on user role
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return view('admin.documents.create', compact('users'));
+        } else {
+            // For students, redirect to dashboard - TODO: create student document upload view
+            return redirect()->route('student.dashboard')->with('info', 'Funzione caricamento documenti non ancora disponibile per studenti.');
+        }
     }
 
     /**
@@ -159,7 +172,13 @@ class DocumentController extends Controller
 
         $document->load('user');
 
-        return view('shared.documents.show', compact('document'));
+        // Route to appropriate view based on user role
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return view('admin.documents.show', compact('document'));
+        } else {
+            // For students, redirect to dashboard - TODO: create student document view
+            return redirect()->route('student.dashboard')->with('info', 'Documento: ' . $document->title);
+        }
     }
 
     /**
@@ -182,7 +201,13 @@ class DocumentController extends Controller
                         ->get();
         }
 
-        return view('shared.documents.edit', compact('document', 'users'));
+        // Route to appropriate view based on user role
+        if ($user->isSuperAdmin() || $user->isAdmin()) {
+            return view('admin.documents.edit', compact('document', 'users'));
+        } else {
+            // For students, redirect to dashboard - TODO: create student document edit view
+            return redirect()->route('student.dashboard')->with('info', 'Modifica documento non ancora disponibile per studenti.');
+        }
     }
 
     /**
