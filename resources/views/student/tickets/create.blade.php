@@ -1,57 +1,63 @@
-@extends('layouts.app')
-
-@section('title', 'Nuovo Messaggio')
-
-@section('content')
-<div class="max-w-4xl mx-auto p-6">
-    <!-- Header with glassmorphism -->
-    <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 mb-6">
-        <!-- Breadcrumb Navigation -->
-        <nav class="flex mb-4" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li class="inline-flex items-center">
-                    <a href="{{ route('student.dashboard') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-rose-600">
-                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-                        </svg>
-                        Dashboard
-                    </a>
-                </li>
-                <li>
-                    <div class="flex items-center">
-                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <a href="{{ route('student.tickets.index') }}" class="ml-1 text-sm font-medium text-gray-700 hover:text-rose-600 md:ml-2">
-                            Messaggi
+<x-app-layout>
+    <x-slot name="header">
+        <!-- Glassmorphism Header with Breadcrumb -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 mb-6">
+            <!-- Breadcrumb Navigation -->
+            <nav class="flex mb-4" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="{{ route('student.dashboard') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-rose-600">
+                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                            </svg>
+                            Dashboard
                         </a>
-                    </div>
-                </li>
-                <li>
-                    <div class="flex items-center">
-                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Nuovo Messaggio</span>
-                    </div>
-                </li>
-            </ol>
-        </nav>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <a href="{{ route('student.tickets.index') }}" class="ml-1 text-sm font-medium text-gray-700 hover:text-rose-600 md:ml-2">
+                                Messaggi
+                            </a>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Nuovo Messaggio</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
 
-        <!-- Page Header -->
-        <div class="flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">✉️ Nuovo Messaggio</h1>
-                <p class="text-gray-600">Invia una richiesta di assistenza o comunicazione alla scuola</p>
+            <!-- Page Header -->
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-bold bg-gradient-to-r from-rose-600 to-purple-600 bg-clip-text text-transparent">
+                        ✉️ Nuovo Messaggio
+                    </h2>
+                    <p class="text-sm text-gray-600 mt-1 flex items-center">
+                        <svg class="w-4 h-4 mr-1 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                        </svg>
+                        Invia una richiesta di assistenza o comunicazione alla scuola
+                    </p>
+                </div>
+                <a href="{{ route('student.tickets.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
+                    <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Torna ai Messaggi
+                </a>
             </div>
-            <a href="{{ route('student.tickets.index') }}" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
-                <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-                Torna ai Messaggi
-            </a>
         </div>
-    </div>
+    </x-slot>
+
+    <div class="space-y-6">
 
     <!-- Help Section -->
     <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
@@ -178,49 +184,49 @@
                     </button>
                 </div>
             </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Character count for description
-    const descriptionTextarea = document.getElementById('description');
-    const charCount = document.getElementById('char-count');
+    @push('scripts')
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Character count for description
+        const descriptionTextarea = document.getElementById('description');
+        const charCount = document.getElementById('char-count');
 
-    function updateCharCount() {
-        const length = descriptionTextarea.value.length;
-        charCount.textContent = `${length}/2000`;
+        function updateCharCount() {
+            const length = descriptionTextarea.value.length;
+            charCount.textContent = `${length}/2000`;
 
-        if (length > 1800) {
-            charCount.classList.add('text-yellow-600');
-        } else if (length > 1950) {
-            charCount.classList.remove('text-yellow-600');
-            charCount.classList.add('text-red-600');
-        } else {
-            charCount.classList.remove('text-yellow-600', 'text-red-600');
+            if (length > 1800) {
+                charCount.classList.add('text-yellow-600');
+            } else if (length > 1950) {
+                charCount.classList.remove('text-yellow-600');
+                charCount.classList.add('text-red-600');
+            } else {
+                charCount.classList.remove('text-yellow-600', 'text-red-600');
+            }
         }
-    }
 
-    descriptionTextarea.addEventListener('input', updateCharCount);
-    updateCharCount(); // Initial count
+        descriptionTextarea.addEventListener('input', updateCharCount);
+        updateCharCount(); // Initial count
 
-    // Form submission with loading state
-    const form = document.getElementById('create-ticket-form');
-    const submitButton = form.querySelector('button[type="submit"]');
+        // Form submission with loading state
+        const form = document.getElementById('create-ticket-form');
+        const submitButton = form.querySelector('button[type="submit"]');
 
-    form.addEventListener('submit', function() {
-        submitButton.disabled = true;
-        submitButton.innerHTML = `
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Invio in corso...
-        `;
+        form.addEventListener('submit', function() {
+            submitButton.disabled = true;
+            submitButton.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Invio in corso...
+            `;
+        });
     });
-});
-</script>
-@endpush
-@endsection
+    </script>
+    @endpush
+</x-app-layout>

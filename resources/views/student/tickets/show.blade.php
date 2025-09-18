@@ -1,11 +1,7 @@
-@extends('layouts.app')
-
-@section('title', 'Messaggio: ' . $ticket->title)
-
-@section('content')
-<div class="max-w-4xl mx-auto p-6">
-    <!-- Header with glassmorphism -->
-    <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 mb-6">
+<x-app-layout>
+    <x-slot name="header">
+        <!-- Glassmorphism Header with Breadcrumb -->
+        <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 mb-6">
         <!-- Breadcrumb Navigation -->
         <nav class="flex mb-4" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
@@ -85,9 +81,10 @@
                 @endif
             </div>
         </div>
-    </div>
+    </x-slot>
 
-    <!-- Ticket Details and Conversation -->
+    <div class="space-y-6">
+        <!-- Ticket Details and Conversation -->
     <div class="space-y-6">
         <!-- Original Message -->
         <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
@@ -204,52 +201,52 @@
                 </div>
             </div>
         @endif
+        </div>
     </div>
-</div>
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Character count for reply
-    const messageTextarea = document.getElementById('message');
-    const charCount = document.getElementById('reply-char-count');
+    @push('scripts')
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Character count for reply
+        const messageTextarea = document.getElementById('message');
+        const charCount = document.getElementById('reply-char-count');
 
-    if (messageTextarea && charCount) {
-        function updateCharCount() {
-            const length = messageTextarea.value.length;
-            charCount.textContent = `${length}/1000`;
+        if (messageTextarea && charCount) {
+            function updateCharCount() {
+                const length = messageTextarea.value.length;
+                charCount.textContent = `${length}/1000`;
 
-            if (length > 800) {
-                charCount.classList.add('text-yellow-600');
-            } else if (length > 950) {
-                charCount.classList.remove('text-yellow-600');
-                charCount.classList.add('text-red-600');
-            } else {
-                charCount.classList.remove('text-yellow-600', 'text-red-600');
+                if (length > 800) {
+                    charCount.classList.add('text-yellow-600');
+                } else if (length > 950) {
+                    charCount.classList.remove('text-yellow-600');
+                    charCount.classList.add('text-red-600');
+                } else {
+                    charCount.classList.remove('text-yellow-600', 'text-red-600');
+                }
             }
+
+            messageTextarea.addEventListener('input', updateCharCount);
+            updateCharCount(); // Initial count
         }
 
-        messageTextarea.addEventListener('input', updateCharCount);
-        updateCharCount(); // Initial count
-    }
+        // Form submission with loading state
+        const form = document.getElementById('reply-form');
+        if (form) {
+            const submitButton = form.querySelector('button[type="submit"]');
 
-    // Form submission with loading state
-    const form = document.getElementById('reply-form');
-    if (form) {
-        const submitButton = form.querySelector('button[type="submit"]');
-
-        form.addEventListener('submit', function() {
-            submitButton.disabled = true;
-            submitButton.innerHTML = `
-                <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Invio in corso...
-            `;
-        });
-    }
-});
-</script>
-@endpush
-@endsection
+            form.addEventListener('submit', function() {
+                submitButton.disabled = true;
+                submitButton.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Invio in corso...
+                `;
+            });
+        }
+    });
+    </script>
+    @endpush
+</x-app-layout>
