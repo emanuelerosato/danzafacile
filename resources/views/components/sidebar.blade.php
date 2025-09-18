@@ -165,9 +165,8 @@
         <!-- Common items for non-super-admin users only -->
         @if(Auth::user()->role !== 'super_admin')
         <div class="border-t border-rose-100 pt-4 mt-4">
-            <x-nav-item href="{{ route('student.dashboard') }}" :active="request()->routeIs('messages.*')" icon="chat">
+            <x-nav-item href="{{ route('student.tickets.index') }}" :active="request()->routeIs('student.tickets.*')" icon="chat">
                 Messaggi
-                <span class="ml-auto bg-rose-500 text-white text-xs px-2 py-1 rounded-full">2</span>
             </x-nav-item>
 
             <x-nav-item href="{{ route('student.dashboard') }}" :active="request()->routeIs('help.*')" icon="question-mark-circle">

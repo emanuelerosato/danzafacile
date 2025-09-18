@@ -30,6 +30,7 @@ use App\Http\Controllers\Admin\StaffScheduleController;
 // Controllers Student
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\StudentCourseController;
+use App\Http\Controllers\Student\TicketController;
 
 // Controllers Shared
 use App\Http\Controllers\Shared\DocumentController;
@@ -270,6 +271,17 @@ Route::middleware('auth')->group(function () {
         // My enrollments
         Route::get('my-courses', [StudentCourseController::class, 'myEnrollments'])->name('my-courses');
         Route::get('my-courses/{enrollment}', [StudentCourseController::class, 'showEnrollment'])->name('my-courses.show');
+
+        // Tickets/Messages (Helpdesk)
+        Route::prefix('tickets')->name('tickets.')->group(function () {
+            Route::get('/', [TicketController::class, 'index'])->name('index');
+            Route::get('/create', [TicketController::class, 'create'])->name('create');
+            Route::post('/', [TicketController::class, 'store'])->name('store');
+            Route::get('/{ticket}', [TicketController::class, 'show'])->name('show');
+            Route::post('/{ticket}/reply', [TicketController::class, 'reply'])->name('reply');
+            Route::get('/stats', [TicketController::class, 'getStats'])->name('stats');
+            Route::get('/recent', [TicketController::class, 'getRecent'])->name('recent');
+        });
     });
     
     // SHARED ROUTES (for all authenticated users)
