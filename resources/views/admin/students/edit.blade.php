@@ -499,3 +499,4 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 </script>
+</x-app-layout>
