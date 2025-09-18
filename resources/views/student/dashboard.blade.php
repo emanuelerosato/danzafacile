@@ -83,9 +83,6 @@
                             <a href="{{ route('profile.edit') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-rose-50 hover:text-rose-600">
                                 Il Mio Profilo
                             </a>
-                            <a href="{{ route('student.settings') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-rose-50 hover:text-rose-600">
-                                Impostazioni
-                            </a>
                             <hr class="my-1 border-gray-200">
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
@@ -249,7 +246,7 @@
                                     <p class="text-sm text-gray-600">Le tue lezioni di oggi</p>
                                 </div>
                             </div>
-                            <a href="{{ route('student.schedule.index') }}"
+                            <a href="{{ route('student.dashboard') }}"
                                class="inline-flex items-center px-3 py-2 bg-white/60 backdrop-blur-sm rounded-lg text-sm font-medium text-rose-600 hover:text-rose-700 hover:bg-white/80 transition-all duration-200 border border-white/40">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -356,7 +353,7 @@
                             <span class="font-medium">Esplora Corsi</span>
                         </a>
                         
-                        <a href="{{ route('student.payments.index') }}" 
+                        <a href="{{ route('student.dashboard') }}" 
                            class="flex items-center p-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-lg hover:from-blue-600 hover:to-cyan-700 transition-all duration-200">
                             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
@@ -364,7 +361,7 @@
                             <span class="font-medium">I Miei Pagamenti</span>
                         </a>
                         
-                        <a href="{{ route('student.documents.index') }}" 
+                        <a href="{{ route('documents.index') }}" 
                            class="flex items-center p-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200">
                             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -420,7 +417,7 @@
                         </div>
                     </div>
                     
-                    <a href="{{ route('messages.index') }}" class="block mt-4 text-center text-sm text-rose-600 hover:text-rose-700">
+                    <a href="{{ route('student.dashboard') }}" class="block mt-4 text-center text-sm text-rose-600 hover:text-rose-700">
                         Vedi tutti i messaggi
                     </a>
                 </div>
@@ -443,7 +440,7 @@
                             <p class="text-sm text-gray-600">Corsi a cui sei iscritto</p>
                         </div>
                     </div>
-                    <a href="{{ route('student.my-courses.index') }}"
+                    <a href="{{ route('student.my-courses') }}"
                        class="inline-flex items-center px-3 py-2 bg-white/60 backdrop-blur-sm rounded-lg text-sm font-medium text-rose-600 hover:text-rose-700 hover:bg-white/80 transition-all duration-200 border border-white/40">
                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -462,7 +459,7 @@
                     schedule="Lun/Mer/Ven 16:00-17:30"
                     :price="85"
                     status="active"
-                    href="{{ route('student.courses.show', 1) }}"
+                    href="{{ route('student.courses.index') }}"
                 >
                     <x-slot name="actions">
                         <div class="flex items-center space-x-2">
@@ -486,7 +483,7 @@
                     schedule="Mar/Gio 18:30-19:30"
                     :price="75"
                     status="active"
-                    href="{{ route('student.courses.show', 2) }}"
+                    href="{{ route('student.courses.index') }}"
                 >
                     <x-slot name="actions">
                         <div class="flex items-center space-x-2">
@@ -510,7 +507,7 @@
                     schedule="Ven 19:00-20:30"
                     :price="95"
                     status="active"
-                    href="{{ route('student.courses.show', 3) }}"
+                    href="{{ route('student.courses.index') }}"
                 >
                     <x-slot name="actions">
                         <div class="flex items-center space-x-2">
