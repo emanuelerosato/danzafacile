@@ -24,7 +24,7 @@
 
 
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Gestione Corsi</h1>
@@ -151,10 +151,10 @@
                                         Modifica
                                     </a>
                                     <span class="text-gray-300">|</span>
-                                    <button onclick="alert('Vista dettaglio in sviluppo')"
-                                            class="text-gray-600 hover:text-gray-900 text-sm font-medium">
+                                    <a href="{{ route('admin.courses.show', $course) }}"
+                                       class="text-gray-600 hover:text-gray-900 text-sm font-medium">
                                         Dettagli
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </div>

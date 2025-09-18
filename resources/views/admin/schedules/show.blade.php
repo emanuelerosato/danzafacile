@@ -28,7 +28,7 @@
         <li class="text-gray-900 font-medium">{{ $course->name }}</li>
     </x-slot>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center space-x-3">
             <a href="{{ route('admin.schedules.index') }}"

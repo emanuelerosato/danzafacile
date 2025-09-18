@@ -131,9 +131,10 @@
                 <x-nav-item href="{{ route('admin.reports.index') }}" :active="request()->routeIs('admin.reports.*')" icon="chart-line">
                     Reports & Analytics
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('admin.dashboards.*')" icon="presentation-chart-bar">
+                {{-- Funzionalità Dashboard Personalizzati rimossa temporaneamente --}}
+                {{-- <x-nav-item href="#" :active="request()->routeIs('admin.dashboards.*')" icon="presentation-chart-bar">
                     Dashboard Personalizzati
-                </x-nav-item>
+                </x-nav-item> --}}
             </x-nav-group>
             
         @else

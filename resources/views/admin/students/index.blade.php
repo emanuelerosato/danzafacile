@@ -24,7 +24,7 @@
 
 
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -35,15 +35,14 @@
             </p>
         </div>
         <div class="flex items-center space-x-3">
-            <button onclick="alert('Funzione importa in sviluppo')"
+            <button disabled title="Funzione in sviluppo"
                     class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"/>
                 </svg>
                 Importa
             </button>
-            <a href="#"
-               onclick="alert('Creazione studente in sviluppo')"
+            <a href="{{ route('admin.students.create') }}"
                class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -135,12 +134,12 @@
                                     {{ $student->active ? 'Attivo' : 'Non attivo' }}
                                 </span>
                                 <div class="flex items-center space-x-2">
-                                    <button onclick="alert('Modifica studente in sviluppo')"
+                                    <a href="{{ route('admin.students.edit', $student) }}"
                                             class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
                                         Modifica
                                     </button>
                                     <span class="text-gray-300">|</span>
-                                    <button onclick="alert('Vista dettaglio in sviluppo')"
+                                    <a href="{{ route('admin.students.show', $student) }}"
                                             class="text-gray-600 hover:text-gray-900 text-sm font-medium">
                                         Dettagli
                                     </button>
@@ -165,7 +164,7 @@
                 <h3 class="mt-2 text-sm font-medium text-gray-900">Nessuno studente</h3>
                 <p class="mt-1 text-sm text-gray-500">Inizia aggiungendo il primo studente alla tua scuola.</p>
                 <div class="mt-6">
-                    <button onclick="alert('Creazione studente in sviluppo')"
+                    <a href="{{ route('admin.students.create') }}"
                             class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>

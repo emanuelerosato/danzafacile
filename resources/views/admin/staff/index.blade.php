@@ -25,7 +25,7 @@
 
 
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Header -->
     <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-sm border border-gray-200 mb-6">
         <div class="px-6 py-4 border-b border-gray-200">

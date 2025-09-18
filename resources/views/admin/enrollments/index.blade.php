@@ -24,7 +24,7 @@
 
 
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -35,14 +35,14 @@
             </p>
         </div>
         <div class="flex items-center space-x-3">
-            <button onclick="alert('Azioni multiple in sviluppo')"
+            <button disabled title="Funzione in sviluppo"
                     class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
                 Azioni Multiple
             </button>
-            <button onclick="alert('Nuova iscrizione in sviluppo')"
+            <button href="{{ route('admin.enrollments.create') }}"
                     class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -136,12 +136,12 @@
                                     {{ ucfirst($enrollment->status ?? 'Unknown') }}
                                 </span>
                                 <div class="flex items-center space-x-2">
-                                    <button onclick="alert('Modifica iscrizione in sviluppo')"
+                                    <button href="{{ route('admin.enrollments.edit', $enrollment) }}"
                                             class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
                                         Modifica
                                     </button>
                                     <span class="text-gray-300">|</span>
-                                    <button onclick="alert('Vista dettaglio in sviluppo')"
+                                    <button href="{{ route('admin.enrollments.show', $enrollment) }}"
                                             class="text-gray-600 hover:text-gray-900 text-sm font-medium">
                                         Dettagli
                                     </button>
@@ -166,7 +166,7 @@
                 <h3 class="mt-2 text-sm font-medium text-gray-900">Nessuna iscrizione</h3>
                 <p class="mt-1 text-sm text-gray-500">Inizia aggiungendo la prima iscrizione.</p>
                 <div class="mt-6">
-                    <button onclick="alert('Nuova iscrizione in sviluppo')"
+                    <button href="{{ route('admin.enrollments.create') }}"
                             class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>

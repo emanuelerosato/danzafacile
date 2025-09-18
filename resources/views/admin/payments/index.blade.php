@@ -24,7 +24,7 @@
 
 
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8" x-data="paymentManager()">
+<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8" x-data="paymentManager()">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between mb-6">
         <div>
@@ -195,174 +195,217 @@
     <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 class="text-lg font-medium text-gray-900">Lista Pagamenti</h3>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-outline-primary btn-sm" id="bulkActionBtn"
-                        disabled data-bs-toggle="dropdown">
-                    <i class="fas fa-tasks me-1"></i>Azioni Multiple
+            <div class="relative inline-block text-left">
+                <button type="button" id="bulkActionBtn" disabled
+                        class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        onclick="toggleBulkDropdown()">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                    Azioni Multiple
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
                 </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#" data-action="mark_completed">Segna come Completati</a></li>
-                    <li><a class="dropdown-item" href="#" data-action="mark_pending">Segna come In Attesa</a></li>
-                    <li><a class="dropdown-item" href="#" data-action="send_receipts">Invia Ricevute</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" href="#" data-action="delete">Elimina</a></li>
-                </ul>
+                <div id="bulkDropdown" class="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                    <div class="py-1">
+                        <a href="#" data-action="mark_completed" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Segna come Completati</a>
+                        <a href="#" data-action="mark_pending" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Segna come In Attesa</a>
+                        <a href="#" data-action="send_receipts" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Invia Ricevute</a>
+                        <div class="border-t border-gray-100"></div>
+                        <a href="#" data-action="delete" class="block px-4 py-2 text-sm text-red-700 hover:bg-red-50">Elimina</a>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="overflow-hidden">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                         <tr>
-                            <th width="40">
-                                <input type="checkbox" id="selectAll" class="form-check-input">
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-10">
+                                <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-rose-600 focus:ring-rose-500">
                             </th>
-                            <th>Studente</th>
-                            <th>Tipo/Dettagli</th>
-                            <th>Importo</th>
-                            <th>Metodo</th>
-                            <th>Stato</th>
-                            <th>Data</th>
-                            <th>Scadenza</th>
-                            <th width="120">Azioni</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Studente</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo/Dettagli</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Importo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Metodo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stato</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scadenza</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">Azioni</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($payments as $payment)
-                        <tr>
-                            <td>
-                                <input type="checkbox" class="form-check-input payment-checkbox"
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="checkbox" class="rounded border-gray-300 text-rose-600 focus:ring-rose-500 payment-checkbox"
                                        value="{{ $payment->id }}">
                             </td>
-                            <td>
-                                <div class="d-flex align-items-center">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
                                     @if($payment->user->profile_image_path)
                                         <img src="{{ $payment->user->profile_image_url }}"
-                                             class="rounded-circle me-2" width="32" height="32" alt="Avatar">
+                                             class="w-8 h-8 rounded-full mr-3" alt="Avatar">
                                     @else
-                                        <div class="bg-secondary rounded-circle me-2 d-flex align-items-center justify-content-center"
-                                             style="width: 32px; height: 32px;">
-                                            <i class="fas fa-user text-white"></i>
+                                        <div class="w-8 h-8 bg-gray-300 rounded-full mr-3 flex items-center justify-center">
+                                            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                            </svg>
                                         </div>
                                     @endif
                                     <div>
-                                        <div class="fw-semibold">{{ $payment->user->full_name ?? $payment->user->name }}</div>
-                                        <small class="text-muted">{{ $payment->user->email }}</small>
+                                        <div class="text-sm font-medium text-gray-900">{{ $payment->user->full_name ?? $payment->user->name }}</div>
+                                        <div class="text-sm text-gray-500">{{ $payment->user->email }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td>
-                                <div>
-                                    <span class="badge bg-info">{{ $payment->payment_type_name }}</span>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="space-y-1">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{{ $payment->payment_type_name }}</span>
                                     @if($payment->is_installment)
-                                        <span class="badge bg-warning">Rata {{ $payment->installment_number }}/{{ $payment->total_installments }}</span>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Rata {{ $payment->installment_number }}/{{ $payment->total_installments }}</span>
                                     @endif
                                 </div>
                                 <div class="mt-1">
                                     @if($payment->course)
-                                        <small class="text-muted">Corso: {{ $payment->course->name }}</small>
+                                        <div class="text-sm text-gray-500">Corso: {{ $payment->course->name }}</div>
                                     @elseif($payment->event)
-                                        <small class="text-muted">Evento: {{ $payment->event->name }}</small>
+                                        <div class="text-sm text-gray-500">Evento: {{ $payment->event->name }}</div>
                                     @endif
                                 </div>
                                 @if($payment->receipt_number)
-                                    <small class="text-muted">Ric: {{ $payment->receipt_number }}</small>
+                                    <div class="text-sm text-gray-500">Ric: {{ $payment->receipt_number }}</div>
                                 @endif
                             </td>
-                            <td>
-                                <div class="fw-semibold">{{ $payment->formatted_full_amount }}</div>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ $payment->formatted_full_amount }}</div>
                                 @if($payment->installments && $payment->installments->count() > 0)
-                                    <small class="text-muted">
+                                    <div class="text-sm text-gray-500">
                                         Pagato: € {{ number_format($payment->getTotalPaidForInstallments(), 2, ',', '.') }}
-                                    </small>
+                                    </div>
                                 @endif
                             </td>
-                            <td>
-                                <span class="badge bg-light text-dark">{{ $payment->payment_method_name }}</span>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{{ $payment->payment_method_name }}</span>
                             </td>
-                            <td>
+                            <td class="px-6 py-4 whitespace-nowrap">
                                 @php
                                     $statusClasses = [
-                                        'pending' => 'bg-warning',
-                                        'completed' => 'bg-success',
-                                        'failed' => 'bg-danger',
-                                        'refunded' => 'bg-info',
-                                        'cancelled' => 'bg-secondary',
-                                        'processing' => 'bg-primary',
-                                        'partial' => 'bg-warning'
+                                        'pending' => 'bg-yellow-100 text-yellow-800',
+                                        'completed' => 'bg-green-100 text-green-800',
+                                        'failed' => 'bg-red-100 text-red-800',
+                                        'refunded' => 'bg-blue-100 text-blue-800',
+                                        'cancelled' => 'bg-gray-100 text-gray-800',
+                                        'processing' => 'bg-blue-100 text-blue-800',
+                                        'partial' => 'bg-yellow-100 text-yellow-800'
                                     ];
                                 @endphp
-                                <span class="badge {{ $statusClasses[$payment->status] ?? 'bg-secondary' }}">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusClasses[$payment->status] ?? 'bg-gray-100 text-gray-800' }}">
                                     {{ $payment->status_name }}
                                 </span>
                                 @if($payment->is_overdue)
-                                    <br><small class="text-danger"><i class="fas fa-exclamation-triangle"></i> Scaduto</small>
+                                    <div class="text-xs text-red-600 mt-1">
+                                        <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                        </svg>
+                                        Scaduto
+                                    </div>
                                 @endif
                             </td>
-                            <td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 @if($payment->payment_date)
-                                    {{ $payment->payment_date->format('d/m/Y') }}
-                                    <br><small class="text-muted">{{ $payment->payment_date->format('H:i') }}</small>
+                                    <div>{{ $payment->payment_date->format('d/m/Y') }}</div>
+                                    <div class="text-xs text-gray-500">{{ $payment->payment_date->format('H:i') }}</div>
                                 @else
-                                    <span class="text-muted">N/A</span>
+                                    <span class="text-gray-500">N/A</span>
                                 @endif
                             </td>
-                            <td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 @if($payment->due_date)
-                                    {{ $payment->due_date->format('d/m/Y') }}
+                                    <div>{{ $payment->due_date->format('d/m/Y') }}</div>
                                     @if($payment->is_overdue)
-                                        <br><small class="text-danger">Scaduto</small>
+                                        <div class="text-xs text-red-600">Scaduto</div>
                                     @endif
                                 @else
-                                    <span class="text-muted">N/A</span>
+                                    <span class="text-gray-500">N/A</span>
                                 @endif
                             </td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle"
-                                            data-bs-toggle="dropdown">
-                                        <i class="fas fa-cog"></i>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="relative inline-block text-left">
+                                    <button type="button"
+                                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
+                                            onclick="togglePaymentDropdown({{ $payment->id }})">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                        </svg>
                                     </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{{ route('admin.payments.show', $payment) }}">
-                                            <i class="fas fa-eye me-1"></i>Visualizza
-                                        </a></li>
-                                        <li><a class="dropdown-item" href="{{ route('admin.payments.edit', $payment) }}">
-                                            <i class="fas fa-edit me-1"></i>Modifica
-                                        </a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        @if($payment->status === 'pending')
-                                        <li><a class="dropdown-item" href="#" onclick="markCompleted({{ $payment->id }})">
-                                            <i class="fas fa-check me-1"></i>Segna Completato
-                                        </a></li>
-                                        @endif
-                                        @if($payment->canBeRefunded())
-                                        <li><a class="dropdown-item" href="#" onclick="processRefund({{ $payment->id }})">
-                                            <i class="fas fa-undo me-1"></i>Rimborsa
-                                        </a></li>
-                                        @endif
-                                        @if($payment->receipt_number)
-                                        <li><a class="dropdown-item" href="{{ route('admin.payments.receipt', $payment) }}" target="_blank">
-                                            <i class="fas fa-file-pdf me-1"></i>Scarica Ricevuta
-                                        </a></li>
-                                        <li><a class="dropdown-item" href="#" onclick="sendReceipt({{ $payment->id }})">
-                                            <i class="fas fa-envelope me-1"></i>Invia Ricevuta
-                                        </a></li>
-                                        @endif
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item text-danger" href="#" onclick="deletePayment({{ $payment->id }})">
-                                            <i class="fas fa-trash me-1"></i>Elimina
-                                        </a></li>
-                                    </ul>
+                                    <div id="paymentDropdown{{ $payment->id }}" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                                        <div class="py-1">
+                                            <a href="{{ route('admin.payments.show', $payment) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                                Visualizza
+                                            </a>
+                                            <a href="{{ route('admin.payments.edit', $payment) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                                Modifica
+                                            </a>
+                                            @if($payment->status === 'pending')
+                                            <a href="#" onclick="markCompleted({{ $payment->id }})" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                                Segna Completato
+                                            </a>
+                                            @endif
+                                            @if($payment->canBeRefunded())
+                                            <a href="#" onclick="processRefundWithModal({{ $payment->id }})" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                                                </svg>
+                                                Rimborsa
+                                            </a>
+                                            @endif
+                                            @if($payment->receipt_number)
+                                            <a href="{{ route('admin.payments.receipt', $payment) }}" target="_blank" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                </svg>
+                                                Scarica Ricevuta
+                                            </a>
+                                            <a href="#" onclick="sendReceipt({{ $payment->id }})" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                                </svg>
+                                                Invia Ricevuta
+                                            </a>
+                                            @endif
+                                            <div class="border-t border-gray-100"></div>
+                                            <a href="#" onclick="deletePayment({{ $payment->id }})" class="group flex items-center px-4 py-2 text-sm text-red-700 hover:bg-red-50">
+                                                <svg class="mr-3 h-4 w-4 text-red-400 group-hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                                Elimina
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="text-center py-4">
-                                <div class="text-muted">
-                                    <i class="fas fa-inbox fa-3x mb-3"></i>
-                                    <p>Nessun pagamento trovato</p>
+                            <td colspan="9" class="px-6 py-12 text-center">
+                                <div class="text-gray-500">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                                    </svg>
+                                    <p class="text-sm">Nessun pagamento trovato</p>
                                 </div>
                             </td>
                         </tr>
@@ -406,7 +449,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Bulk actions
-    document.querySelectorAll('.dropdown-menu a[data-action]').forEach(link => {
+    document.querySelectorAll('#bulkDropdown a[data-action]').forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
             const action = this.dataset.action;
@@ -537,6 +580,101 @@ function deletePayment(paymentId) {
             alert('Errore: ' + data.message);
         }
     });
+}
+
+// Global dropdown state management
+let activeDropdown = null;
+let dropdownClickListener = null;
+
+// Dropdown toggle functions
+function toggleBulkDropdown() {
+    const dropdown = document.getElementById('bulkDropdown');
+
+    // Close any existing dropdown
+    closeActiveDropdown();
+
+    dropdown.classList.toggle('hidden');
+
+    if (!dropdown.classList.contains('hidden')) {
+        setActiveDropdown('bulkDropdown');
+    }
+}
+
+function togglePaymentDropdown(paymentId) {
+    const dropdown = document.getElementById(`paymentDropdown${paymentId}`);
+
+    // Close any existing dropdown
+    closeActiveDropdown();
+
+    // Close all other payment dropdowns
+    document.querySelectorAll('[id^="paymentDropdown"]').forEach(d => {
+        if (d.id !== `paymentDropdown${paymentId}`) {
+            d.classList.add('hidden');
+        }
+    });
+
+    dropdown.classList.toggle('hidden');
+
+    if (!dropdown.classList.contains('hidden')) {
+        setActiveDropdown(`paymentDropdown${paymentId}`);
+    }
+}
+
+// Helper functions for dropdown management
+function setActiveDropdown(dropdownId) {
+    activeDropdown = dropdownId;
+
+    // Remove any existing listener
+    if (dropdownClickListener) {
+        document.removeEventListener('click', dropdownClickListener);
+    }
+
+    // Add new listener
+    dropdownClickListener = function(e) {
+        const dropdown = document.getElementById(activeDropdown);
+        const trigger = dropdownId === 'bulkDropdown'
+            ? document.getElementById('bulkActionBtn')
+            : e.target.closest(`[onclick*="${activeDropdown}"]`);
+
+        if (!e.target.closest(`#${activeDropdown}`) && !e.target.closest(trigger?.tagName || 'button')) {
+            closeActiveDropdown();
+        }
+    };
+
+    document.addEventListener('click', dropdownClickListener);
+}
+
+function closeActiveDropdown() {
+    if (activeDropdown) {
+        const dropdown = document.getElementById(activeDropdown);
+        if (dropdown) {
+            dropdown.classList.add('hidden');
+        }
+
+        if (dropdownClickListener) {
+            document.removeEventListener('click', dropdownClickListener);
+            dropdownClickListener = null;
+        }
+
+        activeDropdown = null;
+    }
+}
+
+// Alpine.js Payment Manager Component
+function paymentManager() {
+    return {
+        selectedPayments: [],
+
+        openBulkModal() {
+            // Implement bulk modal if needed
+            console.log('Bulk modal opened');
+        },
+
+        exportPayments() {
+            // Trigger export
+            window.location.href = '{{ route("admin.payments.export", request()->all()) }}';
+        }
+    };
 }
 </script>
 @endpush</x-app-layout>
