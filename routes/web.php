@@ -257,9 +257,9 @@ Route::middleware('auth')->group(function () {
     
     // STUDENT ROUTES
     Route::middleware('role:student')->prefix('student')->name('student.')->group(function () {
-        Route::get('/dashboard', [StudentDashboardController::class, 'dashboard'])->name('dashboard');
-        Route::get('/progress', [StudentDashboardController::class, 'progress'])->name('progress');
-        Route::get('/activity', [StudentDashboardController::class, 'activity'])->name('activity');
+        Route::get('/dashboard', [StudentDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/progress', [StudentDashboardController::class, 'getProgress'])->name('progress');
+        Route::get('/activity', [StudentDashboardController::class, 'getUpcomingActivities'])->name('activity');
         
         // Available courses and enrollments
         Route::get('courses', [StudentCourseController::class, 'index'])->name('courses.index');
