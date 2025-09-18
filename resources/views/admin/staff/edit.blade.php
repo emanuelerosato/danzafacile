@@ -549,3 +549,4 @@ document.getElementById('employment_type').addEventListener('change', function()
     }
 });
 </script>
+</x-app-layout>

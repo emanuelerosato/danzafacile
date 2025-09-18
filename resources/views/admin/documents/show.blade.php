@@ -402,3 +402,4 @@ document.addEventListener('keydown', function(event) {
 </script>
 @endpush
 
+</x-app-layout>

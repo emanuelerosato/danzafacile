@@ -351,3 +351,4 @@ function documentEdit() {
 </script>
 @endpush
 
+</x-app-layout>

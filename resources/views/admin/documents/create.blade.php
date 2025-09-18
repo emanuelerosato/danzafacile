@@ -308,3 +308,4 @@ function documentUpload() {
 </script>
 @endpush
 
+</x-app-layout>

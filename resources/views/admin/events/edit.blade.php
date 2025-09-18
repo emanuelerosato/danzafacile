@@ -343,3 +343,4 @@ document.addEventListener('DOMContentLoaded', function() {
     @endif
 });
 </script>
+</x-app-layout>

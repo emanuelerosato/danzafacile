@@ -448,3 +448,4 @@ document.getElementById('assignCourseModal').addEventListener('click', function(
     }
 });
 </script>
+</x-app-layout>
