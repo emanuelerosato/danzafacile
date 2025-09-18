@@ -136,30 +136,30 @@
             
         @else
             <!-- Student Menu -->
-            <x-nav-item href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')" icon="home">
+            <x-nav-item href="{{ route('student.dashboard') }}" :active="request()->routeIs('student.dashboard')" icon="home">
                 Dashboard
             </x-nav-item>
-            
+
             <x-nav-group title="I Miei Corsi" icon="academic-cap">
-                <x-nav-item href="#" :active="request()->routeIs('student.courses.*')" icon="book-open">
+                <x-nav-item href="{{ route('student.courses.index') }}" :active="request()->routeIs('student.courses.*')" icon="book-open">
                     Corsi Disponibili
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('student.my-courses.*')" icon="clipboard-check">
+                <x-nav-item href="{{ route('student.my-courses') }}" :active="request()->routeIs('student.my-courses.*')" icon="clipboard-check">
                     Le Mie Iscrizioni
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('student.schedule.*')" icon="calendar">
+                <x-nav-item href="{{ route('student.dashboard') }}" :active="request()->routeIs('student.schedule.*')" icon="calendar">
                     Il Mio Programma
                 </x-nav-item>
             </x-nav-group>
-            
+
             <x-nav-group title="Profilo" icon="user">
-                <x-nav-item href="#" :active="request()->routeIs('student.payments.*')" icon="credit-card">
+                <x-nav-item href="{{ route('student.dashboard') }}" :active="request()->routeIs('student.payments.*')" icon="credit-card">
                     Pagamenti
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('student.documents.*')" icon="document">
+                <x-nav-item href="{{ route('documents.index') }}" :active="request()->routeIs('documents.*')" icon="document">
                     Documenti
                 </x-nav-item>
-                <x-nav-item href="#" :active="request()->routeIs('student.gallery.*')" icon="photograph">
+                <x-nav-item href="{{ route('student.dashboard') }}" :active="request()->routeIs('student.gallery.*')" icon="photograph">
                     Galleria
                 </x-nav-item>
             </x-nav-group>
@@ -168,12 +168,12 @@
         <!-- Common items for non-super-admin users only -->
         @if(Auth::user()->role !== 'super_admin')
         <div class="border-t border-rose-100 pt-4 mt-4">
-            <x-nav-item href="#" :active="request()->routeIs('messages.*')" icon="chat">
+            <x-nav-item href="{{ route('student.dashboard') }}" :active="request()->routeIs('messages.*')" icon="chat">
                 Messaggi
                 <span class="ml-auto bg-rose-500 text-white text-xs px-2 py-1 rounded-full">2</span>
             </x-nav-item>
-            
-            <x-nav-item href="#" :active="request()->routeIs('help.*')" icon="question-mark-circle">
+
+            <x-nav-item href="{{ route('student.dashboard') }}" :active="request()->routeIs('help.*')" icon="question-mark-circle">
                 Aiuto
             </x-nav-item>
         </div>
