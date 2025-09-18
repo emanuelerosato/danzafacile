@@ -24,162 +24,177 @@
 
 
 
-<div class="py-6" x-data="paymentManager()">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Header -->
-        <div class="mb-6 flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Gestione Pagamenti</h1>
-                <p class="text-sm text-gray-600 mt-1">Amministra i pagamenti degli studenti della tua scuola</p>
-            </div>
-            <div class="flex items-center space-x-3">
-                <button @click="openBulkModal()"
-                        class="bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2 rounded-lg transition-colors duration-200">
-                    <i class="fas fa-tasks mr-2"></i>
-                    Azioni Multiple
-                </button>
-                <button @click="exportPayments()"
-                        class="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg transition-colors duration-200">
-                    <i class="fas fa-download mr-2"></i>
-                    Esporta
-                </button>
-                <a href="{{ route('admin.payments.create') }}"
-                   class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-                    <i class="fas fa-plus mr-2"></i>
-                    Nuovo Pagamento
-                </a>
-            </div>
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8" x-data="paymentManager()">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Gestione Pagamenti</h1>
+            <p class="text-gray-600">Tutti i pagamenti della tua scuola di danza</p>
         </div>
+        <div class="flex items-center space-x-3">
+            <button @click="openBulkModal()"
+                    class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                </svg>
+                Azioni Multiple
+            </button>
+            <button @click="exportPayments()"
+                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                Esporta
+            </button>
+            <a href="{{ route('admin.payments.create') }}"
+               class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-all duration-200">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                Nuovo Pagamento
+            </a>
+        </div>
+    </div>
 
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-md text-white p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-2xl font-bold">{{ number_format($stats['total_payments'] ?? 0) }}</h3>
-                        <p class="text-blue-100 text-sm">Pagamenti Totali</p>
-                    </div>
-                    <div class="bg-blue-400 bg-opacity-50 rounded-lg p-3">
-                        <i class="fas fa-receipt text-2xl"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-md text-white p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-2xl font-bold">€{{ number_format($stats['completed_amount'] ?? 0, 2, ',', '.') }}</h3>
-                        <p class="text-green-100 text-sm">Incasso Totale</p>
-                    </div>
-                    <div class="bg-green-400 bg-opacity-50 rounded-lg p-3">
-                        <i class="fas fa-euro-sign text-2xl"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg shadow-md text-white p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-2xl font-bold">{{ number_format($stats['pending_payments'] ?? 0) }}</h3>
-                        <p class="text-yellow-100 text-sm">In Attesa</p>
-                    </div>
-                    <div class="bg-yellow-400 bg-opacity-50 rounded-lg p-3">
-                        <i class="fas fa-clock text-2xl"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gradient-to-r from-red-500 to-red-600 rounded-lg shadow-md text-white p-6">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-2xl font-bold">{{ number_format($stats['overdue_payments'] ?? 0) }}</h3>
-                        <p class="text-red-100 text-sm">Scaduti</p>
-                    </div>
-                    <div class="bg-red-400 bg-opacity-50 rounded-lg p-3">
-                        <i class="fas fa-exclamation-triangle text-2xl"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Key Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <x-stats-card
+            title="Pagamenti Totali"
+            :value="number_format($stats['total_payments'] ?? 0)"
+            :subtitle="'Gestiti'"
+            icon="clipboard-list"
+            color="blue"
+            :change="15"
+            changeType="increase"
+        />
+
+        <x-stats-card
+            title="Incasso Totale"
+            :value="'€' . number_format($stats['completed_amount'] ?? 0, 2, ',', '.')"
+            :subtitle="'Completati'"
+            icon="currency-dollar"
+            color="green"
+            :change="22"
+            changeType="increase"
+        />
+
+        <x-stats-card
+            title="In Attesa"
+            :value="number_format($stats['pending_payments'] ?? 0)"
+            :subtitle="'Da confermare'"
+            icon="clock"
+            color="yellow"
+            :change="5"
+            changeType="increase"
+        />
+
+        <x-stats-card
+            title="Scaduti"
+            :value="number_format($stats['overdue_payments'] ?? 0)"
+            :subtitle="'Richiedono attenzione'"
+            icon="exclamation-triangle"
+            color="red"
+            :change="-3"
+            changeType="decrease"
+        />
+    </div>
 
     <!-- Filters and Search -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5 class="mb-0">Filtri e Ricerca</h5>
+    <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 mb-6">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-medium text-gray-900">Filtri e Ricerca</h3>
         </div>
-        <div class="card-body">
-            <form id="filtersForm" method="GET">
-                <div class="row">
-                    <div class="col-md-3">
-                        <label for="search" class="form-label">Ricerca</label>
-                        <input type="text" class="form-control" id="search" name="search"
-                               placeholder="Nome, email, ricevuta..."
-                               value="{{ request('search') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="status" class="form-label">Stato</label>
-                        <select class="form-select" id="status" name="status">
-                            <option value="">Tutti</option>
-                            @foreach($filterOptions['statuses'] ?? [] as $key => $label)
-                                <option value="{{ $key }}"
-                                        {{ request('status') == $key ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="payment_method" class="form-label">Metodo</label>
-                        <select class="form-select" id="payment_method" name="payment_method">
-                            <option value="">Tutti</option>
-                            @foreach($filterOptions['methods'] ?? [] as $key => $label)
-                                <option value="{{ $key }}"
-                                        {{ request('payment_method') == $key ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="payment_type" class="form-label">Tipo</label>
-                        <select class="form-select" id="payment_type" name="payment_type">
-                            <option value="">Tutti</option>
-                            @foreach($filterOptions['types'] ?? [] as $key => $label)
-                                <option value="{{ $key }}"
-                                        {{ request('payment_type') == $key ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="date_range" class="form-label">Periodo</label>
-                        <div class="input-group">
-                            <input type="date" class="form-control" name="date_from"
-                                   value="{{ request('date_from') }}" placeholder="Da">
-                            <input type="date" class="form-control" name="date_to"
-                                   value="{{ request('date_to') }}" placeholder="A">
-                        </div>
+        <div class="p-6">
+            <form id="filtersForm" method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                <!-- Search -->
+                <div>
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Ricerca</label>
+                    <input type="text" id="search" name="search"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                           placeholder="Nome, email, ricevuta..."
+                           value="{{ request('search') }}">
+                </div>
+
+                <!-- Status -->
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Stato</label>
+                    <select id="status" name="status"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500">
+                        <option value="">Tutti</option>
+                        @foreach($filterOptions['statuses'] ?? [] as $key => $label)
+                            <option value="{{ $key }}"
+                                    {{ request('status') == $key ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Payment Method -->
+                <div>
+                    <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-1">Metodo</label>
+                    <select id="payment_method" name="payment_method"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500">
+                        <option value="">Tutti</option>
+                        @foreach($filterOptions['methods'] ?? [] as $key => $label)
+                            <option value="{{ $key }}"
+                                    {{ request('payment_method') == $key ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Payment Type -->
+                <div>
+                    <label for="payment_type" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                    <select id="payment_type" name="payment_type"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500">
+                        <option value="">Tutti</option>
+                        @foreach($filterOptions['types'] ?? [] as $key => $label)
+                            <option value="{{ $key }}"
+                                    {{ request('payment_type') == $key ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Date Range -->
+                <div>
+                    <label for="date_range" class="block text-sm font-medium text-gray-700 mb-1">Periodo</label>
+                    <div class="flex space-x-2">
+                        <input type="date" name="date_from"
+                               class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                               value="{{ request('date_from') }}" placeholder="Da">
+                        <input type="date" name="date_to"
+                               class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                               value="{{ request('date_to') }}" placeholder="A">
                     </div>
                 </div>
-                <div class="row mt-3">
-                    <div class="col">
-                        <button type="submit" class="btn btn-outline-primary me-2">
-                            <i class="fas fa-search me-1"></i>Filtra
-                        </button>
-                        <a href="{{ route('admin.payments.index') }}" class="btn btn-outline-secondary me-2">
-                            <i class="fas fa-times me-1"></i>Reset
-                        </a>
-                        <a href="{{ route('admin.payments.export', request()->all()) }}" class="btn btn-outline-success">
-                            <i class="fas fa-download me-1"></i>Esporta CSV
-                        </a>
-                    </div>
+
+                <div class="lg:col-span-5 flex justify-end space-x-3">
+                    <button type="submit"
+                            class="px-4 py-2 bg-rose-600 text-white rounded-md hover:bg-rose-700 transition-colors">
+                        Applica Filtri
+                    </button>
+                    <a href="{{ route('admin.payments.index') }}"
+                       class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                        Reset
+                    </a>
+                    <a href="{{ route('admin.payments.export', request()->all()) }}"
+                       class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                        Esporta CSV
+                    </a>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- Payments Table -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Lista Pagamenti</h5>
+    <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="text-lg font-medium text-gray-900">Lista Pagamenti</h3>
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-outline-primary btn-sm" id="bulkActionBtn"
                         disabled data-bs-toggle="dropdown">
@@ -194,7 +209,7 @@
                 </ul>
             </div>
         </div>
-        <div class="card-body p-0">
+        <div class="overflow-hidden">
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
                     <thead class="table-light">
@@ -357,7 +372,7 @@
             </div>
         </div>
         @if($payments->hasPages())
-        <div class="card-footer">
+        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
             {{ $payments->links() }}
         </div>
         @endif
