@@ -1,40 +1,51 @@
 <x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    Carica Nuovo Documento
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">
+                    Aggiungi un nuovo documento alla scuola
+                </p>
+            </div>
+        </div>
+    </x-slot>
 
+    <x-slot name="breadcrumb">
+        <li class="flex items-center">
+            <a href="{{ route('admin.dashboard') }}" class="text-gray-500 hover:text-gray-700">Dashboard</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="flex items-center">
+            <a href="{{ route('admin.documents.index') }}" class="text-gray-500 hover:text-gray-700">Documenti</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="text-gray-900 font-medium">Carica Documento</li>
+    </x-slot>
 
-<div class="min-h-screen bg-gray-50">
+<div class="space-y-6">
     <!-- Header -->
-    <div class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-6">
-                <div>
-                    <nav class="flex" aria-label="Breadcrumb">
-                        <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                            <li class="inline-flex items-center">
-                                <a href="{{ route('admin.documents.index') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-rose-600">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    Documenti
-                                </a>
-                            </li>
-                            <li>
-                                <div class="flex items-center">
-                                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Carica Documento</span>
-                                </div>
-                            </li>
-                        </ol>
-                    </nav>
-                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 mt-1">Carica Nuovo Documento</h1>
-                    <p class="text-sm text-gray-600 mt-1">Aggiungi un nuovo documento alla scuola</p>
-                </div>
+    <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+            <a href="{{ route('admin.documents.index') }}"
+               class="inline-flex items-center p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-gray-900">Carica Nuovo Documento</h1>
+                <p class="text-gray-600">Aggiungi un nuovo documento alla scuola</p>
             </div>
         </div>
     </div>
 
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Form Card -->
         <form action="{{ route('admin.documents.store') }}" method="POST" enctype="multipart/form-data"
               x-data="documentUpload()"
               x-init="initUpload()"
@@ -42,10 +53,15 @@
             @csrf
 
             <!-- Main Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
                 <!-- Card Header -->
-                <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-                    <h2 class="text-lg font-medium text-gray-900">Informazioni Documento</h2>
+                <div class="px-6 py-4 border-b border-gray-200/80 bg-gradient-to-r from-rose-50 to-pink-50">
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Informazioni Documento
+                    </h2>
                     <p class="text-sm text-gray-600 mt-1">Fornisci i dettagli del documento da caricare</p>
                 </div>
 
@@ -56,8 +72,8 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             File Documento <span class="text-red-500">*</span>
                         </label>
-                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-rose-400 transition-colors duration-200"
-                             :class="{ 'border-rose-400 bg-rose-50': isDragOver }"
+                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-2xl border-gray-300 hover:border-rose-400 bg-gradient-to-br from-gray-50/50 to-white/50 backdrop-blur-sm transition-all duration-200"
+                             :class="{ 'border-rose-400 bg-gradient-to-br from-rose-50/80 to-pink-50/80': isDragOver }"
                              @drop="handleDrop"
                              @dragover.prevent="isDragOver = true"
                              @dragleave.prevent="isDragOver = false">
@@ -84,7 +100,7 @@
 
                         <!-- File Preview -->
                         <div x-show="selectedFile" x-cloak class="mt-4">
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div class="flex items-center justify-between p-4 bg-gradient-to-r from-rose-50/80 to-pink-50/80 backdrop-blur-sm rounded-2xl border border-rose-200/50">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0">
                                         <div class="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center">
