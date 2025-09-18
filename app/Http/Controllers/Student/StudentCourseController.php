@@ -208,7 +208,7 @@ class StudentCourseController extends Controller
             ]);
         }
 
-        return redirect()->route('student.enrollments.index')
+        return redirect()->route('student.my-courses')
                         ->with('success', 'Iscrizione completata con successo!');
     }
 
@@ -269,13 +269,14 @@ class StudentCourseController extends Controller
         $enrollments = $query->orderBy('enrollment_date', 'desc')->paginate(10);
 
         if ($request->ajax()) {
+            // TODO: Create partial view for AJAX loading
             return response()->json([
-                'html' => view('student.enrollments.partials.list', compact('enrollments'))->render(),
+                'html' => '<div class="p-4 text-center">AJAX loading non ancora implementato</div>',
                 'pagination' => $enrollments->links()->render()
             ]);
         }
 
-        return view('student.enrollments.index', compact('enrollments'));
+        return view('student.my-courses', compact('enrollments'));
     }
 
     /**
@@ -293,7 +294,8 @@ class StudentCourseController extends Controller
         // Get course schedule details
         $scheduleDetails = $this->getScheduleDetails($enrollment->course);
 
-        return view('student.enrollments.show', compact('enrollment', 'scheduleDetails'));
+        // For now, redirect to dashboard - TODO: create dedicated enrollment view
+        return redirect()->route('student.dashboard')->with('info', 'Dettagli iscrizione: ' . $enrollment->course->name);
     }
 
     /**
