@@ -268,8 +268,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('enrollments/{enrollment}', [StudentCourseController::class, 'cancelEnrollment'])->name('enrollments.cancel');
         
         // My enrollments
-        Route::get('my-courses', [StudentCourseController::class, 'myCourses'])->name('my-courses');
-        Route::get('my-courses/{enrollment}', [StudentCourseController::class, 'showMyCourse'])->name('my-courses.show');
+        Route::get('my-courses', [StudentCourseController::class, 'myEnrollments'])->name('my-courses');
+        Route::get('my-courses/{enrollment}', [StudentCourseController::class, 'showEnrollment'])->name('my-courses.show');
     });
     
     // SHARED ROUTES (for all authenticated users)
