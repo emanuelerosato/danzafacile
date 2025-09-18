@@ -83,8 +83,8 @@ class DocumentController extends Controller
         if ($user->isSuperAdmin() || $user->isAdmin()) {
             return view('admin.documents.index', compact('documents', 'users'));
         } else {
-            // For students, redirect to dashboard for now - TODO: create student documents view
-            return redirect()->route('student.dashboard')->with('info', 'Hai ' . $documents->count() . ' documenti.');
+            // For students, show dedicated documents view
+            return view('student.documents.index', compact('documents'));
         }
     }
 
@@ -171,6 +171,7 @@ class DocumentController extends Controller
         $this->authorizeDocument($document);
 
         $document->load('user');
+        $user = auth()->user();
 
         // Route to appropriate view based on user role
         if ($user->isSuperAdmin() || $user->isAdmin()) {
