@@ -77,7 +77,15 @@ class AdminDocumentController extends AdminBaseController
      */
     public function create()
     {
-        return view('admin.documents.create');
+        // Get all students from the current school for dropdown
+        $students = auth()->user()->school->users()
+            ->where('role', 'user')
+            ->where('active', true)
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get(['id', 'first_name', 'last_name', 'email', 'codice_fiscale']);
+
+        return view('admin.documents.create', compact('students'));
     }
 
     /**
@@ -90,6 +98,18 @@ class AdminDocumentController extends AdminBaseController
             'description' => 'nullable|string|max:1000',
             'category' => 'required|in:general,medical,contract,identification,other',
             'file' => 'required|file|max:10240|mimes:pdf,jpg,jpeg,png,gif,doc,docx,txt',
+            'user_id' => [
+                'nullable',
+                'exists:users,id',
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        $user = \App\Models\User::find($value);
+                        if (!$user || $user->school_id !== auth()->user()->school_id || $user->role !== 'user') {
+                            $fail('Lo studente selezionato non è valido per la tua scuola.');
+                        }
+                    }
+                }
+            ],
             'is_public' => 'boolean',
             'requires_approval' => 'boolean',
             'expires_at' => 'nullable|date|after:now'
@@ -106,6 +126,7 @@ class AdminDocumentController extends AdminBaseController
 
             $document = Document::create([
                 'school_id' => auth()->user()->school_id,
+                'user_id' => $request->user_id, // Associate with student if selected
                 'uploaded_by' => auth()->id(),
                 'title' => $request->title,
                 'description' => $request->description,

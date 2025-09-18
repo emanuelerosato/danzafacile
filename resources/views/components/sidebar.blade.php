@@ -80,9 +80,6 @@
                 <x-nav-item href="{{ route('admin.schedules.index') }}" :active="request()->routeIs('admin.schedules.*')" icon="calendar">
                     Orari
                 </x-nav-item>
-                <x-nav-item href="{{ route('admin.staff.index') }}" :active="request()->routeIs('admin.staff.*')" icon="user-group">
-                    Istruttori
-                </x-nav-item>
             </x-nav-group>
             
             <x-nav-group title="Studenti" icon="users">

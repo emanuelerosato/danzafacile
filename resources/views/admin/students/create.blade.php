@@ -170,6 +170,24 @@
                         <div x-show="errors.phone" class="mt-1 text-sm text-red-600" x-text="errors.phone"></div>
                     </div>
 
+                    <!-- Codice Fiscale -->
+                    <div>
+                        <label for="codice_fiscale" class="block text-sm font-medium text-gray-700 mb-2">
+                            Codice Fiscale <span class="text-red-500">*</span>
+                        </label>
+                        <x-secure-input
+                            type="text"
+                            name="codice_fiscale"
+                            :value="old('codice_fiscale')"
+                            placeholder="RSSMRA80A01H501X"
+                            :required="true"
+                            :max-length="16"
+                            class="uppercase"
+                            x-model="form.codice_fiscale" />
+                        <div x-show="errors.codice_fiscale" class="mt-1 text-sm text-red-600" x-text="errors.codice_fiscale"></div>
+                        <p class="mt-1 text-xs text-gray-500">Inserisci il codice fiscale italiano (16 caratteri)</p>
+                    </div>
+
                     <!-- Date of Birth -->
                     <div>
                         <label for="date_of_birth" class="block text-sm font-medium text-gray-700 mb-2">
@@ -360,6 +378,7 @@ document.addEventListener('alpine:init', () => {
             name: '',
             email: '',
             phone: '',
+            codice_fiscale: '',
             date_of_birth: '',
             address: '',
             emergency_contact_name: '',

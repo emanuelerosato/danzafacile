@@ -42,13 +42,13 @@
                 </svg>
                 Azioni Multiple
             </button>
-            <button href="{{ route('admin.enrollments.create') }}"
-                    class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+            <a href="{{ route('admin.students.create') }}"
+               class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                 </svg>
-                Nuova Iscrizione
-            </button>
+                Nuovo Studente
+            </a>
         </div>
     </div>
 
@@ -136,15 +136,10 @@
                                     {{ ucfirst($enrollment->status ?? 'Unknown') }}
                                 </span>
                                 <div class="flex items-center space-x-2">
-                                    <button href="{{ route('admin.enrollments.edit', $enrollment) }}"
-                                            class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
-                                        Modifica
-                                    </button>
-                                    <span class="text-gray-300">|</span>
-                                    <button href="{{ route('admin.enrollments.show', $enrollment) }}"
-                                            class="text-gray-600 hover:text-gray-900 text-sm font-medium">
+                                    <a href="{{ route('admin.enrollments.show', $enrollment) }}"
+                                       class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
                                         Dettagli
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -166,13 +161,13 @@
                 <h3 class="mt-2 text-sm font-medium text-gray-900">Nessuna iscrizione</h3>
                 <p class="mt-1 text-sm text-gray-500">Inizia aggiungendo la prima iscrizione.</p>
                 <div class="mt-6">
-                    <button href="{{ route('admin.enrollments.create') }}"
-                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700">
+                    <a href="{{ route('admin.students.create') }}"
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                         </svg>
-                        Nuova Iscrizione
-                    </button>
+                        Nuovo Studente
+                    </a>
                 </div>
             </div>
         @endif

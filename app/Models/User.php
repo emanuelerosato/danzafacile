@@ -38,6 +38,7 @@ class User extends Authenticatable
         'first_name',
         'last_name',
         'phone',
+        'codice_fiscale',
         'date_of_birth',
         'address',
         'emergency_contact',

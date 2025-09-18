@@ -70,6 +70,15 @@ class AdminStudentController extends AdminBaseController
                 })
             ],
             'phone' => 'nullable|string|max:20',
+            'codice_fiscale' => [
+                'required',
+                'string',
+                'size:16',
+                'regex:/^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/',
+                Rule::unique('users')->where(function ($query) {
+                    return $query->where('school_id', $this->school->id);
+                })
+            ],
             'date_of_birth' => 'required|date|before:today',
             'address' => 'nullable|string|max:500',
             'emergency_contact_name' => 'nullable|string|max:255',
@@ -182,6 +191,15 @@ class AdminStudentController extends AdminBaseController
                 })
             ],
             'phone' => 'nullable|string|max:20',
+            'codice_fiscale' => [
+                'required',
+                'string',
+                'size:16',
+                'regex:/^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/',
+                Rule::unique('users')->ignore($student->id)->where(function ($query) {
+                    return $query->where('school_id', $this->school->id);
+                })
+            ],
             'date_of_birth' => 'required|date|before:today',
             'address' => 'nullable|string|max:500',
             'emergency_contact_name' => 'nullable|string|max:255',

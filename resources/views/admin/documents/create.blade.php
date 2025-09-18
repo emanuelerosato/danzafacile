@@ -145,6 +145,34 @@
                         @enderror
                     </div>
 
+                    <!-- User/Student Assignment -->
+                    <div>
+                        <label for="user_id" class="block text-sm font-medium text-gray-700 mb-2">
+                            Associa a Studente
+                        </label>
+                        <select id="user_id"
+                                name="user_id"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('user_id') border-red-300 @enderror">
+                            <option value="">Documento generale (non associato a uno studente)</option>
+                            @if(isset($students))
+                                @foreach($students as $student)
+                                    <option value="{{ $student->id }}" {{ old('user_id') == $student->id ? 'selected' : '' }}>
+                                        {{ $student->first_name }} {{ $student->last_name }} ({{ $student->email }})
+                                        @if($student->codice_fiscale)
+                                            - CF: {{ $student->codice_fiscale }}
+                                        @endif
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        @error('user_id')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        <p class="mt-1 text-xs text-gray-500">
+                            Lascia vuoto per creare un documento generale della scuola, oppure seleziona uno studente per associare il documento (es. documento d'identità, certificato medico)
+                        </p>
+                    </div>
+
                     <!-- Category -->
                     <div>
                         <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
