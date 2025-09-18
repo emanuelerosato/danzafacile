@@ -323,3 +323,4 @@ function bulkAction(action) {
 </script>
 @endpush
 
+</x-app-layout>

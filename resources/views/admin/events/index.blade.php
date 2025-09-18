@@ -378,3 +378,4 @@ window.applyFilters = () => {
     }
 };
 </script>
+</x-app-layout>

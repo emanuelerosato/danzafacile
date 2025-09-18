@@ -386,3 +386,4 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 </style>
 @endpush
+</x-app-layout>

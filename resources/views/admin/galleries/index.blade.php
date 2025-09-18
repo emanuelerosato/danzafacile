@@ -267,3 +267,4 @@
 }
 </style>
 @endpush
+</x-app-layout>

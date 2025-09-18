@@ -1,15 +1,29 @@
 <x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    Registrazioni Eventi
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">
+                    Gestisci le registrazioni degli utenti agli eventi
+                </p>
+            </div>
+        </div>
+    </x-slot>
+
+    <x-slot name="breadcrumb">
+        <li class="flex items-center">
+            <a href="{{ route('admin.dashboard') }}" class="text-gray-500 hover:text-gray-700">Dashboard</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="text-gray-900 font-medium">Registrazioni Eventi</li>
+    </x-slot>
 
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between mb-6">
-        <div>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Registrazioni Eventi
-            </h2>
-            <p class="text-sm text-gray-600 mt-1">
-                Gestisci le registrazioni degli utenti agli eventi
-            </p>
-        </div>
         <div class="flex items-center space-x-3">
             <button onclick="openAddRegistrationModal()"
                     class="inline-flex items-center px-4 py-2 bg-rose-600 text-white text-sm font-medium rounded-lg hover:bg-rose-700 transition-all duration-200">
@@ -351,3 +365,4 @@ document.getElementById('addRegistrationModal').addEventListener('click', functi
     }
 });
 </script>
+</x-app-layout>

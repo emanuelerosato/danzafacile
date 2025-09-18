@@ -240,3 +240,4 @@ function exportSchedule() {
     window.open(url, '_blank');
 }
 </script>
+</x-app-layout>

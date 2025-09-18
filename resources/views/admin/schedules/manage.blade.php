@@ -274,3 +274,4 @@ document.getElementById('editScheduleModal').addEventListener('click', function(
     }
 });
 </script>
+</x-app-layout>
