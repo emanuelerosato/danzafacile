@@ -47,7 +47,22 @@
 
     <!-- Form Card -->
     <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-lg p-6">
-        <form action="{{ route('admin.courses.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <!-- Dual-Layer Validation Component -->
+        <x-form-validation :rules="[
+            'name' => 'required|string|max:255',
+            'description' => 'required|string|min:10',
+            'instructor_id' => 'nullable|exists:users,id',
+            'level' => 'required|in:beginner,intermediate,advanced',
+            'price' => 'required|numeric|min:0|max:999.99',
+            'max_students' => 'nullable|integer|min:1|max:100',
+            'start_date' => 'required|date|after:today',
+            'end_date' => 'nullable|date|after:start_date',
+            'location' => 'nullable|string|max:255',
+            'duration_weeks' => 'nullable|integer|min:1|max:52',
+            'schedule' => 'nullable|string|max:255'
+        ]" />
+
+        <form id="courseForm" action="{{ route('admin.courses.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
             <!-- Basic Information -->
@@ -56,10 +71,13 @@
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
                         Nome Corso *
                     </label>
-                    <input type="text" name="name" id="name" required
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                           placeholder="Es. Danza Classica Livello Base"
-                           value="{{ old('name') }}">
+                    <x-secure-input
+                        type="text"
+                        name="name"
+                        :value="old('name')"
+                        placeholder="Es. Danza Classica Livello Base"
+                        :required="true"
+                        :max-length="255" />
                     @error('name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -91,9 +109,14 @@
                 <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
                     Descrizione *
                 </label>
-                <textarea name="description" id="description" rows="4" required
-                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="Descrivi il corso, obiettivi e contenuti...">{{ old('description') }}</textarea>
+                <x-secure-input
+                    type="textarea"
+                    name="description"
+                    :value="old('description')"
+                    placeholder="Descrivi il corso, obiettivi e contenuti..."
+                    :required="true"
+                    :max-length="1000"
+                    class="h-24 resize-none" />
                 @error('description')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
@@ -242,4 +265,13 @@
         </form>
     </div>
 </div>
+
+@push('scripts')
+<script>
+// Initialize dual-layer validation when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    FormValidator.init('#courseForm');
+});
+</script>
+@endpush
 </x-app-layout>

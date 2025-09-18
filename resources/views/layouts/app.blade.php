@@ -170,166 +170,135 @@
     
     @stack('scripts')
     
-    <!-- CSRF Token Refresh Script -->
+    <!-- Simplified CSRF Setup -->
     <script>
-        // Enhanced CSRF Token Management
-        window.csrfTokenManager = {
-            token: document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            
-            // Refresh CSRF token from server
-            refresh() {
-                return fetch('/csrf-token', {
-                    method: 'GET',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.csrf_token) {
-                        this.token = data.csrf_token;
-                        // Update meta tag
-                        document.querySelector('meta[name="csrf-token"]').setAttribute('content', data.csrf_token);
-                        // Update axios defaults if available
-                        if (window.axios) {
-                            window.axios.defaults.headers.common['X-CSRF-TOKEN'] = data.csrf_token;
-                        }
-                        // Update all forms with new token
-                        document.querySelectorAll('input[name="_token"]').forEach(input => {
-                            input.value = data.csrf_token;
-                        });
-                        console.log('CSRF token refreshed successfully');
-                        return data.csrf_token;
-                    }
-                    throw new Error('No CSRF token received');
-                })
-                .catch(error => {
-                    console.error('Failed to refresh CSRF token:', error);
-                    throw error;
-                });
-            },
-            
-            // Handle form submission with fresh token
-            submitFormWithFreshToken(form) {
-                return this.refresh().then(() => {
-                    // Submit the form after token refresh
-                    if (form.requestSubmit) {
-                        form.requestSubmit();
-                    } else {
-                        form.submit();
-                    }
-                });
-            },
-            
-            // Auto-refresh token every 110 minutes (before 120min session expires)
-            startAutoRefresh() {
-                setInterval(() => {
-                    this.refresh().catch(() => {
-                        console.warn('Auto CSRF token refresh failed');
+        // Standard Laravel CSRF token setup
+        window.Laravel = {
+            csrfToken: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        };
+
+        // Update axios defaults if available
+        if (window.axios) {
+            window.axios.defaults.headers.common['X-CSRF-TOKEN'] = window.Laravel.csrfToken;
+        }
+
+        // Global Error Handler
+        window.GlobalErrorHandler = {
+            init() {
+                // Capture JavaScript errors
+                window.addEventListener('error', (event) => {
+                    this.handleError({
+                        message: event.message,
+                        filename: event.filename,
+                        lineno: event.lineno,
+                        colno: event.colno,
+                        error: event.error
                     });
-                }, 110 * 60 * 1000); // 110 minutes
+                });
+
+                // Capture Promise rejections
+                window.addEventListener('unhandledrejection', (event) => {
+                    this.handleError({
+                        message: 'Unhandled Promise Rejection',
+                        error: event.reason
+                    });
+                });
+
+                // Axios error interceptor
+                if (window.axios) {
+                    window.axios.interceptors.response.use(
+                        response => response,
+                        error => {
+                            this.handleAxiosError(error);
+                            return Promise.reject(error);
+                        }
+                    );
+                }
+            },
+
+            handleError(errorInfo) {
+                console.error('Global error:', errorInfo);
+
+                // Show user-friendly error message
+                const message = this.getUserFriendlyMessage(errorInfo);
+                Toast.error(message, 8000);
+            },
+
+            handleAxiosError(error) {
+                let message = 'Si è verificato un errore';
+
+                if (error.response) {
+                    const status = error.response.status;
+                    switch (status) {
+                        case 401:
+                            message = 'Sessione scaduta. Ricarica la pagina.';
+                            break;
+                        case 403:
+                            message = 'Non hai i permessi per questa operazione.';
+                            break;
+                        case 404:
+                            message = 'Risorsa non trovata.';
+                            break;
+                        case 419:
+                            message = 'Sessione scaduta. Ricarica la pagina.';
+                            break;
+                        case 422:
+                            message = 'Dati non validi. Controlla i campi del form.';
+                            break;
+                        case 429:
+                            message = 'Troppe richieste. Attendi prima di riprovare.';
+                            break;
+                        case 500:
+                            message = 'Errore interno del server. Contatta il supporto.';
+                            break;
+                        case 503:
+                            message = 'Servizio temporaneamente non disponibile.';
+                            break;
+                    }
+                } else if (error.request) {
+                    message = 'Errore di connessione. Verifica la tua connessione internet.';
+                }
+
+                Toast.error(message, 8000);
+            },
+
+            getUserFriendlyMessage(errorInfo) {
+                if (errorInfo.message) {
+                    // Common JavaScript errors
+                    if (errorInfo.message.includes('fetch')) {
+                        return 'Errore di connessione. Verifica la tua connessione internet.';
+                    }
+                    if (errorInfo.message.includes('Permission denied')) {
+                        return 'Permesso negato. Aggiorna la pagina e riprova.';
+                    }
+                    if (errorInfo.message.includes('Script error')) {
+                        return 'Errore di script. Ricarica la pagina.';
+                    }
+                }
+                return 'Si è verificato un errore imprevisto. Ricarica la pagina e riprova.';
             }
         };
-        
-        // Start auto-refresh when page loads
+
+        // Show Laravel flash messages as toasts
         document.addEventListener('DOMContentLoaded', function() {
-            window.csrfTokenManager.startAutoRefresh();
-            
-            // Show Laravel flash messages as toasts
+            // Initialize global error handler
+            GlobalErrorHandler.init();
+
             @if(session('success'))
                 Toast.success('{{ session('success') }}');
             @endif
-            
+
             @if(session('error'))
                 Toast.error('{{ session('error') }}');
             @endif
-            
+
             @if(session('warning'))
                 Toast.warning('{{ session('warning') }}');
             @endif
-            
+
             @if(session('info'))
                 Toast.info('{{ session('info') }}');
             @endif
-        });
-        
-        // Enhanced form submission error handling
-        document.addEventListener('submit', function(e) {
-            const form = e.target;
-            
-            // Add retry mechanism for CSRF failures
-            if (form.dataset.csrfRetry === 'true') {
-                return; // Already retrying
-            }
-            
-            // Override submit to handle CSRF errors
-            if (form.method.toLowerCase() === 'post') {
-                e.preventDefault();
-                
-                // Add loading state to submit button
-                const submitButton = form.querySelector('button[type="submit"], input[type="submit"]');
-                const originalButtonText = submitButton?.innerHTML || submitButton?.value;
-                const originalDisabled = submitButton?.disabled;
-                
-                if (submitButton) {
-                    submitButton.disabled = true;
-                    if (submitButton.innerHTML !== undefined) {
-                        submitButton.innerHTML = `
-                            <div class="flex items-center justify-center">
-                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Elaborazione...
-                            </div>
-                        `;
-                    } else {
-                        submitButton.value = 'Elaborazione...';
-                    }
-                }
-                
-                const formData = new FormData(form);
-                const url = form.action || window.location.href;
-                
-                fetch(url, {
-                    method: form.method,
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-                    }
-                })
-                .then(response => {
-                    if (response.status === 419) {
-                        // CSRF token mismatch - refresh and retry once
-                        console.log('CSRF token mismatch detected, refreshing token...');
-                        return window.csrfTokenManager.refresh().then(() => {
-                            form.dataset.csrfRetry = 'true';
-                            form.submit();
-                        });
-                    } else if (response.ok || response.status === 302 || response.status === 422) {
-                        // Success, redirect, or validation errors - follow normal flow
-                        window.location.href = response.url || form.action || window.location.href;
-                    } else {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                })
-                .catch(error => {
-                    console.error('Form submission error:', error);
-                    Toast.error('Si è verificato un errore durante l\'invio del form. Riprova.');
-                    
-                    // Restore button state on error
-                    if (submitButton && originalButtonText !== undefined) {
-                        submitButton.disabled = originalDisabled || false;
-                        if (submitButton.innerHTML !== undefined) {
-                            submitButton.innerHTML = originalButtonText;
-                        } else {
-                            submitButton.value = originalButtonText;
-                        }
-                    }
-                });
-            }
         });
     </script>
     

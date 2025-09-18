@@ -48,6 +48,11 @@
                 </div>
             </div>
 
+            <!-- Dual-Layer Validation Component -->
+            <x-form-validation :rules="[
+                'refund_reason' => 'required|string|min:10|max:500'
+            ]" />
+
             <!-- Modal Body -->
             <form id="refundForm">
                 <div class="px-6 py-4 space-y-4">
@@ -56,9 +61,13 @@
                         <label for="refund_reason" class="block text-sm font-medium text-gray-700 mb-2">
                             Motivo del Rimborso <span class="text-red-500">*</span>
                         </label>
-                        <textarea id="refund_reason" name="refund_reason" rows="4" required
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none"
-                                  placeholder="Inserisci il motivo del rimborso..."></textarea>
+                        <x-secure-input
+                            type="textarea"
+                            name="refund_reason"
+                            placeholder="Inserisci il motivo del rimborso (min. 10 caratteri)..."
+                            :required="true"
+                            :max-length="500"
+                            class="h-24 resize-none focus:ring-amber-500 focus:border-amber-500" />
                         <p id="refund-modal-description" class="text-xs text-gray-500 mt-1">Specifica il motivo per cui viene elaborato questo rimborso.</p>
                     </div>
 
@@ -100,6 +109,11 @@
 function openRefundModal() {
     // Metodo sicuro per aprire modal Alpine.js usando eventi custom
     document.getElementById('refundModal').dispatchEvent(new CustomEvent('open-modal'));
+
+    // Initialize validation for refund form when modal opens
+    setTimeout(() => {
+        FormValidator.init('#refundForm');
+    }, 100);
 }
 
 // Aggiorna la funzione processRefund per usare il nuovo modal

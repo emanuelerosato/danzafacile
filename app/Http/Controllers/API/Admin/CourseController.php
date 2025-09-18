@@ -10,6 +10,50 @@ use Illuminate\Validation\Rule;
 
 class CourseController extends BaseApiController
 {
+    /**
+     * Sanitize input data to prevent XSS attacks
+     */
+    private function sanitizeInput(array $data): array
+    {
+        $sanitized = [];
+
+        foreach ($data as $key => $value) {
+            if (is_string($value)) {
+                // Remove null bytes
+                $value = str_replace("\0", '', $value);
+
+                // Remove script tags and their content
+                $value = preg_replace('/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/mi', '', $value);
+
+                // Remove javascript: URLs
+                $value = preg_replace('/javascript:/i', '', $value);
+
+                // Remove on* event handlers
+                $value = preg_replace('/\bon\w+\s*=\s*["\'][^"\']*["\']/', '', $value);
+
+                // Remove dangerous HTML elements
+                $dangerousTags = ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button', 'select', 'textarea', 'meta', 'link', 'style'];
+                foreach ($dangerousTags as $tag) {
+                    $value = preg_replace("/<\\/?{$tag}\\b[^>]*>/i", '', $value);
+                }
+
+                // For most fields, strip all HTML tags
+                if (!in_array($key, ['description'])) {
+                    $value = strip_tags($value);
+                }
+
+                // Trim whitespace
+                $value = trim($value);
+
+                $sanitized[$key] = $value;
+            } else {
+                // Non-string values pass through unchanged
+                $sanitized[$key] = $value;
+            }
+        }
+
+        return $sanitized;
+    }
 
     public function index(Request $request): JsonResponse
     {
@@ -113,17 +157,21 @@ class CourseController extends BaseApiController
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'instructor_id' => 'required|exists:users,id',
-            'schedule' => 'required|string|max:255',
-            'max_students' => 'required|integer|min:1|max:100',
-            'price' => 'required|numeric|min:0',
-            'duration_weeks' => 'required|integer|min:1|max:52',
-            'difficulty_level' => ['required', Rule::in(['beginner', 'intermediate', 'advanced'])],
+            'description' => 'required|string|min:10',
+            'instructor_id' => 'nullable|exists:users,id',
+            'level' => ['required', Rule::in(['beginner', 'intermediate', 'advanced'])],
+            'price' => 'required|numeric|min:0|max:999.99',
+            'max_students' => 'nullable|integer|min:1|max:100',
             'start_date' => 'required|date|after:today',
-            'end_date' => 'required|date|after:start_date',
+            'end_date' => 'nullable|date|after:start_date',
+            'location' => 'nullable|string|max:255',
+            'duration_weeks' => 'nullable|integer|min:1|max:52',
+            'schedule' => 'nullable|string|max:255',
             'active' => 'boolean',
         ]);
+
+        // Sanitize input data
+        $validated = $this->sanitizeInput($validated);
 
         $validated['school_id'] = $user->school_id;
         $validated['active'] = $validated['active'] ?? true;
