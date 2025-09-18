@@ -159,9 +159,6 @@
                 <x-nav-item href="{{ route('documents.index') }}" :active="request()->routeIs('documents.*')" icon="document">
                     Documenti
                 </x-nav-item>
-                <x-nav-item href="{{ route('student.dashboard') }}" :active="request()->routeIs('student.gallery.*')" icon="photograph">
-                    Galleria
-                </x-nav-item>
             </x-nav-group>
         @endif
         
