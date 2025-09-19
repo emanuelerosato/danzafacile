@@ -339,4 +339,38 @@ class Course extends Model
                     ->where('status', 'completato')
                     ->sum('amount');
     }
+
+    /**
+     * Ottiene i dati dell'orario decodificati e corretti
+     */
+    public function getScheduleDataAttribute()
+    {
+        if (!$this->schedule) {
+            return null;
+        }
+
+        $scheduleData = null;
+
+        if (is_array($this->schedule)) {
+            $scheduleData = $this->schedule;
+        } elseif (is_string($this->schedule)) {
+            $scheduleData = json_decode($this->schedule, true);
+        }
+
+        // Fix encoding issues
+        if ($scheduleData && is_array($scheduleData)) {
+            foreach ($scheduleData as &$slot) {
+                if (isset($slot['day'])) {
+                    $slot['day'] = mb_convert_encoding($slot['day'], 'UTF-8', 'UTF-8');
+                    $slot['day'] = str_replace(
+                        ['LunedÃ¬', 'MartedÃ¬', 'MercoledÃ¬', 'GiovedÃ¬', 'VenerdÃ¬', 'SabatoÃ¬', 'DomenicaÃ¬'],
+                        ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'],
+                        $slot['day']
+                    );
+                }
+            }
+        }
+
+        return $scheduleData;
+    }
 }
