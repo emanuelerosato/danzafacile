@@ -164,32 +164,63 @@ class AdminCourseController extends AdminBaseController
      */
     public function edit(Course $course)
     {
-        $this->authorize('update', $course);
+        // Ensure course belongs to current school
+        if ($course->school_id !== $this->school->id) {
+            abort(404, 'Corso non trovato.');
+        }
 
-        $user = auth()->user();
-        $instructors = User::where('school_id', $user->school_id)
-                          ->where('role', User::ROLE_INSTRUCTOR)
+        $instructors = $this->school->users()
+                          ->whereHas('staffRoles', function($q) {
+                              $q->where('active', true);
+                          })
                           ->where('active', true)
                           ->orderBy('name')
                           ->get();
 
-        return view('admin.courses.edit', compact('course', 'instructors'));
+        $levels = ['Principiante', 'Intermedio', 'Avanzato', 'Professionale'];
+
+        return view('admin.courses.edit', compact('course', 'instructors', 'levels'));
     }
 
     /**
      * Update the specified course in storage
      */
-    public function update(UpdateCourseRequest $request, Course $course)
+    public function update(Request $request, Course $course)
     {
-        $this->authorize('update', $course);
+        // Ensure course belongs to current school
+        if ($course->school_id !== $this->school->id) {
+            abort(404, 'Corso non trovato.');
+        }
 
-        $data = $request->validated();
-        $course->update($data);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'level' => 'required|in:Principiante,Intermedio,Avanzato,Professionale,beginner,intermediate,advanced,professional',
+            'instructor_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('users', 'id')->where(function ($query) {
+                    $query->where('school_id', $this->school->id)
+                          ->whereHas('staffRoles', function($q) {
+                              $q->where('active', true);
+                          });
+                })
+            ],
+            'max_students' => 'required|integer|min:1',
+            'price' => 'required|numeric|min:0',
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after:start_date',
+            'schedule' => 'nullable|string|max:500',
+            'location' => 'nullable|string|max:255',
+            'duration_weeks' => 'nullable|integer|min:1|max:52',
+            'active' => 'boolean'
+        ]);
+
+        $course->update($validated);
+        $this->clearSchoolCache();
 
         if ($request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Corso aggiornato con successo.',
+            return $this->jsonResponse(true, 'Corso aggiornato con successo.', [
                 'course' => $course->fresh()->load(['instructor', 'enrollments'])
             ]);
         }
@@ -203,23 +234,24 @@ class AdminCourseController extends AdminBaseController
      */
     public function destroy(Course $course)
     {
-        $this->authorize('delete', $course);
+        // Ensure course belongs to current school
+        if ($course->school_id !== $this->school->id) {
+            abort(404, 'Corso non trovato.');
+        }
 
         // Check if course has enrollments
         if ($course->enrollments()->count() > 0) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Impossibile eliminare il corso. Ci sono studenti iscritti.'
-            ], 422);
+            if (request()->ajax()) {
+                return $this->jsonResponse(false, 'Impossibile eliminare il corso. Ci sono studenti iscritti.', [], 422);
+            }
+            return redirect()->back()->with('error', 'Impossibile eliminare il corso. Ci sono studenti iscritti.');
         }
 
         $course->delete();
+        $this->clearSchoolCache();
 
         if (request()->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Corso eliminato con successo.'
-            ]);
+            return $this->jsonResponse(true, 'Corso eliminato con successo.');
         }
 
         return redirect()->route('admin.courses.index')
@@ -231,17 +263,19 @@ class AdminCourseController extends AdminBaseController
      */
     public function toggleStatus(Course $course)
     {
-        $this->authorize('update', $course);
+        // Ensure course belongs to current school
+        if ($course->school_id !== $this->school->id) {
+            abort(404, 'Corso non trovato.');
+        }
 
         $course->update(['active' => !$course->active]);
+        $this->clearSchoolCache();
 
         $status = $course->active ? 'attivato' : 'disattivato';
         $message = "Corso {$status} con successo.";
 
         if (request()->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => $message,
+            return $this->jsonResponse(true, $message, [
                 'status' => $course->active
             ]);
         }
@@ -254,7 +288,10 @@ class AdminCourseController extends AdminBaseController
      */
     public function duplicate(Course $course)
     {
-        $this->authorize('create', Course::class);
+        // Ensure course belongs to current school
+        if ($course->school_id !== $this->school->id) {
+            abort(404, 'Corso non trovato.');
+        }
 
         $newCourse = $course->replicate();
         $newCourse->name = $course->name . ' (Copia)';
@@ -262,6 +299,8 @@ class AdminCourseController extends AdminBaseController
         $newCourse->end_date = null;
         $newCourse->active = false;
         $newCourse->save();
+
+        $this->clearSchoolCache();
 
         return redirect()->route('admin.courses.edit', $newCourse)
                         ->with('success', 'Corso duplicato con successo. Aggiorna le date e attivalo.');
