@@ -289,7 +289,7 @@ class User extends Authenticatable
      */
     public function isStudent(): bool
     {
-        return $this->role === 'user';
+        return $this->role === 'student' || $this->role === 'user';
     }
 
     /**

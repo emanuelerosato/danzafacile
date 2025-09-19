@@ -198,6 +198,283 @@ Authorization: Bearer {token}
 
 ---
 
+## 💳 **PAYMENT API ENDPOINTS** (✅ NUOVO!)
+
+### **Get Payment History**
+```http
+GET /student/payments?page=1&status=pending&per_page=15
+Authorization: Bearer {token}
+```
+
+**Query Parameters:**
+- `status`: pending, completed, failed, processing, cancelled, refunded
+- `payment_type`: course_enrollment, event_registration, membership_fee, material, other
+- `from_date`: Filter payments after this date (Y-m-d)
+- `to_date`: Filter payments before this date (Y-m-d)
+- `per_page`: Pagination limit (default: 15)
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "payments": [
+      {
+        "id": 49,
+        "amount": 120.00,
+        "formatted_amount": "€ 120.00",
+        "currency": "EUR",
+        "status": "pending",
+        "status_name": "In Attesa",
+        "payment_type": "course_enrollment",
+        "payment_type_name": "Iscrizione Corso",
+        "payment_method": "paypal",
+        "payment_method_name": "PayPal",
+        "payment_date": null,
+        "due_date": "2023-01-22T10:30:00.000000Z",
+        "transaction_id": null,
+        "receipt_number": "ACC-2023-000049",
+        "notes": "Pagamento per iscrizione corso",
+        "course": {
+          "id": 1,
+          "name": "Danza Classica - Principianti"
+        },
+        "event": null,
+        "can_pay_now": true,
+        "is_overdue": false,
+        "created_at": "2023-01-15T10:30:00.000000Z",
+        "updated_at": "2023-01-15T10:30:00.000000Z"
+      }
+    ],
+    "pagination": {
+      "current_page": 1,
+      "last_page": 2,
+      "per_page": 15,
+      "total": 25
+    }
+  }
+}
+```
+
+### **Get Payment Statistics**
+```http
+GET /student/payments/statistics
+Authorization: Bearer {token}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "overview": {
+      "total_spent": 480.00,
+      "pending_amount": 120.00,
+      "overdue_count": 1,
+      "this_month_spent": 150.00,
+      "total_payments": 8
+    },
+    "status_breakdown": {
+      "completed": 5,
+      "pending": 2,
+      "failed": 1,
+      "processing": 0,
+      "cancelled": 0,
+      "refunded": 0
+    },
+    "payment_methods": [
+      {
+        "payment_method": "paypal",
+        "count": 3,
+        "total_amount": 360.00
+      },
+      {
+        "payment_method": "credit_card",
+        "count": 2,
+        "total_amount": 240.00
+      }
+    ],
+    "recent_activity": [
+      {
+        "date": "2023-01-15",
+        "count": 2,
+        "total": 240.00
+      }
+    ]
+  }
+}
+```
+
+### **Get Upcoming/Due Payments**
+```http
+GET /student/payments/upcoming?days=7
+Authorization: Bearer {token}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "upcoming_payments": [
+      {
+        "id": 50,
+        "amount": 95.00,
+        "formatted_amount": "€ 95.00",
+        "due_date": "2023-01-22T10:30:00.000000Z",
+        "days_until_due": 3,
+        "status": "pending",
+        "payment_type_name": "Quota Mensile",
+        "course": {
+          "id": 1,
+          "name": "Danza Classica - Principianti"
+        },
+        "event": null
+      }
+    ],
+    "total_amount": 95.00,
+    "count": 1
+  }
+}
+```
+
+### **Get Payment Details**
+```http
+GET /student/payments/{payment_id}
+Authorization: Bearer {token}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "payment": {
+      "id": 49,
+      "amount": 120.00,
+      "formatted_amount": "€ 120.00",
+      "currency": "EUR",
+      "status": "pending",
+      "status_name": "In Attesa",
+      "payment_type": "course_enrollment",
+      "payment_type_name": "Iscrizione Corso",
+      "payment_method": "paypal",
+      "payment_method_name": "PayPal",
+      "payment_date": null,
+      "due_date": "2023-01-22T10:30:00.000000Z",
+      "transaction_id": null,
+      "receipt_number": "ACC-2023-000049",
+      "notes": "Pagamento per iscrizione corso",
+      "gateway_response": null,
+      "course": {
+        "id": 1,
+        "name": "Danza Classica - Principianti",
+        "instructor": "Maria Bianchi",
+        "schedule": "Lunedì e Mercoledì 18:00-19:30",
+        "location": "Sala A"
+      },
+      "event": null,
+      "can_pay_now": true,
+      "can_refund": false,
+      "is_overdue": false,
+      "created_at": "2023-01-15T10:30:00.000000Z",
+      "updated_at": "2023-01-15T10:30:00.000000Z"
+    }
+  }
+}
+```
+
+### **🔥 CREATE PAYPAL PAYMENT (Mobile)**
+```http
+POST /student/payments/{payment_id}/paypal
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "approval_url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=PAYID-ABC123&payment_id=49&mobile=1",
+    "payment_id": 49,
+    "paypal_data": {
+      "intent": "sale",
+      "payer": {
+        "payment_method": "paypal"
+      },
+      "transactions": [...],
+      "redirect_urls": {...}
+    }
+  }
+}
+```
+
+**Flutter Integration:**
+```dart
+// 1. Call this API to get approval_url
+// 2. Open approval_url in WebView or external browser
+// 3. PayPal will redirect back to success/cancel URLs
+// 4. Handle success/cancel as needed
+```
+
+### **PayPal Success Handler**
+```http
+GET /student/payments/{payment_id}/paypal/success?PayerID=ABC123&paymentId=PAYID-123
+Authorization: Bearer {token}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Pagamento completato con successo!",
+  "data": {
+    "payment": {
+      "id": 49,
+      "status": "completed",
+      "receipt_number": "ACC-2023-000049",
+      "transaction_id": "PAYID-123",
+      "amount": 120.00
+    }
+  }
+}
+```
+
+### **PayPal Cancel Handler**
+```http
+GET /student/payments/{payment_id}/paypal/cancel
+Authorization: Bearer {token}
+```
+
+### **Get Payment Status (Real-time)**
+```http
+GET /student/payments/{payment_id}/status
+Authorization: Bearer {token}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "payment": {
+      "id": 49,
+      "status": "completed",
+      "status_name": "Completato",
+      "amount": 120.00,
+      "formatted_amount": "€ 120.00",
+      "payment_date": "2023-01-15T15:30:00.000000Z",
+      "receipt_number": "ACC-2023-000049",
+      "transaction_id": "PAYID-123",
+      "can_pay_now": false
+    }
+  }
+}
+```
+
+---
+
 ## 👨‍🏫 **ADMIN API ENDPOINTS**
 
 ### **Dashboard Analytics**
@@ -638,7 +915,13 @@ class Course {
 - [x] Students CRUD (Admin only)
 - [x] Courses CRUD (Admin only)
 - [x] Course enrollment (Students)
-- [x] Payments management
+- [x] **💳 PAYMENTS MANAGEMENT (COMPLETO!)**
+  - [x] Payment history con filtering e pagination
+  - [x] Payment statistics e analytics
+  - [x] Upcoming/due payments
+  - [x] PayPal integration per mobile
+  - [x] Real-time payment status
+  - [x] Email confirmation automatica
 - [x] Documents upload/management
 - [x] Media/Gallery management
 - [x] Multi-tenant security

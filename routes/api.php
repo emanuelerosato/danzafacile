@@ -308,6 +308,16 @@ Route::prefix('mobile/v1')->middleware('throttle:120,1')->group(function () {
             Route::get('/enrollments/{enrollment}', [EnrollmentController::class, 'show'])->name('api.mobile.student.enrollments.show');
             Route::post('/enrollments/{enrollment}/cancel', [EnrollmentController::class, 'cancel'])->name('api.mobile.student.enrollments.cancel');
             Route::get('/enrollments/history', [EnrollmentController::class, 'history'])->name('api.mobile.student.enrollments.history');
+
+            // Payment Management
+            Route::get('/payments', [\App\Http\Controllers\API\Student\PaymentController::class, 'index'])->name('api.mobile.student.payments.index');
+            Route::get('/payments/statistics', [\App\Http\Controllers\API\Student\PaymentController::class, 'statistics'])->name('api.mobile.student.payments.statistics');
+            Route::get('/payments/upcoming', [\App\Http\Controllers\API\Student\PaymentController::class, 'upcoming'])->name('api.mobile.student.payments.upcoming');
+            Route::get('/payments/{payment}', [\App\Http\Controllers\API\Student\PaymentController::class, 'show'])->name('api.mobile.student.payments.show');
+            Route::get('/payments/{payment}/status', [\App\Http\Controllers\API\Student\PaymentController::class, 'getPaymentStatus'])->name('api.mobile.student.payments.status');
+            Route::post('/payments/{payment}/paypal', [\App\Http\Controllers\API\Student\PaymentController::class, 'createPayPalPayment'])->name('api.mobile.student.payments.paypal.create');
+            Route::get('/payments/{payment}/paypal/success', [\App\Http\Controllers\API\Student\PaymentController::class, 'paypalSuccess'])->name('api.mobile.student.payments.paypal.success');
+            Route::get('/payments/{payment}/paypal/cancel', [\App\Http\Controllers\API\Student\PaymentController::class, 'paypalCancel'])->name('api.mobile.student.payments.paypal.cancel');
         });
         
         // Quick mobile dashboard for any authenticated user
