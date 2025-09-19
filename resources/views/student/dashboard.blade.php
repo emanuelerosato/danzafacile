@@ -44,13 +44,12 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- I Miei Corsi -->
             <div class="bg-white rounded-lg shadow p-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-rose-500 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
-                            </svg>
-                        </div>
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-rose-500 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
+                        </svg>
+                    </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Corsi Attivi</p>
                         <p class="text-2xl font-bold text-gray-900">{{ $stats['active_enrollments'] }}</p>
@@ -62,10 +61,10 @@
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Lezioni Totali</p>
                         <p class="text-2xl font-bold text-gray-900">{{ $activeEnrollments->count() * 8 }}</p>
@@ -77,10 +76,10 @@
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Presenze</p>
                         <p class="text-2xl font-bold text-gray-900">{{ floor(($activeEnrollments->count() * 8) * 0.92) }}/{{ $activeEnrollments->count() * 8 }}</p>
@@ -92,26 +91,14 @@
             <div class="bg-white rounded-lg shadow p-6">
                 <div class="flex items-center">
                     <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
-                            </svg>
-                        </div>
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                        </svg>
+                    </div>
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600">Da Pagare</p>
                         <p class="text-2xl font-bold text-gray-900">€{{ number_format($stats['pending_payments'], 0, ',', '.') }}</p>
                     </div>
-                </div>
-                </div>
-                <div class="mt-4 flex items-center justify-between">
-                    @if($stats['pending_payments'] > 0)
-                        <span class="text-xs text-gray-500">Scadenza tra 15 giorni</span>
-                        <button class="text-xs text-blue-600 hover:text-blue-700 font-medium underline">
-                            Paga ora
-                        </button>
-                    @else
-                        <span class="text-xs text-green-500">Nessun pagamento in sospeso</span>
-                        <span class="text-xs text-gray-400">• Complimenti!</span>
-                    @endif
                 </div>
             </div>
         </div>
