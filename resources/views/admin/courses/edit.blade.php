@@ -19,58 +19,11 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
         </li>
-        <li class="text-gray-900 font-medium">Modifica</li>
+        <li class="text-gray-900 font-medium">Modifica {{ $course->name ?? 'Corso' }}</li>
     </x-slot>
 
 
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Modifica Corso
-                </h2>
-                <p class="text-sm text-gray-600 mt-1">
-                    Aggiorna le informazioni del corso
-                </p>
-            </div>
-            <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
-                <a href="{{ route('admin.courses.show', $course ?? 1) }}" 
-                   class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                    </svg>
-                    Visualizza
-                </a>
-                <button @click="$dispatch('open-modal', 'deactivate-course')" 
-                        class="inline-flex items-center px-4 py-2 bg-orange-600 text-white text-sm font-medium rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-all duration-200">
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    Disattiva
-                </button>
-            </div>
-        </div>
-
-    <x-slot name="breadcrumb">
-        <li class="flex items-center">
-            <a href="{{ route('dashboard') }}" class="text-gray-500 hover:text-gray-700">Dashboard</a>
-            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-        </li>
-        <li class="flex items-center">
-            <a href="{{ route('admin.courses.index') }}" class="text-gray-500 hover:text-gray-700">Corsi</a>
-            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-        </li>
-        <li class="flex items-center">
-            <a href="{{ route('admin.courses.show', $course ?? 1) }}" class="text-gray-500 hover:text-gray-700">Danza Classica Intermedio</a>
-            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
-        </li>
-        <li class="text-gray-900 font-medium">Modifica</li>
+        {{-- Header duplicato rimosso --}}
 
     <div class="space-y-6">
         <!-- Course Status Alert -->
@@ -80,7 +33,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <div>
-                    <h3 class="text-sm font-medium text-blue-900">Corso Attivo con 28 Studenti Iscritti</h3>
+                    <h3 class="text-sm font-medium text-blue-900">Corso {{ $course->active ? 'Attivo' : 'Inattivo' }} con {{ $course->enrollments()->where('status', 'attiva')->count() }} Studenti Iscritti</h3>
                     <p class="text-sm text-blue-700 mt-1">
                         Le modifiche agli orari e ai prezzi potrebbero influenzare gli studenti già iscritti. 
                         Ti consigliamo di comunicare i cambiamenti con almeno 7 giorni di anticipo.
@@ -95,7 +48,7 @@
             @method('PUT')
 
             <!-- Form Sections -->
-            <div class="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-200">
                 <!-- Tab Navigation -->
                 <div class="border-b border-gray-200">
                     <nav class="-mb-px flex space-x-8 px-6">
@@ -121,7 +74,7 @@
                             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
                             </svg>
-                            Studenti (28)
+                            Studenti ({{ $course->enrollments()->where('status', 'attiva')->count() }})
                         </button>
                         <button type="button" @click="activeTab = 'schedule'" 
                                 :class="{ 'border-rose-500 text-rose-600': activeTab === 'schedule', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'schedule' }"
@@ -187,7 +140,7 @@
                                             label="Nome Corso *"
                                             name="name"
                                             type="text"
-                                            value="Danza Classica Intermedio"
+                                            value="{{ old('name', $course->name) }}"
                                             placeholder="es. Danza Classica Intermedio"
                                             required />
                                     </div>
@@ -196,7 +149,7 @@
                                             label="Codice Corso"
                                             name="code"
                                             type="text"
-                                            value="CLA-INT-001"
+                                            value="{{ $course->code ?? '' }}"
                                             readonly />
                                     </div>
                                 </div>
@@ -206,33 +159,33 @@
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Tipo di Danza *</label>
                                         <select name="dance_type" class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
                                             <option value="">Seleziona tipo</option>
-                                            <option value="classica" selected>Danza Classica</option>
-                                            <option value="moderna">Danza Moderna</option>
-                                            <option value="contemporanea">Danza Contemporanea</option>
-                                            <option value="hip_hop">Hip Hop</option>
-                                            <option value="jazz">Jazz Dance</option>
-                                            <option value="latino">Danze Latine</option>
-                                            <option value="bollywood">Bollywood</option>
-                                            <option value="altro">Altro</option>
+                                            <option value="classica" {{ old('dance_type', $course->dance_type ?? '') === 'classica' ? 'selected' : '' }}>Danza Classica</option>
+                                            <option value="moderna" {{ old('dance_type', $course->dance_type ?? '') === 'moderna' ? 'selected' : '' }}>Danza Moderna</option>
+                                            <option value="contemporanea" {{ old('dance_type', $course->dance_type ?? '') === 'contemporanea' ? 'selected' : '' }}>Danza Contemporanea</option>
+                                            <option value="hip_hop" {{ old('dance_type', $course->dance_type ?? '') === 'hip_hop' ? 'selected' : '' }}>Hip Hop</option>
+                                            <option value="jazz" {{ old('dance_type', $course->dance_type ?? '') === 'jazz' ? 'selected' : '' }}>Jazz Dance</option>
+                                            <option value="latino" {{ old('dance_type', $course->dance_type ?? '') === 'latino' ? 'selected' : '' }}>Danze Latine</option>
+                                            <option value="bollywood" {{ old('dance_type', $course->dance_type ?? '') === 'bollywood' ? 'selected' : '' }}>Bollywood</option>
+                                            <option value="altro" {{ old('dance_type', $course->dance_type ?? '') === 'altro' ? 'selected' : '' }}>Altro</option>
                                         </select>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Livello *</label>
                                         <select name="level" class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
                                             <option value="">Seleziona livello</option>
-                                            <option value="principiante">Principiante</option>
-                                            <option value="base">Base</option>
-                                            <option value="intermedio" selected>Intermedio</option>
-                                            <option value="avanzato">Avanzato</option>
-                                            <option value="professionale">Professionale</option>
+                                            <option value="principiante" {{ old('level', $course->level ?? '') === 'principiante' ? 'selected' : '' }}>Principiante</option>
+                                            <option value="base" {{ old('level', $course->level ?? '') === 'base' ? 'selected' : '' }}>Base</option>
+                                            <option value="intermedio" {{ old('level', $course->level ?? '') === 'intermedio' ? 'selected' : '' }}>Intermedio</option>
+                                            <option value="avanzato" {{ old('level', $course->level ?? '') === 'avanzato' ? 'selected' : '' }}>Avanzato</option>
+                                            <option value="professionale" {{ old('level', $course->level ?? '') === 'professionale' ? 'selected' : '' }}>Professionale</option>
                                         </select>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Stato</label>
                                         <select name="status" class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                            <option value="draft">Bozza</option>
-                                            <option value="published" selected>Pubblicato</option>
-                                            <option value="archived">Archiviato</option>
+                                            <option value="draft" {{ old('status', $course->active ? 'published' : 'draft') === 'draft' ? 'selected' : '' }}>Bozza</option>
+                                            <option value="published" {{ old('status', $course->active ? 'published' : 'draft') === 'published' ? 'selected' : '' }}>Pubblicato</option>
+                                            <option value="archived" {{ old('status', $course->active ? 'published' : 'draft') === 'archived' ? 'selected' : '' }}>Archiviato</option>
                                         </select>
                                     </div>
                                 </div>
@@ -240,12 +193,12 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Età Minima</label>
-                                        <input type="number" name="min_age" min="3" max="99" value="12" 
+                                        <input type="number" name="min_age" min="3" max="99" value="{{ old('min_age', $course->min_age ?? '') }}" 
                                                class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Età Massima</label>
-                                        <input type="number" name="max_age" min="3" max="99" value="16" 
+                                        <input type="number" name="max_age" min="3" max="99" value="{{ old('max_age', $course->max_age ?? '') }}" 
                                                class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
                                     </div>
                                 </div>
@@ -253,18 +206,17 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Posti Totali *</label>
-                                        <input type="number" name="max_students" min="1" max="100" value="30" required
+                                        <input type="number" name="max_students" min="1" max="100" value="{{ old('max_students', $course->max_students ?? '') }}" required
                                                class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                        <p class="mt-1 text-xs text-gray-500">Attualmente iscritti: 28 studenti</p>
+                                        <p class="mt-1 text-xs text-gray-500">Attualmente iscritti: {{ $course->enrollments()->where('status', 'attiva')->count() }} studenti</p>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Istruttore</label>
                                         <select name="instructor_id" class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
                                             <option value="">Seleziona istruttore</option>
-                                            <option value="1" selected>Martina Rossi</option>
-                                            <option value="2">Marco Bianchi</option>
-                                            <option value="3">Elena Verdi</option>
-                                            <option value="4">Giuseppe Romano</option>
+                                            @foreach($instructors ?? [] as $instructor)
+                                                <option value="{{ $instructor->id }}" {{ old('instructor_id', $course->instructor_id ?? '') == $instructor->id ? 'selected' : '' }}>{{ $instructor->user->name ?? $instructor->name }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
@@ -279,22 +231,20 @@
                             <div class="space-y-6">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Descrizione Breve</label>
-                                    <textarea name="short_description" rows="3" 
-                                              class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">Il corso di Danza Classica Intermedio è rivolto a studenti che hanno già acquisito le basi della danza classica e desiderano perfezionare tecnica ed espressività.</textarea>
+                                    <textarea name="short_description" rows="3"
+                                              class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">{{ old('short_description', $course->short_description ?? '') }}</textarea>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Descrizione Completa</label>
-                                    <textarea name="description" rows="6" 
-                                              class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">Durante le lezioni verranno approfonditi i movimenti fondamentali, la postura, l'equilibrio e la coordinazione. Il programma include esercizi alla sbarra, al centro, salti e variazioni coreografiche. Gli studenti impareranno anche i principi dell'interpretazione artistica e della musicalità, elementi essenziali per una formazione completa.</textarea>
+                                    <textarea name="description" rows="6"
+                                              class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">{{ old('description', $course->description ?? '') }}</textarea>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Prerequisiti</label>
-                                    <textarea name="prerequisites" rows="4" 
-                                              class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">- Conoscenza delle 5 posizioni di base
-- Esercizi base alla sbarra
-- Almeno 1 anno di esperienza in danza classica</textarea>
+                                    <textarea name="prerequisites" rows="4"
+                                              class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">{{ old('prerequisites', $course->prerequisites ?? '') }}</textarea>
                                 </div>
                             </div>
 
@@ -303,35 +253,41 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Abbigliamento Richiesto</label>
                                     <div class="space-y-2">
-                                        <input type="text" name="equipment[]" value="Body nero o colori scuri" 
-                                               class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                        <input type="text" name="equipment[]" value="Collant rosa o neri" 
-                                               class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                        <input type="text" name="equipment[]" value="Scarpette da danza classica" 
-                                               class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                        <input type="text" name="equipment[]" value="Capelli raccolti" 
-                                               class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
+                                        @php $equipment = old('equipment', $course->equipment ?? []); @endphp
+                                        @if(is_array($equipment) && count($equipment) > 0)
+                                            @foreach($equipment as $item)
+                                                <input type="text" name="equipment[]" value="{{ $item }}"
+                                                       class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
+                                            @endforeach
+                                        @else
+                                            <input type="text" name="equipment[]" value=""
+                                                   class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500" placeholder="Inserisci abbigliamento richiesto">
+                                        @endif
+                                        <button type="button" onclick="addEquipmentField()" class="text-sm text-rose-600 hover:text-rose-800">+ Aggiungi elemento</button>
                                     </div>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Obiettivi del Corso</label>
                                     <div class="space-y-2">
-                                        <input type="text" name="objectives[]" value="Migliorare la tecnica di base" 
-                                               class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                        <input type="text" name="objectives[]" value="Sviluppare coordinazione ed equilibrio" 
-                                               class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                        <input type="text" name="objectives[]" value="Imparare variazioni coreografiche" 
-                                               class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                        <input type="text" name="objectives[]" value="Perfezionare interpretazione artistica" 
-                                               class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
+                                        @php $objectives = old('objectives', $course->objectives ?? []); @endphp
+                                        @if(is_array($objectives) && count($objectives) > 0)
+                                            @foreach($objectives as $objective)
+                                                <input type="text" name="objectives[]" value="{{ $objective }}"
+                                                       class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
+                                            @endforeach
+                                        @else
+                                            <input type="text" name="objectives[]" value=""
+                                                   class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500" placeholder="Inserisci obiettivo del corso">
+                                        @endif
+                                        <button type="button" onclick="addObjectiveField()" class="text-sm text-rose-600 hover:text-rose-800">+ Aggiungi obiettivo</button>
                                     </div>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Note Aggiuntive</label>
-                                    <textarea name="notes" rows="4" 
-                                              class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">È richiesta la partecipazione al saggio di fine anno. Gli studenti che mostrano particolare talento potrebbero essere selezionati per partecipare a concorsi e masterclass.</textarea>
+                                    <textarea name="notes" rows="4"
+                                              class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">{{ old('notes', $course->notes ?? '') }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -371,26 +327,16 @@
 
                         <!-- Students Management Grid -->
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            @php
-                                $students = [
-                                    ['name' => 'Sofia Verdi', 'age' => 14, 'enrolled' => '2024-09-01', 'attendance' => 95, 'payment_status' => 'paid'],
-                                    ['name' => 'Marco Neri', 'age' => 13, 'enrolled' => '2024-09-01', 'attendance' => 88, 'payment_status' => 'paid'],
-                                    ['name' => 'Giulia Rossi', 'age' => 15, 'enrolled' => '2024-09-05', 'attendance' => 92, 'payment_status' => 'pending'],
-                                    ['name' => 'Luca Bianchi', 'age' => 16, 'enrolled' => '2024-09-10', 'attendance' => 85, 'payment_status' => 'paid'],
-                                    ['name' => 'Emma Ferrari', 'age' => 14, 'enrolled' => '2024-09-01', 'attendance' => 100, 'payment_status' => 'paid'],
-                                    ['name' => 'Alessandro Romano', 'age' => 15, 'enrolled' => '2024-09-03', 'attendance' => 90, 'payment_status' => 'overdue']
-                                ];
-                            @endphp
-                            @foreach ($students as $student)
+                            @forelse ($course->enrollments()->with('user')->where('status', 'attiva')->get() as $enrollment)
                                 <div class="bg-white p-4 rounded-lg border border-gray-200 hover:border-rose-300 transition-colors">
                                     <div class="flex items-center justify-between mb-3">
                                         <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
                                             <div class="w-10 h-10 bg-gradient-to-r from-rose-400 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                                                {{ strtoupper(substr($student['name'], 0, 1) . substr(explode(' ', $student['name'])[1], 0, 1)) }}
+                                                {{ strtoupper(substr($enrollment->user->name, 0, 1) . substr(explode(' ', $enrollment->user->name)[1] ?? '', 0, 1)) }}
                                             </div>
                                             <div>
-                                                <h4 class="font-medium text-gray-900">{{ $student['name'] }}</h4>
-                                                <p class="text-xs text-gray-500">{{ $student['age'] }} anni</p>
+                                                <h4 class="font-medium text-gray-900">{{ $enrollment->user->name }}</h4>
+                                                <p class="text-xs text-gray-500">{{ $enrollment->user->age ?? 'N/A' }} anni</p>
                                             </div>
                                         </div>
                                         <div class="relative" x-data="{ open: false }">
@@ -427,25 +373,35 @@
                                     <div class="space-y-2 text-sm">
                                         <div class="flex justify-between">
                                             <span class="text-gray-600">Iscritto:</span>
-                                            <span class="text-gray-900">{{ date('d/m/Y', strtotime($student['enrolled'])) }}</span>
+                                            <span class="text-gray-900">{{ $enrollment->enrollment_date ? $enrollment->enrollment_date->format('d/m/Y') : 'N/A' }}</span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-gray-600">Presenze:</span>
-                                            <span class="font-medium {{ $student['attendance'] >= 90 ? 'text-green-600' : 'text-yellow-600' }}">
-                                                {{ $student['attendance'] }}%
+                                            <span class="font-medium text-gray-600">
+                                                N/A
                                             </span>
                                         </div>
                                         <div class="flex justify-between">
                                             <span class="text-gray-600">Pagamenti:</span>
-                                            <span class="font-medium 
-                                                {{ $student['payment_status'] === 'paid' ? 'text-green-600' : 
-                                                   ($student['payment_status'] === 'pending' ? 'text-yellow-600' : 'text-red-600') }}">
-                                                {{ ucfirst($student['payment_status']) }}
+                                            <span class="font-medium
+                                                {{ $enrollment->payment_status === 'pagato' ? 'text-green-600' :
+                                                   ($enrollment->payment_status === 'in_attesa' ? 'text-yellow-600' : 'text-red-600') }}">
+                                                {{ ucfirst($enrollment->payment_status ?? 'N/A') }}
                                             </span>
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+                            @empty
+                                <div class="col-span-full text-center py-8">
+                                    <div class="text-gray-500">
+                                        <svg class="w-12 h-12 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                        </svg>
+                                        <h3 class="text-lg font-medium text-gray-900 mb-1">Nessuno studente iscritto</h3>
+                                        <p class="text-gray-500">Inizia ad aggiungere studenti al corso</p>
+                                    </div>
+                                </div>
+                            @endforelse
                         </div>
                     </div>
 
@@ -471,35 +427,28 @@
                                 <h3 class="text-lg font-semibold text-gray-900">Orario Attuale</h3>
                                 
                                 <div class="space-y-4">
-                                    <div class="p-4 bg-gradient-to-r from-rose-50 to-purple-50 rounded-lg border border-rose-200">
-                                        <div class="flex items-center space-x-4 mb-2">
-                                            <div class="w-12 h-12 bg-rose-500 rounded-lg flex items-center justify-center text-white">
-                                                <span class="font-bold text-sm">MAR</span>
+                                    @if($course->schedule_data && is_array($course->schedule_data))
+                                        @foreach($course->schedule_data as $index => $slot)
+                                            <div class="p-4 bg-gradient-to-r from-rose-50 to-purple-50 rounded-lg border border-rose-200">
+                                                <div class="flex items-center space-x-4 mb-2">
+                                                    <div class="w-12 h-12 bg-rose-500 rounded-lg flex items-center justify-center text-white">
+                                                        <span class="font-bold text-sm">{{ strtoupper(substr($slot['day'] ?? '', 0, 3)) }}</span>
+                                                    </div>
+                                                    <div>
+                                                        <h4 class="font-semibold text-gray-900">{{ $slot['day'] ?? 'N/A' }}</h4>
+                                                        <p class="text-gray-600">{{ $slot['start_time'] ?? '' }} - {{ $slot['end_time'] ?? '' }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="text-sm text-gray-600">
+                                                    <p>{{ $slot['location'] ?? $course->location ?? 'Sede' }} • {{ $course->enrollments()->where('status', 'attiva')->count() }} studenti iscritti</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h4 class="font-semibold text-gray-900">Martedì</h4>
-                                                <p class="text-gray-600">16:00 - 17:30</p>
-                                            </div>
+                                        @endforeach
+                                    @else
+                                        <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 text-center">
+                                            <p class="text-gray-500">Nessun orario configurato</p>
                                         </div>
-                                        <div class="text-sm text-gray-600">
-                                            <p>Sala A • 90 minuti • 28 studenti presenti in media</p>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="p-4 bg-gradient-to-r from-purple-50 to-violet-50 rounded-lg border border-purple-200">
-                                        <div class="flex items-center space-x-4 mb-2">
-                                            <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center text-white">
-                                                <span class="font-bold text-sm">GIO</span>
-                                            </div>
-                                            <div>
-                                                <h4 class="font-semibold text-gray-900">Giovedì</h4>
-                                                <p class="text-gray-600">16:00 - 17:30</p>
-                                            </div>
-                                        </div>
-                                        <div class="text-sm text-gray-600">
-                                            <p>Sala A • 90 minuti • 26 studenti presenti in media</p>
-                                        </div>
-                                    </div>
+                                    @endif
                                 </div>
                             </div>
 
@@ -508,86 +457,12 @@
                                 <h3 class="text-lg font-semibold text-gray-900">Modifica Orari</h3>
                                 
                                 <div class="space-y-4">
-                                    <!-- First Lesson -->
-                                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                        <div class="flex items-center justify-between mb-3">
-                                            <h4 class="font-medium text-gray-900">Lezione 1 - Martedì</h4>
-                                        </div>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-xs font-medium text-gray-600 mb-1">Giorno</label>
-                                                <select name="schedule[0][day]" class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                                    <option value="monday">Lunedì</option>
-                                                    <option value="tuesday" selected>Martedì</option>
-                                                    <option value="wednesday">Mercoledì</option>
-                                                    <option value="thursday">Giovedì</option>
-                                                    <option value="friday">Venerdì</option>
-                                                    <option value="saturday">Sabato</option>
-                                                    <option value="sunday">Domenica</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label class="block text-xs font-medium text-gray-600 mb-1">Sala</label>
-                                                <select name="schedule[0][room]" class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                                    <option value="sala_a" selected>Sala A</option>
-                                                    <option value="sala_b">Sala B</option>
-                                                    <option value="sala_c">Sala C</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-4 mt-4">
-                                            <div>
-                                                <label class="block text-xs font-medium text-gray-600 mb-1">Orario Inizio</label>
-                                                <input type="time" name="schedule[0][start_time]" value="16:00" 
-                                                       class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                            </div>
-                                            <div>
-                                                <label class="block text-xs font-medium text-gray-600 mb-1">Orario Fine</label>
-                                                <input type="time" name="schedule[0][end_time]" value="17:30" 
-                                                       class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Second Lesson -->
-                                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                                        <div class="flex items-center justify-between mb-3">
-                                            <h4 class="font-medium text-gray-900">Lezione 2 - Giovedì</h4>
-                                        </div>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-xs font-medium text-gray-600 mb-1">Giorno</label>
-                                                <select name="schedule[1][day]" class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                                    <option value="monday">Lunedì</option>
-                                                    <option value="tuesday">Martedì</option>
-                                                    <option value="wednesday">Mercoledì</option>
-                                                    <option value="thursday" selected>Giovedì</option>
-                                                    <option value="friday">Venerdì</option>
-                                                    <option value="saturday">Sabato</option>
-                                                    <option value="sunday">Domenica</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label class="block text-xs font-medium text-gray-600 mb-1">Sala</label>
-                                                <select name="schedule[1][room]" class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                                    <option value="sala_a" selected>Sala A</option>
-                                                    <option value="sala_b">Sala B</option>
-                                                    <option value="sala_c">Sala C</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-4 mt-4">
-                                            <div>
-                                                <label class="block text-xs font-medium text-gray-600 mb-1">Orario Inizio</label>
-                                                <input type="time" name="schedule[1][start_time]" value="16:00" 
-                                                       class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                            </div>
-                                            <div>
-                                                <label class="block text-xs font-medium text-gray-600 mb-1">Orario Fine</label>
-                                                <input type="time" name="schedule[1][end_time]" value="17:30" 
-                                                       class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                                            </div>
-                                        </div>
+                                    <div class="bg-gray-50 rounded-lg p-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Orario del Corso (JSON)</label>
+                                        <textarea name="schedule" rows="6"
+                                                  class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 font-mono text-sm"
+                                                  placeholder='Esempio: [{"day":"Lunedì","start_time":"19:00","end_time":"20:30","location":"Sala A"}]'>{{ old('schedule', $course->schedule ? json_encode($course->schedule, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : '') }}</textarea>
+                                        <p class="mt-1 text-xs text-gray-500">Modifica l'orario in formato JSON. Ogni slot deve contenere: day, start_time, end_time, location</p>
                                     </div>
                                 </div>
                             </div>
@@ -619,19 +494,19 @@
                                 <div class="space-y-4">
                                     <div class="p-4 bg-green-50 rounded-lg border border-green-200">
                                         <div class="text-center">
-                                            <div class="text-xl md:text-2xl font-bold text-green-800">€85,00</div>
+                                            <div class="text-xl md:text-2xl font-bold text-green-800">{{ $course->formatted_price ?? '€0,00' }}</div>
                                             <p class="text-sm text-green-600">Quota mensile</p>
-                                            <p class="text-xs text-green-600 mt-1">28 studenti paganti</p>
+                                            <p class="text-xs text-green-600 mt-1">{{ $course->enrollments()->where('status', 'attiva')->count() }} studenti paganti</p>
                                         </div>
                                     </div>
                                     
                                     <div class="grid grid-cols-2 gap-4">
                                         <div class="text-center p-3 bg-gray-50 rounded-lg">
-                                            <div class="font-bold text-gray-800">€25,00</div>
+                                            <div class="font-bold text-gray-800">€{{ number_format($course->enrollment_fee ?? 0, 2, ',', '.') }}</div>
                                             <p class="text-xs text-gray-600">Quota iscrizione</p>
                                         </div>
                                         <div class="text-center p-3 bg-gray-50 rounded-lg">
-                                            <div class="font-bold text-gray-800">€15,00</div>
+                                            <div class="font-bold text-gray-800">€{{ number_format($course->single_lesson_price ?? 0, 2, ',', '.') }}</div>
                                             <p class="text-xs text-gray-600">Lezione singola</p>
                                         </div>
                                     </div>
@@ -640,9 +515,15 @@
                                 <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
                                     <h4 class="font-medium text-blue-900 mb-2">Ricavi Mensili</h4>
                                     <div class="text-sm text-blue-800 space-y-1">
-                                        <p>Studenti: 28 × €85 = <strong>€2,380</strong></p>
-                                        <p>Nuove iscrizioni (media): 2 × €25 = <strong>€50</strong></p>
-                                        <p>Totale mensile: <strong>€2,430</strong></p>
+                                        @php
+                                            $activeStudents = $course->enrollments()->where('status', 'attiva')->count();
+                                            $monthlyRevenue = $activeStudents * ($course->price ?? 0);
+                                            $enrollmentFeeRevenue = 2 * ($course->enrollment_fee ?? 0);
+                                            $totalRevenue = $monthlyRevenue + $enrollmentFeeRevenue;
+                                        @endphp
+                                        <p>Studenti: {{ $activeStudents }} × €{{ number_format($course->price ?? 0, 2, ',', '.') }} = <strong>€{{ number_format($monthlyRevenue, 0, ',', '.') }}</strong></p>
+                                        <p>Nuove iscrizioni (media): 2 × €{{ number_format($course->enrollment_fee ?? 0, 2, ',', '.') }} = <strong>€{{ number_format($enrollmentFeeRevenue, 0, ',', '.') }}</strong></p>
+                                        <p>Totale mensile: <strong>€{{ number_format($totalRevenue, 0, ',', '.') }}</strong></p>
                                     </div>
                                 </div>
                             </div>
@@ -658,7 +539,7 @@
                                             name="monthly_price"
                                             type="number"
                                             step="0.01"
-                                            value="85.00"
+                                            value="{{ old('monthly_price', $course->price ?? '') }}"
                                             required />
                                     </div>
                                     <div>
@@ -667,7 +548,7 @@
                                             name="enrollment_fee"
                                             type="number"
                                             step="0.01"
-                                            value="25.00" />
+                                            value="{{ old('enrollment_fee', $course->enrollment_fee ?? '') }}" />
                                     </div>
                                 </div>
 
@@ -678,7 +559,7 @@
                                             name="single_lesson_price"
                                             type="number"
                                             step="0.01"
-                                            value="15.00" />
+                                            value="{{ old('single_lesson_price', $course->single_lesson_price ?? '') }}" />
                                     </div>
                                     <div>
                                         <x-form-input 
@@ -686,7 +567,7 @@
                                             name="trial_price"
                                             type="number"
                                             step="0.01"
-                                            value="0.00" />
+                                            value="{{ old('trial_price', $course->trial_price ?? '') }}" />
                                     </div>
                                 </div>
 
@@ -719,7 +600,7 @@
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Data Applicazione</label>
-                                    <input type="date" name="price_effective_date" value="2024-10-01"
+                                    <input type="date" name="price_effective_date" value="{{ old('price_effective_date', now()->addDays(7)->format('Y-m-d')) }}"
                                            class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
                                     <p class="mt-1 text-xs text-gray-500">Gli studenti saranno avvisati con almeno 7 giorni di anticipo</p>
                                 </div>
@@ -730,7 +611,7 @@
             </div>
 
             <!-- Form Actions -->
-            <div class="flex items-center justify-between bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
+            <div class="flex items-center justify-between bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('admin.courses.show', $course ?? 1) }}" 
                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200">
@@ -775,7 +656,7 @@
                     </svg>
                 </div>
                 <p class="text-center text-gray-700 mb-4">
-                    Sei sicuro di voler disattivare <strong>"Danza Classica Intermedio"</strong>?
+                    Sei sicuro di voler disattivare <strong>"{{ $course->name ?? 'questo corso' }}"</strong>?
                 </p>
                 <p class="text-sm text-gray-500 text-center mb-4">
                     Il corso non sarà più visibile per le nuove iscrizioni, ma gli studenti già iscritti potranno continuare a frequentare.
@@ -783,7 +664,7 @@
                 
                 <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                     <p class="text-sm text-yellow-800">
-                        <strong>28 studenti</strong> sono attualmente iscritti a questo corso.
+                        <strong>{{ $course->enrollments()->where('status', 'attiva')->count() }} studenti</strong> sono attualmente iscritti a questo corso.
                     </p>
                 </div>
             </div>
@@ -820,4 +701,26 @@
             </div>
         </div>
     </x-modal>
+
+<script>
+function addEquipmentField() {
+    const container = event.target.parentElement;
+    const newField = document.createElement('input');
+    newField.type = 'text';
+    newField.name = 'equipment[]';
+    newField.className = 'w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500';
+    newField.placeholder = 'Inserisci abbigliamento richiesto';
+    container.insertBefore(newField, event.target);
+}
+
+function addObjectiveField() {
+    const container = event.target.parentElement;
+    const newField = document.createElement('input');
+    newField.type = 'text';
+    newField.name = 'objectives[]';
+    newField.className = 'w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500';
+    newField.placeholder = 'Inserisci obiettivo del corso';
+    container.insertBefore(newField, event.target);
+}
+</script>
 </x-app-layout>
