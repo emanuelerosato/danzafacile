@@ -45,8 +45,8 @@
                 :subtitle="($quickStats['active_students'] ?? 0) . ' attivi'"
                 icon="users"
                 color="blue"
-                :change="15"
-                changeType="increase"
+                :change="$quickStats['students_change'] ?? 0"
+                :changeType="$quickStats['students_change_type'] ?? 'neutral'"
             />
 
             <x-stats-card
@@ -55,8 +55,8 @@
                 :subtitle="'su ' . number_format($quickStats['total_courses'] ?? 0) . ' totali'"
                 icon="academic-cap"
                 color="purple"
-                :change="3"
-                changeType="increase"
+                :change="$quickStats['courses_change'] ?? 0"
+                :changeType="$quickStats['courses_change_type'] ?? 'neutral'"
             />
 
             <x-stats-card
@@ -65,8 +65,8 @@
                 :subtitle="'Mese corrente'"
                 icon="currency-dollar"
                 color="green"
-                :change="22"
-                changeType="increase"
+                :change="$quickStats['revenue_change'] ?? 0"
+                :changeType="$quickStats['revenue_change_type'] ?? 'neutral'"
             />
 
             <x-stats-card
@@ -75,8 +75,8 @@
                 :subtitle="number_format($quickStats['total_events'] ?? 0) . ' eventi totali'"
                 icon="calendar"
                 color="rose"
-                :change="8"
-                changeType="increase"
+                :change="$quickStats['events_change'] ?? 0"
+                :changeType="$quickStats['events_change_type'] ?? 'neutral'"
             />
         </div>
 
@@ -85,9 +85,9 @@
             <x-chart-card
                 title="Andamento Iscrizioni"
                 type="line"
-                :data="[
-                    'labels' => ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu'],
-                    'values' => [12, 19, 15, 25, 22, 30],
+                :data="$analytics['enrollment_trends'] ?? [
+                    'labels' => ['Nessun dato'],
+                    'values' => [0],
                     'label' => 'Nuove Iscrizioni'
                 ]"
             />
@@ -95,9 +95,9 @@
             <x-chart-card
                 title="Distribuzione Corsi"
                 type="doughnut"
-                :data="[
-                    'labels' => ['Danza Classica', 'Hip Hop', 'Contemporanea', 'Pilates'],
-                    'values' => [45, 25, 20, 10],
+                :data="$analytics['course_distribution'] ?? [
+                    'labels' => ['Nessun dato'],
+                    'values' => [0],
                     'label' => 'Studenti per Corso'
                 ]"
             />

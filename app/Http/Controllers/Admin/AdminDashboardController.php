@@ -35,9 +35,9 @@ class AdminDashboardController extends Controller
 
         // Statistics for the school
         $stats = [
-            'students_total' => $school->users()->where('role', User::ROLE_STUDENT)->count(),
-            'students_active' => $school->users()->where('role', User::ROLE_STUDENT)->where('active', true)->count(),
-            'instructors_total' => $school->users()->where('role', User::ROLE_INSTRUCTOR)->count(),
+            'students_total' => $school->users()->where('role', 'user')->count(),
+            'students_active' => $school->users()->where('role', 'user')->where('active', true)->count(),
+            'instructors_total' => $school->users()->where('role', 'admin')->count(),
             'courses_total' => $school->courses()->count(),
             'courses_active' => $school->courses()->where('active', true)->count(),
             'enrollments_total' => CourseEnrollment::whereHas('course', function($q) use ($school) {
@@ -98,6 +98,25 @@ class AdminDashboardController extends Controller
             ->get();
 
         // Analytics data for charts
+        $enrollmentTrends = CourseEnrollment::whereHas('course', function($q) use ($school) {
+            $q->where('school_id', $school->id);
+        })
+        ->selectRaw('MONTH(enrollment_date) as month, COUNT(*) as count')
+        ->whereYear('enrollment_date', now()->year)
+        ->groupBy('month')
+        ->orderBy('month')
+        ->get();
+
+        // Course distribution - get enrollment count per course
+        $courseDistribution = Course::where('school_id', $school->id)
+            ->withCount(['enrollments' => function($q) {
+                $q->where('status', 'active');
+            }])
+            ->get()
+            ->filter(function($course) {
+                return $course->enrollments_count > 0;
+            });
+
         $analytics = [
             'monthly_revenue' => Payment::whereHas('user', function($q) use ($school) {
                 $q->where('school_id', $school->id);
@@ -114,21 +133,41 @@ class AdminDashboardController extends Controller
                 ];
             }),
 
-            'enrollment_trends' => CourseEnrollment::whereHas('course', function($q) use ($school) {
-                $q->where('school_id', $school->id);
-            })
-            ->selectRaw('MONTH(enrollment_date) as month, COUNT(*) as count')
-            ->whereYear('enrollment_date', now()->year)
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->map(function($item) {
-                return [
-                    'month' => now()->month($item->month)->format('M'),
-                    'count' => (int) $item->count
-                ];
-            })
+            'enrollment_trends' => $enrollmentTrends->isNotEmpty() ? [
+                'labels' => $enrollmentTrends->map(function($item) {
+                    return now()->month($item->month)->format('M');
+                })->toArray(),
+                'values' => $enrollmentTrends->pluck('count')->toArray(),
+                'label' => 'Nuove Iscrizioni'
+            ] : [
+                'labels' => ['Nessun dato'],
+                'values' => [0],
+                'label' => 'Nuove Iscrizioni'
+            ],
+
+            'course_distribution' => $courseDistribution->isNotEmpty() ? [
+                'labels' => $courseDistribution->pluck('name')->toArray(),
+                'values' => $courseDistribution->pluck('enrollments_count')->toArray(),
+                'label' => 'Studenti per Corso'
+            ] : [
+                'labels' => ['Nessun dato'],
+                'values' => [0],
+                'label' => 'Studenti per Corso'
+            ]
         ];
+
+        // Calculate percentage changes compared to last month
+        $lastMonthStudents = $school->users()->where('role', 'user')
+            ->whereMonth('created_at', now()->subMonth()->month)->count();
+        $lastMonthRevenue = Payment::whereHas('user', function($q) use ($school) {
+            $q->where('school_id', $school->id);
+        })->where('status', 'completed')
+          ->whereMonth('payment_date', now()->subMonth()->month)->sum('amount');
+
+        $studentsChange = $lastMonthStudents > 0 ?
+            round((($stats['students_total'] - $lastMonthStudents) / $lastMonthStudents) * 100, 1) : 0;
+        $revenueChange = $lastMonthRevenue > 0 ?
+            round((($stats['revenue_this_month'] - $lastMonthRevenue) / $lastMonthRevenue) * 100, 1) : 0;
 
         // Quick stats for dashboard cards - formato compatibile con template
         $quickStats = [
@@ -141,7 +180,17 @@ class AdminDashboardController extends Controller
             'total_events' => Event::where('school_id', $school->id)->count(),
             'pending_payments' => Payment::whereHas('user', function($q) use ($school) {
                 $q->where('school_id', $school->id);
-            })->where('status', 'pending')->count()
+            })->where('status', 'pending')->count(),
+
+            // Dynamic change percentages
+            'students_change' => abs($studentsChange),
+            'students_change_type' => $studentsChange >= 0 ? 'increase' : 'decrease',
+            'courses_change' => 0, // No course changes to calculate yet
+            'courses_change_type' => 'neutral',
+            'revenue_change' => abs($revenueChange),
+            'revenue_change_type' => $revenueChange >= 0 ? 'increase' : 'decrease',
+            'events_change' => 0, // No event changes to calculate yet
+            'events_change_type' => 'neutral'
         ];
 
         // Add recent enrollments to variable name expected by template
@@ -179,7 +228,7 @@ class AdminDashboardController extends Controller
 
         $stats = [
             'new_students' => $school->users()
-                ->where('role', User::ROLE_STUDENT)
+                ->where('role', 'user')
                 ->where('created_at', '>=', $dateFilter)
                 ->count(),
             
@@ -250,8 +299,8 @@ class AdminDashboardController extends Controller
             
             // Statistics
             fputcsv($file, ['Statistiche Generali']);
-            fputcsv($file, ['Studenti Totali', $school->users()->where('role', User::ROLE_STUDENT)->count()]);
-            fputcsv($file, ['Istruttori', $school->users()->where('role', User::ROLE_INSTRUCTOR)->count()]);
+            fputcsv($file, ['Studenti Totali', $school->users()->where('role', 'user')->count()]);
+            fputcsv($file, ['Istruttori', $school->users()->where('role', 'admin')->count()]);
             fputcsv($file, ['Corsi Attivi', $school->courses()->where('active', true)->count()]);
             fputcsv($file, ['Iscrizioni Totali', CourseEnrollment::whereHas('course', function($q) use ($school) {
                 $q->where('school_id', $school->id);
