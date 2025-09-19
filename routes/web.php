@@ -282,6 +282,12 @@ Route::middleware('auth')->group(function () {
             Route::get('/stats', [TicketController::class, 'getStats'])->name('stats');
             Route::get('/recent', [TicketController::class, 'getRecent'])->name('recent');
         });
+
+        // Help and Support
+        Route::prefix('help')->name('help.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Student\HelpController::class, 'index'])->name('index');
+            Route::get('/{section}', [\App\Http\Controllers\Student\HelpController::class, 'section'])->name('section');
+        });
     });
     
     // SHARED ROUTES (for all authenticated users)

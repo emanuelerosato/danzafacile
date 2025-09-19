@@ -169,7 +169,7 @@
                 Messaggi
             </x-nav-item>
 
-            <x-nav-item href="{{ route('student.dashboard') }}" :active="request()->routeIs('help.*')" icon="question-mark-circle">
+            <x-nav-item href="{{ route('student.help.index') }}" :active="request()->routeIs('student.help.*')" icon="question-mark-circle">
                 Aiuto
             </x-nav-item>
         </div>
