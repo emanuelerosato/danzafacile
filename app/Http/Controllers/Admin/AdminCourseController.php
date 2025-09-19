@@ -85,12 +85,7 @@ class AdminCourseController extends AdminBaseController
             'instructor_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('users', 'id')->where(function ($query) {
-                    $query->where('school_id', $this->school->id)
-                          ->whereHas('staffRoles', function($q) {
-                              $q->where('active', true);
-                          });
-                })
+                Rule::exists('users', 'id')->where('school_id', $this->school->id)
             ],
             'max_students' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
@@ -101,6 +96,20 @@ class AdminCourseController extends AdminBaseController
             'duration_weeks' => 'nullable|integer|min:1|max:52',
             'active' => 'boolean'
         ]);
+
+        // Validate instructor_id separately if provided
+        if ($validated['instructor_id']) {
+            $instructorExists = \App\Models\User::where('id', $validated['instructor_id'])
+                ->where('school_id', $this->school->id)
+                ->whereHas('staffRoles', function($q) {
+                    $q->where('active', true);
+                })
+                ->exists();
+
+            if (!$instructorExists) {
+                return back()->withErrors(['instructor_id' => 'L\'istruttore selezionato non è valido per questa scuola.'])->withInput();
+            }
+        }
 
         $validated['school_id'] = $this->school->id;
         $validated['active'] = $validated['active'] ?? true;
@@ -199,12 +208,7 @@ class AdminCourseController extends AdminBaseController
             'instructor_id' => [
                 'nullable',
                 'integer',
-                Rule::exists('users', 'id')->where(function ($query) {
-                    $query->where('school_id', $this->school->id)
-                          ->whereHas('staffRoles', function($q) {
-                              $q->where('active', true);
-                          });
-                })
+                Rule::exists('users', 'id')->where('school_id', $this->school->id)
             ],
             'max_students' => 'required|integer|min:1',
             'price' => 'required|numeric|min:0',
@@ -215,6 +219,20 @@ class AdminCourseController extends AdminBaseController
             'duration_weeks' => 'nullable|integer|min:1|max:52',
             'active' => 'boolean'
         ]);
+
+        // Validate instructor_id separately if provided
+        if ($validated['instructor_id']) {
+            $instructorExists = \App\Models\User::where('id', $validated['instructor_id'])
+                ->where('school_id', $this->school->id)
+                ->whereHas('staffRoles', function($q) {
+                    $q->where('active', true);
+                })
+                ->exists();
+
+            if (!$instructorExists) {
+                return back()->withErrors(['instructor_id' => 'L\'istruttore selezionato non è valido per questa scuola.'])->withInput();
+            }
+        }
 
         $course->update($validated);
         $this->clearSchoolCache();
