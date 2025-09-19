@@ -168,7 +168,20 @@
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Orario:</span>
-                                    <span class="font-medium text-gray-900">{{ $course->schedule ?? 'Da definire' }}</span>
+                                    <div class="font-medium text-gray-900">
+                                        @if($course->schedule && is_array($course->schedule))
+                                            @foreach($course->schedule as $slot)
+                                                <div class="text-sm">
+                                                    {{ $slot['day'] ?? 'N/A' }}: {{ $slot['start_time'] ?? 'N/A' }} - {{ $slot['end_time'] ?? 'N/A' }}
+                                                    @if(isset($slot['location']))
+                                                        ({{ $slot['location'] }})
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        @else
+                                            <span>Da definire</span>
+                                        @endif
+                                    </div>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Data inizio:</span>
@@ -388,17 +401,36 @@
                 <!-- Schedule Tab -->
                 <div x-show="activeTab === 'schedule'" class="space-y-4">
                     <h3 class="text-lg font-semibold text-gray-900">Orario delle Lezioni</h3>
-                    @if($course->schedule)
-                        <div class="bg-gradient-to-r from-rose-50 to-purple-50 p-6 rounded-lg border border-rose-200">
-                            <div class="text-gray-700">
-                                <strong>Programma:</strong> {{ $course->schedule }}
-                            </div>
-                            @if($course->location)
-                                <div class="mt-2 text-gray-600">
-                                    <strong>Sede:</strong> {{ $course->location }}
+                    @if($course->schedule && is_array($course->schedule) && count($course->schedule) > 0)
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            @foreach($course->schedule as $index => $slot)
+                                <div class="bg-gradient-to-r from-rose-50 to-purple-50 p-6 rounded-lg border border-rose-200">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="w-12 h-12 {{ $index % 2 === 0 ? 'bg-rose-500' : 'bg-purple-500' }} rounded-lg flex items-center justify-center text-white">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-semibold text-gray-900">{{ $slot['day'] ?? 'Giorno non specificato' }}</h4>
+                                            <p class="text-gray-600">
+                                                {{ $slot['start_time'] ?? 'N/A' }} - {{ $slot['end_time'] ?? 'N/A' }}
+                                            </p>
+                                            @if(isset($slot['location']))
+                                                <p class="text-sm text-gray-500">{{ $slot['location'] }}</p>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
-                            @endif
+                            @endforeach
                         </div>
+                        @if($course->location && $course->location !== ($course->schedule[0]['location'] ?? ''))
+                            <div class="mt-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <div class="text-blue-700">
+                                    <strong>Sede principale:</strong> {{ $course->location }}
+                                </div>
+                            </div>
+                        @endif
                     @else
                         <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 text-center">
                             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
