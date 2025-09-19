@@ -253,12 +253,19 @@ class StudentCourseController extends Controller
     }
 
     /**
-     * Display student's current enrollments
+     * Display student's unified course dashboard (schedule + enrollments + stats)
      */
     public function myEnrollments(Request $request)
     {
         $user = auth()->user();
 
+        // Get student's active enrollments with schedule data
+        $activeEnrollments = $user->courseEnrollments()
+            ->with(['course.instructor'])
+            ->where('status', 'active')
+            ->get();
+
+        // Get all enrollments for detailed list
         $query = $user->courseEnrollments()->with(['course.instructor', 'course.school']);
 
         // Filter by status
@@ -268,15 +275,118 @@ class StudentCourseController extends Controller
 
         $enrollments = $query->orderBy('enrollment_date', 'desc')->paginate(10);
 
+        // Generate schedule data (reusing logic from schedule method)
+        $upcomingEvents = [];
+        $weeklySchedule = [
+            'monday' => [], 'tuesday' => [], 'wednesday' => [], 'thursday' => [],
+            'friday' => [], 'saturday' => [], 'sunday' => []
+        ];
+
+        foreach ($activeEnrollments as $enrollment) {
+            $course = $enrollment->course;
+
+            // Parse schedule and build weekly view
+            if ($course->schedule) {
+                $scheduleData = is_string($course->schedule) ? json_decode($course->schedule, true) : $course->schedule;
+
+                if (is_array($scheduleData) && !isset($scheduleData['description'])) {
+                    foreach ($scheduleData as $day => $times) {
+                        $dayKey = strtolower($day);
+
+                        // Map Italian day names to English (handle both with and without accents)
+                        $dayMapping = [
+                            'lunedì' => 'monday', 'lunedi' => 'monday',
+                            'martedì' => 'tuesday', 'martedi' => 'tuesday',
+                            'mercoledì' => 'wednesday', 'mercoledi' => 'wednesday',
+                            'giovedì' => 'thursday', 'giovedi' => 'thursday',
+                            'venerdì' => 'friday', 'venerdi' => 'friday',
+                            'sabato' => 'saturday',
+                            'domenica' => 'sunday'
+                        ];
+
+                        if (isset($dayMapping[$dayKey])) {
+                            $dayKey = $dayMapping[$dayKey];
+                        }
+
+                        if (isset($weeklySchedule[$dayKey])) {
+                            if (is_array($times) && count($times) > 0) {
+                                $timeRange = $times[0];
+                                if (is_string($timeRange) && strpos($timeRange, '-') !== false) {
+                                    [$start, $end] = explode('-', $timeRange);
+                                    $parsedTimes = ['start' => trim($start), 'end' => trim($end), 'duration' => 1.5];
+                                } else {
+                                    $parsedTimes = ['start' => '18:00', 'end' => '19:30', 'duration' => 1.5];
+                                }
+                            } else {
+                                $parsedTimes = ['start' => '18:00', 'end' => '19:30', 'duration' => 1.5];
+                            }
+
+                            $weeklySchedule[$dayKey][] = [
+                                'course' => $course,
+                                'enrollment' => $enrollment,
+                                'times' => $parsedTimes,
+                                'instructor' => $course->instructor ? $course->instructor->name : 'TBD'
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // Generate upcoming events (next 14 days)
+            $startDate = max(now(), $course->start_date);
+            $endDate = min(now()->addDays(14), $course->end_date);
+
+            $currentDate = $startDate->copy();
+            while ($currentDate <= $endDate) {
+                if ($this->isDayInCourseSchedule($currentDate, $course)) {
+                    $upcomingEvents[] = [
+                        'date' => $currentDate->copy(),
+                        'course' => $course,
+                        'enrollment' => $enrollment,
+                        'instructor' => $course->instructor ? $course->instructor->name : 'TBD'
+                    ];
+                }
+                $currentDate->addDay();
+            }
+        }
+
+        // Sort upcoming events by date
+        usort($upcomingEvents, function($a, $b) {
+            return $a['date']->timestamp - $b['date']->timestamp;
+        });
+        $upcomingEvents = array_slice($upcomingEvents, 0, 6);
+
+        // Calculate statistics
+        $stats = [
+            'active_courses' => $activeEnrollments->count(),
+            'total_hours_per_week' => $this->calculateWeeklyHours($weeklySchedule),
+            'next_class' => !empty($upcomingEvents) ? $upcomingEvents[0] : null,
+            'completed_classes' => $this->calculateCompletedClasses($activeEnrollments)
+        ];
+
+        // Get enrollment statistics by status
+        $enrollmentStats = [
+            'active' => $user->courseEnrollments()->where('status', 'active')->count(),
+            'completed' => $user->courseEnrollments()->where('status', 'completed')->count(),
+            'cancelled' => $user->courseEnrollments()->where('status', 'cancelled')->count(),
+            'pending' => $user->courseEnrollments()->where('status', 'pending')->count(),
+        ];
+
         if ($request->ajax()) {
-            // TODO: Create partial view for AJAX loading
             return response()->json([
-                'html' => '<div class="p-4 text-center">AJAX loading non ancora implementato</div>',
+                'html' => view('student.my-courses-partial', compact('enrollments'))->render(),
                 'pagination' => $enrollments->links()->render()
             ]);
         }
 
-        return view('student.my-courses', compact('enrollments'));
+        return view('student.my-courses', compact(
+            'enrollments',
+            'activeEnrollments',
+            'weeklySchedule',
+            'upcomingEvents',
+            'stats',
+            'enrollmentStats'
+        ));
     }
 
     /**
@@ -382,14 +492,271 @@ class StudentCourseController extends Controller
 
         for ($i = 0; $i < 30; $i++) { // Check next 30 days
             $checkDate = $today->copy()->addDays($i);
-            
-            if (strtolower($checkDate->format('l')) === $dayName 
-                && $checkDate >= $course->start_date 
+
+            if (strtolower($checkDate->format('l')) === $dayName
+                && $checkDate >= $course->start_date
                 && $checkDate <= $endDate) {
                 return $checkDate;
             }
         }
 
         return null;
+    }
+
+    /**
+     * Display student's personalized schedule/calendar
+     */
+    public function schedule()
+    {
+        $user = auth()->user();
+
+        // Get student's active enrollments
+        $activeEnrollments = $user->courseEnrollments()
+            ->with(['course.instructor'])
+            ->where('status', 'active')
+            ->get();
+
+        // Get upcoming events for enrolled courses
+        $upcomingEvents = [];
+        $weeklySchedule = [
+            'monday' => [],
+            'tuesday' => [],
+            'wednesday' => [],
+            'thursday' => [],
+            'friday' => [],
+            'saturday' => [],
+            'sunday' => []
+        ];
+
+        foreach ($activeEnrollments as $enrollment) {
+            $course = $enrollment->course;
+
+            // Parse schedule and build weekly view
+            if ($course->schedule) {
+                $scheduleData = is_string($course->schedule) ? json_decode($course->schedule, true) : $course->schedule;
+
+                if (is_array($scheduleData)) {
+                    // Check if it's the old format (description only)
+                    if (isset($scheduleData['description'])) {
+                        // Old format - try to parse from description
+                        $description = $scheduleData['description'];
+                        if (stripos($description, 'lunedì') !== false || stripos($description, 'monday') !== false) {
+                            $weeklySchedule['monday'][] = [
+                                'course' => $course,
+                                'enrollment' => $enrollment,
+                                'times' => ['start' => '18:00', 'end' => '19:30', 'duration' => 1.5],
+                                'instructor' => $course->instructor ? $course->instructor->name : 'TBD'
+                            ];
+                        }
+                        if (stripos($description, 'mercoledì') !== false || stripos($description, 'wednesday') !== false) {
+                            $weeklySchedule['wednesday'][] = [
+                                'course' => $course,
+                                'enrollment' => $enrollment,
+                                'times' => ['start' => '18:00', 'end' => '19:30', 'duration' => 1.5],
+                                'instructor' => $course->instructor ? $course->instructor->name : 'TBD'
+                            ];
+                        }
+                    } else {
+                        // New format - proper structure
+                        foreach ($scheduleData as $day => $times) {
+                            $dayKey = strtolower($day);
+
+                            // Map Italian day names to English
+                            $dayMapping = [
+                                'lunedì' => 'monday',
+                                'martedì' => 'tuesday',
+                                'mercoledì' => 'wednesday',
+                                'giovedì' => 'thursday',
+                                'venerdì' => 'friday',
+                                'sabato' => 'saturday',
+                                'domenica' => 'sunday'
+                            ];
+
+                            if (isset($dayMapping[$dayKey])) {
+                                $dayKey = $dayMapping[$dayKey];
+                            }
+
+                            if (isset($weeklySchedule[$dayKey])) {
+                                // Parse time range if it's a simple string like "19:00-20:30"
+                                if (is_array($times) && count($times) > 0) {
+                                    $timeRange = $times[0];
+                                    if (is_string($timeRange) && strpos($timeRange, '-') !== false) {
+                                        [$start, $end] = explode('-', $timeRange);
+                                        $parsedTimes = [
+                                            'start' => trim($start),
+                                            'end' => trim($end),
+                                            'duration' => 1.5 // Default duration
+                                        ];
+                                    } else {
+                                        $parsedTimes = is_array($timeRange) ? $timeRange : ['start' => '18:00', 'end' => '19:30', 'duration' => 1.5];
+                                    }
+                                } else {
+                                    $parsedTimes = ['start' => '18:00', 'end' => '19:30', 'duration' => 1.5];
+                                }
+
+                                $weeklySchedule[$dayKey][] = [
+                                    'course' => $course,
+                                    'enrollment' => $enrollment,
+                                    'times' => $parsedTimes,
+                                    'instructor' => $course->instructor ? $course->instructor->name : 'TBD'
+                                ];
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Generate upcoming events (next 30 days)
+            $startDate = max(now(), $course->start_date);
+            $endDate = min(now()->addDays(30), $course->end_date);
+
+            $currentDate = $startDate->copy();
+            while ($currentDate <= $endDate) {
+                if ($this->isDayInCourseSchedule($currentDate, $course)) {
+                    $upcomingEvents[] = [
+                        'date' => $currentDate->copy(),
+                        'course' => $course,
+                        'enrollment' => $enrollment,
+                        'instructor' => $course->instructor ? $course->instructor->name : 'TBD'
+                    ];
+                }
+                $currentDate->addDay();
+            }
+        }
+
+        // Sort upcoming events by date
+        usort($upcomingEvents, function($a, $b) {
+            return $a['date']->timestamp - $b['date']->timestamp;
+        });
+
+        // Take only next 10 events
+        $upcomingEvents = array_slice($upcomingEvents, 0, 10);
+
+        // Calculate statistics
+        $stats = [
+            'active_courses' => $activeEnrollments->count(),
+            'total_hours_per_week' => $this->calculateWeeklyHours($weeklySchedule),
+            'next_class' => !empty($upcomingEvents) ? $upcomingEvents[0] : null,
+            'completed_classes' => $this->calculateCompletedClasses($activeEnrollments)
+        ];
+
+        return view('student.schedule.index', compact(
+            'activeEnrollments',
+            'weeklySchedule',
+            'upcomingEvents',
+            'stats'
+        ));
+    }
+
+    /**
+     * Check if a date falls within a course's schedule
+     */
+    private function isDayInCourseSchedule($date, $course)
+    {
+        if (!$course->schedule) {
+            return false;
+        }
+
+        $scheduleData = is_string($course->schedule) ? json_decode($course->schedule, true) : $course->schedule;
+        if (!is_array($scheduleData)) {
+            return false;
+        }
+
+        $dayName = strtolower($date->format('l'));
+        $dayNameItalianVariants = $this->translateDayToItalian($dayName);
+
+        // Check if it's the old format (description only)
+        if (isset($scheduleData['description'])) {
+            $description = strtolower($scheduleData['description']);
+            foreach ($dayNameItalianVariants as $variant) {
+                if (stripos($description, $variant) !== false) {
+                    return true;
+                }
+            }
+            return stripos($description, $dayName) !== false;
+        }
+
+        // New format - check keys
+        if (isset($scheduleData[$dayName])) {
+            return true;
+        }
+        foreach ($dayNameItalianVariants as $variant) {
+            if (isset($scheduleData[$variant])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Translate English day names to Italian (including variants without accents)
+     */
+    private function translateDayToItalian($englishDay)
+    {
+        $translations = [
+            'monday' => ['lunedì', 'lunedi'],
+            'tuesday' => ['martedì', 'martedi'],
+            'wednesday' => ['mercoledì', 'mercoledi'],
+            'thursday' => ['giovedì', 'giovedi'],
+            'friday' => ['venerdì', 'venerdi'],
+            'saturday' => ['sabato'],
+            'sunday' => ['domenica']
+        ];
+
+        return $translations[$englishDay] ?? [$englishDay];
+    }
+
+    /**
+     * Calculate total weekly hours from schedule
+     */
+    private function calculateWeeklyHours($weeklySchedule)
+    {
+        $totalHours = 0;
+
+        foreach ($weeklySchedule as $day => $classes) {
+            foreach ($classes as $class) {
+                if (isset($class['times']['duration'])) {
+                    $totalHours += (float) $class['times']['duration'];
+                } else {
+                    // Default to 1.5 hours if duration not specified
+                    $totalHours += 1.5;
+                }
+            }
+        }
+
+        return $totalHours;
+    }
+
+    /**
+     * Calculate completed classes for active enrollments
+     */
+    private function calculateCompletedClasses($activeEnrollments)
+    {
+        $completedClasses = 0;
+
+        foreach ($activeEnrollments as $enrollment) {
+            $course = $enrollment->course;
+
+            // Calculate how many classes have occurred since enrollment
+            $enrollmentDate = $enrollment->enrollment_date;
+            $today = now();
+
+            if ($course->start_date <= $today) {
+                $startCountingFrom = max($enrollmentDate, $course->start_date);
+                $daysBetween = $startCountingFrom->diffInDays($today);
+
+                // Rough calculation: assume 1-2 classes per week
+                if ($course->schedule) {
+                    $scheduleData = json_decode($course->schedule, true);
+                    $classesPerWeek = is_array($scheduleData) ? count($scheduleData) : 1;
+                } else {
+                    $classesPerWeek = 1;
+                }
+
+                $completedClasses += floor(($daysBetween / 7) * $classesPerWeek);
+            }
+        }
+
+        return $completedClasses;
     }
 }

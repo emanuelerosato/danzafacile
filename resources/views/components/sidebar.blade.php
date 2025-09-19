@@ -141,14 +141,11 @@
             </x-nav-item>
 
             <x-nav-group title="I Miei Corsi" icon="academic-cap">
-                <x-nav-item href="{{ route('student.courses.index') }}" :active="request()->routeIs('student.courses.*')" icon="book-open">
+                <x-nav-item href="{{ route('student.courses.index') }}" :active="request()->routeIs('student.courses.*') && !request()->routeIs('student.my-courses')" icon="book-open">
                     Corsi Disponibili
                 </x-nav-item>
-                <x-nav-item href="{{ route('student.my-courses') }}" :active="request()->routeIs('student.my-courses.*')" icon="clipboard-check">
-                    Le Mie Iscrizioni
-                </x-nav-item>
-                <x-nav-item href="{{ route('student.dashboard') }}" :active="request()->routeIs('student.schedule.*')" icon="calendar">
-                    Il Mio Programma
+                <x-nav-item href="{{ route('student.my-courses') }}" :active="request()->routeIs('student.my-courses')" icon="calendar">
+                    I Miei Corsi
                 </x-nav-item>
             </x-nav-group>
 

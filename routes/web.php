@@ -272,6 +272,8 @@ Route::middleware('auth')->group(function () {
         Route::get('my-courses', [StudentCourseController::class, 'myEnrollments'])->name('my-courses');
         Route::get('my-courses/{enrollment}', [StudentCourseController::class, 'showEnrollment'])->name('my-courses.show');
 
+        // Schedule/Calendar
+
         // Tickets/Messages (Helpdesk)
         Route::prefix('tickets')->name('tickets.')->group(function () {
             Route::get('/', [TicketController::class, 'index'])->name('index');
