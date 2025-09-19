@@ -357,7 +357,7 @@ class Course extends Model
             $scheduleData = json_decode($this->schedule, true);
         }
 
-        // Fix encoding issues
+        // Fix encoding issues and format times
         if ($scheduleData && is_array($scheduleData)) {
             foreach ($scheduleData as &$slot) {
                 if (isset($slot['day'])) {
@@ -367,6 +367,14 @@ class Course extends Model
                         ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'],
                         $slot['day']
                     );
+                }
+
+                // Format time to HH:MM (remove seconds)
+                if (isset($slot['start_time'])) {
+                    $slot['start_time'] = substr($slot['start_time'], 0, 5);
+                }
+                if (isset($slot['end_time'])) {
+                    $slot['end_time'] = substr($slot['end_time'], 0, 5);
                 }
             }
         }
