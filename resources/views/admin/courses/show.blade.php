@@ -231,9 +231,9 @@
                                                 Profilo Staff
                                             </a>
                                         @else
-                                            <button class="flex-1 px-4 py-2 bg-gray-400 text-white rounded-lg text-sm font-medium cursor-not-allowed" disabled>
-                                                Profilo Non Disponibile
-                                            </button>
+                                            <a href="{{ route('admin.users.show', $course->instructor_id) }}" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium text-center">
+                                                Profilo Utente
+                                            </a>
                                         @endif
                                     </div>
                                 </div>
