@@ -290,6 +290,15 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [\App\Http\Controllers\Student\HelpController::class, 'index'])->name('index');
             Route::get('/{section}', [\App\Http\Controllers\Student\HelpController::class, 'section'])->name('section');
         });
+
+        // Student Payments
+        Route::prefix('payments')->name('payment.')->group(function () {
+            Route::post('/{payment}/paypal', [\App\Http\Controllers\Student\PaymentController::class, 'createPayPalPayment'])->name('paypal.create');
+            Route::get('/{payment}/paypal/success', [\App\Http\Controllers\Student\PaymentController::class, 'paypalSuccess'])->name('paypal.success');
+            Route::get('/{payment}/paypal/cancel', [\App\Http\Controllers\Student\PaymentController::class, 'paypalCancel'])->name('paypal.cancel');
+            Route::get('/{payment}/receipt', [\App\Http\Controllers\Student\PaymentController::class, 'downloadReceipt'])->name('receipt');
+            Route::get('/{payment}/status', [\App\Http\Controllers\Student\PaymentController::class, 'getPaymentStatus'])->name('status');
+        });
     });
     
     // SHARED ROUTES (for all authenticated users)

@@ -372,6 +372,40 @@ class StudentCourseController extends Controller
             'pending' => $user->courseEnrollments()->where('status', 'pending')->count(),
         ];
 
+        // Get payment data
+        $userPayments = $user->payments()
+            ->with(['course', 'event'])
+            ->orderBy('payment_date', 'desc')
+            ->take(10)
+            ->get();
+
+        // Get all payments for statistics and filtering
+        $allUserPayments = $user->payments();
+
+        // Payment statistics
+        $paymentStats = [
+            'total_spent' => $user->payments()->where('status', 'completed')->sum('amount'),
+            'pending_amount' => $user->payments()->whereIn('status', ['pending', 'processing'])->sum('amount'),
+            'overdue_count' => $user->payments()->where('due_date', '<', now())->whereIn('status', ['pending', 'processing'])->count(),
+            'this_month_spent' => $user->payments()->where('status', 'completed')->whereMonth('payment_date', now()->month)->sum('amount'),
+        ];
+
+        // Payment status counts
+        $paymentStatusStats = [
+            'completed' => $user->payments()->where('status', 'completed')->count(),
+            'pending' => $user->payments()->where('status', 'pending')->count(),
+            'failed' => $user->payments()->where('status', 'failed')->count(),
+            'overdue' => $user->payments()->where('due_date', '<', now())->whereIn('status', ['pending', 'processing'])->count(),
+        ];
+
+        // Upcoming payments (next 30 days)
+        $upcomingPayments = $user->payments()
+            ->where('status', 'pending')
+            ->whereBetween('due_date', [now(), now()->addDays(30)])
+            ->orderBy('due_date')
+            ->take(5)
+            ->get();
+
         if ($request->ajax()) {
             return response()->json([
                 'html' => view('student.my-courses-partial', compact('enrollments'))->render(),
@@ -385,7 +419,11 @@ class StudentCourseController extends Controller
             'weeklySchedule',
             'upcomingEvents',
             'stats',
-            'enrollmentStats'
+            'enrollmentStats',
+            'userPayments',
+            'paymentStats',
+            'paymentStatusStats',
+            'upcomingPayments'
         ));
     }
 

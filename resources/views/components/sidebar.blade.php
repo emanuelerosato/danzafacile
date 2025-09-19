@@ -150,9 +150,6 @@
             </x-nav-group>
 
             <x-nav-group title="Profilo" icon="user">
-                <x-nav-item href="{{ route('student.dashboard') }}" :active="request()->routeIs('student.payments.*')" icon="credit-card">
-                    Pagamenti
-                </x-nav-item>
                 <x-nav-item href="{{ route('documents.index') }}" :active="request()->routeIs('documents.*')" icon="document">
                     Documenti
                 </x-nav-item>
