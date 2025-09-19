@@ -169,8 +169,18 @@
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Orario:</span>
                                     <div class="font-medium text-gray-900">
-                                        @if($course->schedule && is_array($course->schedule))
-                                            @foreach($course->schedule as $slot)
+                                        @php
+                                            $scheduleData = null;
+                                            if ($course->schedule) {
+                                                if (is_array($course->schedule)) {
+                                                    $scheduleData = $course->schedule;
+                                                } elseif (is_string($course->schedule)) {
+                                                    $scheduleData = json_decode($course->schedule, true);
+                                                }
+                                            }
+                                        @endphp
+                                        @if($scheduleData && is_array($scheduleData) && count($scheduleData) > 0)
+                                            @foreach($scheduleData as $slot)
                                                 <div class="text-sm">
                                                     {{ $slot['day'] ?? 'N/A' }}: {{ $slot['start_time'] ?? 'N/A' }} - {{ $slot['end_time'] ?? 'N/A' }}
                                                     @if(isset($slot['location']))
@@ -401,9 +411,19 @@
                 <!-- Schedule Tab -->
                 <div x-show="activeTab === 'schedule'" class="space-y-4">
                     <h3 class="text-lg font-semibold text-gray-900">Orario delle Lezioni</h3>
-                    @if($course->schedule && is_array($course->schedule) && count($course->schedule) > 0)
+                    @php
+                        $scheduleData = null;
+                        if ($course->schedule) {
+                            if (is_array($course->schedule)) {
+                                $scheduleData = $course->schedule;
+                            } elseif (is_string($course->schedule)) {
+                                $scheduleData = json_decode($course->schedule, true);
+                            }
+                        }
+                    @endphp
+                    @if($scheduleData && is_array($scheduleData) && count($scheduleData) > 0)
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            @foreach($course->schedule as $index => $slot)
+                            @foreach($scheduleData as $index => $slot)
                                 <div class="bg-gradient-to-r from-rose-50 to-purple-50 p-6 rounded-lg border border-rose-200">
                                     <div class="flex items-center space-x-4">
                                         <div class="w-12 h-12 {{ $index % 2 === 0 ? 'bg-rose-500' : 'bg-purple-500' }} rounded-lg flex items-center justify-center text-white">
@@ -424,7 +444,7 @@
                                 </div>
                             @endforeach
                         </div>
-                        @if($course->location && $course->location !== ($course->schedule[0]['location'] ?? ''))
+                        @if($course->location && $course->location !== ($scheduleData[0]['location'] ?? ''))
                             <div class="mt-4 bg-blue-50 p-4 rounded-lg border border-blue-200">
                                 <div class="text-blue-700">
                                     <strong>Sede principale:</strong> {{ $course->location }}
