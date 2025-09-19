@@ -6,6 +6,7 @@ use App\Http\Requests\StoreCourseRequest;
 use App\Http\Requests\UpdateCourseRequest;
 use App\Models\Course;
 use App\Models\CourseEnrollment;
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -134,14 +135,25 @@ class AdminCourseController extends AdminBaseController
             'school'
         ]);
 
+        // Calculate revenue from actual payments for this course
+        $enrolledUserIds = $course->enrollments()->pluck('user_id');
+        $actualRevenue = Payment::whereIn('user_id', $enrolledUserIds)
+            ->where('course_id', $course->id)
+            ->where('status', 'completed')
+            ->sum('amount');
+
+        // If no payments found, calculate potential revenue based on enrollment count and course price
+        $potentialRevenue = $course->enrollments()->count() * $course->price;
+        $totalRevenue = $actualRevenue > 0 ? $actualRevenue : $potentialRevenue;
+
         $stats = [
             'enrolled_students' => $course->enrollments()->count(),
             'available_spots' => max(0, $course->max_students - $course->enrollments()->count()),
             'completion_rate' => $this->calculateCompletionRate($course),
-            'total_revenue' => $course->enrollments()->sum('amount_paid') ?? ($course->enrollments()->count() * $course->price),
+            'total_revenue' => $totalRevenue,
             'attendance_rate' => $this->calculateAttendanceRate($course),
             'revenue_per_student' => $course->enrollments()->count() > 0 ?
-                ($course->enrollments()->sum('amount_paid') ?? ($course->enrollments()->count() * $course->price)) / $course->enrollments()->count() : 0
+                $totalRevenue / $course->enrollments()->count() : 0
         ];
 
         return view('admin.courses.show', compact('course', 'stats'));
