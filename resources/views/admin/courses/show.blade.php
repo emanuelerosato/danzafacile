@@ -128,16 +128,7 @@
                             class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
                         Orario
                     </button>
-                    <button @click="activeTab = 'attendance'" 
-                            :class="{ 'border-rose-500 text-rose-600': activeTab === 'attendance', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'attendance' }"
-                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
-                        Presenze
-                    </button>
-                    <button @click="activeTab = 'materials'" 
-                            :class="{ 'border-rose-500 text-rose-600': activeTab === 'materials', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'materials' }"
-                            class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
-                        Materiali
-                    </button>
+                    {{-- Removed attendance and materials tabs - not implemented yet --}}
                 </nav>
             </div>
 
@@ -260,62 +251,7 @@
                         </div>
                     </div>
 
-                    <!-- Prerequisites & Requirements -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <h4 class="font-semibold text-gray-900 mb-3">Prerequisiti</h4>
-                            <ul class="space-y-2 text-sm text-gray-600">
-                                <li class="flex items-center">
-                                    <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    Conoscenza delle 5 posizioni di base
-                                </li>
-                                <li class="flex items-center">
-                                    <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    Esercizi base alla sbarra
-                                </li>
-                                <li class="flex items-center">
-                                    <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                    Almeno 1 anno di esperienza
-                                </li>
-                            </ul>
-                        </div>
-                        
-                        <div>
-                            <h4 class="font-semibold text-gray-900 mb-3">Occorrente</h4>
-                            <ul class="space-y-2 text-sm text-gray-600">
-                                <li class="flex items-center">
-                                    <svg class="w-4 h-4 text-rose-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                    </svg>
-                                    Body nero o colori scuri
-                                </li>
-                                <li class="flex items-center">
-                                    <svg class="w-4 h-4 text-rose-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                    </svg>
-                                    Collant rosa o neri
-                                </li>
-                                <li class="flex items-center">
-                                    <svg class="w-4 h-4 text-rose-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                    </svg>
-                                    Scarpette da danza classica
-                                </li>
-                                <li class="flex items-center">
-                                    <svg class="w-4 h-4 text-rose-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                    </svg>
-                                    Capelli raccolti
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                    {{-- Prerequisites & Requirements section removed - was hardcoded content --}}
                 </div>
 
                 <!-- Students Tab -->
@@ -453,51 +389,10 @@
                     @endif
                 </div>
 
-                <div x-show="activeTab === 'attendance'" class="space-y-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Registro Presenze</h3>
-                    <p class="text-gray-600">Sistema di gestione delle presenze e assenze degli studenti...</p>
-                </div>
-
-                <div x-show="activeTab === 'materials'" class="space-y-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Materiali Didattici</h3>
-                    <p class="text-gray-600">Video, musiche, documenti e risorse per il corso...</p>
-                </div>
+                {{-- Attendance and Materials tabs content removed - not implemented yet --}}
             </div>
         </div>
     </div>
 
-    <!-- Modals -->
-    <x-modal name="duplicate-course" maxWidth="md">
-        <div class="p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Duplica Corso</h3>
-            <p class="text-gray-600 mb-6">
-                Stai per creare una copia di "Danza Classica Intermedio". 
-                Vuoi modificare alcuni dettagli?
-            </p>
-            <form>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nuovo Nome Corso</label>
-                        <input type="text" value="Danza Classica Intermedio (Copia)" 
-                               class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Data Inizio</label>
-                        <input type="date" value="2024-10-01" 
-                               class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
-                    </div>
-                </div>
-                <div class="flex items-center justify-end space-x-3 mt-6">
-                    <button type="button" @click="$dispatch('close-modal', 'duplicate-course')" 
-                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">
-                        Annulla
-                    </button>
-                    <button type="submit" 
-                            class="px-4 py-2 text-sm font-medium text-white bg-rose-600 rounded-lg hover:bg-rose-700">
-                        Duplica Corso
-                    </button>
-                </div>
-            </form>
-        </div>
-    </x-modal>
+    {{-- Duplicate course modal removed - contained hardcoded content --}}
 </x-app-layout>
