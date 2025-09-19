@@ -221,9 +221,20 @@
                                         <a href="mailto:{{ $course->instructor->email }}" class="flex-1 px-4 py-2 bg-white text-rose-600 border border-rose-600 rounded-lg hover:bg-rose-50 text-sm font-medium text-center">
                                             Contatta
                                         </a>
-                                        <button class="flex-1 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 text-sm font-medium">
-                                            Profilo
-                                        </button>
+                                        @php
+                                            $staffRecord = \App\Models\Staff::where('user_id', $course->instructor_id)
+                                                                           ->where('school_id', $course->school_id)
+                                                                           ->first();
+                                        @endphp
+                                        @if($staffRecord)
+                                            <a href="{{ route('admin.staff.show', $staffRecord->id) }}" class="flex-1 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 text-sm font-medium text-center">
+                                                Profilo Staff
+                                            </a>
+                                        @else
+                                            <button class="flex-1 px-4 py-2 bg-gray-400 text-white rounded-lg text-sm font-medium cursor-not-allowed" disabled>
+                                                Profilo Non Disponibile
+                                            </button>
+                                        @endif
                                     </div>
                                 </div>
                             @else
