@@ -34,7 +34,7 @@
         <li class="text-gray-900 font-medium">Admin - {{ $currentSchool->name ?? 'Scuola' }}</li>
     </x-slot>
 
-    <div x-data="dashboard()" class="space-y-8">
+    <div x-data="{ refreshing: false, refreshData() { this.refreshing = true; setTimeout(() => { this.refreshing = false; location.reload(); }, 1000); } }" class="space-y-8">
 
     <div class="space-y-6">
         <!-- Key Statistics -->
@@ -212,22 +212,4 @@
         </div>
     </div>
 
-    @push('scripts')
-    <script>
-    function dashboard() {
-        return {
-            refreshing: false,
-            refreshData() {
-                this.refreshing = true;
-
-                // Simulate API call
-                setTimeout(() => {
-                    this.refreshing = false;
-                    location.reload();
-                }, 1000);
-            }
-        }
-    }
-    </script>
-    @endpush
 </x-app-layout>
