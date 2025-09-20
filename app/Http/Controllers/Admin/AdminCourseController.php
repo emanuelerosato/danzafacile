@@ -296,22 +296,78 @@ class AdminCourseController extends AdminBaseController
         }
 
         // Check if course has enrollments
-        if ($course->enrollments()->count() > 0) {
+        $enrollmentCount = $course->enrollments()->count();
+        if ($enrollmentCount > 0) {
+            \Log::warning('Attempted to delete course with enrollments', [
+                'course_id' => $course->id,
+                'course_name' => $course->name,
+                'enrollments_count' => $enrollmentCount,
+                'admin_id' => auth()->id(),
+                'school_id' => $this->school->id
+            ]);
+
             if (request()->ajax()) {
-                return $this->jsonResponse(false, 'Impossibile eliminare il corso. Ci sono studenti iscritti.', [], 422);
+                return $this->jsonResponse(false, "Impossibile eliminare il corso. Ci sono {$enrollmentCount} student" . ($enrollmentCount === 1 ? 'e iscritto' : 'i iscritti') . ".", [], 422);
             }
-            return redirect()->back()->with('error', 'Impossibile eliminare il corso. Ci sono studenti iscritti.');
+            return redirect()->back()->with('error', "Impossibile eliminare il corso. Ci sono {$enrollmentCount} student" . ($enrollmentCount === 1 ? 'e iscritto' : 'i iscritti') . ".");
         }
 
+        // Check for related data that might be orphaned
+        $relatedData = [
+            'documents' => $course->documents()->count(),
+            'media_galleries' => $course->mediaGalleries()->count(),
+            'payments' => $course->payments()->count(),
+            'attendance_records' => \App\Models\Attendance::where('attendable_type', 'App\\Models\\Course')
+                                                          ->where('attendable_id', $course->id)
+                                                          ->count()
+        ];
+
+        $hasRelatedData = array_sum($relatedData) > 0;
+
+        // Log deletion attempt with related data info
+        \Log::info('Course deletion initiated', [
+            'course_id' => $course->id,
+            'course_name' => $course->name,
+            'admin_id' => auth()->id(),
+            'school_id' => $this->school->id,
+            'related_data' => $relatedData,
+            'has_related_data' => $hasRelatedData
+        ]);
+
+        // Store course data for logging before deletion
+        $courseData = [
+            'id' => $course->id,
+            'name' => $course->name,
+            'level' => $course->level,
+            'price' => $course->price,
+            'start_date' => $course->start_date?->format('Y-m-d'),
+            'end_date' => $course->end_date?->format('Y-m-d'),
+            'instructor_name' => $course->instructor?->name,
+            'location' => $course->location
+        ];
+
+        // Perform deletion
         $course->delete();
         $this->clearSchoolCache();
 
+        // Log successful deletion
+        \Log::info('Course deleted successfully', [
+            'course_data' => $courseData,
+            'admin_id' => auth()->id(),
+            'school_id' => $this->school->id,
+            'deleted_at' => now()->toISOString()
+        ]);
+
+        $successMessage = $hasRelatedData
+            ? 'Corso eliminato con successo. Verifica eventuali dati correlati rimasti.'
+            : 'Corso eliminato con successo.';
+
         if (request()->ajax()) {
-            return $this->jsonResponse(true, 'Corso eliminato con successo.');
+            return $this->jsonResponse(true, $successMessage);
         }
 
         return redirect()->route('admin.courses.index')
-                        ->with('success', 'Corso eliminato con successo.');
+                        ->with('success', $successMessage);
     }
 
     /**

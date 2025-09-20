@@ -99,7 +99,7 @@
         @if($courses->count() > 0)
             <div class="divide-y divide-gray-200">
                 @foreach($courses as $course)
-                    <div class="p-6 hover:bg-gray-50">
+                    <div class="p-6 hover:bg-gray-50" data-course-id="{{ $course->id }}">
                         <div class="flex items-center justify-between">
                             <div class="flex-1">
                                 <div class="flex items-center space-x-4">
@@ -155,6 +155,11 @@
                                        class="text-gray-600 hover:text-gray-900 text-sm font-medium">
                                         Dettagli
                                     </a>
+                                    <span class="text-gray-300">|</span>
+                                    <button onclick="showDeleteModal({{ $course->id }}, '{{ addslashes($course->name) }}', {{ $course->enrollments->count() }})"
+                                            class="text-red-600 hover:text-red-900 text-sm font-medium">
+                                        Elimina
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -188,4 +193,252 @@
         @endif
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+    <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <!-- Modal Header -->
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center">
+                <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <h3 class="text-lg font-medium text-gray-900">Eliminare corso?</h3>
+                    <p class="text-sm text-gray-500">Questa azione non può essere annullata</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6">
+            <p class="text-sm text-gray-700 mb-4">
+                Sei sicuro di voler eliminare il corso <strong id="courseName" class="text-gray-900"></strong>?
+            </p>
+            <div id="courseWarnings" class="space-y-2"></div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end space-x-3 rounded-b-lg">
+            <button id="cancelDelete" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Annulla
+            </button>
+            <button id="confirmDelete" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg id="deleteSpinner" class="hidden animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span id="deleteButtonText">Elimina corso</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed top-4 right-4 max-w-xs bg-white border border-gray-200 rounded-xl shadow-lg z-50 hidden">
+    <div class="flex p-4">
+        <div class="flex-shrink-0">
+            <svg id="toastIcon" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+        </div>
+        <div class="ml-3">
+            <p id="toastMessage" class="text-sm text-gray-700"></p>
+        </div>
+        <div class="ml-auto pl-3">
+            <button onclick="hideToast()" class="inline-flex text-gray-400 hover:text-gray-600">
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentCourseId = null;
+
+    // Show delete modal with course information
+    window.showDeleteModal = function(courseId, courseName, enrollmentCount) {
+        currentCourseId = courseId;
+
+        // Set course name
+        document.getElementById('courseName').textContent = courseName;
+
+        // Clear previous warnings
+        const warningsDiv = document.getElementById('courseWarnings');
+        warningsDiv.innerHTML = '';
+
+        // Add warnings based on course data
+        if (enrollmentCount > 0) {
+            warningsDiv.innerHTML += `
+                <div class="flex items-center p-2 text-sm text-red-700 bg-red-100 rounded-lg">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    Corso con ${enrollmentCount} student${enrollmentCount === 1 ? 'e' : 'i'} iscritt${enrollmentCount === 1 ? 'o' : 'i'}
+                </div>
+            `;
+        }
+
+        // Show modal
+        document.getElementById('deleteModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    };
+
+    // Hide delete modal
+    function hideDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        currentCourseId = null;
+    }
+
+    // Show toast notification
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        const icon = document.getElementById('toastIcon');
+        const messageEl = document.getElementById('toastMessage');
+
+        messageEl.textContent = message;
+
+        // Set icon and colors based on type
+        if (type === 'success') {
+            toast.className = 'fixed top-4 right-4 max-w-xs bg-green-50 border border-green-200 rounded-xl shadow-lg z-50';
+            icon.className = 'h-4 w-4 text-green-600';
+            icon.innerHTML = '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>';
+        } else {
+            toast.className = 'fixed top-4 right-4 max-w-xs bg-red-50 border border-red-200 rounded-xl shadow-lg z-50';
+            icon.className = 'h-4 w-4 text-red-600';
+            icon.innerHTML = '<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>';
+        }
+
+        toast.classList.remove('hidden');
+
+        // Auto hide after 4 seconds
+        setTimeout(() => {
+            hideToast();
+        }, 4000);
+    }
+
+    // Hide toast notification
+    function hideToast() {
+        document.getElementById('toast').classList.add('hidden');
+    }
+
+    // Delete course function
+    window.deleteCourse = async function() {
+        if (!currentCourseId) return;
+
+        const deleteButton = document.getElementById('confirmDelete');
+        const deleteButtonText = document.getElementById('deleteButtonText');
+        const deleteSpinner = document.getElementById('deleteSpinner');
+
+        // Show loading state
+        deleteButton.disabled = true;
+        deleteButtonText.textContent = 'Eliminando...';
+        deleteSpinner.classList.remove('hidden');
+
+        try {
+            // Create form data with method spoofing
+            const formData = new FormData();
+            formData.append('_method', 'DELETE');
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}');
+
+            const response = await fetch(`{{ url('/admin/courses') }}/${currentCourseId}`, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+
+            console.log('Response status:', response.status, 'OK:', response.ok);
+
+            // Check if course was actually deleted (status 200 or redirect 302)
+            if (response.ok || response.status === 302) {
+                try {
+                    const data = await response.json();
+                    showToast(data.message || 'Corso eliminato con successo', 'success');
+                    console.log('Server response:', data);
+                } catch (e) {
+                    console.log('JSON parse failed, but response was ok');
+                    showToast('Corso eliminato con successo', 'success');
+                }
+
+                // Remove course card from DOM (optimistic update)
+                console.log('Looking for course card with ID:', currentCourseId);
+                const courseCard = document.querySelector(`[data-course-id="${currentCourseId}"]`);
+                console.log('Found course card:', courseCard);
+
+                if (courseCard) {
+                    console.log('Removing course card...');
+                    courseCard.style.transition = 'all 0.5s ease-out';
+                    courseCard.style.opacity = '0';
+                    courseCard.style.transform = 'translateX(-100%)';
+                    setTimeout(() => {
+                        courseCard.remove();
+                        console.log('Course card removed from DOM');
+
+                        // Check if no courses left to show empty state
+                        const remainingCards = document.querySelectorAll('[data-course-id]');
+                        console.log('Remaining course cards:', remainingCards.length);
+                        if (remainingCards.length === 0) {
+                            console.log('No courses left, reloading page...');
+                            setTimeout(() => location.reload(), 500);
+                        }
+                    }, 500);
+                } else {
+                    console.log('Course card not found, reloading page...');
+                    setTimeout(() => location.reload(), 1000);
+                }
+
+            } else {
+                console.log('Response not ok, status:', response.status);
+                try {
+                    const errorData = await response.json();
+                    console.log('Error response:', errorData);
+                    showToast(errorData.message || 'Errore durante l\'eliminazione', 'error');
+                } catch (e) {
+                    console.log('Could not parse error response');
+                    showToast('Errore durante l\'eliminazione del corso', 'error');
+                }
+            }
+        } catch (error) {
+            console.error('Network error:', error);
+            showToast('Errore di connessione', 'error');
+        } finally {
+            // Reset button state
+            deleteButton.disabled = false;
+            deleteButtonText.textContent = 'Elimina corso';
+            deleteSpinner.classList.add('hidden');
+            hideDeleteModal();
+        }
+    };
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cancel delete
+        document.getElementById('cancelDelete').addEventListener('click', hideDeleteModal);
+
+        // Confirm delete
+        document.getElementById('confirmDelete').addEventListener('click', deleteCourse);
+
+        // Close modal on background click
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideDeleteModal();
+            }
+        });
+
+        // ESC key to close modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                hideDeleteModal();
+            }
+        });
+    });
+</script>
 </x-app-layout>
