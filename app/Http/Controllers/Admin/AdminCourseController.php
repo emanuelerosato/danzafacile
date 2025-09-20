@@ -76,34 +76,12 @@ class AdminCourseController extends AdminBaseController
     /**
      * Store a newly created course in storage
      */
-    public function store(Request $request)
+    public function store(StoreCourseRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'level' => 'required|in:Principiante,Intermedio,Avanzato,Professionale,beginner,intermediate,advanced,professional,principiante,base,intermedio,avanzato,professionale',
-            'instructor_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('users', 'id')->where('school_id', $this->school->id)
-            ],
-            'max_students' => 'required|integer|min:1',
-            'price' => 'required|numeric|min:0',
-            'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after:start_date',
-            'schedule' => 'nullable|string|max:500',
-            'schedule_slots' => 'nullable|array',
-            'schedule_slots.*.day' => 'required_with:schedule_slots|string|in:Lunedì,Martedì,Mercoledì,Giovedì,Venerdì,Sabato,Domenica',
-            'schedule_slots.*.start_time' => 'required_with:schedule_slots|date_format:H:i',
-            'schedule_slots.*.end_time' => 'required_with:schedule_slots|date_format:H:i|after:schedule_slots.*.start_time',
-            'schedule_slots.*.location' => 'nullable|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'duration_weeks' => 'nullable|integer|min:1|max:52',
-            'active' => 'boolean'
-        ]);
+        $validated = $request->validated();
 
         // Validate instructor_id separately if provided
-        if ($validated['instructor_id']) {
+        if (!empty($validated['instructor_id'])) {
             $instructorExists = \App\Models\User::where('id', $validated['instructor_id'])
                 ->where('school_id', $this->school->id)
                 ->whereHas('staffRoles', function($q) {
@@ -121,13 +99,34 @@ class AdminCourseController extends AdminBaseController
 
         // Process schedule_slots if provided
         if (isset($validated['schedule_slots']) && is_array($validated['schedule_slots'])) {
-            // Filter out empty slots
+            // Filter out empty slots and ensure UTF-8 encoding
             $scheduleSlots = array_filter($validated['schedule_slots'], function($slot) {
                 return !empty($slot['day']) && !empty($slot['start_time']) && !empty($slot['end_time']);
             });
 
-            // Convert to JSON and store in schedule field
-            $validated['schedule'] = json_encode(array_values($scheduleSlots), JSON_UNESCAPED_UNICODE);
+            // Ensure proper UTF-8 encoding for day names
+            foreach ($scheduleSlots as &$slot) {
+                if (isset($slot['day'])) {
+                    $slot['day'] = mb_convert_encoding($slot['day'], 'UTF-8', 'auto');
+                    // Normalize common Italian day names
+                    $dayMappings = [
+                        'Lunedi' => 'Lunedì',
+                        'Martedi' => 'Martedì',
+                        'Mercoledi' => 'Mercoledì',
+                        'Giovedi' => 'Giovedì',
+                        'Venerdi' => 'Venerdì'
+                    ];
+                    if (isset($dayMappings[$slot['day']])) {
+                        $slot['day'] = $dayMappings[$slot['day']];
+                    }
+                }
+                if (isset($slot['location'])) {
+                    $slot['location'] = mb_convert_encoding($slot['location'], 'UTF-8', 'auto');
+                }
+            }
+
+            // Convert to JSON with proper UTF-8 handling
+            $validated['schedule'] = json_encode(array_values($scheduleSlots), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             unset($validated['schedule_slots']);
         }
 
@@ -211,7 +210,7 @@ class AdminCourseController extends AdminBaseController
     /**
      * Update the specified course in storage
      */
-    public function update(Request $request, Course $course)
+    public function update(UpdateCourseRequest $request, Course $course)
     {
 
         // Ensure course belongs to current school
@@ -219,45 +218,10 @@ class AdminCourseController extends AdminBaseController
             abort(404, 'Corso non trovato.');
         }
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => 'nullable|string|max:50',
-            'dance_type' => 'nullable|string|max:100',
-            'description' => 'nullable|string',
-            'short_description' => 'nullable|string|max:500',
-            'level' => 'required|in:Principiante,Intermedio,Avanzato,Professionale,beginner,intermediate,advanced,professional,principiante,base,intermedio,avanzato,professionale',
-            'min_age' => 'nullable|integer|min:1|max:100',
-            'max_age' => 'nullable|integer|min:1|max:100',
-            'status' => 'nullable|string',
-            'prerequisites' => 'nullable|string',
-            'equipment' => 'nullable|array',
-            'objectives' => 'nullable|array',
-            'notes' => 'nullable|string',
-            'instructor_id' => [
-                'nullable',
-                'integer',
-                Rule::exists('users', 'id')->where('school_id', $this->school->id)
-            ],
-            'max_students' => 'required|integer|min:1',
-            'monthly_price' => 'required|numeric|min:0',
-            'enrollment_fee' => 'nullable|numeric|min:0',
-            'single_lesson_price' => 'nullable|numeric|min:0',
-            'trial_price' => 'nullable|numeric|min:0',
-            'price_application' => 'nullable|string',
-            'price_effective_date' => 'required|date',
-            'schedule' => 'nullable|string|max:500',
-            'schedule_slots' => 'nullable|array',
-            'schedule_slots.*.day' => 'required_with:schedule_slots|string|in:Lunedì,Martedì,Mercoledì,Giovedì,Venerdì,Sabato,Domenica',
-            'schedule_slots.*.start_time' => 'required_with:schedule_slots|date_format:H:i',
-            'schedule_slots.*.end_time' => 'required_with:schedule_slots|date_format:H:i|after:schedule_slots.*.start_time',
-            'schedule_slots.*.location' => 'nullable|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'duration_weeks' => 'nullable|integer|min:1|max:52',
-            'active' => 'boolean'
-        ]);
+        $validated = $request->validated();
 
         // Validate instructor_id separately if provided
-        if ($validated['instructor_id']) {
+        if (!empty($validated['instructor_id'])) {
             $instructorExists = \App\Models\User::where('id', $validated['instructor_id'])
                 ->where('school_id', $this->school->id)
                 ->whereHas('staffRoles', function($q) {
@@ -272,13 +236,34 @@ class AdminCourseController extends AdminBaseController
 
         // Process schedule_slots if provided
         if (isset($validated['schedule_slots']) && is_array($validated['schedule_slots'])) {
-            // Filter out empty slots
+            // Filter out empty slots and ensure UTF-8 encoding
             $scheduleSlots = array_filter($validated['schedule_slots'], function($slot) {
                 return !empty($slot['day']) && !empty($slot['start_time']) && !empty($slot['end_time']);
             });
 
-            // Convert to JSON and store in schedule field
-            $validated['schedule'] = json_encode(array_values($scheduleSlots), JSON_UNESCAPED_UNICODE);
+            // Ensure proper UTF-8 encoding for day names
+            foreach ($scheduleSlots as &$slot) {
+                if (isset($slot['day'])) {
+                    $slot['day'] = mb_convert_encoding($slot['day'], 'UTF-8', 'auto');
+                    // Normalize common Italian day names
+                    $dayMappings = [
+                        'Lunedi' => 'Lunedì',
+                        'Martedi' => 'Martedì',
+                        'Mercoledi' => 'Mercoledì',
+                        'Giovedi' => 'Giovedì',
+                        'Venerdi' => 'Venerdì'
+                    ];
+                    if (isset($dayMappings[$slot['day']])) {
+                        $slot['day'] = $dayMappings[$slot['day']];
+                    }
+                }
+                if (isset($slot['location'])) {
+                    $slot['location'] = mb_convert_encoding($slot['location'], 'UTF-8', 'auto');
+                }
+            }
+
+            // Convert to JSON with proper UTF-8 handling
+            $validated['schedule'] = json_encode(array_values($scheduleSlots), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             unset($validated['schedule_slots']);
         }
 

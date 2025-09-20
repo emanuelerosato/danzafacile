@@ -361,12 +361,47 @@ class Course extends Model
         if ($scheduleData && is_array($scheduleData)) {
             foreach ($scheduleData as &$slot) {
                 if (isset($slot['day'])) {
-                    $slot['day'] = mb_convert_encoding($slot['day'], 'UTF-8', 'UTF-8');
-                    $slot['day'] = str_replace(
-                        ['LunedÃ¬', 'MartedÃ¬', 'MercoledÃ¬', 'GiovedÃ¬', 'VenerdÃ¬', 'SabatoÃ¬', 'DomenicaÃ¬'],
-                        ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'],
-                        $slot['day']
-                    );
+                    // Ensure UTF-8 encoding
+                    $slot['day'] = mb_convert_encoding($slot['day'], 'UTF-8', 'auto');
+
+                    // Fix common encoding issues with Italian accented characters
+                    $encodingFixes = [
+                        'LunedÃ¬' => 'Lunedì',
+                        'MartedÃ¬' => 'Martedì',
+                        'MercoledÃ¬' => 'Mercoledì',
+                        'GiovedÃ¬' => 'Giovedì',
+                        'VenerdÃ¬' => 'Venerdì',
+                        'SabatoÃ¬' => 'Sabato',
+                        'DomenicaÃ¬' => 'Domenica',
+                        // Additional variations
+                        'Luned%C3%AC' => 'Lunedì',
+                        'Marted%C3%AC' => 'Martedì',
+                        'Mercoled%C3%AC' => 'Mercoledì',
+                        'Gioved%C3%AC' => 'Giovedì',
+                        'Venerd%C3%AC' => 'Venerdì'
+                    ];
+
+                    foreach ($encodingFixes as $broken => $fixed) {
+                        $slot['day'] = str_replace($broken, $fixed, $slot['day']);
+                    }
+
+                    // Normalize day names (in case they come without accents)
+                    $dayNormalizations = [
+                        'Lunedi' => 'Lunedì',
+                        'Martedi' => 'Martedì',
+                        'Mercoledi' => 'Mercoledì',
+                        'Giovedi' => 'Giovedì',
+                        'Venerdi' => 'Venerdì'
+                    ];
+
+                    if (isset($dayNormalizations[$slot['day']])) {
+                        $slot['day'] = $dayNormalizations[$slot['day']];
+                    }
+                }
+
+                // Ensure UTF-8 encoding for location
+                if (isset($slot['location'])) {
+                    $slot['location'] = mb_convert_encoding($slot['location'], 'UTF-8', 'auto');
                 }
 
                 // Format time to HH:MM (remove seconds)

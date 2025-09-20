@@ -220,6 +220,28 @@
                                         </select>
                                     </div>
                                 </div>
+
+                                <!-- Date Fields -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Data Inizio *</label>
+                                        <input type="date" name="start_date" required
+                                               value="{{ old('start_date', $course->start_date ? $course->start_date->format('Y-m-d') : '') }}"
+                                               class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
+                                        @error('start_date')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Data Fine</label>
+                                        <input type="date" name="end_date"
+                                               value="{{ old('end_date', $course->end_date ? $course->end_date->format('Y-m-d') : '') }}"
+                                               class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
+                                        @error('end_date')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

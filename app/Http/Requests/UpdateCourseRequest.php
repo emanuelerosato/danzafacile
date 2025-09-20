@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Carbon\Carbon;
 
 class UpdateCourseRequest extends FormRequest
 {
@@ -21,22 +22,57 @@ class UpdateCourseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'school_id' => 'required|exists:schools,id',
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'instructor_id' => 'nullable|exists:users,id',
-            'max_students' => 'required|integer|min:1|max:100',
-            'price' => 'required|numeric|min:0',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
-            'schedule_days' => 'required|array|min:1',
-            'schedule_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
-            'start_time' => 'required|date_format:H:i',
-            'end_time' => 'required|date_format:H:i|after:start_time',
-            'level' => 'required|in:beginner,intermediate,advanced',
-            'active' => 'boolean',
-            'age_min' => 'nullable|integer|min:3|max:100',
-            'age_max' => 'nullable|integer|min:3|max:100|gte:age_min',
+            'code' => 'nullable|string|max:50',
+            'dance_type' => 'nullable|string|max:100',
+            'description' => 'nullable|string',
+            'short_description' => 'nullable|string|max:500',
+            'level' => 'required|in:Principiante,Intermedio,Avanzato,Professionale,beginner,intermediate,advanced,professional,principiante,base,intermedio,avanzato,professionale',
+            'min_age' => 'nullable|integer|min:1|max:100',
+            'max_age' => 'nullable|integer|min:1|max:100',
+            'status' => 'nullable|string',
+            'prerequisites' => 'nullable|string',
+            'equipment' => 'nullable|array',
+            'objectives' => 'nullable|array',
+            'notes' => 'nullable|string',
+            'instructor_id' => 'nullable|integer|exists:users,id',
+            'max_students' => 'required|integer|min:1',
+            'start_date' => [
+                'required',
+                'date',
+                function ($attribute, $value, $fail) {
+                    $course = $this->route('course');
+                    $startDate = \Carbon\Carbon::parse($value);
+
+                    // If this is a new course or the start date is being changed to a past date
+                    if (!$course || $startDate->isPast()) {
+                        // For existing courses, allow past start dates only if they haven't changed
+                        if ($course && $course->start_date && $course->start_date->format('Y-m-d') === $startDate->format('Y-m-d')) {
+                            return; // Allow keeping the same past start date
+                        }
+
+                        // For new start dates, they must be today or in the future
+                        if ($startDate->isPast()) {
+                            $fail('La data di inizio non può essere impostata nel passato.');
+                        }
+                    }
+                }
+            ],
+            'end_date' => 'nullable|date|after:start_date',
+            'monthly_price' => 'required|numeric|min:0',
+            'enrollment_fee' => 'nullable|numeric|min:0',
+            'single_lesson_price' => 'nullable|numeric|min:0',
+            'trial_price' => 'nullable|numeric|min:0',
+            'price_application' => 'nullable|string',
+            'schedule' => 'nullable|string|max:500',
+            'schedule_slots' => 'nullable|array',
+            'schedule_slots.*.day' => 'required_with:schedule_slots|string|in:Lunedì,Martedì,Mercoledì,Giovedì,Venerdì,Sabato,Domenica',
+            'schedule_slots.*.start_time' => 'required_with:schedule_slots|date_format:H:i',
+            'schedule_slots.*.end_time' => 'required_with:schedule_slots|date_format:H:i|after:schedule_slots.*.start_time',
+            'schedule_slots.*.location' => 'nullable|string|max:255',
+            'location' => 'nullable|string|max:255',
+            'duration_weeks' => 'nullable|integer|min:1|max:52',
+            'active' => 'boolean'
         ];
     }
 
@@ -62,6 +98,9 @@ class UpdateCourseRequest extends FormRequest
             'end_time.after' => 'L\'orario di fine deve essere successivo all\'orario di inizio.',
             'level.required' => 'Il livello è obbligatorio.',
             'age_max.gte' => 'L\'età massima deve essere maggiore o uguale all\'età minima.',
+            'start_date.required' => 'La data di inizio è obbligatoria.',
+            'start_date.after_or_equal' => 'La data di inizio non può essere nel passato.',
+            'end_date.after' => 'La data di fine deve essere successiva alla data di inizio.',
         ];
     }
 }
