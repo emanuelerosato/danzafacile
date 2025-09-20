@@ -27,7 +27,7 @@ class UpdateCourseRequest extends FormRequest
             'dance_type' => 'nullable|string|max:100',
             'description' => 'nullable|string',
             'short_description' => 'nullable|string|max:500',
-            'level' => 'required|in:Principiante,Intermedio,Avanzato,Professionale,beginner,intermediate,advanced,professional,principiante,base,intermedio,avanzato,professionale',
+            'level' => 'required|in:beginner,intermediate,advanced,professional',
             'min_age' => 'nullable|integer|min:1|max:100',
             'max_age' => 'nullable|integer|min:1|max:100',
             'status' => 'nullable|string',
@@ -37,8 +37,9 @@ class UpdateCourseRequest extends FormRequest
             'notes' => 'nullable|string',
             'instructor_id' => 'nullable|integer|exists:users,id',
             'max_students' => 'required|integer|min:1',
+            'price' => 'nullable|numeric|min:0',
             'start_date' => [
-                'required',
+                'nullable',
                 'date',
                 function ($attribute, $value, $fail) {
                     $course = $this->route('course');
@@ -64,6 +65,7 @@ class UpdateCourseRequest extends FormRequest
             'single_lesson_price' => 'nullable|numeric|min:0',
             'trial_price' => 'nullable|numeric|min:0',
             'price_application' => 'nullable|string',
+            'price_effective_date' => 'nullable|date',
             'schedule' => 'nullable|string|max:500',
             'schedule_slots' => [
                 'nullable',
@@ -82,9 +84,9 @@ class UpdateCourseRequest extends FormRequest
                     $this->validateScheduleConflicts($value, $course, $instructorId, $startDate, $endDate, $fail);
                 }
             ],
-            'schedule_slots.*.day' => 'required_with:schedule_slots|string|in:Lunedì,Martedì,Mercoledì,Giovedì,Venerdì,Sabato,Domenica',
-            'schedule_slots.*.start_time' => 'required_with:schedule_slots|date_format:H:i',
-            'schedule_slots.*.end_time' => 'required_with:schedule_slots|date_format:H:i|after:schedule_slots.*.start_time',
+            'schedule_slots.*.day' => 'nullable|string|in:Lunedì,Martedì,Mercoledì,Giovedì,Venerdì,Sabato,Domenica',
+            'schedule_slots.*.start_time' => 'nullable|date_format:H:i',
+            'schedule_slots.*.end_time' => 'nullable|date_format:H:i|after:schedule_slots.*.start_time',
             'schedule_slots.*.location' => 'nullable|string|max:255',
             'location' => 'nullable|string|max:255',
             'duration_weeks' => 'nullable|integer|min:1|max:52',

@@ -212,13 +212,21 @@ class AdminCourseController extends AdminBaseController
      */
     public function update(UpdateCourseRequest $request, Course $course)
     {
+        \Log::info('🔥 NEW LOGGING: UPDATE METHOD CALLED', ['course_id' => $course->id, 'timestamp' => now()->toISOString()]);
 
         // Ensure course belongs to current school
         if ($course->school_id !== $this->school->id) {
             abort(404, 'Corso non trovato.');
         }
 
-        $validated = $request->validated();
+        \Log::info('UPDATE - About to validate request');
+        try {
+            $validated = $request->validated();
+            \Log::info('UPDATE - Validation passed, validated data:', ['validated' => $validated]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('UPDATE - Validation failed:', ['errors' => $e->errors()]);
+            throw $e;
+        }
 
         // Validate instructor_id separately if provided
         if (!empty($validated['instructor_id'])) {
@@ -272,7 +280,9 @@ class AdminCourseController extends AdminBaseController
             unset($validated['instructor_id']);
         }
 
+        \Log::info('UPDATE - About to update course with validated data');
         $course->update($validated);
+        \Log::info('UPDATE - Course updated successfully', ['course_id' => $course->id]);
         $this->clearSchoolCache();
 
         if ($request->ajax()) {
@@ -635,5 +645,85 @@ class AdminCourseController extends AdminBaseController
         $filename = 'corsi_' . str_replace(' ', '_', $this->school->name) . '_' . now()->format('Y-m-d') . '.csv';
 
         return $this->exportToCsv($data, $headers, $filename);
+    }
+
+    /**
+     * Add a student to a course
+     */
+    public function addStudent(Request $request, Course $course)
+    {
+        \Log::info('🔥 ADD STUDENT: Method called', [
+            'course_id' => $course->id,
+            'request_data' => $request->all(),
+            'timestamp' => now()->toISOString()
+        ]);
+
+        // Verify the course belongs to the admin's school
+        if ($course->school_id !== $this->school->id) {
+            abort(403, 'Non hai i permessi per gestire questo corso.');
+        }
+
+        try {
+            $validatedData = $request->validate([
+                'user_id' => 'required|exists:users,id',
+                'status' => 'required|in:pending,active,cancelled,completed',
+                'payment_status' => 'required|in:pending,paid,refunded',
+                'notes' => 'nullable|string|max:1000'
+            ]);
+            \Log::info('🔥 ADD STUDENT: Validation passed', ['validated' => $validatedData]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('🔥 ADD STUDENT: Validation failed', ['errors' => $e->errors()]);
+            throw $e;
+        }
+
+        // Check if user is already enrolled
+        $existingEnrollment = CourseEnrollment::where('course_id', $course->id)
+            ->where('user_id', $request->user_id)
+            ->first();
+
+        if ($existingEnrollment) {
+            return redirect()->back()->withErrors(['user_id' => 'Lo studente è già iscritto a questo corso.']);
+        }
+
+        // Create enrollment
+        $enrollment = CourseEnrollment::create([
+            'course_id' => $course->id,
+            'user_id' => $request->user_id,
+            'enrollment_date' => now(),
+            'status' => $request->status,
+            'payment_status' => $request->payment_status,
+            'notes' => $request->notes
+        ]);
+
+        \Log::info('🔥 ADD STUDENT: Enrollment created', [
+            'enrollment_id' => $enrollment->id,
+            'status' => $enrollment->status,
+            'payment_status' => $enrollment->payment_status
+        ]);
+
+        return redirect()->back()->with('success', 'Studente aggiunto al corso con successo.');
+    }
+
+    /**
+     * Remove a student from a course
+     */
+    public function removeStudent(Course $course, User $user)
+    {
+        // Verify the course belongs to the admin's school
+        if ($course->school_id !== $this->school->id) {
+            abort(403, 'Non hai i permessi per gestire questo corso.');
+        }
+
+        $enrollment = CourseEnrollment::where('course_id', $course->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$enrollment) {
+            return redirect()->back()->withErrors(['error' => 'Lo studente non è iscritto a questo corso.']);
+        }
+
+        $enrollment->delete();
+
+        return redirect()->back()->with('success', 'Studente rimosso dal corso con successo.');
     }
 }

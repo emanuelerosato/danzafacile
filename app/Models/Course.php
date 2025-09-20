@@ -19,6 +19,7 @@ class Course extends Model
     const LEVEL_BEGINNER = 'beginner';
     const LEVEL_INTERMEDIATE = 'intermediate';
     const LEVEL_ADVANCED = 'advanced';
+    const LEVEL_PROFESSIONAL = 'professional';
 
     /**
      * The attributes that are mass assignable.
@@ -28,18 +29,33 @@ class Course extends Model
     protected $fillable = [
         'school_id',
         'name',
+        'code',
         'description',
+        'short_description',
+        'dance_type',
         'level',
         'difficulty_level',
+        'min_age',
+        'max_age',
+        'prerequisites',
+        'equipment',
+        'objectives',
+        'notes',
         'duration_weeks',
         'max_students',
         'price',
+        'monthly_price',
+        'enrollment_fee',
+        'single_lesson_price',
+        'trial_price',
+        'price_application',
         'start_date',
         'end_date',
         'schedule',
         'location',
         'instructor_id',
         'active',
+        'status',
     ];
 
     /**
@@ -51,11 +67,20 @@ class Course extends Model
     {
         return [
             'schedule' => 'array',
+            'equipment' => 'array',
+            'objectives' => 'array',
             'start_date' => 'date',
             'end_date' => 'date',
             'price' => 'decimal:2',
+            'monthly_price' => 'decimal:2',
+            'enrollment_fee' => 'decimal:2',
+            'single_lesson_price' => 'decimal:2',
+            'trial_price' => 'decimal:2',
             'active' => 'boolean',
             'max_students' => 'integer',
+            'min_age' => 'integer',
+            'max_age' => 'integer',
+            'duration_weeks' => 'integer',
         ];
     }
 
@@ -220,7 +245,7 @@ class Course extends Model
     public function getRemaininingSpotsAttribute(): int
     {
         $enrolledStudents = $this->courseEnrollments()
-                                 ->where('status', 'attiva')
+                                 ->where('status', 'active')
                                  ->count();
 
         return max(0, $this->max_students - $enrolledStudents);
@@ -269,13 +294,24 @@ class Course extends Model
      */
     public function setLevelAttribute($value): void
     {
-        $allowedLevels = [
-            self::LEVEL_BEGINNER,
-            self::LEVEL_INTERMEDIATE,
-            self::LEVEL_ADVANCED
+        // Mapping da italiano a inglese
+        $levelMapping = [
+            'principiante' => self::LEVEL_BEGINNER,
+            'intermedio' => self::LEVEL_INTERMEDIATE,
+            'avanzato' => self::LEVEL_ADVANCED,
+            'professionale' => self::LEVEL_PROFESSIONAL,
+            'Principiante' => self::LEVEL_BEGINNER,
+            'Intermedio' => self::LEVEL_INTERMEDIATE,
+            'Avanzato' => self::LEVEL_ADVANCED,
+            'Professionale' => self::LEVEL_PROFESSIONAL,
+            // Valori inglesi (già corretti)
+            self::LEVEL_BEGINNER => self::LEVEL_BEGINNER,
+            self::LEVEL_INTERMEDIATE => self::LEVEL_INTERMEDIATE,
+            self::LEVEL_ADVANCED => self::LEVEL_ADVANCED,
+            self::LEVEL_PROFESSIONAL => self::LEVEL_PROFESSIONAL,
         ];
-        
-        $this->attributes['level'] = in_array($value, $allowedLevels) ? $value : self::LEVEL_BEGINNER;
+
+        $this->attributes['level'] = $levelMapping[$value] ?? self::LEVEL_BEGINNER;
     }
 
     /**
@@ -315,7 +351,7 @@ class Course extends Model
     public function getEnrolledStudentsCount(): int
     {
         return $this->courseEnrollments()
-                    ->where('status', 'attiva')
+                    ->where('status', 'active')
                     ->count();
     }
 
@@ -326,7 +362,7 @@ class Course extends Model
     {
         return $this->courseEnrollments()
                     ->where('user_id', $user->id)
-                    ->where('status', 'attiva')
+                    ->where('status', 'active')
                     ->exists();
     }
 

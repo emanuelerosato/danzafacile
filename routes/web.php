@@ -120,6 +120,10 @@ Route::middleware('auth')->group(function () {
         Route::post('courses/bulk-action', [AdminCourseController::class, 'bulkAction'])->name('courses.bulk-action');
         Route::get('courses-export', [AdminCourseController::class, 'export'])->name('courses.export');
 
+        // Course Students management
+        Route::post('courses/{course}/students', [AdminCourseController::class, 'addStudent'])->name('courses.students.store');
+        Route::delete('courses/{course}/students/{user}', [AdminCourseController::class, 'removeStudent'])->name('courses.students.destroy');
+
         // Events management
         Route::resource('events', AdminEventController::class);
         Route::patch('events/{event}/toggle-active', [AdminEventController::class, 'toggleActive'])->name('events.toggle-active');
