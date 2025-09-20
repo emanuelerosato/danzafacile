@@ -173,11 +173,11 @@
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Livello *</label>
                                         <select name="level" class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
                                             <option value="">Seleziona livello</option>
-                                            <option value="principiante" {{ old('level', $course->level ?? '') === 'principiante' ? 'selected' : '' }}>Principiante</option>
+                                            <option value="principiante" {{ old('level', $course->level ?? '') === 'principiante' || old('level', $course->level ?? '') === 'beginner' ? 'selected' : '' }}>Principiante</option>
                                             <option value="base" {{ old('level', $course->level ?? '') === 'base' ? 'selected' : '' }}>Base</option>
-                                            <option value="intermedio" {{ old('level', $course->level ?? '') === 'intermedio' ? 'selected' : '' }}>Intermedio</option>
-                                            <option value="avanzato" {{ old('level', $course->level ?? '') === 'avanzato' ? 'selected' : '' }}>Avanzato</option>
-                                            <option value="professionale" {{ old('level', $course->level ?? '') === 'professionale' ? 'selected' : '' }}>Professionale</option>
+                                            <option value="intermedio" {{ old('level', $course->level ?? '') === 'intermedio' || old('level', $course->level ?? '') === 'intermediate' ? 'selected' : '' }}>Intermedio</option>
+                                            <option value="avanzato" {{ old('level', $course->level ?? '') === 'avanzato' || old('level', $course->level ?? '') === 'advanced' ? 'selected' : '' }}>Avanzato</option>
+                                            <option value="professionale" {{ old('level', $course->level ?? '') === 'professionale' || old('level', $course->level ?? '') === 'professional' ? 'selected' : '' }}>Professionale</option>
                                         </select>
                                     </div>
                                     <div>
@@ -454,15 +454,107 @@
 
                             <!-- Schedule Modification Form -->
                             <div class="space-y-6">
-                                <h3 class="text-lg font-semibold text-gray-900">Modifica Orari</h3>
-                                
-                                <div class="space-y-4">
-                                    <div class="bg-gray-50 rounded-lg p-4">
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Orario del Corso (JSON)</label>
-                                        <textarea name="schedule" rows="6"
-                                                  class="w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 font-mono text-sm"
-                                                  placeholder='Esempio: [{"day":"Lunedì","start_time":"19:00","end_time":"20:30","location":"Sala A"}]'>{{ old('schedule', $course->schedule ? json_encode($course->schedule, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) : '') }}</textarea>
-                                        <p class="mt-1 text-xs text-gray-500">Modifica l'orario in formato JSON. Ogni slot deve contenere: day, start_time, end_time, location</p>
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-lg font-semibold text-gray-900">Modifica Orari</h3>
+                                    <button type="button" onclick="addScheduleSlot()"
+                                            class="px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 text-sm font-medium">
+                                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                        </svg>
+                                        Aggiungi Orario
+                                    </button>
+                                </div>
+
+                                <div id="schedule-container" class="space-y-4">
+                                    @php
+                                        $scheduleData = old('schedule_slots', $course->schedule_data ?? []);
+                                        if (empty($scheduleData)) {
+                                            $scheduleData = [['day' => '', 'start_time' => '', 'end_time' => '', 'location' => '']];
+                                        }
+                                    @endphp
+
+
+                                    @foreach($scheduleData as $index => $slot)
+                                        <div class="schedule-slot bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                            <div class="flex items-center justify-between mb-3">
+                                                <h4 class="font-medium text-gray-900">Orario {{ $index + 1 }}</h4>
+                                                @if($index > 0)
+                                                    <button type="button" onclick="removeScheduleSlot(this)"
+                                                            class="text-red-600 hover:text-red-800 text-sm">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        </svg>
+                                                        Rimuovi
+                                                    </button>
+                                                @endif
+                                            </div>
+
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-600 mb-1">Giorno della settimana *</label>
+                                                    <select name="schedule_slots[{{ $index }}][day]" required
+                                                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
+                                                        <option value="">Seleziona giorno</option>
+                                                        <option value="Lunedì" {{ ($slot['day'] ?? '') === 'Lunedì' ? 'selected' : '' }}>Lunedì</option>
+                                                        <option value="Martedì" {{ ($slot['day'] ?? '') === 'Martedì' ? 'selected' : '' }}>Martedì</option>
+                                                        <option value="Mercoledì" {{ ($slot['day'] ?? '') === 'Mercoledì' ? 'selected' : '' }}>Mercoledì</option>
+                                                        <option value="Giovedì" {{ ($slot['day'] ?? '') === 'Giovedì' ? 'selected' : '' }}>Giovedì</option>
+                                                        <option value="Venerdì" {{ ($slot['day'] ?? '') === 'Venerdì' ? 'selected' : '' }}>Venerdì</option>
+                                                        <option value="Sabato" {{ ($slot['day'] ?? '') === 'Sabato' ? 'selected' : '' }}>Sabato</option>
+                                                        <option value="Domenica" {{ ($slot['day'] ?? '') === 'Domenica' ? 'selected' : '' }}>Domenica</option>
+                                                    </select>
+                                                </div>
+
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-600 mb-1">Sala/Ubicazione</label>
+                                                    <select name="schedule_slots[{{ $index }}][location]"
+                                                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
+                                                        <option value="">Seleziona sala</option>
+                                                        <option value="Sala A" {{ ($slot['location'] ?? '') === 'Sala A' ? 'selected' : '' }}>Sala A</option>
+                                                        <option value="Sala B" {{ ($slot['location'] ?? '') === 'Sala B' ? 'selected' : '' }}>Sala B</option>
+                                                        <option value="Sala C" {{ ($slot['location'] ?? '') === 'Sala C' ? 'selected' : '' }}>Sala C</option>
+                                                        <option value="Sala Principale" {{ ($slot['location'] ?? '') === 'Sala Principale' ? 'selected' : '' }}>Sala Principale</option>
+                                                        <option value="Studio 1" {{ ($slot['location'] ?? '') === 'Studio 1' ? 'selected' : '' }}>Studio 1</option>
+                                                        <option value="Studio 2" {{ ($slot['location'] ?? '') === 'Studio 2' ? 'selected' : '' }}>Studio 2</option>
+                                                        <option value="Palestra" {{ ($slot['location'] ?? '') === 'Palestra' ? 'selected' : '' }}>Palestra</option>
+                                                        <option value="Aula Magna" {{ ($slot['location'] ?? '') === 'Aula Magna' ? 'selected' : '' }}>Aula Magna</option>
+                                                        <option value="Altro" {{ ($slot['location'] ?? '') === 'Altro' ? 'selected' : '' }}>Altro</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-600 mb-1">Orario Inizio *</label>
+                                                    <input type="time" name="schedule_slots[{{ $index }}][start_time]"
+                                                           value="{{ isset($slot['start_time']) ? substr($slot['start_time'], 0, 5) : '' }}" required
+                                                           class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-600 mb-1">Orario Fine *</label>
+                                                    <input type="time" name="schedule_slots[{{ $index }}][end_time]"
+                                                           value="{{ isset($slot['end_time']) ? substr($slot['end_time'], 0, 5) : '' }}" required
+                                                           class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
+                                                </div>
+                                            </div>
+
+                                            <div class="mt-3 text-xs text-gray-500">
+                                                <span class="font-medium">Durata: </span>
+                                                <span class="duration-display">Seleziona orari per calcolare la durata</span>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        <div>
+                                            <p class="text-sm text-blue-800 font-medium">Suggerimento</p>
+                                            <p class="text-xs text-blue-700">Puoi aggiungere più orari per lo stesso corso se si svolge in giorni diversi della settimana.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -722,5 +814,186 @@ function addObjectiveField() {
     newField.placeholder = 'Inserisci obiettivo del corso';
     container.insertBefore(newField, event.target);
 }
+
+// Schedule management functions
+let scheduleSlotIndex = {{ count($scheduleData ?? []) }};
+
+function addScheduleSlot() {
+    const container = document.getElementById('schedule-container');
+    const slotHtml = `
+        <div class="schedule-slot bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <div class="flex items-center justify-between mb-3">
+                <h4 class="font-medium text-gray-900">Orario ${scheduleSlotIndex + 1}</h4>
+                <button type="button" onclick="removeScheduleSlot(this)"
+                        class="text-red-600 hover:text-red-800 text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Rimuovi
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Giorno della settimana *</label>
+                    <select name="schedule_slots[${scheduleSlotIndex}][day]" required onchange="updateSlotNumbers()"
+                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
+                        <option value="">Seleziona giorno</option>
+                        <option value="Lunedì">Lunedì</option>
+                        <option value="Martedì">Martedì</option>
+                        <option value="Mercoledì">Mercoledì</option>
+                        <option value="Giovedì">Giovedì</option>
+                        <option value="Venerdì">Venerdì</option>
+                        <option value="Sabato">Sabato</option>
+                        <option value="Domenica">Domenica</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Sala/Ubicazione</label>
+                    <select name="schedule_slots[${scheduleSlotIndex}][location]"
+                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
+                        <option value="">Seleziona sala</option>
+                        <option value="Sala A">Sala A</option>
+                        <option value="Sala B">Sala B</option>
+                        <option value="Sala C">Sala C</option>
+                        <option value="Sala Principale">Sala Principale</option>
+                        <option value="Studio 1">Studio 1</option>
+                        <option value="Studio 2">Studio 2</option>
+                        <option value="Palestra">Palestra</option>
+                        <option value="Aula Magna">Aula Magna</option>
+                        <option value="Altro">Altro</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Orario Inizio *</label>
+                    <input type="time" name="schedule_slots[${scheduleSlotIndex}][start_time]" required
+                           onchange="calculateDuration(this)"
+                           class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Orario Fine *</label>
+                    <input type="time" name="schedule_slots[${scheduleSlotIndex}][end_time]" required
+                           onchange="calculateDuration(this)"
+                           class="w-full text-sm border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
+                </div>
+            </div>
+
+            <div class="mt-3 text-xs text-gray-500">
+                <span class="font-medium">Durata: </span>
+                <span class="duration-display">Seleziona orari per calcolare la durata</span>
+            </div>
+        </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', slotHtml);
+    scheduleSlotIndex++;
+    updateSlotNumbers();
+}
+
+function removeScheduleSlot(button) {
+    const slot = button.closest('.schedule-slot');
+    slot.remove();
+    updateSlotNumbers();
+}
+
+function updateSlotNumbers() {
+    const slots = document.querySelectorAll('.schedule-slot');
+    slots.forEach((slot, index) => {
+        const title = slot.querySelector('h4');
+        const daySelect = slot.querySelector('select[name*="[day]"]');
+        const selectedDay = daySelect.value;
+
+        if (selectedDay) {
+            title.textContent = `${selectedDay} - Orario ${index + 1}`;
+        } else {
+            title.textContent = `Orario ${index + 1}`;
+        }
+
+        // Update field names
+        const inputs = slot.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            const nameAttr = input.getAttribute('name');
+            if (nameAttr && nameAttr.includes('schedule_slots[')) {
+                const newName = nameAttr.replace(/schedule_slots\[\d+\]/, `schedule_slots[${index}]`);
+                input.setAttribute('name', newName);
+            }
+        });
+    });
+}
+
+function calculateDuration(input) {
+    const slot = input.closest('.schedule-slot');
+    const startTime = slot.querySelector('input[name*="[start_time]"]').value;
+    const endTime = slot.querySelector('input[name*="[end_time]"]').value;
+    const durationDisplay = slot.querySelector('.duration-display');
+
+    if (startTime && endTime) {
+        const start = new Date(`2000-01-01T${startTime}:00`);
+        const end = new Date(`2000-01-01T${endTime}:00`);
+
+        if (end > start) {
+            const diff = end - start;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+            let durationText = '';
+            if (hours > 0) {
+                durationText += `${hours}h `;
+            }
+            if (minutes > 0) {
+                durationText += `${minutes}min`;
+            }
+
+            durationDisplay.textContent = durationText || '0min';
+            durationDisplay.className = 'duration-display text-green-600 font-medium';
+        } else {
+            durationDisplay.textContent = 'Orario fine deve essere dopo orario inizio';
+            durationDisplay.className = 'duration-display text-red-600';
+        }
+    } else {
+        durationDisplay.textContent = 'Seleziona orari per calcolare la durata';
+        durationDisplay.className = 'duration-display';
+    }
+}
+
+// Initialize duration calculation for existing slots
+document.addEventListener('DOMContentLoaded', function() {
+    const timeInputs = document.querySelectorAll('input[type="time"]');
+    timeInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            calculateDuration(this);
+        });
+        // Calculate on page load
+        calculateDuration(input);
+    });
+
+    const daySelects = document.querySelectorAll('select[name*="[day]"]');
+    daySelects.forEach(select => {
+        select.addEventListener('change', function() {
+            updateSlotNumbers();
+        });
+    });
+
+    updateSlotNumbers();
+
+    // Debug form submission
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log('Form is submitting...');
+            const formData = new FormData(form);
+            console.log('Form data:');
+            for (let [key, value] of formData.entries()) {
+                if (key.includes('schedule_slots')) {
+                    console.log(key, '=', value);
+                }
+            }
+        });
+    }
+});
 </script>
 </x-app-layout>

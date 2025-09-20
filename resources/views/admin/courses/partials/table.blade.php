@@ -123,8 +123,16 @@
                                     <span class="text-gray-600">{{ $course->end_date->format('d/m/Y') }}</span>
                                 </div>
                             @endif
-                            @if($course->schedule)
-                                <div class="text-xs text-gray-500">{{ $course->schedule }}</div>
+                            @if($course->schedule_data && is_array($course->schedule_data) && count($course->schedule_data) > 0)
+                                <div class="text-xs text-gray-500">
+                                    @foreach($course->schedule_data as $index => $slot)
+                                        <div>{{ $slot['day'] ?? 'N/A' }}: {{ $slot['start_time'] ?? 'N/A' }} - {{ $slot['end_time'] ?? 'N/A' }}</div>
+                                        @if($index >= 1) @break @endif
+                                    @endforeach
+                                    @if(count($course->schedule_data) > 2)
+                                        <div class="text-gray-400">+{{ count($course->schedule_data) - 2 }} altri...</div>
+                                    @endif
+                                </div>
                             @endif
                         </div>
                     </td>

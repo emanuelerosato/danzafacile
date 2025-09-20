@@ -103,11 +103,20 @@
                     <h3 class="text-lg font-semibold text-gray-900">Dettagli Orario</h3>
                 </div>
                 <div class="p-6">
-                    @if($course->schedule && count($scheduleData) > 0)
+                    @if($course->schedule_data && is_array($course->schedule_data) && count($course->schedule_data) > 0)
                     <div class="space-y-4">
                         <div>
                             <dt class="text-sm font-medium text-gray-500 mb-2">Orario Completo</dt>
-                            <dd class="text-lg font-medium text-gray-900">{{ $course->schedule }}</dd>
+                            <dd class="text-lg font-medium text-gray-900">
+                                @foreach($course->schedule_data as $index => $slot)
+                                    <div class="mb-2">
+                                        {{ $slot['day'] ?? 'N/A' }}: {{ $slot['start_time'] ?? 'N/A' }} - {{ $slot['end_time'] ?? 'N/A' }}
+                                        @if(isset($slot['location']))
+                                            ({{ $slot['location'] }})
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </dd>
                         </div>
 
                         <div>

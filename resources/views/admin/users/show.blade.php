@@ -203,13 +203,23 @@
                                 </div>
                             </div>
                             
-                            @if($enrollment->course->schedule)
+                            @if($enrollment->course->schedule_data && is_array($enrollment->course->schedule_data) && count($enrollment->course->schedule_data) > 0)
                                 <div class="mt-3 pt-3 border-t border-gray-100">
-                                    <div class="flex items-center text-sm text-gray-600">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                        </svg>
-                                        {{ $enrollment->course->schedule }}
+                                    <div class="text-sm text-gray-600">
+                                        <div class="flex items-center mb-2">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                            <span class="font-medium">Orari:</span>
+                                        </div>
+                                        @foreach($enrollment->course->schedule_data as $slot)
+                                            <div class="ml-6 text-xs">
+                                                {{ $slot['day'] ?? 'N/A' }}: {{ $slot['start_time'] ?? 'N/A' }} - {{ $slot['end_time'] ?? 'N/A' }}
+                                                @if(isset($slot['location']))
+                                                    ({{ $slot['location'] }})
+                                                @endif
+                                            </div>
+                                        @endforeach
                                     </div>
                                 </div>
                             @endif

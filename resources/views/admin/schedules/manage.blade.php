@@ -71,7 +71,21 @@
                             <div class="text-sm text-gray-900">{{ $course->instructor?->name ?? 'Non assegnato' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">{{ $course->schedule ?: 'Non impostato' }}</div>
+                            <div class="text-sm text-gray-900">
+                                @if($course->schedule_data && is_array($course->schedule_data) && count($course->schedule_data) > 0)
+                                    @foreach($course->schedule_data as $index => $slot)
+                                        <div class="text-xs mb-1">
+                                            {{ $slot['day'] ?? 'N/A' }}: {{ $slot['start_time'] ?? 'N/A' }} - {{ $slot['end_time'] ?? 'N/A' }}
+                                        </div>
+                                        @if($index >= 1) @break @endif
+                                    @endforeach
+                                    @if(count($course->schedule_data) > 2)
+                                        <div class="text-xs text-gray-500">+{{ count($course->schedule_data) - 2 }} altri...</div>
+                                    @endif
+                                @else
+                                    Non impostato
+                                @endif
+                            </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ $course->location ?: 'Non assegnata' }}</div>

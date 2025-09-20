@@ -234,17 +234,98 @@
                     @enderror
                 </div>
 
-                <div>
-                    <label for="schedule" class="block text-sm font-medium text-gray-700 mb-2">
-                        Programma/Orari
-                    </label>
-                    <input type="text" name="schedule" id="schedule"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                           placeholder="Es. Lun-Mer-Ven 18:00-19:30"
-                           value="{{ old('schedule') }}">
-                    @error('schedule')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
+                <!-- Schedule Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-sm font-medium text-gray-700">
+                            Orari delle Lezioni
+                        </label>
+                        <button type="button" onclick="addScheduleSlotCreate()"
+                                class="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+                            <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                            </svg>
+                            Aggiungi Orario
+                        </button>
+                    </div>
+
+                    <div id="schedule-container-create" class="space-y-3">
+                        <!-- Default slot -->
+                        <div class="schedule-slot bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-medium text-gray-900">Orario 1</h4>
+                                <button type="button" onclick="removeScheduleSlotCreate(this)" class="text-red-600 hover:text-red-800 text-sm" style="display: none;">
+                                    Rimuovi
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Giorno della settimana *</label>
+                                    <select name="schedule_slots[0][day]" required onchange="updateSlotNumbersCreate()"
+                                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="">Seleziona giorno</option>
+                                        <option value="Lunedì">Lunedì</option>
+                                        <option value="Martedì">Martedì</option>
+                                        <option value="Mercoledì">Mercoledì</option>
+                                        <option value="Giovedì">Giovedì</option>
+                                        <option value="Venerdì">Venerdì</option>
+                                        <option value="Sabato">Sabato</option>
+                                        <option value="Domenica">Domenica</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Sala/Ubicazione</label>
+                                    <select name="schedule_slots[0][location]"
+                                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                        <option value="">Seleziona sala</option>
+                                        <option value="Sala A">Sala A</option>
+                                        <option value="Sala B">Sala B</option>
+                                        <option value="Sala C">Sala C</option>
+                                        <option value="Sala Principale">Sala Principale</option>
+                                        <option value="Studio 1">Studio 1</option>
+                                        <option value="Studio 2">Studio 2</option>
+                                        <option value="Palestra">Palestra</option>
+                                        <option value="Aula Magna">Aula Magna</option>
+                                        <option value="Altro">Altro</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4 mt-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Orario Inizio *</label>
+                                    <input type="time" name="schedule_slots[0][start_time]" required
+                                           onchange="calculateDurationCreate(this)"
+                                           class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Orario Fine *</label>
+                                    <input type="time" name="schedule_slots[0][end_time]" required
+                                           onchange="calculateDurationCreate(this)"
+                                           class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                </div>
+                            </div>
+
+                            <div class="mt-3 text-xs text-gray-500">
+                                <span class="font-medium">Durata: </span>
+                                <span class="duration-display">Seleziona orari per calcolare la durata</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <div>
+                                <p class="text-sm text-blue-800 font-medium">Suggerimento</p>
+                                <p class="text-xs text-blue-700">Puoi aggiungere più orari per lo stesso corso se si svolge in giorni diversi della settimana.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -272,6 +353,154 @@
 document.addEventListener('DOMContentLoaded', function() {
     FormValidator.init('#courseForm');
 });
+
+// Schedule management functions for create page
+let scheduleSlotIndexCreate = 1;
+
+function addScheduleSlotCreate() {
+    const container = document.getElementById('schedule-container-create');
+    const slotHtml = `
+        <div class="schedule-slot bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <div class="flex items-center justify-between mb-3">
+                <h4 class="font-medium text-gray-900">Orario ${scheduleSlotIndexCreate + 1}</h4>
+                <button type="button" onclick="removeScheduleSlotCreate(this)"
+                        class="text-red-600 hover:text-red-800 text-sm">
+                    Rimuovi
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Giorno della settimana *</label>
+                    <select name="schedule_slots[${scheduleSlotIndexCreate}][day]" required onchange="updateSlotNumbersCreate()"
+                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Seleziona giorno</option>
+                        <option value="Lunedì">Lunedì</option>
+                        <option value="Martedì">Martedì</option>
+                        <option value="Mercoledì">Mercoledì</option>
+                        <option value="Giovedì">Giovedì</option>
+                        <option value="Venerdì">Venerdì</option>
+                        <option value="Sabato">Sabato</option>
+                        <option value="Domenica">Domenica</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Sala/Ubicazione</label>
+                    <select name="schedule_slots[${scheduleSlotIndexCreate}][location]"
+                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Seleziona sala</option>
+                        <option value="Sala A">Sala A</option>
+                        <option value="Sala B">Sala B</option>
+                        <option value="Sala C">Sala C</option>
+                        <option value="Sala Principale">Sala Principale</option>
+                        <option value="Studio 1">Studio 1</option>
+                        <option value="Studio 2">Studio 2</option>
+                        <option value="Palestra">Palestra</option>
+                        <option value="Aula Magna">Aula Magna</option>
+                        <option value="Altro">Altro</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Orario Inizio *</label>
+                    <input type="time" name="schedule_slots[${scheduleSlotIndexCreate}][start_time]" required
+                           onchange="calculateDurationCreate(this)"
+                           class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 mb-1">Orario Fine *</label>
+                    <input type="time" name="schedule_slots[${scheduleSlotIndexCreate}][end_time]" required
+                           onchange="calculateDurationCreate(this)"
+                           class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+
+            <div class="mt-3 text-xs text-gray-500">
+                <span class="font-medium">Durata: </span>
+                <span class="duration-display">Seleziona orari per calcolare la durata</span>
+            </div>
+        </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', slotHtml);
+    scheduleSlotIndexCreate++;
+    updateSlotNumbersCreate();
+}
+
+function removeScheduleSlotCreate(button) {
+    const slot = button.closest('.schedule-slot');
+    slot.remove();
+    updateSlotNumbersCreate();
+}
+
+function updateSlotNumbersCreate() {
+    const slots = document.querySelectorAll('#schedule-container-create .schedule-slot');
+    slots.forEach((slot, index) => {
+        const title = slot.querySelector('h4');
+        const daySelect = slot.querySelector('select[name*="[day]"]');
+        const selectedDay = daySelect.value;
+        const removeButton = slot.querySelector('button[onclick*="removeScheduleSlotCreate"]');
+
+        if (selectedDay) {
+            title.textContent = `${selectedDay} - Orario ${index + 1}`;
+        } else {
+            title.textContent = `Orario ${index + 1}`;
+        }
+
+        // Show/hide remove button
+        if (removeButton) {
+            removeButton.style.display = slots.length > 1 ? 'block' : 'none';
+        }
+
+        // Update field names
+        const inputs = slot.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            const nameAttr = input.getAttribute('name');
+            if (nameAttr && nameAttr.includes('schedule_slots[')) {
+                const newName = nameAttr.replace(/schedule_slots\[\d+\]/, `schedule_slots[${index}]`);
+                input.setAttribute('name', newName);
+            }
+        });
+    });
+}
+
+function calculateDurationCreate(input) {
+    const slot = input.closest('.schedule-slot');
+    const startTime = slot.querySelector('input[name*="[start_time]"]').value;
+    const endTime = slot.querySelector('input[name*="[end_time]"]').value;
+    const durationDisplay = slot.querySelector('.duration-display');
+
+    if (startTime && endTime) {
+        const start = new Date(`2000-01-01T${startTime}:00`);
+        const end = new Date(`2000-01-01T${endTime}:00`);
+
+        if (end > start) {
+            const diff = end - start;
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+            let durationText = '';
+            if (hours > 0) {
+                durationText += `${hours}h `;
+            }
+            if (minutes > 0) {
+                durationText += `${minutes}min`;
+            }
+
+            durationDisplay.textContent = durationText || '0min';
+            durationDisplay.className = 'duration-display text-green-600 font-medium';
+        } else {
+            durationDisplay.textContent = 'Orario fine deve essere dopo orario inizio';
+            durationDisplay.className = 'duration-display text-red-600';
+        }
+    } else {
+        durationDisplay.textContent = 'Seleziona orari per calcolare la durata';
+        durationDisplay.className = 'duration-display';
+    }
+}
 </script>
 @endpush
 </x-app-layout>

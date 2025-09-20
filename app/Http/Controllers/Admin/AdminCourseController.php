@@ -81,7 +81,7 @@ class AdminCourseController extends AdminBaseController
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'level' => 'required|in:Principiante,Intermedio,Avanzato,Professionale,beginner,intermediate,advanced,professional',
+            'level' => 'required|in:Principiante,Intermedio,Avanzato,Professionale,beginner,intermediate,advanced,professional,principiante,base,intermedio,avanzato,professionale',
             'instructor_id' => [
                 'nullable',
                 'integer',
@@ -92,6 +92,11 @@ class AdminCourseController extends AdminBaseController
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after:start_date',
             'schedule' => 'nullable|string|max:500',
+            'schedule_slots' => 'nullable|array',
+            'schedule_slots.*.day' => 'required_with:schedule_slots|string|in:Lunedì,Martedì,Mercoledì,Giovedì,Venerdì,Sabato,Domenica',
+            'schedule_slots.*.start_time' => 'required_with:schedule_slots|date_format:H:i',
+            'schedule_slots.*.end_time' => 'required_with:schedule_slots|date_format:H:i|after:schedule_slots.*.start_time',
+            'schedule_slots.*.location' => 'nullable|string|max:255',
             'location' => 'nullable|string|max:255',
             'duration_weeks' => 'nullable|integer|min:1|max:52',
             'active' => 'boolean'
@@ -113,6 +118,18 @@ class AdminCourseController extends AdminBaseController
 
         $validated['school_id'] = $this->school->id;
         $validated['active'] = $validated['active'] ?? true;
+
+        // Process schedule_slots if provided
+        if (isset($validated['schedule_slots']) && is_array($validated['schedule_slots'])) {
+            // Filter out empty slots
+            $scheduleSlots = array_filter($validated['schedule_slots'], function($slot) {
+                return !empty($slot['day']) && !empty($slot['start_time']) && !empty($slot['end_time']);
+            });
+
+            // Convert to JSON and store in schedule field
+            $validated['schedule'] = json_encode(array_values($scheduleSlots), JSON_UNESCAPED_UNICODE);
+            unset($validated['schedule_slots']);
+        }
 
         $course = Course::create($validated);
 
@@ -196,6 +213,7 @@ class AdminCourseController extends AdminBaseController
      */
     public function update(Request $request, Course $course)
     {
+
         // Ensure course belongs to current school
         if ($course->school_id !== $this->school->id) {
             abort(404, 'Corso non trovato.');
@@ -203,18 +221,36 @@ class AdminCourseController extends AdminBaseController
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'code' => 'nullable|string|max:50',
+            'dance_type' => 'nullable|string|max:100',
             'description' => 'nullable|string',
-            'level' => 'required|in:Principiante,Intermedio,Avanzato,Professionale,beginner,intermediate,advanced,professional',
+            'short_description' => 'nullable|string|max:500',
+            'level' => 'required|in:Principiante,Intermedio,Avanzato,Professionale,beginner,intermediate,advanced,professional,principiante,base,intermedio,avanzato,professionale',
+            'min_age' => 'nullable|integer|min:1|max:100',
+            'max_age' => 'nullable|integer|min:1|max:100',
+            'status' => 'nullable|string',
+            'prerequisites' => 'nullable|string',
+            'equipment' => 'nullable|array',
+            'objectives' => 'nullable|array',
+            'notes' => 'nullable|string',
             'instructor_id' => [
                 'nullable',
                 'integer',
                 Rule::exists('users', 'id')->where('school_id', $this->school->id)
             ],
             'max_students' => 'required|integer|min:1',
-            'price' => 'required|numeric|min:0',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after:start_date',
+            'monthly_price' => 'required|numeric|min:0',
+            'enrollment_fee' => 'nullable|numeric|min:0',
+            'single_lesson_price' => 'nullable|numeric|min:0',
+            'trial_price' => 'nullable|numeric|min:0',
+            'price_application' => 'nullable|string',
+            'price_effective_date' => 'required|date',
             'schedule' => 'nullable|string|max:500',
+            'schedule_slots' => 'nullable|array',
+            'schedule_slots.*.day' => 'required_with:schedule_slots|string|in:Lunedì,Martedì,Mercoledì,Giovedì,Venerdì,Sabato,Domenica',
+            'schedule_slots.*.start_time' => 'required_with:schedule_slots|date_format:H:i',
+            'schedule_slots.*.end_time' => 'required_with:schedule_slots|date_format:H:i|after:schedule_slots.*.start_time',
+            'schedule_slots.*.location' => 'nullable|string|max:255',
             'location' => 'nullable|string|max:255',
             'duration_weeks' => 'nullable|integer|min:1|max:52',
             'active' => 'boolean'
@@ -232,6 +268,23 @@ class AdminCourseController extends AdminBaseController
             if (!$instructorExists) {
                 return back()->withErrors(['instructor_id' => 'L\'istruttore selezionato non è valido per questa scuola.'])->withInput();
             }
+        }
+
+        // Process schedule_slots if provided
+        if (isset($validated['schedule_slots']) && is_array($validated['schedule_slots'])) {
+            // Filter out empty slots
+            $scheduleSlots = array_filter($validated['schedule_slots'], function($slot) {
+                return !empty($slot['day']) && !empty($slot['start_time']) && !empty($slot['end_time']);
+            });
+
+            // Convert to JSON and store in schedule field
+            $validated['schedule'] = json_encode(array_values($scheduleSlots), JSON_UNESCAPED_UNICODE);
+            unset($validated['schedule_slots']);
+        }
+
+        // Remove null instructor_id to avoid DB constraint violation
+        if (empty($validated['instructor_id'])) {
+            unset($validated['instructor_id']);
         }
 
         $course->update($validated);

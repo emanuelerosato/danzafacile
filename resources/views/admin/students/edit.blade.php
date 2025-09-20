@@ -427,14 +427,25 @@ document.addEventListener('alpine:init', () => {
             this.errors = {};
 
             try {
+                // Create FormData for better Laravel compatibility
+                const formData = new FormData();
+                formData.append('_method', 'PUT');
+                formData.append('_token', '{{ csrf_token() }}');
+
+                // Add all form fields
+                Object.keys(this.form).forEach(key => {
+                    if (this.form[key] !== null && this.form[key] !== undefined) {
+                        formData.append(key, this.form[key]);
+                    }
+                });
+
                 const response = await fetch('/admin/students/{{ $student->id }}', {
-                    method: 'PUT',
+                    method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify(this.form)
+                    body: formData
                 });
 
                 const data = await response.json();
