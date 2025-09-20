@@ -497,7 +497,7 @@
 
 
                                     @foreach($scheduleData as $index => $slot)
-                                        <div class="schedule-slot bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                        <div class="schedule-slot bg-gray-50 hover:bg-gray-100 rounded-lg p-4 border border-gray-200 transition-all duration-200">
                                             <div class="flex items-center justify-between mb-3">
                                                 <h4 class="font-medium text-gray-900">Orario {{ $index + 1 }}</h4>
                                                 @if($index > 0)
@@ -1013,6 +1013,242 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (key.includes('schedule_slots')) {
                     console.log(key, '=', value);
                 }
+            }
+        });
+    }
+});
+
+// Enhanced schedule management functions
+function validateTimeSlots() {
+    const slots = document.querySelectorAll('.schedule-slot');
+    const conflicts = [];
+
+    // Clear previous conflict indicators
+    slots.forEach(slot => {
+        const conflictIndicator = slot.querySelector('.conflict-indicator');
+        if (conflictIndicator) {
+            conflictIndicator.remove();
+        }
+        slot.classList.remove('border-red-300', 'bg-red-50');
+    });
+
+    // Check for conflicts between slots
+    for (let i = 0; i < slots.length; i++) {
+        for (let j = i + 1; j < slots.length; j++) {
+            const conflict = checkSlotConflict(slots[i], slots[j]);
+            if (conflict) {
+                conflicts.push({ slot1: slots[i], slot2: slots[j], message: conflict });
+            }
+        }
+    }
+
+    // Display conflicts
+    conflicts.forEach(conflict => {
+        showConflictIndicator(conflict.slot1, conflict.message);
+        showConflictIndicator(conflict.slot2, conflict.message);
+    });
+
+    return conflicts.length === 0;
+}
+
+function checkSlotConflict(slot1, slot2) {
+    const day1 = slot1.querySelector('select[name*="[day]"]').value;
+    const day2 = slot2.querySelector('select[name*="[day]"]').value;
+
+    if (!day1 || !day2 || day1 !== day2) {
+        return null; // No conflict if different days or empty
+    }
+
+    const start1 = slot1.querySelector('input[name*="[start_time]"]').value;
+    const end1 = slot1.querySelector('input[name*="[end_time]"]').value;
+    const start2 = slot2.querySelector('input[name*="[start_time]"]').value;
+    const end2 = slot2.querySelector('input[name*="[end_time]"]').value;
+
+    if (!start1 || !end1 || !start2 || !end2) {
+        return null; // Can't check without complete times
+    }
+
+    // Check for time overlap
+    if (clientTimesOverlap(start1, end1, start2, end2)) {
+        const location1 = slot1.querySelector('select[name*="[location]"]').value;
+        const location2 = slot2.querySelector('select[name*="[location]"]').value;
+
+        if (location1 && location2 && location1 === location2) {
+            return `Conflitto: stessa location "${location1}" il ${day1} dalle ${start1}-${end1} e ${start2}-${end2}`;
+        } else {
+            return `Attenzione: orari sovrapposti il ${day1} dalle ${start1}-${end1} e ${start2}-${end2}`;
+        }
+    }
+
+    return null;
+}
+
+function clientTimesOverlap(start1, end1, start2, end2) {
+    const startTime1 = new Date(`2000-01-01T${start1}:00`);
+    const endTime1 = new Date(`2000-01-01T${end1}:00`);
+    const startTime2 = new Date(`2000-01-01T${start2}:00`);
+    const endTime2 = new Date(`2000-01-01T${end2}:00`);
+
+    // Check for overlap: start1 < end2 && start2 < end1
+    return startTime1 < endTime2 && startTime2 < endTime1;
+}
+
+function showConflictIndicator(slot, message) {
+    slot.classList.add('border-red-300', 'bg-red-50');
+
+    if (!slot.querySelector('.conflict-indicator')) {
+        const indicator = document.createElement('div');
+        indicator.className = 'conflict-indicator mt-2 p-2 bg-red-100 border border-red-300 rounded text-red-700 text-sm';
+        indicator.innerHTML = `<i class="fas fa-exclamation-triangle mr-1"></i> ${message}`;
+        slot.appendChild(indicator);
+    }
+}
+
+// Enhanced event handling with delegation
+document.addEventListener('DOMContentLoaded', function() {
+    const scheduleContainer = document.getElementById('schedule-container');
+
+    // Use event delegation for better performance and dynamic content handling
+    scheduleContainer.addEventListener('change', function(e) {
+        if (e.target.type === 'time') {
+            calculateDuration(e.target);
+            setTimeout(validateTimeSlots, 100); // Small delay to ensure DOM is updated
+        } else if (e.target.matches('select[name*="[day]"]')) {
+            updateSlotNumbers();
+            setTimeout(validateTimeSlots, 100);
+        } else if (e.target.matches('select[name*="[location]"]')) {
+            setTimeout(validateTimeSlots, 100);
+        }
+    });
+
+    // Add form submission validation
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            if (!validateTimeSlots()) {
+                e.preventDefault();
+                alert('Ci sono conflitti negli orari. Risolvi i conflitti prima di salvare.');
+                return false;
+            }
+        });
+    }
+
+    // Initialize validation for existing slots
+    setTimeout(validateTimeSlots, 500);
+
+    // Add UX enhancements
+    initializeUXEnhancements();
+});
+
+// UX Enhancement functions
+function initializeUXEnhancements() {
+    // Add helpful tooltips and visual improvements
+    addTimeSlotTooltips();
+    enhanceSlotVisuals();
+    addKeyboardNavigation();
+}
+
+function addTimeSlotTooltips() {
+    const scheduleContainer = document.getElementById('schedule-container');
+
+    // Add helpful tooltips to time inputs
+    scheduleContainer.addEventListener('focus', function(e) {
+        if (e.target.type === 'time') {
+            if (!e.target.title) {
+                e.target.title = 'Formato: HH:MM (es. 09:30)';
+            }
+        }
+    }, true);
+}
+
+function enhanceSlotVisuals() {
+    // Add visual feedback when slots are being edited
+    const scheduleContainer = document.getElementById('schedule-container');
+
+    scheduleContainer.addEventListener('focus', function(e) {
+        if (e.target.closest('.schedule-slot')) {
+            const slot = e.target.closest('.schedule-slot');
+            slot.classList.add('ring-2', 'ring-rose-300', 'border-rose-300');
+        }
+    }, true);
+
+    scheduleContainer.addEventListener('blur', function(e) {
+        if (e.target.closest('.schedule-slot')) {
+            const slot = e.target.closest('.schedule-slot');
+            slot.classList.remove('ring-2', 'ring-rose-300', 'border-rose-300');
+        }
+    }, true);
+}
+
+function addKeyboardNavigation() {
+    // Add keyboard shortcuts for better accessibility
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey || e.metaKey) {
+            switch(e.key) {
+                case 'n':
+                    if (document.activeElement.closest('#schedule-container')) {
+                        e.preventDefault();
+                        addScheduleSlot();
+                    }
+                    break;
+                case 'd':
+                    if (document.activeElement.closest('.schedule-slot')) {
+                        e.preventDefault();
+                        const removeBtn = document.activeElement.closest('.schedule-slot').querySelector('button[onclick*="removeScheduleSlot"]');
+                        if (removeBtn) {
+                            removeScheduleSlot(removeBtn);
+                        }
+                    }
+                    break;
+            }
+        }
+    });
+}
+
+// Enhanced addScheduleSlot function with UX improvements
+const originalAddScheduleSlot = window.addScheduleSlot;
+window.addScheduleSlot = function() {
+    const result = originalAddScheduleSlot();
+
+    // Focus on the new slot's first input for better UX
+    setTimeout(() => {
+        const newSlot = document.querySelector('.schedule-slot:last-child');
+        if (newSlot) {
+            const firstInput = newSlot.querySelector('select, input');
+            if (firstInput) {
+                firstInput.focus();
+            }
+
+            // Add a subtle animation
+            newSlot.style.opacity = '0';
+            newSlot.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                newSlot.style.transition = 'all 0.3s ease';
+                newSlot.style.opacity = '1';
+                newSlot.style.transform = 'translateY(0)';
+            }, 10);
+        }
+    }, 100);
+
+    return result;
+};
+
+// Add visual feedback for form validation
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    if (form) {
+        // Add visual feedback on form submission
+        form.addEventListener('submit', function(e) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...';
+
+                // Re-enable after 5 seconds in case of issues
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Salva Modifiche';
+                }, 5000);
             }
         });
     }
