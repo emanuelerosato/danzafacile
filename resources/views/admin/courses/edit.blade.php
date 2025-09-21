@@ -474,16 +474,12 @@
                                                                 'destroy_route' => $destroyRoute
                                                             ]);
                                                         @endphp
-                                                        <form id="remove-form-{{ $enrollment->user_id }}" action="{{ $destroyRoute }}" method="POST">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="button" @click.stop.prevent="removeStudentConfirm($el, {{ $enrollment->user_id }}, '{{ $enrollment->user->name ?? 'Unknown' }}')" class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                                                </svg>
-                                                                Rimuovi dal Corso
-                                                            </button>
-                                                        </form>
+                                                        <button type="button" data-remove-url="{{ $destroyRoute }}" @click.stop.prevent="removeStudentConfirm($el, {{ $enrollment->user_id }}, '{{ $enrollment->user->name ?? 'Unknown' }}')" class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                            </svg>
+                                                            Rimuovi dal Corso
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1557,6 +1553,15 @@ document.addEventListener('DOMContentLoaded', function() {
                         form.appendChild(hiddenAction);
 
                         console.log('🚀 Manually submitting form...');
+                        console.log('Form details before submission:');
+                        console.log('- Action:', form.action);
+                        console.log('- Method:', form.method);
+                        console.log('- Form data preview:');
+
+                        const formData = new FormData(form);
+                        formData.forEach((value, key) => {
+                            console.log(`  ${key}: ${value}`);
+                        });
 
                         // Show success message and reload after submission
                         const submitBtn = e.target;
@@ -1564,10 +1569,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...';
 
                         // Submit form
+                        console.log('⚡ About to submit form NOW...');
                         form.submit();
+                        console.log('⚡ Form.submit() called');
 
                         // Reload page after a short delay to show data was saved
                         setTimeout(() => {
+                            console.log('⚡ Reloading page...');
                             window.location.reload();
                         }, 1000);
 
