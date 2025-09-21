@@ -115,7 +115,10 @@
                             <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
                             </svg>
-                            Studenti ({{ $course->enrollments()->where('status', 'active')->count() }})
+                            @php
+                                $studentsCount = $course->enrollments()->where('status', 'active')->count();
+                            @endphp
+                            Studenti ({{ $studentsCount }})
                         </button>
                         <button type="button" @click="activeTab = 'schedule'" 
                                 :class="{ 'border-rose-500 text-rose-600': activeTab === 'schedule', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'schedule' }"
@@ -388,8 +391,21 @@
                         </div>
 
                         <!-- Students Management Grid -->
+                        @php
+                            $activeEnrollments = $course->enrollments()->with('user')->where('status', 'active')->get();
+                        @endphp
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            @forelse ($course->enrollments()->with('user')->where('status', 'active')->get() as $enrollment)
+                            @forelse ($activeEnrollments as $enrollment)
+                                <!-- DEBUG: User ID {{ $enrollment->user->id ?? 'NULL' }} - {{ $enrollment->user->name ?? 'NULL' }} - Status: {{ $enrollment->status }} -->
+                                @php
+                                    Log::info('🎨 RENDERING STUDENT CARD', [
+                                        'user_id' => $enrollment->user_id,
+                                        'user_name' => $enrollment->user->name ?? 'NULL',
+                                        'enrollment_id' => $enrollment->id,
+                                        'has_user_object' => $enrollment->user ? 'YES' : 'NO'
+                                    ]);
+                                @endphp
+                                @if($enrollment->user)
                                 <div class="bg-white p-4 rounded-lg border border-gray-200 hover:border-rose-300 transition-colors">
                                     <div class="flex items-center justify-between mb-3">
                                         <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
@@ -423,10 +439,45 @@
                                                         Contatta
                                                     </button>
                                                     <div @click.stop.prevent>
-                                                        <form id="remove-form-{{ $enrollment->user->id }}" action="{{ route('admin.courses.students.destroy', [$course, $enrollment->user]) }}" method="POST">
+                                                        <!-- DEBUG FORM: User ID {{ $enrollment->user->id }} - Form ID: remove-form-{{ $enrollment->user->id }} -->
+                                                        @php
+                                                            Log::info('🔧 GENERATING REMOVE FORM', [
+                                                                'user_id' => $enrollment->user_id,
+                                                                'user_name' => $enrollment->user->name ?? 'NULL',
+                                                                'enrollment_id' => $enrollment->id
+                                                            ]);
+                                                        @endphp
+                                                        @php
+                                                            try {
+                                                                if (!$enrollment->user) {
+                                                                    throw new \Exception('User relationship is null for enrollment ' . $enrollment->id);
+                                                                }
+                                                                if (!$enrollment->user->id) {
+                                                                    throw new \Exception('User ID is null for enrollment ' . $enrollment->id);
+                                                                }
+                                                                $destroyRoute = route('admin.courses.students.destroy', [$course, $enrollment->user]);
+                                                            } catch (\Exception $e) {
+                                                                $destroyRoute = '#ERROR-' . $enrollment->user_id;
+                                                                Log::error('🔥 Route generation failed for user', [
+                                                                    'enrollment_id' => $enrollment->id,
+                                                                    'user_id' => $enrollment->user_id,
+                                                                    'user_object' => $enrollment->user ? 'EXISTS' : 'NULL',
+                                                                    'user_object_id' => $enrollment->user ? $enrollment->user->id : 'N/A',
+                                                                    'course_id' => $course->id,
+                                                                    'error' => $e->getMessage()
+                                                                ]);
+                                                            }
+                                                        @endphp
+                                                        @php
+                                                            Log::info('✅ FORM GENERATION COMPLETED', [
+                                                                'user_id' => $enrollment->user_id,
+                                                                'destroy_route' => $destroyRoute
+                                                            ]);
+                                                        @endphp
+                                                        <form id="remove-form-{{ $enrollment->user_id }}" action="{{ $destroyRoute }}" method="POST">
                                                             @csrf
                                                             @method('DELETE')
-                                                            <button type="button" @click.stop.prevent="removeStudentConfirm({{ $enrollment->user->id }}, '{{ $enrollment->user->name }}')" class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                                                            <button type="button" @click.stop.prevent="removeStudentConfirm($el, {{ $enrollment->user_id }}, '{{ $enrollment->user->name ?? 'Unknown' }}')" class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                                                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                                 </svg>
@@ -459,6 +510,7 @@
                                         </div>
                                     </div>
                                 </div>
+                                @endif
                             @empty
                                 <div class="col-span-full text-center py-8">
                                     <div class="text-gray-500">
@@ -1122,6 +1174,8 @@
     </x-modal>
 
 <script>
+console.log('🔄 COURSE EDIT JS v2.1 - FIXED CONFIRMATION POPUP');
+
 function addEquipmentField() {
     const container = event.target.parentElement;
     const newField = document.createElement('input');
@@ -1644,15 +1698,284 @@ function getPaymentStatusLabel(paymentStatus) {
     return paymentLabels[paymentStatus] || paymentStatus;
 }
 
-function removeStudentConfirm(studentId, studentName) {
+function removeStudentConfirm(buttonElement, studentId, studentName) {
+    console.log(`🔍 CHECKING FORM FOR: ${studentName} (ID: ${studentId})`);
+
+    // The form is in an Alpine.js x-show dropdown that might not be in DOM
+    // Method 1: Check if form is already in DOM (dropdown is open)
+    let formElement = document.getElementById(`remove-form-${studentId}`);
+    console.log(`Method 1 - getElementById result:`, formElement);
+
+    if (!formElement) {
+        // Method 2: Search in button's parent hierarchy (the form should be a sibling)
+        let current = buttonElement.parentElement;
+        while (current && current !== document) {
+            const form = current.querySelector(`#remove-form-${studentId}`);
+            if (form) {
+                formElement = form;
+                console.log(`Method 2 - Found form via querySelector in parent:`, formElement);
+                break;
+            }
+            current = current.parentElement;
+        }
+    }
+
+    if (!formElement) {
+        // Method 3: Search all forms for matching action URL
+        const allForms = Array.from(document.querySelectorAll('form'));
+        formElement = allForms.find(form =>
+            form.action && form.action.includes(`/students/${studentId}`)
+        );
+        console.log(`Method 3 - Found form by action URL:`, formElement);
+    }
+
+    if (!formElement) {
+        // Method 4: The form exists in HTML but Alpine.js hides it
+        // Let's try to find the parent container and force show the dropdown
+        console.log(`Method 4 - Trying to access hidden Alpine.js form...`);
+
+        // Find the dropdown container
+        let dropdownContainer = buttonElement.closest('[x-data*="open"]');
+        if (dropdownContainer) {
+            console.log('Found dropdown container:', dropdownContainer);
+
+            // Try to access Alpine data and force open
+            if (dropdownContainer._x_dataStack && dropdownContainer._x_dataStack[0]) {
+                const alpineData = dropdownContainer._x_dataStack[0];
+                if (alpineData.open !== undefined) {
+                    console.log('Setting Alpine open to true temporarily...');
+                    const wasOpen = alpineData.open;
+                    alpineData.open = true;
+
+                    // Force Alpine.js to re-render by triggering the reactive system
+                    if (window.Alpine && window.Alpine.nextTick) {
+                        window.Alpine.nextTick(() => {
+                            setTimeout(() => {
+                                formElement = document.getElementById(`remove-form-${studentId}`);
+                                console.log('Method 4 - Form found after Alpine nextTick:', formElement);
+
+                                if (formElement) {
+                                    processFormSubmission(formElement, studentId, studentName);
+                                } else {
+                                    fallbackRemoval(studentId, studentName);
+                                }
+
+                                // Restore original state
+                                alpineData.open = wasOpen;
+                            }, 50);
+                        });
+                    } else {
+                        // Fallback without Alpine.nextTick
+                        setTimeout(() => {
+                            formElement = document.getElementById(`remove-form-${studentId}`);
+                            console.log('Method 4 - Form found after forcing Alpine open (no nextTick):', formElement);
+
+                            if (formElement) {
+                                processFormSubmission(formElement, studentId, studentName);
+                            } else {
+                                fallbackRemoval(studentId, studentName);
+                            }
+
+                            // Restore original state
+                            alpineData.open = wasOpen;
+                        }, 100);
+                    }
+                    return; // Exit here, continuation is in setTimeout
+                }
+            }
+        }
+    }
+
+    if (!formElement) {
+        console.error(`❌ FORM NOT FOUND for student ${studentId} using all methods`);
+        console.log('🔄 Trying fallback removal with temporary form...');
+        fallbackRemoval(studentId, studentName);
+        return;
+    }
+
+    // If we found the form, process it
+    processFormSubmission(formElement, studentId, studentName);
+}
+
+function processFormSubmission(formElement, studentId, studentName) {
+    console.log(`✅ FORM FOUND for student ${studentId}:`, formElement);
+
     if (confirm(`Sei sicuro di voler rimuovere ${studentName} dal corso?\n\nQuesta azione non può essere annullata.`)) {
         console.log(`Removing student ${studentName} (ID: ${studentId})`);
-        const form = document.getElementById(`remove-form-${studentId}`);
-        if (form) {
-            form.submit();
-        } else {
-            console.error(`Form with ID remove-form-${studentId} not found`);
+        console.log('Submitting form:', formElement);
+        console.log('Form action:', formElement.action);
+        console.log('Form method:', formElement.method);
+
+        // Submit the found form
+        try {
+            formElement.submit();
+        } catch (error) {
+            console.error('Form submission failed:', error);
+
+            // Fallback: create temporary form and submit
+            console.log('Trying temporary form fallback...');
+            const tempForm = document.createElement('form');
+            tempForm.method = 'POST';
+            tempForm.action = `/admin/courses/41/students/${studentId}`;
+            tempForm.style.display = 'none';
+
+            // Add CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = '_token';
+                csrfInput.value = csrfToken;
+                tempForm.appendChild(csrfInput);
+            }
+
+            // Add method override for DELETE
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'DELETE';
+            tempForm.appendChild(methodInput);
+
+            // Add form to DOM and submit
+            document.body.appendChild(tempForm);
+            tempForm.submit();
         }
+
+        // Try multiple methods to find the form
+        if (buttonElement && typeof buttonElement.closest === 'function') {
+            console.log('Trying closest() method...');
+            form = buttonElement.closest('form');
+        }
+
+        if (!form && buttonElement && buttonElement.parentNode) {
+            console.log('Trying parentNode traversal...');
+            let parent = buttonElement.parentNode;
+            while (parent && parent.tagName !== 'FORM' && parent !== document.body) {
+                parent = parent.parentNode;
+            }
+            if (parent && parent.tagName === 'FORM') {
+                form = parent;
+            }
+        }
+
+        if (!form) {
+            console.log('Trying by ID...');
+            form = document.getElementById(`remove-form-${studentId}`);
+        }
+
+        if (form) {
+            console.log('Form found, submitting...', form);
+            console.log('Form action:', form.action);
+            console.log('Form method:', form.method);
+            console.log('Form ID:', form.id);
+
+            // Verify this is the correct form for student removal
+            if (form.action.includes('/students/') || form.id.includes('remove-form')) {
+                console.log('Verified: This is a student removal form');
+                form.submit();
+                return; // Exit function after successful submission
+            } else {
+                console.warn('Warning: This appears to be the wrong form!');
+                console.log('Expected: URL should contain /students/ or ID should contain remove-form');
+                console.log('Falling back to ID search...');
+
+                const correctForm = document.getElementById(`remove-form-${studentId}`);
+                if (correctForm) {
+                    console.log('Found correct form by ID:', correctForm);
+                    correctForm.submit();
+                    return; // Exit function after successful submission
+                } else {
+                    console.error('Could not find the correct student removal form');
+                    // Don't return here - continue to fetch fallback
+                    form = null; // Reset form so we go to fetch fallback
+                }
+            }
+        }
+
+        // If we reach here, no form was found or wrong form was detected
+        // Last resort: try to submit via fetch
+        if (!form || form.action.includes('/admin/courses/41')) {
+            console.error(`Form not found or wrong form detected for student ${studentId}`);
+            console.log('All forms in document:', document.querySelectorAll('form'));
+            console.log('All forms with remove-form ID:', document.querySelectorAll('form[id*="remove-form"]'));
+            console.log('All forms with student ID:', document.querySelectorAll(`form[id="remove-form-${studentId}"]`));
+            console.log('Button parent elements:', buttonElement.parentNode, buttonElement.parentNode.parentNode);
+
+            console.log('Trying direct fetch submission...');
+
+            // Build the URL properly
+            const baseUrl = '{{ route("admin.courses.students.destroy", [$course->id, "PLACEHOLDER"]) }}';
+            const formAction = baseUrl.replace('PLACEHOLDER', studentId);
+
+            console.log('Fetch URL:', formAction);
+
+            fetch(formAction, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+            }).then(response => {
+                if (response.ok) {
+                    console.log('Student removed successfully via fetch');
+                    location.reload();
+                } else {
+                    console.error('Failed to remove student via fetch, status:', response.status);
+
+                    if (response.status === 403) {
+                        alert('⚠️ Permessi insufficienti per rimuovere questo studente.\n\nPossibili cause:\n- Lo studente non è più iscritto al corso\n- Non hai i permessi per questa operazione\n\nRicarica la pagina per aggiornare la lista studenti.');
+                        location.reload();
+                    } else if (response.status === 404) {
+                        alert('⚠️ Studente non trovato.\n\nLo studente potrebbe essere già stato rimosso da un altro utente.\nRicarica la pagina per aggiornare la lista.');
+                        location.reload();
+                    } else {
+                        response.text().then(text => {
+                            console.error('Response:', text);
+                            alert('❌ Errore durante la rimozione dello studente.\n\nErrore: ' + response.status + '\nConsulta la console per maggiori dettagli.');
+                        });
+                    }
+                }
+            }).catch(error => {
+                console.error('Error removing student:', error);
+                alert('❌ Errore di connessione durante la rimozione dello studente.\n\nControlla la connessione internet e riprova.');
+            });
+        }
+    }
+}
+
+function fallbackRemoval(studentId, studentName) {
+    console.log('🔄 NEW FALLBACK REMOVAL METHOD v2.0 - Using temporary form method...');
+
+    if (confirm(`Sei sicuro di voler rimuovere ${studentName} dal corso?\n\nQuesta azione non può essere annullata.`)) {
+        // Create a temporary form and submit it (most reliable method)
+        const tempForm = document.createElement('form');
+        tempForm.method = 'POST';
+        tempForm.action = `/admin/courses/41/students/${studentId}`;
+        tempForm.style.display = 'none';
+
+        // Add CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        if (csrfToken) {
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = csrfToken;
+            tempForm.appendChild(csrfInput);
+        }
+
+        // Add method override for DELETE
+        const methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'DELETE';
+        tempForm.appendChild(methodInput);
+
+        // Add form to DOM and submit
+        document.body.appendChild(tempForm);
+        console.log('Submitting temporary form:', tempForm);
+        console.log('Form action:', tempForm.action);
+        tempForm.submit();
     }
 }
 
@@ -1692,6 +2015,22 @@ document.addEventListener('DOMContentLoaded', function() {
             window.dispatchEvent(new CustomEvent('close-modal', { detail: 'contact-student' }));
         });
     }
+});
+
+// DEBUG: Check all remove forms on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔍 DEBUG: Page loaded, checking all remove forms...');
+
+    const allRemoveForms = document.querySelectorAll('form[id*="remove-form"]');
+    console.log(`Found ${allRemoveForms.length} remove forms:`, allRemoveForms);
+
+    allRemoveForms.forEach(form => {
+        const formId = form.id;
+        const studentId = formId.replace('remove-form-', '');
+        console.log(`✅ Form found: ${formId} for student ID: ${studentId}`);
+    });
+
+    // Debug forms (removed Andrea Conti specific checks since he was successfully removed)
 });
 </script>
 </x-app-layout>

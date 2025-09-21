@@ -9,6 +9,7 @@ use App\Models\CourseEnrollment;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
 class AdminCourseController extends AdminBaseController
@@ -203,6 +204,22 @@ class AdminCourseController extends AdminBaseController
                           ->get();
 
         $levels = ['Principiante', 'Intermedio', 'Avanzato', 'Professionale'];
+
+        // DEBUG: Log active enrollments when loading edit page
+        $activeEnrollments = $course->enrollments()->with('user')->where('status', 'active')->get();
+        Log::info('🔍 EDIT PAGE LOADED - Active enrollments', [
+            'course_id' => $course->id,
+            'course_name' => $course->name,
+            'active_enrollments_count' => $activeEnrollments->count(),
+            'student_details' => $activeEnrollments->map(function($enrollment) {
+                return [
+                    'user_id' => $enrollment->user->id,
+                    'name' => $enrollment->user->name,
+                    'enrollment_id' => $enrollment->id,
+                    'status' => $enrollment->status
+                ];
+            })
+        ]);
 
         return view('admin.courses.edit', compact('course', 'instructors', 'levels'));
     }
@@ -709,8 +726,23 @@ class AdminCourseController extends AdminBaseController
      */
     public function removeStudent(Course $course, User $user)
     {
+        Log::info('🔍 REMOVE STUDENT DEBUG', [
+            'course_id' => $course->id,
+            'course_school_id' => $course->school_id,
+            'user_id' => $user->id,
+            'user_name' => $user->name,
+            'auth_user_id' => auth()->id(),
+            'auth_user_school_id' => auth()->user()->school_id ?? 'NULL',
+            'this_school_id' => $this->school->id ?? 'NULL',
+            'this_school' => $this->school ? 'EXISTS' : 'NULL'
+        ]);
+
         // Verify the course belongs to the admin's school
         if ($course->school_id !== $this->school->id) {
+            Log::warning('🚫 SCHOOL OWNERSHIP CHECK FAILED', [
+                'course_school_id' => $course->school_id,
+                'admin_school_id' => $this->school->id
+            ]);
             abort(403, 'Non hai i permessi per gestire questo corso.');
         }
 
