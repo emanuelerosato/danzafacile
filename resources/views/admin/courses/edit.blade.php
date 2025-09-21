@@ -1511,11 +1511,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Find the course edit form specifically (Form 1 from debug)
                 const courseForm = Array.from(allForms).find(f => {
-                    const isCoursePath = f.action.includes('/admin/courses/41') && f.method.toLowerCase() === 'post';
-                    const isNotLogout = !f.action.includes('/logout');
-                    const isNotStudents = !f.action.includes('/students');
+                    // Ensure f.action is a string before using .includes()
+                    const actionStr = typeof f.action === 'string' ? f.action : '';
+                    const isCoursePath = actionStr.includes('/admin/courses/41') && f.method.toLowerCase() === 'post';
+                    const isNotLogout = !actionStr.includes('/logout');
+                    const isNotStudents = !actionStr.includes('/students');
                     const isNotGet = f.method.toLowerCase() !== 'get';
-                    console.log(`Checking form: ${f.action} - isCoursePath:${isCoursePath} isNotLogout:${isNotLogout} isNotStudents:${isNotStudents} isNotGet:${isNotGet}`);
+                    console.log(`Checking form: ${actionStr} - isCoursePath:${isCoursePath} isNotLogout:${isNotLogout} isNotStudents:${isNotStudents} isNotGet:${isNotGet}`);
                     return isCoursePath && isNotLogout && isNotStudents && isNotGet;
                 });
 
