@@ -256,7 +256,8 @@ class Course extends Model
      */
     public function getFormattedPriceAttribute(): string
     {
-        return '€ ' . number_format($this->price, 2, ',', '.');
+        $price = $this->monthly_price ?? $this->price ?? 0;
+        return '€ ' . number_format($price, 2, ',', '.');
     }
 
     /**

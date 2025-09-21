@@ -736,11 +736,11 @@
                                     <div class="text-sm text-blue-800 space-y-1">
                                         @php
                                             $activeStudents = $course->enrollments()->where('status', 'attiva')->count();
-                                            $monthlyRevenue = $activeStudents * ($course->price ?? 0);
+                                            $monthlyRevenue = $activeStudents * ($course->monthly_price ?? $course->price ?? 0);
                                             $enrollmentFeeRevenue = 2 * ($course->enrollment_fee ?? 0);
                                             $totalRevenue = $monthlyRevenue + $enrollmentFeeRevenue;
                                         @endphp
-                                        <p>Studenti: {{ $activeStudents }} × €{{ number_format($course->price ?? 0, 2, ',', '.') }} = <strong>€{{ number_format($monthlyRevenue, 0, ',', '.') }}</strong></p>
+                                        <p>Studenti: {{ $activeStudents }} × €{{ number_format($course->monthly_price ?? $course->price ?? 0, 2, ',', '.') }} = <strong>€{{ number_format($monthlyRevenue, 0, ',', '.') }}</strong></p>
                                         <p>Nuove iscrizioni (media): 2 × €{{ number_format($course->enrollment_fee ?? 0, 2, ',', '.') }} = <strong>€{{ number_format($enrollmentFeeRevenue, 0, ',', '.') }}</strong></p>
                                         <p>Totale mensile: <strong>€{{ number_format($totalRevenue, 0, ',', '.') }}</strong></p>
                                     </div>
@@ -758,7 +758,7 @@
                                             name="monthly_price"
                                             type="number"
                                             step="0.01"
-                                            value="{{ old('monthly_price', $course->price ?? '') }}"
+                                            value="{{ old('monthly_price', $course->monthly_price ?? $course->price ?? '') }}"
                                             required />
                                     </div>
                                     <div>
