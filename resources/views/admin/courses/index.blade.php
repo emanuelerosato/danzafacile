@@ -55,8 +55,8 @@
             :subtitle="($stats['active_courses'] ?? 0) . ' attivi'"
             icon="academic-cap"
             color="blue"
-            :change="5"
-            changeType="increase"
+            :change="$stats['course_change'] ?? 0"
+            :changeType="($stats['course_change'] ?? 0) >= 0 ? 'increase' : 'decrease'"
         />
 
         <x-stats-card
@@ -65,7 +65,7 @@
             :subtitle="'In arrivo'"
             icon="clock"
             color="green"
-            :change="12"
+            :change="$stats['upcoming_change'] ?? 0"
             changeType="increase"
         />
 
@@ -75,18 +75,18 @@
             :subtitle="'Totali'"
             icon="users"
             color="purple"
-            :change="8"
-            changeType="increase"
+            :change="$stats['enrollment_change'] ?? 0"
+            :changeType="($stats['enrollment_change'] ?? 0) >= 0 ? 'increase' : 'decrease'"
         />
 
         <x-stats-card
             title="Performance"
-            :value="round($stats['total_enrollments'] > 0 ? ($stats['active_courses'] / $stats['total_courses']) * 100 : 0) . '%'"
+            :value="$stats['performance_rate'] . '%'"
             :subtitle="'Tasso attivazione'"
             icon="chart-bar"
             color="rose"
-            :change="3"
-            changeType="increase"
+            :change="abs($stats['performance_rate'] - 75)"
+            :changeType="$stats['performance_rate'] > 75 ? 'increase' : 'decrease'"
         />
     </div>
 
