@@ -396,15 +396,6 @@
                         @endphp
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             @forelse ($activeEnrollments as $enrollment)
-                                <!-- DEBUG: User ID {{ $enrollment->user->id ?? 'NULL' }} - {{ $enrollment->user->name ?? 'NULL' }} - Status: {{ $enrollment->status }} -->
-                                @php
-                                    Log::info('🎨 RENDERING STUDENT CARD', [
-                                        'user_id' => $enrollment->user_id,
-                                        'user_name' => $enrollment->user->name ?? 'NULL',
-                                        'enrollment_id' => $enrollment->id,
-                                        'has_user_object' => $enrollment->user ? 'YES' : 'NO'
-                                    ]);
-                                @endphp
                                 @if($enrollment->user)
                                 <div class="bg-white p-4 rounded-lg border border-gray-200 hover:border-rose-300 transition-colors">
                                     <div class="flex items-center justify-between mb-3">
@@ -417,8 +408,8 @@
                                                 <p class="text-xs text-gray-500">{{ $enrollment->user->age ?? 'N/A' }} anni</p>
                                             </div>
                                         </div>
-                                        <div class="relative" x-data="{ open: false }" @click.stop="console.log('Dropdown container clicked')">
-                                            <button type="button" @click.stop="console.log('Button clicked, open was:', open); open = !open; console.log('Button clicked, open now:', open);" class="p-1 text-gray-400 hover:text-gray-600">
+                                        <div class="relative" x-data="{ open: false }" @click.stop>
+                                            <button type="button" @click.stop="open = !open" class="p-1 text-gray-400 hover:text-gray-600">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
                                                 </svg>
@@ -439,9 +430,7 @@
                                                         Contatta
                                                     </button>
                                                     <div @click.stop.prevent>
-                                                        <!-- DEBUG FORM: User ID {{ $enrollment->user->id }} - Form ID: remove-form-{{ $enrollment->user->id }} -->
                                                         @php
-                                                            Log::info('🔧 GENERATING REMOVE FORM', [
                                                                 'user_id' => $enrollment->user_id,
                                                                 'user_name' => $enrollment->user->name ?? 'NULL',
                                                                 'enrollment_id' => $enrollment->id
@@ -469,7 +458,6 @@
                                                             }
                                                         @endphp
                                                         @php
-                                                            Log::info('✅ FORM GENERATION COMPLETED', [
                                                                 'user_id' => $enrollment->user_id,
                                                                 'destroy_route' => $destroyRoute
                                                             ]);
@@ -1177,7 +1165,6 @@
     </x-modal>
 
 <script>
-console.log('🔄 COURSE EDIT JS v2.3 - ENHANCED DEBUGGING SYSTEM');
 
 // Global error handler to catch any JavaScript errors
 window.addEventListener('error', function(e) {
@@ -1398,45 +1385,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize ALL location selects (existing + new) with JavaScript-generated options
     initializeAllLocationDropdowns();
 
-    // Debug form submission with comprehensive error checking
     const form = document.querySelector('form');
     if (form) {
-        console.log('🎯 Form found, adding event listeners...', form);
 
         // High priority listener to catch submit early
         form.addEventListener('submit', function(e) {
-            console.log('🔥 HIGH PRIORITY SUBMIT EVENT TRIGGERED!');
-            console.log('Event:', e);
-            console.log('Form action:', form.action);
-            console.log('Form method:', form.method);
         }, { capture: true });
 
         // Normal priority listener
         form.addEventListener('submit', function(e) {
-            console.log('🔥 NORMAL PRIORITY SUBMIT EVENT TRIGGERED!');
-            console.log('Event:', e);
-            console.log('Form action:', form.action);
-            console.log('Form method:', form.method);
 
             const formData = new FormData(form);
-            console.log('📋 All form data:');
             for (let [key, value] of formData.entries()) {
-                console.log(key, '=', value);
             }
 
             // Check specifically for pricing fields
-            console.log('💰 Pricing fields check:');
-            console.log('monthly_price:', formData.get('monthly_price'));
-            console.log('enrollment_fee:', formData.get('enrollment_fee'));
-            console.log('single_lesson_price:', formData.get('single_lesson_price'));
-            console.log('trial_price:', formData.get('trial_price'));
-            console.log('price_application:', formData.get('price_application'));
 
             // Check if form submission is being prevented
-            console.log('Is default prevented?', e.defaultPrevented);
 
             // Check form validity (HTML5 validation)
-            console.log('Form validity:', form.checkValidity());
             if (!form.checkValidity()) {
                 console.error('❌ Form validation failed! Invalid fields:');
                 const invalidFields = form.querySelectorAll(':invalid');
@@ -1449,49 +1416,25 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add click listener to submit buttons specifically
         const submitButtons = form.querySelectorAll('button[type="submit"]');
         submitButtons.forEach((btn, index) => {
-            console.log(`🎯 Submit button ${index} found:`, btn);
-            console.log('Button text:', btn.textContent.trim());
-            console.log('Button classes:', btn.className);
-            console.log('Button disabled:', btn.disabled);
-            console.log('Button offsetParent:', btn.offsetParent);
-            console.log('Button style display:', window.getComputedStyle(btn).display);
-            console.log('Button style visibility:', window.getComputedStyle(btn).visibility);
-            console.log('Button style pointer-events:', window.getComputedStyle(btn).pointerEvents);
 
             // Add multiple types of event listeners
             btn.addEventListener('click', function(e) {
-                console.log(`🖱️ CLICK EVENT Submit button ${index} clicked!`, btn);
-                console.log('Event target:', e.target);
-                console.log('Event currentTarget:', e.currentTarget);
-                console.log('Button value:', btn.value);
-                console.log('Button name:', btn.name);
             }, true); // Capture phase
 
             btn.addEventListener('click', function(e) {
-                console.log(`🖱️ BUBBLE EVENT Submit button ${index} clicked!`, btn);
             }, false); // Bubble phase
 
             btn.addEventListener('mousedown', function(e) {
-                console.log(`🖱️ MOUSEDOWN Submit button ${index}!`);
             });
 
             btn.addEventListener('mouseup', function(e) {
-                console.log(`🖱️ MOUSEUP Submit button ${index}!`);
             });
         });
 
-        // Global click detection for debugging
         document.addEventListener('click', function(e) {
             if (e.target.matches('button[type="submit"]')) {
-                console.log(`🌍 GLOBAL CLICK DETECTED on submit button:`, e.target);
-                console.log('Target text:', e.target.textContent.trim());
 
                 // Check form validity when button is clicked
-                console.log('🔍 Debug target element:');
-                console.log('- Target tag:', e.target.tagName);
-                console.log('- Target type:', e.target.type);
-                console.log('- Target parent:', e.target.parentElement);
-                console.log('- Target parent tag:', e.target.parentElement?.tagName);
 
                 // Try multiple ways to find the form
                 const form1 = e.target.closest('form');
@@ -1500,16 +1443,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Count ALL forms in the page
                 const allForms = document.querySelectorAll('form');
-                console.log('🔍 Form search results:');
-                console.log('- closest("form"):', form1);
-                console.log('- target.form:', form2);
-                console.log('- document.querySelector("form"):', form3);
-                console.log('- Total forms in page:', allForms.length);
                 allForms.forEach((f, i) => {
-                    console.log(`  Form ${i}: action="${f.action}" method="${f.method}"`);
                 });
 
-                // Find the course edit form specifically (Form 1 from debug)
                 const courseForm = Array.from(allForms).find(f => {
                     // Ensure f.action is a string before using .includes()
                     const actionStr = typeof f.action === 'string' ? f.action : '';
@@ -1517,18 +1453,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     const isNotLogout = !actionStr.includes('/logout');
                     const isNotStudents = !actionStr.includes('/students');
                     const isNotGet = f.method.toLowerCase() !== 'get';
-                    console.log(`Checking form: ${actionStr} - isCoursePath:${isCoursePath} isNotLogout:${isNotLogout} isNotStudents:${isNotStudents} isNotGet:${isNotGet}`);
                     return isCoursePath && isNotLogout && isNotStudents && isNotGet;
                 });
 
-                console.log('🎯 Course form found:', courseForm);
 
                 const form = form1 || form2 || courseForm || form3;
                 if (form) {
-                    console.log('🔍 Form validity check:');
-                    console.log('- Form valid:', form.checkValidity());
-                    console.log('- Form action:', form.action);
-                    console.log('- Form method:', form.method);
 
                     if (!form.checkValidity()) {
                         console.error('❌ Form validation failed! Invalid fields:');
@@ -1539,10 +1469,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         // Prevent form submission if invalid
                         e.preventDefault();
-                        console.log('🚫 Form submission prevented due to validation errors');
                         return false;
                     } else {
-                        console.log('✅ Form is valid, forcing manual submission...');
 
                         // Force manual form submission
                         e.preventDefault(); // Prevent default to control submission
@@ -1554,15 +1482,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         hiddenAction.value = e.target.value || 'update';
                         form.appendChild(hiddenAction);
 
-                        console.log('🚀 Manually submitting form...');
-                        console.log('Form details before submission:');
-                        console.log('- Action:', form.action);
-                        console.log('- Method:', form.method);
-                        console.log('- Form data preview:');
 
                         const formData = new FormData(form);
                         formData.forEach((value, key) => {
-                            console.log(`  ${key}: ${value}`);
                         });
 
                         // Show success message and reload after submission
@@ -1571,9 +1493,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...';
 
                         // Submit form
-                        console.log('⚡ About to submit form NOW...');
                         form.submit();
-                        console.log('⚡ Form.submit() called');
 
                         return false;
                     }
@@ -1716,20 +1636,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Initialize all location dropdowns with current room data
 function initializeAllLocationDropdowns() {
-    console.log('🏗️ Initializing all location dropdowns...');
-    console.log('📋 Current availableRooms:', availableRooms);
 
     const locationSelects = document.querySelectorAll('select[name*="[location]"]');
-    console.log(`🔍 Found ${locationSelects.length} location dropdowns to update`);
 
     locationSelects.forEach((select, index) => {
         // Get the selected value (either current value or from data attribute for initial load)
         const selectedValue = select.value || select.getAttribute('data-selected-value');
-        console.log(`🎯 Dropdown ${index}: selectedValue="${selectedValue}"`);
 
         // Populate with current room options
         const newOptionsHtml = generateRoomOptions();
-        console.log(`🔄 Dropdown ${index}: Setting new options HTML`);
         select.innerHTML = newOptionsHtml;
 
         // Restore the selected value
@@ -1737,19 +1652,15 @@ function initializeAllLocationDropdowns() {
             if (availableRooms.includes(selectedValue)) {
                 // This is a managed room, select it directly
                 select.value = selectedValue;
-                console.log(`✅ Dropdown ${index}: Restored managed room "${selectedValue}"`);
             } else if (selectedValue) {
                 // Keep the value as-is for now (legacy data)
                 // New rooms will be added through the modal system
                 select.value = selectedValue;
-                console.log(`⚠️ Dropdown ${index}: Keeping legacy value "${selectedValue}"`);
             }
         } else {
-            console.log(`📭 Dropdown ${index}: No value to restore`);
         }
     });
 
-    console.log(`✅ Initialized ${locationSelects.length} location dropdowns`);
 }
 
 // UX Enhancement functions
@@ -1948,12 +1859,10 @@ function getPaymentStatusLabel(paymentStatus) {
 }
 
 function removeStudentConfirm(buttonElement, studentId, studentName) {
-    console.log(`🔍 CHECKING FORM FOR: ${studentName} (ID: ${studentId})`);
 
     // The form is in an Alpine.js x-show dropdown that might not be in DOM
     // Method 1: Check if form is already in DOM (dropdown is open)
     let formElement = document.getElementById(`remove-form-${studentId}`);
-    console.log(`Method 1 - getElementById result:`, formElement);
 
     if (!formElement) {
         // Method 2: Search in button's parent hierarchy (the form should be a sibling)
@@ -1962,7 +1871,6 @@ function removeStudentConfirm(buttonElement, studentId, studentName) {
             const form = current.querySelector(`#remove-form-${studentId}`);
             if (form) {
                 formElement = form;
-                console.log(`Method 2 - Found form via querySelector in parent:`, formElement);
                 break;
             }
             current = current.parentElement;
@@ -1975,24 +1883,20 @@ function removeStudentConfirm(buttonElement, studentId, studentName) {
         formElement = allForms.find(form =>
             form.action && form.action.includes(`/students/${studentId}`)
         );
-        console.log(`Method 3 - Found form by action URL:`, formElement);
     }
 
     if (!formElement) {
         // Method 4: The form exists in HTML but Alpine.js hides it
         // Let's try to find the parent container and force show the dropdown
-        console.log(`Method 4 - Trying to access hidden Alpine.js form...`);
 
         // Find the dropdown container
         let dropdownContainer = buttonElement.closest('[x-data*="open"]');
         if (dropdownContainer) {
-            console.log('Found dropdown container:', dropdownContainer);
 
             // Try to access Alpine data and force open
             if (dropdownContainer._x_dataStack && dropdownContainer._x_dataStack[0]) {
                 const alpineData = dropdownContainer._x_dataStack[0];
                 if (alpineData.open !== undefined) {
-                    console.log('Setting Alpine open to true temporarily...');
                     const wasOpen = alpineData.open;
                     alpineData.open = true;
 
@@ -2001,7 +1905,6 @@ function removeStudentConfirm(buttonElement, studentId, studentName) {
                         window.Alpine.nextTick(() => {
                             setTimeout(() => {
                                 formElement = document.getElementById(`remove-form-${studentId}`);
-                                console.log('Method 4 - Form found after Alpine nextTick:', formElement);
 
                                 if (formElement) {
                                     processFormSubmission(formElement, studentId, studentName);
@@ -2017,7 +1920,6 @@ function removeStudentConfirm(buttonElement, studentId, studentName) {
                         // Fallback without Alpine.nextTick
                         setTimeout(() => {
                             formElement = document.getElementById(`remove-form-${studentId}`);
-                            console.log('Method 4 - Form found after forcing Alpine open (no nextTick):', formElement);
 
                             if (formElement) {
                                 processFormSubmission(formElement, studentId, studentName);
@@ -2037,7 +1939,6 @@ function removeStudentConfirm(buttonElement, studentId, studentName) {
 
     if (!formElement) {
         console.error(`❌ FORM NOT FOUND for student ${studentId} using all methods`);
-        console.log('🔄 Trying fallback removal with temporary form...');
         fallbackRemoval(studentId, studentName);
         return;
     }
@@ -2047,13 +1948,8 @@ function removeStudentConfirm(buttonElement, studentId, studentName) {
 }
 
 function processFormSubmission(formElement, studentId, studentName) {
-    console.log(`✅ FORM FOUND for student ${studentId}:`, formElement);
 
     if (confirm(`Sei sicuro di voler rimuovere ${studentName} dal corso?\n\nQuesta azione non può essere annullata.`)) {
-        console.log(`Removing student ${studentName} (ID: ${studentId})`);
-        console.log('Submitting form:', formElement);
-        console.log('Form action:', formElement.action);
-        console.log('Form method:', formElement.method);
 
         // Submit the found form
         try {
@@ -2062,7 +1958,6 @@ function processFormSubmission(formElement, studentId, studentName) {
             console.error('Form submission failed:', error);
 
             // Fallback: create temporary form and submit
-            console.log('Trying temporary form fallback...');
             const tempForm = document.createElement('form');
             tempForm.method = 'POST';
             tempForm.action = `/admin/courses/41/students/${studentId}`;
@@ -2092,12 +1987,10 @@ function processFormSubmission(formElement, studentId, studentName) {
 
         // Try multiple methods to find the form
         if (buttonElement && typeof buttonElement.closest === 'function') {
-            console.log('Trying closest() method...');
             form = buttonElement.closest('form');
         }
 
         if (!form && buttonElement && buttonElement.parentNode) {
-            console.log('Trying parentNode traversal...');
             let parent = buttonElement.parentNode;
             while (parent && parent.tagName !== 'FORM' && parent !== document.body) {
                 parent = parent.parentNode;
@@ -2108,29 +2001,20 @@ function processFormSubmission(formElement, studentId, studentName) {
         }
 
         if (!form) {
-            console.log('Trying by ID...');
             form = document.getElementById(`remove-form-${studentId}`);
         }
 
         if (form) {
-            console.log('Form found, submitting...', form);
-            console.log('Form action:', form.action);
-            console.log('Form method:', form.method);
-            console.log('Form ID:', form.id);
 
             // Verify this is the correct form for student removal
             if (form.action.includes('/students/') || form.id.includes('remove-form')) {
-                console.log('Verified: This is a student removal form');
                 form.submit();
                 return; // Exit function after successful submission
             } else {
                 console.warn('Warning: This appears to be the wrong form!');
-                console.log('Expected: URL should contain /students/ or ID should contain remove-form');
-                console.log('Falling back to ID search...');
 
                 const correctForm = document.getElementById(`remove-form-${studentId}`);
                 if (correctForm) {
-                    console.log('Found correct form by ID:', correctForm);
                     correctForm.submit();
                     return; // Exit function after successful submission
                 } else {
@@ -2145,18 +2029,12 @@ function processFormSubmission(formElement, studentId, studentName) {
         // Last resort: try to submit via fetch
         if (!form || form.action.includes('/admin/courses/41')) {
             console.error(`Form not found or wrong form detected for student ${studentId}`);
-            console.log('All forms in document:', document.querySelectorAll('form'));
-            console.log('All forms with remove-form ID:', document.querySelectorAll('form[id*="remove-form"]'));
-            console.log('All forms with student ID:', document.querySelectorAll(`form[id="remove-form-${studentId}"]`));
-            console.log('Button parent elements:', buttonElement.parentNode, buttonElement.parentNode.parentNode);
 
-            console.log('Trying direct fetch submission...');
 
             // Build the URL properly
             const baseUrl = '{{ route("admin.courses.students.destroy", [$course->id, "PLACEHOLDER"]) }}';
             const formAction = baseUrl.replace('PLACEHOLDER', studentId);
 
-            console.log('Fetch URL:', formAction);
 
             fetch(formAction, {
                 method: 'DELETE',
@@ -2167,7 +2045,6 @@ function processFormSubmission(formElement, studentId, studentName) {
                 },
             }).then(response => {
                 if (response.ok) {
-                    console.log('Student removed successfully via fetch');
                     location.reload();
                 } else {
                     console.error('Failed to remove student via fetch, status:', response.status);
@@ -2194,7 +2071,6 @@ function processFormSubmission(formElement, studentId, studentName) {
 }
 
 function fallbackRemoval(studentId, studentName) {
-    console.log('🔄 NEW FALLBACK REMOVAL METHOD v2.0 - Using temporary form method...');
 
     if (confirm(`Sei sicuro di voler rimuovere ${studentName} dal corso?\n\nQuesta azione non può essere annullata.`)) {
         // Create a temporary form and submit it (most reliable method)
@@ -2222,8 +2098,6 @@ function fallbackRemoval(studentId, studentName) {
 
         // Add form to DOM and submit
         document.body.appendChild(tempForm);
-        console.log('Submitting temporary form:', tempForm);
-        console.log('Form action:', tempForm.action);
         tempForm.submit();
     }
 }
@@ -2247,7 +2121,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             // Here you would normally send the data to your backend
-            console.log('Contact form submitted:', {
                 studentId,
                 subject,
                 message,
@@ -2266,20 +2139,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// DEBUG: Check all remove forms on page load
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔍 DEBUG: Page loaded, checking all remove forms...');
 
     const allRemoveForms = document.querySelectorAll('form[id*="remove-form"]');
-    console.log(`Found ${allRemoveForms.length} remove forms:`, allRemoveForms);
 
     allRemoveForms.forEach(form => {
         const formId = form.id;
         const studentId = formId.replace('remove-form-', '');
-        console.log(`✅ Form found: ${formId} for student ID: ${studentId}`);
     });
 
-    // Debug forms (removed Andrea Conti specific checks since he was successfully removed)
 });
 
 // ========================================
@@ -2288,7 +2156,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Function to open the room manager modal
 function openRoomManager() {
-    console.log('🏢 Opening Room Manager...');
     loadRoomsList();
     window.dispatchEvent(new CustomEvent('open-modal', { detail: 'room-manager' }));
 }
@@ -2300,7 +2167,6 @@ let editingRoomId = null;
 // Load all rooms for the current school
 async function loadRoomsList() {
     try {
-        console.log('📥 Loading rooms list...');
         const response = await fetch('/admin/rooms', {
             method: 'GET',
             credentials: 'same-origin',
@@ -2312,23 +2178,18 @@ async function loadRoomsList() {
 
         if (response.ok) {
             const responseData = await response.json();
-            console.log('✅ API Response:', responseData);
 
             // Modal MUST use detailed_rooms (full objects), not just room names
             if (responseData.detailed_rooms && Array.isArray(responseData.detailed_rooms)) {
                 roomsData = responseData.detailed_rooms;
-                console.log('🔍 Using detailed_rooms array (REQUIRED for modal)');
             } else if (Array.isArray(responseData)) {
                 // Fallback: if it's a direct array, assume it contains full objects
                 roomsData = responseData;
-                console.log('🔍 Using direct array response as fallback');
             } else {
                 roomsData = [];
                 console.error('❌ Modal requires detailed_rooms array, but not found in response:', responseData);
             }
 
-            console.log('✅ Rooms data processed:', roomsData);
-            console.log('🔍 RoomsData type:', typeof roomsData, 'Length:', roomsData.length);
             renderRoomsList();
         } else {
             console.error('❌ Failed to load rooms:', response.status);
@@ -2342,7 +2203,6 @@ async function loadRoomsList() {
 
 // Render the rooms list in the modal
 function renderRoomsList() {
-    console.log('🎨 Rendering rooms list, roomsData:', roomsData);
 
     const container = document.getElementById('rooms-list-container');
     if (!container) {
@@ -2351,7 +2211,6 @@ function renderRoomsList() {
     }
 
     if (roomsData.length === 0) {
-        console.log('📭 No rooms to display');
         container.innerHTML = `
             <div class="text-center py-8">
                 <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2367,7 +2226,6 @@ function renderRoomsList() {
     }
 
     const roomsHtml = roomsData.map(room => {
-        console.log('🏠 Rendering room:', room);
 
         // Safe access to room properties
         const roomName = room.name || 'Nome non disponibile';
@@ -2454,7 +2312,6 @@ async function saveRoom(event) {
         active: formData.has('active')
     };
 
-    console.log('💾 Saving room:', roomData);
 
     try {
         const url = editingRoomId ? `/admin/rooms/${editingRoomId}` : '/admin/rooms';
@@ -2473,7 +2330,6 @@ async function saveRoom(event) {
 
         if (response.ok) {
             const result = await response.json();
-            console.log('✅ Room saved successfully:', result);
 
             showNotification(
                 editingRoomId ? 'Sala aggiornata con successo' : 'Sala creata con successo',
@@ -2500,7 +2356,6 @@ async function deleteRoom(roomId, roomName) {
         return;
     }
 
-    console.log('🗑️ Deleting room:', roomId);
 
     try {
         const response = await fetch(`/admin/rooms/${roomId}`, {
@@ -2513,7 +2368,6 @@ async function deleteRoom(roomId, roomName) {
         });
 
         if (response.ok) {
-            console.log('✅ Room deleted successfully');
             showNotification('Sala eliminata con successo', 'success');
             await loadRoomsList();
             await refreshRoomDropdowns();
@@ -2530,24 +2384,20 @@ async function deleteRoom(roomId, roomName) {
 
 // Refresh all room dropdowns on the page
 async function refreshRoomDropdowns() {
-    console.log('🔄 Refreshing room dropdowns...');
 
     try {
         // SIMPLIFIED APPROACH: Use roomsData from modal (already loaded and working)
         if (roomsData && Array.isArray(roomsData)) {
             // Extract room names from the detailed room objects
             const roomNames = roomsData.map(room => room.name).sort();
-            console.log('📦 Extracted room names from modal data:', roomNames);
 
             // Update both local and global availableRooms variables
             availableRooms = roomNames;
             window.availableRooms = roomNames;
-            console.log('🔄 Updated availableRooms variable:', availableRooms);
 
             // Use the same initialization logic for consistency
             initializeAllLocationDropdowns();
 
-            console.log('✅ Room dropdowns refreshed via roomsData!');
         } else {
             console.warn('⚠️ roomsData not available for dropdown refresh');
         }

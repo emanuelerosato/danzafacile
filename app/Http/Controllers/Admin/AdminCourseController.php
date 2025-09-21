@@ -240,17 +240,14 @@ class AdminCourseController extends AdminBaseController
      */
     public function update(UpdateCourseRequest $request, Course $course)
     {
-        \Log::info('🔥 NEW LOGGING: UPDATE METHOD CALLED', ['course_id' => $course->id, 'timestamp' => now()->toISOString()]);
 
         // Ensure course belongs to current school
         if ($course->school_id !== $this->school->id) {
             abort(404, 'Corso non trovato.');
         }
 
-        \Log::info('UPDATE - About to validate request');
         try {
             $validated = $request->validated();
-            \Log::info('UPDATE - Validation passed, validated data:', ['validated' => $validated]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('UPDATE - Validation failed:', ['errors' => $e->errors()]);
             throw $e;
@@ -316,9 +313,7 @@ class AdminCourseController extends AdminBaseController
             unset($validated['instructor_id']);
         }
 
-        \Log::info('UPDATE - About to update course with validated data');
         $course->update($validated);
-        \Log::info('UPDATE - Course updated successfully', ['course_id' => $course->id]);
         $this->clearSchoolCache();
 
         if ($request->ajax()) {
