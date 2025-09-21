@@ -431,12 +431,6 @@
                                                     </button>
                                                     <div @click.stop.prevent>
                                                         @php
-                                                                'user_id' => $enrollment->user_id,
-                                                                'user_name' => $enrollment->user->name ?? 'NULL',
-                                                                'enrollment_id' => $enrollment->id
-                                                            ]);
-                                                        @endphp
-                                                        @php
                                                             try {
                                                                 if (!$enrollment->user) {
                                                                     throw new \Exception('User relationship is null for enrollment ' . $enrollment->id);
