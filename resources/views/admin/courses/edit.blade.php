@@ -1573,12 +1573,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         form.submit();
                         console.log('⚡ Form.submit() called');
 
-                        // Reload page after a short delay to show data was saved
-                        setTimeout(() => {
-                            console.log('⚡ Reloading page...');
-                            window.location.reload();
-                        }, 1000);
-
                         return false;
                     }
                 } else {

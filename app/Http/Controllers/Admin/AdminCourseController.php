@@ -327,7 +327,7 @@ class AdminCourseController extends AdminBaseController
             ]);
         }
 
-        return redirect()->route('admin.courses.show', $course)
+        return redirect()->route('admin.courses.edit', $course)
                         ->with('success', 'Corso aggiornato con successo.');
     }
 
