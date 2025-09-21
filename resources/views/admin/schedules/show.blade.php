@@ -218,7 +218,7 @@
                     <div class="flex justify-between items-center">
                         <span class="text-sm text-gray-600">Ricavo Totale</span>
                         <span class="text-lg font-semibold text-green-600">
-                            €{{ number_format($course->enrollments->count() * $course->price, 2) }}
+                            €{{ number_format($course->enrollments->count() * ($course->monthly_price ?? $course->price ?? 0), 2, ',', '.') }}
                         </span>
                     </div>
                     @endif

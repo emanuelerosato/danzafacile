@@ -115,7 +115,7 @@
                                                 {{ ucfirst($course->level) }}
                                             </span>
                                             <span class="text-sm text-gray-500">
-                                                €{{ number_format($course->price, 2) }} /mese
+                                                {{ $course->formatted_price }} /mese
                                             </span>
                                             <span class="text-sm text-gray-500">
                                                 Max {{ $course->max_students }} studenti

@@ -184,7 +184,7 @@
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Prezzo:</span>
-                                    <span class="font-medium text-green-600">€{{ number_format($course->price ?? 0, 2, ',', '.') }}</span>
+                                    <span class="font-medium text-green-600">{{ $course->formatted_price }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Sala:</span>

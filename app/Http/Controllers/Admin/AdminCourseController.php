@@ -199,7 +199,8 @@ class AdminCourseController extends AdminBaseController
             ->sum('amount');
 
         // If no payments found, calculate potential revenue based on enrollment count and course price
-        $potentialRevenue = $course->enrollments()->count() * $course->price;
+        $coursePrice = $course->monthly_price ?? $course->price ?? 0;
+        $potentialRevenue = $course->enrollments()->count() * $coursePrice;
         $totalRevenue = $actualRevenue > 0 ? $actualRevenue : $potentialRevenue;
 
         $stats = [

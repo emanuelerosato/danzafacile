@@ -141,10 +141,11 @@
                             <svg class="w-4 h-4 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
                             </svg>
-                            <span class="font-medium">€{{ number_format($course->price, 2, ',', '.') }}</span>
+                            <span class="font-medium">{{ $course->formatted_price }}</span>
                         </div>
                         @php
-                            $totalRevenue = $course->enrollments->count() * $course->price;
+                            $price = $course->monthly_price ?? $course->price ?? 0;
+                            $totalRevenue = $course->enrollments->count() * $price;
                         @endphp
                         @if($totalRevenue > 0)
                             <div class="text-xs text-gray-500">
