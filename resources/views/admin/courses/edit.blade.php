@@ -1544,7 +1544,34 @@ document.addEventListener('DOMContentLoaded', function() {
                         console.log('🚫 Form submission prevented due to validation errors');
                         return false;
                     } else {
-                        console.log('✅ Form is valid, allowing submission');
+                        console.log('✅ Form is valid, forcing manual submission...');
+
+                        // Force manual form submission
+                        e.preventDefault(); // Prevent default to control submission
+
+                        // Add the button's name and value to the form
+                        const hiddenAction = document.createElement('input');
+                        hiddenAction.type = 'hidden';
+                        hiddenAction.name = e.target.name || 'action';
+                        hiddenAction.value = e.target.value || 'update';
+                        form.appendChild(hiddenAction);
+
+                        console.log('🚀 Manually submitting form...');
+
+                        // Show success message and reload after submission
+                        const submitBtn = e.target;
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...';
+
+                        // Submit form
+                        form.submit();
+
+                        // Reload page after a short delay to show data was saved
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+
+                        return false;
                     }
                 } else {
                     console.error('❌ No form found for submit button');
