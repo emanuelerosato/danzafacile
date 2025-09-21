@@ -142,7 +142,7 @@
                 <!-- Tab Content -->
                 <div class="p-6">
                     <!-- Basic Information Tab -->
-                    <div x-show="activeTab === 'basic'" class="space-y-6">
+                    <div :class="{ 'hidden': activeTab !== 'basic' }" class="space-y-6">
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             <!-- Image Upload -->
                             <div class="lg:col-span-1">
@@ -290,7 +290,7 @@
                     </div>
 
                     <!-- Details Tab -->
-                    <div x-show="activeTab === 'details'" class="space-y-6">
+                    <div :class="{ 'hidden': activeTab !== 'details' }" class="space-y-6">
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <!-- Course Description -->
                             <div class="space-y-6">
@@ -359,7 +359,7 @@
                     </div>
 
                     <!-- Students Tab -->
-                    <div x-show="activeTab === 'students'" class="space-y-6">
+                    <div :class="{ 'hidden': activeTab !== 'students' }" class="space-y-6">
                         <div class="flex items-center justify-between">
                             <h3 class="text-lg font-semibold text-gray-900">Gestione Studenti Iscritti</h3>
                             <div class="flex space-x-3">
@@ -526,7 +526,7 @@
                     </div>
 
                     <!-- Schedule Tab -->
-                    <div x-show="activeTab === 'schedule'" class="space-y-6">
+                    <div :class="{ 'hidden': activeTab !== 'schedule' }" class="space-y-6">
                         <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 text-orange-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -689,7 +689,7 @@
                     </div>
 
                     <!-- Pricing Tab -->
-                    <div x-show="activeTab === 'pricing'" class="space-y-6">
+                    <div :class="{ 'hidden': activeTab !== 'pricing' }" class="space-y-6">
                         <div class="bg-red-50 border border-red-200 rounded-lg p-4">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1181,7 +1181,20 @@
     </x-modal>
 
 <script>
-console.log('🔄 COURSE EDIT JS v2.2 - DYNAMIC ROOMS SYSTEM');
+console.log('🔄 COURSE EDIT JS v2.3 - ENHANCED DEBUGGING SYSTEM');
+
+// Global error handler to catch any JavaScript errors
+window.addEventListener('error', function(e) {
+    console.error('🚨 JavaScript Error:', e.error);
+    console.error('Message:', e.message);
+    console.error('Filename:', e.filename);
+    console.error('Line:', e.lineno);
+});
+
+// Capture unhandled promise rejections
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('🚨 Unhandled Promise Rejection:', e.reason);
+});
 
 // Available rooms data from server (global so it can be updated)
 let availableRooms = @json($availableRooms);
@@ -1389,19 +1402,158 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize ALL location selects (existing + new) with JavaScript-generated options
     initializeAllLocationDropdowns();
 
-    // Debug form submission
+    // Debug form submission with comprehensive error checking
     const form = document.querySelector('form');
     if (form) {
+        console.log('🎯 Form found, adding event listeners...', form);
+
+        // High priority listener to catch submit early
         form.addEventListener('submit', function(e) {
-            console.log('Form is submitting...');
+            console.log('🔥 HIGH PRIORITY SUBMIT EVENT TRIGGERED!');
+            console.log('Event:', e);
+            console.log('Form action:', form.action);
+            console.log('Form method:', form.method);
+        }, { capture: true });
+
+        // Normal priority listener
+        form.addEventListener('submit', function(e) {
+            console.log('🔥 NORMAL PRIORITY SUBMIT EVENT TRIGGERED!');
+            console.log('Event:', e);
+            console.log('Form action:', form.action);
+            console.log('Form method:', form.method);
+
             const formData = new FormData(form);
-            console.log('Form data:');
+            console.log('📋 All form data:');
             for (let [key, value] of formData.entries()) {
-                if (key.includes('schedule_slots')) {
-                    console.log(key, '=', value);
-                }
+                console.log(key, '=', value);
+            }
+
+            // Check specifically for pricing fields
+            console.log('💰 Pricing fields check:');
+            console.log('monthly_price:', formData.get('monthly_price'));
+            console.log('enrollment_fee:', formData.get('enrollment_fee'));
+            console.log('single_lesson_price:', formData.get('single_lesson_price'));
+            console.log('trial_price:', formData.get('trial_price'));
+            console.log('price_application:', formData.get('price_application'));
+
+            // Check if form submission is being prevented
+            console.log('Is default prevented?', e.defaultPrevented);
+
+            // Check form validity (HTML5 validation)
+            console.log('Form validity:', form.checkValidity());
+            if (!form.checkValidity()) {
+                console.error('❌ Form validation failed! Invalid fields:');
+                const invalidFields = form.querySelectorAll(':invalid');
+                invalidFields.forEach(field => {
+                    console.error('- Invalid field:', field.name, field.value, field.validationMessage);
+                });
             }
         });
+
+        // Add click listener to submit buttons specifically
+        const submitButtons = form.querySelectorAll('button[type="submit"]');
+        submitButtons.forEach((btn, index) => {
+            console.log(`🎯 Submit button ${index} found:`, btn);
+            console.log('Button text:', btn.textContent.trim());
+            console.log('Button classes:', btn.className);
+            console.log('Button disabled:', btn.disabled);
+            console.log('Button offsetParent:', btn.offsetParent);
+            console.log('Button style display:', window.getComputedStyle(btn).display);
+            console.log('Button style visibility:', window.getComputedStyle(btn).visibility);
+            console.log('Button style pointer-events:', window.getComputedStyle(btn).pointerEvents);
+
+            // Add multiple types of event listeners
+            btn.addEventListener('click', function(e) {
+                console.log(`🖱️ CLICK EVENT Submit button ${index} clicked!`, btn);
+                console.log('Event target:', e.target);
+                console.log('Event currentTarget:', e.currentTarget);
+                console.log('Button value:', btn.value);
+                console.log('Button name:', btn.name);
+            }, true); // Capture phase
+
+            btn.addEventListener('click', function(e) {
+                console.log(`🖱️ BUBBLE EVENT Submit button ${index} clicked!`, btn);
+            }, false); // Bubble phase
+
+            btn.addEventListener('mousedown', function(e) {
+                console.log(`🖱️ MOUSEDOWN Submit button ${index}!`);
+            });
+
+            btn.addEventListener('mouseup', function(e) {
+                console.log(`🖱️ MOUSEUP Submit button ${index}!`);
+            });
+        });
+
+        // Global click detection for debugging
+        document.addEventListener('click', function(e) {
+            if (e.target.matches('button[type="submit"]')) {
+                console.log(`🌍 GLOBAL CLICK DETECTED on submit button:`, e.target);
+                console.log('Target text:', e.target.textContent.trim());
+
+                // Check form validity when button is clicked
+                console.log('🔍 Debug target element:');
+                console.log('- Target tag:', e.target.tagName);
+                console.log('- Target type:', e.target.type);
+                console.log('- Target parent:', e.target.parentElement);
+                console.log('- Target parent tag:', e.target.parentElement?.tagName);
+
+                // Try multiple ways to find the form
+                const form1 = e.target.closest('form');
+                const form2 = e.target.form;
+                const form3 = document.querySelector('form');
+
+                // Count ALL forms in the page
+                const allForms = document.querySelectorAll('form');
+                console.log('🔍 Form search results:');
+                console.log('- closest("form"):', form1);
+                console.log('- target.form:', form2);
+                console.log('- document.querySelector("form"):', form3);
+                console.log('- Total forms in page:', allForms.length);
+                allForms.forEach((f, i) => {
+                    console.log(`  Form ${i}: action="${f.action}" method="${f.method}"`);
+                });
+
+                // Find the course edit form specifically (Form 1 from debug)
+                const courseForm = Array.from(allForms).find(f => {
+                    const isCoursePath = f.action.includes('/admin/courses/41') && f.method.toLowerCase() === 'post';
+                    const isNotLogout = !f.action.includes('/logout');
+                    const isNotStudents = !f.action.includes('/students');
+                    const isNotGet = f.method.toLowerCase() !== 'get';
+                    console.log(`Checking form: ${f.action} - isCoursePath:${isCoursePath} isNotLogout:${isNotLogout} isNotStudents:${isNotStudents} isNotGet:${isNotGet}`);
+                    return isCoursePath && isNotLogout && isNotStudents && isNotGet;
+                });
+
+                console.log('🎯 Course form found:', courseForm);
+
+                const form = form1 || form2 || courseForm || form3;
+                if (form) {
+                    console.log('🔍 Form validity check:');
+                    console.log('- Form valid:', form.checkValidity());
+                    console.log('- Form action:', form.action);
+                    console.log('- Form method:', form.method);
+
+                    if (!form.checkValidity()) {
+                        console.error('❌ Form validation failed! Invalid fields:');
+                        const invalidFields = form.querySelectorAll(':invalid');
+                        invalidFields.forEach(field => {
+                            console.error(`- Invalid: ${field.name} = "${field.value}" (${field.validationMessage})`);
+                        });
+
+                        // Prevent form submission if invalid
+                        e.preventDefault();
+                        console.log('🚫 Form submission prevented due to validation errors');
+                        return false;
+                    } else {
+                        console.log('✅ Form is valid, allowing submission');
+                    }
+                } else {
+                    console.error('❌ No form found for submit button');
+                }
+            }
+        }, true);
+
+    } else {
+        console.error('❌ Form not found!');
     }
 });
 
