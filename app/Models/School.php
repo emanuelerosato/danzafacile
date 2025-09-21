@@ -68,6 +68,14 @@ class School extends Model
     }
 
     /**
+     * Ottiene tutte le sale della scuola
+     */
+    public function rooms(): HasMany
+    {
+        return $this->hasMany(SchoolRoom::class);
+    }
+
+    /**
      * Ottiene tutti i documenti della scuola
      */
     public function documents(): HasMany

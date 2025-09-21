@@ -124,6 +124,15 @@ Route::middleware('auth')->group(function () {
         Route::post('courses/{course}/students', [AdminCourseController::class, 'addStudent'])->name('courses.students.store');
         Route::delete('courses/{course}/students/{user}', [AdminCourseController::class, 'removeStudent'])->name('courses.students.destroy');
 
+        // Course Rooms endpoint for dropdown population
+        Route::get('courses/rooms', [AdminCourseController::class, 'getSchoolRoomsForDropdown'])->name('courses.rooms');
+
+        // School Rooms management (AJAX API)
+        Route::get('rooms', [AdminCourseController::class, 'getRooms'])->name('rooms.index');
+        Route::post('rooms', [AdminCourseController::class, 'createRoom'])->name('rooms.store');
+        Route::put('rooms/{room}', [AdminCourseController::class, 'updateRoom'])->name('rooms.update');
+        Route::delete('rooms/{room}', [AdminCourseController::class, 'deleteRoom'])->name('rooms.destroy');
+
         // Events management
         Route::resource('events', AdminEventController::class);
         Route::patch('events/{event}/toggle-active', [AdminEventController::class, 'toggleActive'])->name('events.toggle-active');

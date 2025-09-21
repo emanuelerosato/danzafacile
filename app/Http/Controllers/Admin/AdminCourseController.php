@@ -105,6 +105,14 @@ class AdminCourseController extends AdminBaseController
                 return !empty($slot['day']) && !empty($slot['start_time']) && !empty($slot['end_time']);
             });
 
+            // Handle custom locations first
+            foreach ($scheduleSlots as &$slot) {
+                if (isset($slot['custom_location']) && !empty($slot['custom_location'])) {
+                    $slot['location'] = trim($slot['custom_location']);
+                    unset($slot['custom_location']);
+                }
+            }
+
             // Ensure proper UTF-8 encoding for day names
             foreach ($scheduleSlots as &$slot) {
                 if (isset($slot['day'])) {
@@ -205,6 +213,9 @@ class AdminCourseController extends AdminBaseController
 
         $levels = ['Principiante', 'Intermedio', 'Avanzato', 'Professionale'];
 
+        // Get available rooms for this school
+        $availableRooms = $this->getSchoolRooms();
+
         // DEBUG: Log active enrollments when loading edit page
         $activeEnrollments = $course->enrollments()->with('user')->where('status', 'active')->get();
         Log::info('🔍 EDIT PAGE LOADED - Active enrollments', [
@@ -221,7 +232,7 @@ class AdminCourseController extends AdminBaseController
             })
         ]);
 
-        return view('admin.courses.edit', compact('course', 'instructors', 'levels'));
+        return view('admin.courses.edit', compact('course', 'instructors', 'levels', 'availableRooms'));
     }
 
     /**
@@ -265,6 +276,14 @@ class AdminCourseController extends AdminBaseController
             $scheduleSlots = array_filter($validated['schedule_slots'], function($slot) {
                 return !empty($slot['day']) && !empty($slot['start_time']) && !empty($slot['end_time']);
             });
+
+            // Handle custom locations first
+            foreach ($scheduleSlots as &$slot) {
+                if (isset($slot['custom_location']) && !empty($slot['custom_location'])) {
+                    $slot['location'] = trim($slot['custom_location']);
+                    unset($slot['custom_location']);
+                }
+            }
 
             // Ensure proper UTF-8 encoding for day names
             foreach ($scheduleSlots as &$slot) {
@@ -757,5 +776,215 @@ class AdminCourseController extends AdminBaseController
         $enrollment->delete();
 
         return redirect()->back()->with('success', 'Studente rimosso dal corso con successo.');
+    }
+
+    /**
+     * Get available rooms for the current school
+     */
+    private function getSchoolRooms()
+    {
+        // FIRST PRIORITY: Get managed rooms from database
+        $managedRooms = collect();
+        if ($this->school->rooms()->exists()) {
+            $managedRooms = $this->school->rooms()
+                ->where('active', true)
+                ->orderBy('name')
+                ->pluck('name');
+        }
+
+        // LEGACY ROOMS DISABLED - Pure Database-Only System
+        // Only use managed rooms from database, ignore all legacy rooms
+        // This ensures complete consistency between dropdown and modal
+        $existingRooms = collect();
+
+        // THIRD PRIORITY: Default predefined rooms - DISABLED
+        // Now that we have full room management, we don't use hardcoded defaults
+        // Schools should manage their own rooms through the database
+        $defaultRooms = collect();
+
+        // Merge with priority: managed rooms first, then existing legacy rooms, then defaults
+        $allRooms = $managedRooms
+            ->merge($existingRooms)
+            ->merge($defaultRooms)
+            ->unique()
+            ->filter()
+            ->sort()
+            ->values();
+
+
+        return $allRooms->toArray();
+    }
+
+    /**
+     * Get school rooms for dropdown population (used by JavaScript)
+     */
+    public function getSchoolRoomsForDropdown()
+    {
+        return response()->json($this->getSchoolRooms());
+    }
+
+    /**
+     * Get rooms via AJAX
+     */
+    public function getRooms()
+    {
+        // DEBUG: Log which school is being used
+        Log::info('getRooms() called', [
+            'school_id' => $this->school->id,
+            'school_name' => $this->school->name,
+            'user_id' => auth()->id()
+        ]);
+
+        // Get detailed room objects from database
+        $rooms = $this->school->rooms()->active()->orderBy('name')->get();
+
+        // Use the same logic as getSchoolRooms() for consistency
+        $availableRoomNames = $this->getSchoolRooms();
+
+        Log::info('getRooms() result', [
+            'detailed_rooms_count' => $rooms->count(),
+            'available_room_names_count' => count($availableRoomNames),
+            'detailed_rooms' => $rooms->pluck('name'),
+            'available_room_names' => $availableRoomNames
+        ]);
+
+        return response()->json([
+            'rooms' => $availableRoomNames,
+            'detailed_rooms' => $rooms->toArray()
+        ]);
+    }
+
+    /**
+     * Create a new room via AJAX
+     */
+    public function createRoom()
+    {
+        request()->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
+            'capacity' => 'nullable|integer|min:1'
+        ]);
+
+        try {
+            $room = $this->school->rooms()->create([
+                'name' => trim(request('name')),
+                'description' => request('description'),
+                'capacity' => request('capacity'),
+                'active' => true
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'room' => $room,
+                'message' => "Sala '{$room->name}' creata con successo!"
+            ]);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000') { // Unique constraint violation
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Una sala con questo nome esiste già.'
+                ], 422);
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * Delete a room via AJAX
+     */
+    public function deleteRoom($roomId)
+    {
+        $room = $this->school->rooms()->findOrFail($roomId);
+
+        // Check if room is being used in any courses
+        $usageCount = Course::where('school_id', $this->school->id)
+            ->where(function($query) use ($room) {
+                $query->where('location', $room->name)
+                      ->orWhereJsonContains('schedule', [['location' => $room->name]]);
+            })
+            ->count();
+
+        if ($usageCount > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => "Impossibile eliminare '{$room->name}'. È utilizzata in {$usageCount} corso/i."
+            ], 422);
+        }
+
+        $roomName = $room->name;
+        $room->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "Sala '{$roomName}' eliminata con successo!"
+        ]);
+    }
+
+    /**
+     * Update a room via AJAX
+     */
+    public function updateRoom($roomId)
+    {
+        $room = $this->school->rooms()->findOrFail($roomId);
+
+        request()->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
+            'capacity' => 'nullable|integer|min:1',
+            'active' => 'boolean'
+        ]);
+
+        $oldName = $room->name;
+        $newName = trim(request('name'));
+
+        try {
+            $room->update([
+                'name' => $newName,
+                'description' => request('description'),
+                'capacity' => request('capacity'),
+                'active' => request('active', true)
+            ]);
+
+            // If name changed, update courses that use this room
+            if ($oldName !== $newName) {
+                Course::where('school_id', $this->school->id)
+                    ->where('location', $oldName)
+                    ->update(['location' => $newName]);
+
+                // Update schedule data (this is more complex due to JSON field)
+                $courses = Course::where('school_id', $this->school->id)->get();
+                foreach ($courses as $course) {
+                    if ($course->schedule_data) {
+                        $updated = false;
+                        $scheduleData = $course->schedule_data;
+                        foreach ($scheduleData as &$slot) {
+                            if (($slot['location'] ?? '') === $oldName) {
+                                $slot['location'] = $newName;
+                                $updated = true;
+                            }
+                        }
+                        if ($updated) {
+                            $course->update(['schedule' => json_encode($scheduleData)]);
+                        }
+                    }
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'room' => $room,
+                'message' => "Sala aggiornata con successo!"
+            ]);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Una sala con questo nome esiste già.'
+                ], 422);
+            }
+            throw $e;
+        }
     }
 }

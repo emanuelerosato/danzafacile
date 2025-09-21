@@ -88,6 +88,7 @@ class UpdateCourseRequest extends FormRequest
             'schedule_slots.*.start_time' => 'nullable|date_format:H:i',
             'schedule_slots.*.end_time' => 'nullable|date_format:H:i|after:schedule_slots.*.start_time',
             'schedule_slots.*.location' => 'nullable|string|max:255',
+            'schedule_slots.*.custom_location' => 'nullable|string|max:255',
             'location' => 'nullable|string|max:255',
             'duration_weeks' => 'nullable|integer|min:1|max:52',
             'active' => 'boolean'
