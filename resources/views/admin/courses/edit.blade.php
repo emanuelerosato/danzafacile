@@ -835,11 +835,11 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
-                    <button type="submit" name="action" value="draft" 
+                    <button type="submit" name="submit_action" value="draft" 
                             class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200">
                         Salva come Bozza
                     </button>
-                    <button type="submit" name="action" value="update" 
+                    <button type="submit" name="submit_action" value="update" 
                             class="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-rose-500 to-purple-600 rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
                         <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
