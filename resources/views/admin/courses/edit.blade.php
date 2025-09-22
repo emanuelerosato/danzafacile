@@ -97,9 +97,9 @@
                                     <label class="course-field-label">Sala</label>
                                     <select name="schedule_slots[{{ $index }}][room_id]" class="course-field-select room-dropdown">
                                         <option value="">Seleziona una sala</option>
-                                        @foreach($rooms as $room)
-                                            <option value="{{ $room->id }}" {{ ($slot['room_id'] ?? '') == $room->id ? 'selected' : '' }}>
-                                                {{ $room->name }}
+                                        @foreach($availableRooms as $index => $roomName)
+                                            <option value="{{ $index }}" {{ ($slot['room_id'] ?? '') == $index ? 'selected' : '' }}>
+                                                {{ $roomName }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -218,7 +218,7 @@
         @vite('resources/js/admin/courses/course-edit.js')
         <script>
             // Pass data to JavaScript modules
-            window.availableRooms = @json($rooms->pluck('name', 'id')->toArray());
+            window.availableRooms = @json(collect($availableRooms)->mapWithKeys(function($room, $index) { return [$index => $room]; })->toArray());
             window.scheduleSlotIndex = {{ count($scheduleData ?? []) }};
 
             // Legacy functions for onclick handlers (will be deprecated)
