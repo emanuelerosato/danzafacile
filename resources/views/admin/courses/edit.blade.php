@@ -28,10 +28,50 @@
         <li class="text-gray-900">Modifica Corso</li>
     </x-slot>
 
+    <!-- Success/Error Alerts -->
+    @if(session('success'))
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <p class="text-green-800">{{ session('success') }}</p>
+            </div>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div>
+                    <p class="text-red-800 font-medium">Si sono verificati degli errori:</p>
+                    <ul class="list-disc list-inside text-red-700 mt-1">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <div class="course-edit-container py-8">
         <form method="POST" action="{{ route('admin.courses.update', $course) }}" enctype="multipart/form-data" class="space-y-8">
             @csrf
             @method('PUT')
+
+            @php
+                // Prepare data for the form
+                $scheduleData = old('schedule_slots', $course->schedule_data ?? []);
+                if (empty($scheduleData)) {
+                    $scheduleData = [['day' => '', 'start_time' => '', 'end_time' => '', 'room_id' => '']];
+                }
+                $equipment = old('equipment', $course->equipment ?? []);
+                $objectives = old('objectives', $course->objectives ?? []);
+            @endphp
 
             {{-- Course Information Section --}}
             <x-admin.courses.course-info-form :course="$course" />
