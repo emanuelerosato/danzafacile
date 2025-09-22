@@ -2692,4 +2692,8 @@ function showNotification(message, type = 'info') {
     </div>
 </x-modal>
 
+@push('scripts')
+    @vite('resources/js/admin/courses/course-edit.js')
+@endpush
+
 </x-app-layout>
