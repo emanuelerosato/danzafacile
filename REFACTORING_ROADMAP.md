@@ -40,23 +40,47 @@
 
 ## 📅 PIANO DI IMPLEMENTAZIONE
 
-### **FASE 1: QUICK WINS** ⚡ (Settimana 1-2)
+### **FASE 1: QUICK WINS** ⚡ (Settimana 1-2) - ULTRA-SAFE APPROACH
 **Target: File edit.blade.php (2.695 → 800 righe)**
 
-#### Step 1.1: Estrazione JavaScript (Giorno 1-2)
+#### 🔒 SETUP SICUREZZA (Giorno 0)
 ```bash
-# Creare struttura modulare JS
+# OBBLIGATORIO: Creare ambiente sicuro
+git checkout -b feature/refactoring-phase-1
+git tag stable-pre-refactoring-$(date +%Y%m%d)
+
+# Test stato iniziale
+curl -s -o /dev/null -w "Status: %{http_code}\n" http://localhost:8089/admin/courses/41/edit
+```
+
+#### Step 1.1: Estrazione JavaScript - APPROACH INCREMENTALE (Giorno 1-2)
+```bash
+# Prima di tutto: ANALISI del JavaScript esistente
+grep -n "function\|let\|const\|var" resources/views/admin/courses/edit.blade.php > js-analysis.txt
+
+# Creare struttura SOLO DOPO analisi completa
 mkdir -p resources/js/admin/courses/modules
 mkdir -p resources/js/admin/courses/utils
 ```
 
-**File da creare:**
-- [ ] `resources/js/admin/courses/course-edit.js` (Entry point)
+**⚠️ ATTENZIONE: Estrazione GRADUALE, non tutto insieme!**
+
+**Step 1.1a: Prima extractione (SOLO utility functions)**
+- [ ] `resources/js/admin/courses/utils/helpers.js` (SOLO helper non critici)
+- [ ] Test: ✅ Pulsante "Aggiungi Orario" funziona
+
+**Step 1.1b: Seconda extractione (Schedule management)**
 - [ ] `resources/js/admin/courses/modules/ScheduleManager.js`
-- [ ] `resources/js/admin/courses/modules/LocationManager.js`
-- [ ] `resources/js/admin/courses/modules/MediaUploader.js`
-- [ ] `resources/js/admin/courses/utils/api.js`
-- [ ] `resources/js/admin/courses/utils/helpers.js`
+- [ ] Test: ✅ Tutti i pulsanti orari funzionano
+
+**Step 1.1c: Terza extractione (Entry point)**
+- [ ] `resources/js/admin/courses/course-edit.js` (Entry point)
+- [ ] Test: ✅ Funzionalità completa
+
+**❌ NON TOCCARE ANCORA:**
+- Location management (troppo rischioso inizialmente)
+- Media upload (complesso)
+- Form validation (critico)
 
 #### Step 1.2: CSS Modulare (Giorno 2-3)
 ```bash
@@ -208,20 +232,124 @@ php artisan make:resource CourseCollection
 
 ---
 
-## 🚨 RISCHI E MITIGAZIONI
+## 🚨 SICUREZZA E STRATEGIA DI PROTEZIONE
 
-### Rischi Identificati
-1. **Rottura funzionalità esistenti**
-   - *Mitigazione: Test automatizzati + manual testing*
-2. **Tempo di implementazione sottostimato**
-   - *Mitigazione: Buffer time del 30% su ogni fase*
-3. **Resistenza al cambiamento architetturale**
-   - *Mitigazione: Documentazione e training adeguato*
+### 🔒 STATO SICURO ATTUALE (GOLDEN STATE)
+- **Commit di riferimento:** `16b83ee` - "🔧 HOTFIX: Ripristinato pulsante 'Aggiungi Orario' funzionante"
+- **Data:** 2025-09-22
+- **Funzionalità verificate:** ✅ Tutto funziona correttamente
+- **URL test:** http://localhost:8089/admin/courses/41/edit
 
-### Rollback Plan
-- [ ] Git tags per ogni fase completata
-- [ ] Script di rollback automatizzato
-- [ ] Backup database prima modifiche strutturali
+### 🛡️ STRATEGIA BRANCHING SICURA
+```bash
+# BEFORE STARTING: Creare branch di sicurezza
+git checkout -b feature/refactoring-phase-1
+git tag stable-pre-refactoring-$(date +%Y%m%d)
+
+# Durante ogni step: commit incrementali
+git add .
+git commit -m "SAFE STEP: descrizione specifica"
+
+# Fine fase: merge solo se tutto funziona
+git checkout main
+git merge feature/refactoring-phase-1
+```
+
+### 🧪 TESTING OBBLIGATORIO OGNI STEP
+```bash
+# Prima di ogni modifica
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8089/admin/courses/41/edit
+
+# Test JavaScript funzionalità critiche
+# 1. Pulsante "Aggiungi Orario" deve funzionare
+# 2. Form submission deve salvare
+# 3. Nessun errore JavaScript console
+```
+
+### 🚨 RISCHI IDENTIFICATI E MITIGAZIONI
+
+#### 🔴 RISCHI CRITICI
+1. **Rottura pulsante "Aggiungi Orario"** (già successo prima!)
+   - *Mitigazione: Test specifico dopo ogni modifica JS*
+   - *Rollback: `git reset --hard 16b83ee`*
+
+2. **Perdita variabili PHP in Blade**
+   - *Problema: `$scheduleData` e scope variables*
+   - *Mitigazione: Mapping completo variabili prima estrazione*
+
+3. **Rottura CSS layout/styling**
+   - *Mitigazione: Screenshots before/after ogni modifica*
+   - *Test: Visual regression testing*
+
+#### 🟡 RISCHI MODERATI
+4. **Tempo di implementazione sottostimato**
+   - *Mitigazione: Buffer time del 50% (non 30%)*
+5. **Conflitti con altri sviluppatori**
+   - *Mitigazione: Branch separato + comunicazione*
+
+### 🔙 ROLLBACK PLAN DETTAGLIATO
+```bash
+# Rollback immediato a stato sicuro
+git reset --hard 16b83ee
+
+# Rollback parziale (ultimo commit working)
+git reset --hard HEAD~1
+
+# Emergency restore da tag
+git checkout stable-pre-refactoring-YYYYMMDD
+```
+
+### 🗺️ MAPPING FUNZIONALITÀ CRITICHE DA PRESERVARE
+
+#### edit.blade.php - Funzioni JavaScript critiche:
+- [ ] `addScheduleSlot()` - Pulsante "Aggiungi Orario"
+- [ ] `removeScheduleSlot(index)` - Rimozione slots orari
+- [ ] `updateSlotRoom(slotIndex, roomId)` - Aggiornamento sale
+- [ ] Form validation e submission
+- [ ] Media upload functionality
+- [ ] Alpine.js data binding
+
+#### Variabili PHP da preservare:
+- [ ] `$course` - Dati corso principale
+- [ ] `$scheduleData` - Array orari esistenti
+- [ ] `$rooms` - Lista sale disponibili
+- [ ] `$appSettings` - Configurazioni app
+- [ ] Auth user data e permissions
+
+#### CSS/Styling da preservare:
+- [ ] Layout responsive principale
+- [ ] Form styling consistency
+- [ ] Button states e hover effects
+- [ ] Modal/popup functionality
+- [ ] Color scheme e branding
+
+### 📋 PRE-FLIGHT CHECKLIST
+- [x] ✅ Stato attuale funzionante (commit 16b83ee)
+- [ ] Branch di sicurezza creato
+- [ ] Tag di backup creato
+- [ ] Test URL funzionante
+- [ ] Database backup fatto
+- [ ] Mapping funzionalità critiche completato
+- [ ] Team informato del refactoring
+
+### 🔍 STEP-BY-STEP VERIFICATION PROCESS
+```bash
+# Prima di ogni modifica - MANDATORY
+echo "🧪 TESTING BEFORE CHANGES..."
+curl -s -o /dev/null -w "Status: %{http_code}\n" http://localhost:8089/admin/courses/41/edit
+
+# Dopo ogni modifica - MANDATORY
+echo "🧪 TESTING AFTER CHANGES..."
+curl -s -o /dev/null -w "Status: %{http_code}\n" http://localhost:8089/admin/courses/41/edit
+
+# Test JavaScript functionality
+echo "🧪 Manual test required:"
+echo "1. Click 'Aggiungi Orario' button"
+echo "2. Verify new slot appears"
+echo "3. Test room selection"
+echo "4. Test remove slot"
+echo "5. Check console for errors"
+```
 
 ---
 
