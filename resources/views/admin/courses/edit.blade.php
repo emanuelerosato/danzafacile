@@ -1169,7 +1169,7 @@ window.addEventListener('unhandledrejection', function(e) {
 });
 
 // Available rooms data from server (global so it can be updated)
-let availableRooms = @json($availableRooms);
+let availableRooms = @json($availableRooms ?? []);
 window.availableRooms = availableRooms;
 
 // Function to generate room options HTML
@@ -1204,7 +1204,7 @@ function addObjectiveField() {
 }
 
 // Schedule management functions
-let scheduleSlotIndex = {{ count($scheduleData ?? []) }};
+let scheduleSlotIndex = 0;
 
 function addScheduleSlot() {
     const container = document.getElementById('schedule-container');
@@ -1373,6 +1373,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initialize ALL location selects (existing + new) with JavaScript-generated options
     initializeAllLocationDropdowns();
+
+    // Initialize schedule slot index based on existing slots
+    const existingSlots = document.querySelectorAll('.schedule-slot');
+    scheduleSlotIndex = existingSlots.length;
+
+    // Note: "Aggiungi Orario" button uses onclick attribute directly
 
     const form = document.querySelector('form');
     if (form) {
