@@ -1,0 +1,233 @@
+169:                                                       const reader = new FileReader();
+304:                                    <label class="block text-sm font-medium text-gray-700 mb-2">Descrizione Completa</label>
+874:                    Sei sicuro di voler disattivare <strong>"{{ $course->name ?? 'questo corso' }}"</strong>?
+1140:                        <option value="completed">Completata</option>
+1183:window.addEventListener('error', function(e) {
+1191:window.addEventListener('unhandledrejection', function(e) {
+1196:let availableRooms = @json($availableRooms);
+1200:function generateRoomOptions() {
+1201:    let options = '<option value="">Seleziona sala</option>';
+1210:function addEquipmentField() {
+1211:    const container = event.target.parentElement;
+1212:    const newField = document.createElement('input');
+1220:function addObjectiveField() {
+1221:    const container = event.target.parentElement;
+1222:    const newField = document.createElement('input');
+1230:// Schedule management functions
+1231:let scheduleSlotIndex = {{ count($scheduleData ?? []) }};
+1233:function addScheduleSlot() {
+1234:    const container = document.getElementById('schedule-container');
+1235:    const slotHtml = `
+1312:function removeScheduleSlot(button) {
+1313:    const slot = button.closest('.schedule-slot');
+1318:function updateSlotNumbers() {
+1319:    const slots = document.querySelectorAll('.schedule-slot');
+1321:        const title = slot.querySelector('h4');
+1322:        const daySelect = slot.querySelector('select[name*="[day]"]');
+1323:        const selectedDay = daySelect.value;
+1332:        const inputs = slot.querySelectorAll('input, select');
+1334:            const nameAttr = input.getAttribute('name');
+1336:                const newName = nameAttr.replace(/schedule_slots\[\d+\]/, `schedule_slots[${index}]`);
+1343:function calculateDuration(input) {
+1344:    const slot = input.closest('.schedule-slot');
+1345:    const startTime = slot.querySelector('input[name*="[start_time]"]').value;
+1346:    const endTime = slot.querySelector('input[name*="[end_time]"]').value;
+1347:    const durationDisplay = slot.querySelector('.duration-display');
+1350:        const start = new Date(`2000-01-01T${startTime}:00`);
+1351:        const end = new Date(`2000-01-01T${endTime}:00`);
+1354:            const diff = end - start;
+1355:            const hours = Math.floor(diff / (1000 * 60 * 60));
+1356:            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+1358:            let durationText = '';
+1379:document.addEventListener('DOMContentLoaded', function() {
+1380:    const timeInputs = document.querySelectorAll('input[type="time"]');
+1382:        input.addEventListener('change', function() {
+1389:    const daySelects = document.querySelectorAll('select[name*="[day]"]');
+1391:        select.addEventListener('change', function() {
+1402:    const form = document.querySelector('form');
+1407:        form.addEventListener('submit', function(e) {
+1415:        form.addEventListener('submit', function(e) {
+1421:            const formData = new FormData(form);
+1423:            for (let [key, value] of formData.entries()) {
+1442:                const invalidFields = form.querySelectorAll(':invalid');
+1450:        const submitButtons = form.querySelectorAll('button[type="submit"]');
+1462:            btn.addEventListener('click', function(e) {
+1470:            btn.addEventListener('click', function(e) {
+1474:            btn.addEventListener('mousedown', function(e) {
+1478:            btn.addEventListener('mouseup', function(e) {
+1484:        document.addEventListener('click', function(e) {
+1497:                const form1 = e.target.closest('form');
+1498:                const form2 = e.target.form;
+1499:                const form3 = document.querySelector('form');
+1502:                const allForms = document.querySelectorAll('form');
+1513:                const courseForm = Array.from(allForms).find(f => {
+1515:                    const actionStr = typeof f.action === 'string' ? f.action : '';
+1516:                    const isCoursePath = actionStr.includes('/admin/courses/41') && f.method.toLowerCase() === 'post';
+1517:                    const isNotLogout = !actionStr.includes('/logout');
+1518:                    const isNotStudents = !actionStr.includes('/students');
+1519:                    const isNotGet = f.method.toLowerCase() !== 'get';
+1526:                const form = form1 || form2 || courseForm || form3;
+1535:                        const invalidFields = form.querySelectorAll(':invalid');
+1551:                        const hiddenAction = document.createElement('input');
+1563:                        const formData = new FormData(form);
+1569:                        const submitBtn = e.target;
+1591:// Enhanced schedule management functions
+1592:function validateTimeSlots() {
+1593:    const slots = document.querySelectorAll('.schedule-slot');
+1594:    const conflicts = [];
+1598:        const conflictIndicator = slot.querySelector('.conflict-indicator');
+1606:    for (let i = 0; i < slots.length; i++) {
+1607:        for (let j = i + 1; j < slots.length; j++) {
+1608:            const conflict = checkSlotConflict(slots[i], slots[j]);
+1624:function checkSlotConflict(slot1, slot2) {
+1625:    const day1 = slot1.querySelector('select[name*="[day]"]').value;
+1626:    const day2 = slot2.querySelector('select[name*="[day]"]').value;
+1632:    const start1 = slot1.querySelector('input[name*="[start_time]"]').value;
+1633:    const end1 = slot1.querySelector('input[name*="[end_time]"]').value;
+1634:    const start2 = slot2.querySelector('input[name*="[start_time]"]').value;
+1635:    const end2 = slot2.querySelector('input[name*="[end_time]"]').value;
+1638:        return null; // Can't check without complete times
+1643:        const location1 = slot1.querySelector('select[name*="[location]"]').value;
+1644:        const location2 = slot2.querySelector('select[name*="[location]"]').value;
+1656:function clientTimesOverlap(start1, end1, start2, end2) {
+1657:    const startTime1 = new Date(`2000-01-01T${start1}:00`);
+1658:    const endTime1 = new Date(`2000-01-01T${end1}:00`);
+1659:    const startTime2 = new Date(`2000-01-01T${start2}:00`);
+1660:    const endTime2 = new Date(`2000-01-01T${end2}:00`);
+1666:function showConflictIndicator(slot, message) {
+1670:        const indicator = document.createElement('div');
+1678:document.addEventListener('DOMContentLoaded', function() {
+1679:    const scheduleContainer = document.getElementById('schedule-container');
+1682:    scheduleContainer.addEventListener('change', function(e) {
+1695:    // const form = document.querySelector('form');
+1697:    //     form.addEventListener('submit', function(e) {
+1699:    //         const scheduleTab = document.querySelector('[x-show="activeTab === \'schedule\'"]');
+1700:    //         const isScheduleTabActive = scheduleTab && !scheduleTab.hidden;
+1704:    //             alert('Ci sono conflitti negli orari. Risolvi i conflitti prima di salvare.');
+1718:function initializeAllLocationDropdowns() {
+1722:    const locationSelects = document.querySelectorAll('select[name*="[location]"]');
+1727:        const selectedValue = select.value || select.getAttribute('data-selected-value');
+1731:        const newOptionsHtml = generateRoomOptions();
+1755:// UX Enhancement functions
+1756:function initializeUXEnhancements() {
+1763:function addTimeSlotTooltips() {
+1764:    const scheduleContainer = document.getElementById('schedule-container');
+1767:    scheduleContainer.addEventListener('focus', function(e) {
+1776:function enhanceSlotVisuals() {
+1778:    const scheduleContainer = document.getElementById('schedule-container');
+1780:    scheduleContainer.addEventListener('focus', function(e) {
+1782:            const slot = e.target.closest('.schedule-slot');
+1787:    scheduleContainer.addEventListener('blur', function(e) {
+1789:            const slot = e.target.closest('.schedule-slot');
+1795:function addKeyboardNavigation() {
+1797:    document.addEventListener('keydown', function(e) {
+1809:                        const removeBtn = document.activeElement.closest('.schedule-slot').querySelector('button[onclick*="removeScheduleSlot"]');
+1820:// Enhanced addScheduleSlot function with UX improvements
+1821:const originalAddScheduleSlot = window.addScheduleSlot;
+1822:window.addScheduleSlot = function() {
+1823:    const result = originalAddScheduleSlot();
+1827:        const newSlot = document.querySelector('.schedule-slot:last-child');
+1829:            const firstInput = newSlot.querySelector('select, input');
+1849:document.addEventListener('DOMContentLoaded', function() {
+1850:    const form = document.querySelector('form');
+1853:        form.addEventListener('submit', function(e) {
+1854:            const submitBtn = form.querySelector('button[type="submit"]');
+1870:let currentStudentData = {};
+1872:function openStudentDetailsModal(id, name, email, phone, enrollmentDate, status, paymentStatus) {
+1876:    const avatar = document.getElementById('student-avatar');
+1877:    const initials = getInitials(name);
+1893:function openContactModal(id, name, email) {
+1897:    const avatar = document.getElementById('contact-avatar');
+1898:    const initials = getInitials(name);
+1915:function openContactModalFromDetails() {
+1923:function getInitials(name) {
+1924:    const nameParts = name.split(' ');
+1925:    const firstInitial = nameParts[0] ? nameParts[0].charAt(0).toUpperCase() : '';
+1926:    const lastInitial = nameParts[1] ? nameParts[1].charAt(0).toUpperCase() : '';
+1930:function getStatusLabel(status) {
+1931:    const statusLabels = {
+1935:        'completed': 'Completata',
+1941:function getPaymentStatusLabel(paymentStatus) {
+1942:    const paymentLabels = {
+1950:function removeStudentConfirm(buttonElement, studentId, studentName) {
+1955:    let formElement = document.getElementById(`remove-form-${studentId}`);
+1960:        let current = buttonElement.parentElement;
+1962:            const form = current.querySelector(`#remove-form-${studentId}`);
+1974:        const allForms = Array.from(document.querySelectorAll('form'));
+1987:        let dropdownContainer = buttonElement.closest('[x-data*="open"]');
+1993:                const alpineData = dropdownContainer._x_dataStack[0];
+1996:                    const wasOpen = alpineData.open;
+2049:function processFormSubmission(formElement, studentId, studentName) {
+2066:            const tempForm = document.createElement('form');
+2072:            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+2074:                const csrfInput = document.createElement('input');
+2082:            const methodInput = document.createElement('input');
+2094:        if (buttonElement && typeof buttonElement.closest === 'function') {
+2101:            let parent = buttonElement.parentNode;
+2125:                return; // Exit function after successful submission
+2131:                const correctForm = document.getElementById(`remove-form-${studentId}`);
+2135:                    return; // Exit function after successful submission
+2156:            const baseUrl = '{{ route("admin.courses.students.destroy", [$course->id, "PLACEHOLDER"]) }}';
+2157:            const formAction = baseUrl.replace('PLACEHOLDER', studentId);
+2196:function fallbackRemoval(studentId, studentName) {
+2201:        const tempForm = document.createElement('form');
+2207:        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+2209:            const csrfInput = document.createElement('input');
+2217:        const methodInput = document.createElement('input');
+2232:document.addEventListener('DOMContentLoaded', function() {
+2233:    const contactForm = document.getElementById('contact-form');
+2235:        contactForm.addEventListener('submit', function(e) {
+2238:            const formData = new FormData(contactForm);
+2239:            const studentId = formData.get('student_id');
+2240:            const subject = formData.get('subject');
+2241:            const message = formData.get('message');
+2242:            const sendEmail = formData.get('send_email');
+2270:document.addEventListener('DOMContentLoaded', function() {
+2273:    const allRemoveForms = document.querySelectorAll('form[id*="remove-form"]');
+2277:        const formId = form.id;
+2278:        const studentId = formId.replace('remove-form-', '');
+2290:function openRoomManager() {
+2297:let roomsData = [];
+2298:let editingRoomId = null;
+2301:async function loadRoomsList() {
+2304:        const response = await fetch('/admin/rooms', {
+2314:            const responseData = await response.json();
+2344:function renderRoomsList() {
+2347:    const container = document.getElementById('rooms-list-container');
+2369:    const roomsHtml = roomsData.map(room => {
+2373:        const roomName = room.name || 'Nome non disponibile';
+2374:        const roomDescription = room.description || 'Nessuna descrizione';
+2375:        const roomCapacity = room.capacity || 'Non specificata';
+2376:        const roomActive = room.active !== undefined ? room.active : true;
+2377:        const roomId = room.id || 0;
+2399:                        <button onclick="deleteRoom(${roomId}, '${escapeHtml(roomName)}')" class="text-red-600 hover:text-red-800 text-sm">
+2414:function showAddRoomForm() {
+2423:function showEditRoomForm(roomId) {
+2424:    const room = roomsData.find(r => r.id === roomId);
+2440:function hideRoomForm() {
+2446:async function saveRoom(event) {
+2449:    const formData = new FormData(event.target);
+2450:    const roomData = {
+2460:        const url = editingRoomId ? `/admin/rooms/${editingRoomId}` : '/admin/rooms';
+2461:        const method = editingRoomId ? 'PUT' : 'POST';
+2463:        const response = await fetch(url, {
+2475:            const result = await response.json();
+2487:            const error = await response.json();
+2497:// Delete room
+2498:async function deleteRoom(roomId, roomName) {
+2503:    console.log('🗑️ Deleting room:', roomId);
+2506:        const response = await fetch(`/admin/rooms/${roomId}`, {
+2516:            console.log('✅ Room deleted successfully');
+2521:            const error = await response.json();
+2522:            console.error('❌ Failed to delete room:', error);
+2526:        console.error('❌ Error deleting room:', error);
+2532:async function refreshRoomDropdowns() {
+2539:            const roomNames = roomsData.map(room => room.name).sort();
+2542:            // Update both local and global availableRooms variables
+2545:            console.log('🔄 Updated availableRooms variable:', availableRooms);
+2559:// Utility functions
+2560:function escapeHtml(text) {
+2565:    const map = {
+2572:    return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+2575:function showNotification(message, type = 'info') {
+2577:    const notification = document.createElement('div');
