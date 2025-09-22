@@ -873,6 +873,16 @@ class AdminCourseController extends AdminBaseController
     }
 
     /**
+     * Show the room management page
+     */
+    public function manageRooms()
+    {
+        $rooms = $this->school->rooms()->active()->orderBy('name')->get();
+
+        return view('admin.rooms.manage', compact('rooms'));
+    }
+
+    /**
      * Create a new room via AJAX
      */
     public function createRoom()

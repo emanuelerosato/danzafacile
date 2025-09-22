@@ -127,8 +127,9 @@ Route::middleware('auth')->group(function () {
         // Course Rooms endpoint for dropdown population
         Route::get('courses/rooms', [AdminCourseController::class, 'getSchoolRoomsForDropdown'])->name('courses.rooms');
 
-        // School Rooms management (AJAX API)
+        // School Rooms management
         Route::get('rooms', [AdminCourseController::class, 'getRooms'])->name('rooms.index');
+        Route::get('rooms/manage', [AdminCourseController::class, 'manageRooms'])->name('rooms.manage');
         Route::post('rooms', [AdminCourseController::class, 'createRoom'])->name('rooms.store');
         Route::put('rooms/{room}', [AdminCourseController::class, 'updateRoom'])->name('rooms.update');
         Route::delete('rooms/{room}', [AdminCourseController::class, 'deleteRoom'])->name('rooms.destroy');

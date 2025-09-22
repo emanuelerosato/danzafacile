@@ -77,8 +77,8 @@
                 <x-nav-item href="{{ route('admin.courses.index') }}" :active="request()->routeIs('admin.courses.*')" icon="book-open">
                     Corsi
                 </x-nav-item>
-                <x-nav-item href="{{ route('admin.schedules.index') }}" :active="request()->routeIs('admin.schedules.*')" icon="calendar">
-                    Orari
+                <x-nav-item href="{{ route('admin.rooms.manage') }}" :active="request()->routeIs('admin.rooms.*')" icon="building">
+                    Gestisci Sale
                 </x-nav-item>
             </x-nav-group>
             
