@@ -1320,7 +1320,7 @@ function updateSlotNumbers() {
     slots.forEach((slot, index) => {
         const title = slot.querySelector('h4');
         const daySelect = slot.querySelector('select[name*="[day]"]');
-        const selectedDay = daySelect.value;
+        const selectedDay = daySelect ? daySelect.value : '';
 
         if (selectedDay) {
             title.textContent = `${selectedDay} - Orario ${index + 1}`;
