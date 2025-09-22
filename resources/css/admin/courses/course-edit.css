@@ -56,7 +56,7 @@
 
 /* Add Schedule Button */
 .add-schedule-btn {
-    @apply w-full border-2 border-dashed border-gray-300 hover:border-rose-400 rounded-lg p-4 text-center transition-colors group;
+    @apply w-full border-2 border-dashed border-gray-300 hover:border-rose-400 rounded-lg p-4 text-center transition-colors;
 }
 
 .add-schedule-btn:hover {
@@ -89,7 +89,8 @@
 }
 
 .course-field-textarea {
-    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent resize-vertical min-h-[100px];
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent min-h-[100px];
+    resize: vertical;
 }
 
 .course-field-select {
@@ -123,7 +124,7 @@
 }
 
 .media-gallery-item {
-    @apply relative group rounded-lg overflow-hidden border border-gray-200;
+    @apply relative rounded-lg overflow-hidden border border-gray-200;
 }
 
 .media-gallery-image {
