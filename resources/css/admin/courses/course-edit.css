@@ -1,0 +1,218 @@
+/**
+ * Course Edit Specific Styles
+ * Modular CSS for course editing interface
+ */
+
+/* Course Edit Container */
+.course-edit-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Form Section Styling */
+.course-form-section {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6;
+}
+
+.course-form-section h3 {
+    @apply text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200;
+}
+
+/* Schedule Slot Specific Styles */
+.schedule-container {
+    @apply space-y-4;
+}
+
+.schedule-slot {
+    @apply bg-gray-50 hover:bg-gray-100 rounded-lg p-4 border border-gray-200 transition-all duration-200;
+}
+
+.schedule-slot:hover {
+    @apply shadow-md border-rose-200;
+}
+
+.schedule-slot-header {
+    @apply flex items-center justify-between mb-3;
+}
+
+.schedule-slot-title {
+    @apply font-medium text-gray-900;
+}
+
+.schedule-remove-btn {
+    @apply text-red-600 hover:text-red-800 text-sm flex items-center space-x-1 transition-colors;
+}
+
+.schedule-remove-btn:hover {
+    @apply bg-red-50 rounded px-2 py-1;
+}
+
+.schedule-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4;
+}
+
+.schedule-duration-display {
+    @apply px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 font-mono text-sm;
+}
+
+/* Add Schedule Button */
+.add-schedule-btn {
+    @apply w-full border-2 border-dashed border-gray-300 hover:border-rose-400 rounded-lg p-4 text-center transition-colors group;
+}
+
+.add-schedule-btn:hover {
+    @apply bg-rose-50;
+}
+
+.add-schedule-btn-icon {
+    @apply w-8 h-8 text-gray-400 group-hover:text-rose-500 mx-auto mb-2 transition-colors;
+}
+
+.add-schedule-btn-text {
+    @apply text-gray-600 group-hover:text-rose-700 font-medium;
+}
+
+/* Form Field Enhancements */
+.course-field-group {
+    @apply space-y-1;
+}
+
+.course-field-label {
+    @apply block text-sm font-medium text-gray-700;
+}
+
+.course-field-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors;
+}
+
+.course-field-input:focus {
+    @apply outline-none ring-2 ring-rose-500 border-transparent;
+}
+
+.course-field-textarea {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent resize-vertical min-h-[100px];
+}
+
+.course-field-select {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent bg-white;
+}
+
+/* Dynamic List Fields (Equipment, Objectives) */
+.dynamic-list-container {
+    @apply space-y-2;
+}
+
+.dynamic-list-item {
+    @apply flex items-center space-x-2;
+}
+
+.dynamic-list-input {
+    @apply flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent;
+}
+
+.dynamic-list-remove {
+    @apply px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm;
+}
+
+.dynamic-list-add {
+    @apply w-full mt-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors;
+}
+
+/* Media Gallery Styles */
+.media-gallery-container {
+    @apply grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
+}
+
+.media-gallery-item {
+    @apply relative group rounded-lg overflow-hidden border border-gray-200;
+}
+
+.media-gallery-image {
+    @apply w-full h-32 object-cover group-hover:scale-105 transition-transform duration-200;
+}
+
+.media-gallery-overlay {
+    @apply absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity duration-200 flex items-center justify-center;
+}
+
+.media-gallery-remove {
+    @apply bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity;
+}
+
+/* Action Buttons */
+.course-action-buttons {
+    @apply flex items-center justify-between pt-6 border-t border-gray-200;
+}
+
+.course-btn-primary {
+    @apply bg-rose-600 hover:bg-rose-700 text-white font-medium py-2 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2;
+}
+
+.course-btn-secondary {
+    @apply bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+}
+
+.course-btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+}
+
+/* Loading States */
+.loading-spinner {
+    @apply animate-spin rounded-full h-8 w-8 border-b-2 border-rose-500;
+}
+
+.loading-overlay {
+    @apply absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .schedule-grid {
+        @apply grid-cols-1 gap-3;
+    }
+
+    .course-action-buttons {
+        @apply flex-col space-y-3;
+    }
+
+    .course-action-buttons > * {
+        @apply w-full;
+    }
+
+    .media-gallery-container {
+        @apply grid-cols-2 gap-2;
+    }
+}
+
+/* Dark Mode Support (Future) */
+@media (prefers-color-scheme: dark) {
+    .course-edit-container {
+        /* Dark mode styles when implemented */
+    }
+}
+
+/* Print Styles */
+@media print {
+    .schedule-remove-btn,
+    .course-action-buttons,
+    .add-schedule-btn {
+        @apply hidden;
+    }
+}
+
+/* Accessibility Enhancements */
+.course-field-input:focus,
+.course-field-textarea:focus,
+.course-field-select:focus {
+    @apply ring-2 ring-rose-500 ring-offset-2;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .schedule-slot {
+        @apply border-2 border-gray-400;
+    }
+
+    .course-btn-primary {
+        @apply bg-blue-700 border border-blue-900;
+    }
+}
