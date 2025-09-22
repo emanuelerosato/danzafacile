@@ -27,21 +27,8 @@ class CourseResource extends JsonResource
             'equipment' => $this->equipment ?? [],
             'objectives' => $this->objectives ?? [],
 
-            // Schedule information
-            'schedule_slots' => $this->whenLoaded('scheduleSlots', function () {
-                return $this->scheduleSlots->map(function ($slot) {
-                    return [
-                        'id' => $slot->id,
-                        'day' => $slot->day,
-                        'start_time' => $slot->start_time,
-                        'end_time' => $slot->end_time,
-                        'room' => $slot->room ? [
-                            'id' => $slot->room->id,
-                            'name' => $slot->room->name,
-                        ] : null,
-                    ];
-                });
-            }),
+            // Schedule information (using JSON field)
+            'schedule_slots' => $this->schedule_data ?? [],
 
             // Media information
             'media' => $this->whenLoaded('media', function () {
@@ -80,15 +67,19 @@ class CourseResource extends JsonResource
      */
     protected function calculateTotalDurationHours(): ?float
     {
-        if (!$this->relationLoaded('scheduleSlots') || $this->scheduleSlots->isEmpty()) {
+        $scheduleData = $this->schedule_data;
+        if (!$scheduleData || empty($scheduleData)) {
             return null;
         }
 
         $totalMinutes = 0;
-        foreach ($this->scheduleSlots as $slot) {
+        foreach ($scheduleData as $slot) {
             try {
-                $start = new \DateTime($slot->start_time);
-                $end = new \DateTime($slot->end_time);
+                if (empty($slot['start_time']) || empty($slot['end_time'])) {
+                    continue;
+                }
+                $start = new \DateTime($slot['start_time']);
+                $end = new \DateTime($slot['end_time']);
                 $diff = $start->diff($end);
                 $totalMinutes += ($diff->h * 60) + $diff->i;
             } catch (\Exception $e) {
