@@ -814,7 +814,7 @@
 
                     this.saving = true;
 
-                    fetch(`/admin/courses/${courseData.course.id}/students`, {
+                    fetch(`/admin/courses/{{ $course->id }}/students`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
