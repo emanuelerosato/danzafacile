@@ -546,7 +546,7 @@
                         <div id="schedule-container" class="space-y-4">
                             @if(!empty($scheduleData))
                                 @foreach($scheduleData as $index => $slot)
-                                    <div class="bg-gray-50 rounded-lg p-4 border">
+                                    <div class="schedule-slot bg-gray-50 rounded-lg p-4 border">
                                         <div class="flex items-center justify-between mb-4">
                                             <h4 class="font-medium text-gray-900">
                                                 {{ $slot['day'] ? $slot['day'] . ' - ' : '' }}Orario {{ $index + 1 }}
@@ -898,6 +898,21 @@
                 return ['id' => $index, 'name' => $room];
             })->values()->toArray());
             window.scheduleSlotIndex = {{ count($scheduleData ?? []) }};
+
+            // Debug log for JavaScript modules
+            console.log('🏢 Available rooms loaded:', window.availableRooms);
+            console.log('📅 Schedule slot index:', window.scheduleSlotIndex);
+
+            // Test addScheduleSlot function availability (after DOM load)
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(() => {
+                    console.log('🔧 addScheduleSlot function available:', typeof window.addScheduleSlot);
+                    console.log('📋 courseEditManager available:', typeof window.courseEditManager);
+                    if (window.courseEditManager) {
+                        console.log('⚙️ scheduleManager available:', typeof window.courseEditManager.scheduleManager);
+                    }
+                }, 1000);
+            });
 
             // Legacy functions for onclick handlers (will be deprecated)
             function deleteCourse() {
