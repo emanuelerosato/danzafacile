@@ -6,7 +6,7 @@
                     Modifica Corso
                 </h2>
                 <p class="text-sm text-gray-600 mt-1">
-                    Gestione modifica della tua scuola
+                    Modifica i dettagli del corso e le impostazioni
                 </p>
             </div>
         </div>
@@ -19,11 +19,18 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
             </svg>
         </li>
+        <li class="flex items-center">
+            <a href="{{ route('admin.courses.index') }}" class="text-gray-500 hover:text-gray-700">Corsi</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
         <li class="text-gray-900 font-medium">Modifica {{ $course->name ?? 'Corso' }}</li>
     </x-slot>
 
-    <!-- Main Container -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="space-y-6">
         <!-- Success/Error Alerts -->
         @if(session('success'))
             <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
@@ -72,12 +79,29 @@
         </div>
 
         <form action="{{ route('admin.courses.update', $course) }}" method="POST" enctype="multipart/form-data"
-              x-data="{
-                  activeTab: 'basic',
-                  imagePreview: '{{ $course->image ? Storage::url($course->image) : null }}'
-              }">
+              x-data="courseEditData"
+              @submit.prevent="submitForm($event)">
             @csrf
             @method('PUT')
+
+            <!-- Dynamic Alert Area -->
+            <div x-show="message" x-transition
+                 :class="{
+                     'bg-green-50 border-green-200 text-green-800': messageType === 'success',
+                     'bg-red-50 border-red-200 text-red-800': messageType === 'error',
+                     'bg-blue-50 border-blue-200 text-blue-800': messageType === 'info'
+                 }"
+                 class="border rounded-lg p-4 mb-6">
+                <div class="flex items-center">
+                    <svg x-show="messageType === 'success'" class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <svg x-show="messageType === 'error'" class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <p x-text="message"></p>
+                </div>
+            </div>
 
             @php
                 // Prepare data for the form
@@ -184,19 +208,19 @@
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Nome Corso *</label>
                                         <input type="text" name="name" value="{{ old('name', $course->name) }}"
                                                placeholder="es. Danza Classica Intermedio" required
-                                               class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Codice Corso</label>
                                         <input type="text" name="code" value="{{ $course->code ?? '' }}" readonly
-                                               class="w-full px-4 py-3 border-gray-300 rounded-lg bg-gray-50 text-gray-600">
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600">
                                     </div>
                                 </div>
 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Tipo di Danza *</label>
-                                        <select name="dance_type" class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                        <select name="dance_type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                             <option value="">Seleziona tipo</option>
                                             <option value="classica" {{ old('dance_type', $course->dance_type ?? '') === 'classica' ? 'selected' : '' }}>Danza Classica</option>
                                             <option value="moderna" {{ old('dance_type', $course->dance_type ?? '') === 'moderna' ? 'selected' : '' }}>Danza Moderna</option>
@@ -210,7 +234,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Livello *</label>
-                                        <select name="level" class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                        <select name="level" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                             <option value="">Seleziona livello</option>
                                             <option value="beginner" {{ old('level', $course->level ?? '') === 'beginner' ? 'selected' : '' }}>Principiante</option>
                                             <option value="intermediate" {{ old('level', $course->level ?? '') === 'intermediate' ? 'selected' : '' }}>Intermedio</option>
@@ -220,7 +244,7 @@
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Stato</label>
-                                        <select name="status" class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                        <select name="status" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                             <option value="draft" {{ old('status', $course->status) === 'draft' ? 'selected' : '' }}>Bozza</option>
                                             <option value="published" {{ old('status', $course->status) === 'published' ? 'selected' : '' }}>Pubblicato</option>
                                             <option value="archived" {{ old('status', $course->status) === 'archived' ? 'selected' : '' }}>Archiviato</option>
@@ -232,12 +256,12 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Età Minima</label>
                                         <input type="number" name="min_age" min="3" max="99" value="{{ old('min_age', $course->min_age ?? '') }}"
-                                               class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Età Massima</label>
                                         <input type="number" name="max_age" min="3" max="99" value="{{ old('max_age', $course->max_age ?? '') }}"
-                                               class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                     </div>
                                 </div>
 
@@ -245,12 +269,12 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Posti Totali *</label>
                                         <input type="number" name="max_students" min="1" max="100" value="{{ old('max_students', $course->max_students ?? '') }}" required
-                                               class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                         <p class="mt-1 text-xs text-gray-500">Attualmente iscritti: {{ $course->enrollments()->where('status', 'active')->count() }} studenti</p>
                                     </div>
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Istruttore</label>
-                                        <select name="instructor_id" class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                        <select name="instructor_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                             <option value="">Seleziona istruttore</option>
                                             @foreach($instructors ?? [] as $instructor)
                                                 <option value="{{ $instructor->id }}" {{ old('instructor_id', $course->instructor_id ?? '') == $instructor->id ? 'selected' : '' }}>{{ $instructor->user->name ?? $instructor->name }}</option>
@@ -265,7 +289,7 @@
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Data Inizio *</label>
                                         <input type="date" name="start_date"
                                                value="{{ old('start_date', $course->start_date ? $course->start_date->format('Y-m-d') : '') }}"
-                                               class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                         @error('start_date')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -274,7 +298,7 @@
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Data Fine</label>
                                         <input type="date" name="end_date"
                                                value="{{ old('end_date', $course->end_date ? $course->end_date->format('Y-m-d') : '') }}"
-                                               class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                         @error('end_date')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -292,19 +316,19 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Descrizione Breve</label>
                                     <textarea name="short_description" rows="3"
-                                              class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors resize-vertical">{{ old('short_description', $course->short_description ?? '') }}</textarea>
+                                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors resize-vertical">{{ old('short_description', $course->short_description ?? '') }}</textarea>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Descrizione Completa</label>
                                     <textarea name="description" rows="6"
-                                              class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors resize-vertical">{{ old('description', $course->description ?? '') }}</textarea>
+                                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors resize-vertical">{{ old('description', $course->description ?? '') }}</textarea>
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Prerequisiti</label>
                                     <textarea name="prerequisites" rows="4"
-                                              class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors resize-vertical">{{ old('prerequisites', $course->prerequisites ?? '') }}</textarea>
+                                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors resize-vertical">{{ old('prerequisites', $course->prerequisites ?? '') }}</textarea>
                                 </div>
                             </div>
 
@@ -312,15 +336,15 @@
                             <div class="space-y-6">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Abbigliamento Richiesto</label>
-                                    <div class="space-y-2">
+                                    <div id="equipment-container" class="space-y-2">
                                         @if(is_array($equipment) && count($equipment) > 0)
                                             @foreach($equipment as $item)
                                                 <input type="text" name="equipment[]" value="{{ $item }}"
-                                                       class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                             @endforeach
                                         @else
                                             <input type="text" name="equipment[]" value=""
-                                                   class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors" placeholder="Inserisci abbigliamento richiesto">
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors" placeholder="Inserisci abbigliamento richiesto">
                                         @endif
                                         <button type="button" onclick="addEquipmentField()" class="text-sm text-rose-600 hover:text-rose-800">+ Aggiungi elemento</button>
                                     </div>
@@ -328,15 +352,15 @@
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Obiettivi del Corso</label>
-                                    <div class="space-y-2">
+                                    <div id="objectives-container" class="space-y-2">
                                         @if(is_array($objectives) && count($objectives) > 0)
                                             @foreach($objectives as $objective)
                                                 <input type="text" name="objectives[]" value="{{ $objective }}"
-                                                       class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                             @endforeach
                                         @else
                                             <input type="text" name="objectives[]" value=""
-                                                   class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors" placeholder="Inserisci obiettivo del corso">
+                                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors" placeholder="Inserisci obiettivo del corso">
                                         @endif
                                         <button type="button" onclick="addObjectiveField()" class="text-sm text-rose-600 hover:text-rose-800">+ Aggiungi obiettivo</button>
                                     </div>
@@ -345,7 +369,7 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Note Aggiuntive</label>
                                     <textarea name="notes" rows="4"
-                                              class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors resize-vertical">{{ old('notes', $course->notes ?? '') }}</textarea>
+                                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors resize-vertical">{{ old('notes', $course->notes ?? '') }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -458,7 +482,7 @@
                                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 mb-1">Giorno</label>
-                                                <select name="schedule_slots[{{ $index }}][day]" class="w-full px-3 py-2 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                                <select name="schedule_slots[{{ $index }}][day]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                                     <option value="">Seleziona giorno</option>
                                                     @foreach(['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'] as $day)
                                                         <option value="{{ $day }}" {{ ($slot['day'] ?? '') == $day ? 'selected' : '' }}>{{ $day }}</option>
@@ -470,7 +494,7 @@
                                                 <label class="block text-sm font-medium text-gray-700 mb-1">Ora Inizio</label>
                                                 <input type="time" name="schedule_slots[{{ $index }}][start_time]"
                                                        value="{{ $slot['start_time'] ?? '' }}"
-                                                       class="w-full px-3 py-2 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors"
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors"
                                                        onchange="calculateDuration(this)">
                                             </div>
 
@@ -478,7 +502,7 @@
                                                 <label class="block text-sm font-medium text-gray-700 mb-1">Ora Fine</label>
                                                 <input type="time" name="schedule_slots[{{ $index }}][end_time]"
                                                        value="{{ $slot['end_time'] ?? '' }}"
-                                                       class="w-full px-3 py-2 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors"
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors"
                                                        onchange="calculateDuration(this)">
                                             </div>
 
@@ -492,7 +516,7 @@
 
                                         <div class="mt-4">
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Sala</label>
-                                            <select name="schedule_slots[{{ $index }}][room_id]" class="w-full px-3 py-2 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                            <select name="schedule_slots[{{ $index }}][room_id]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                                 <option value="">Seleziona una sala</option>
                                                 @foreach($availableRooms as $roomIndex => $roomName)
                                                     <option value="{{ $roomIndex }}" {{ ($slot['room_id'] ?? '') == $roomIndex ? 'selected' : '' }}>
@@ -536,21 +560,21 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Prezzo Mensile € *</label>
                                     <input type="number" name="monthly_price" step="0.01" min="0"
                                            value="{{ old('monthly_price', $course->monthly_price ?? '') }}"
-                                           class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Prezzo Trimestrale €</label>
                                     <input type="number" name="quarterly_price" step="0.01" min="0"
                                            value="{{ old('quarterly_price', $course->quarterly_price ?? '') }}"
-                                           class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Prezzo Annuale €</label>
                                     <input type="number" name="yearly_price" step="0.01" min="0"
                                            value="{{ old('yearly_price', $course->yearly_price ?? '') }}"
-                                           class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                 </div>
                             </div>
 
@@ -559,21 +583,21 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Quota di Iscrizione €</label>
                                     <input type="number" name="enrollment_fee" step="0.01" min="0"
                                            value="{{ old('enrollment_fee', $course->enrollment_fee ?? '') }}"
-                                           class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Lezione Singola €</label>
                                     <input type="number" name="single_lesson_price" step="0.01" min="0"
                                            value="{{ old('single_lesson_price', $course->single_lesson_price ?? '') }}"
-                                           class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                 </div>
 
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Pacchetto 10 Lezioni €</label>
                                     <input type="number" name="package_10_price" step="0.01" min="0"
                                            value="{{ old('package_10_price', $course->package_10_price ?? '') }}"
-                                           class="w-full px-4 py-3 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                 </div>
                             </div>
                         </div>
@@ -590,21 +614,38 @@
                     </div>
 
                     <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0 order-1 sm:order-2">
-                        <button type="submit" name="submit_action" value="draft"
-                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200">
-                            Salva come Bozza
+                        <button type="submit" name="submit_action" value="draft" :disabled="saving"
+                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-200 disabled:opacity-50">
+                            <span x-show="!saving">Salva come Bozza</span>
+                            <span x-show="saving" class="flex items-center">
+                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-600" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Salvando...
+                            </span>
                         </button>
-                        <button type="submit" name="submit_action" value="update"
-                                class="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-rose-500 to-purple-600 rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
-                            <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
-                            Salva Modifiche
+                        <button type="submit" name="submit_action" value="update" :disabled="saving"
+                                class="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-rose-500 to-purple-600 rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105 disabled:opacity-50">
+                            <span x-show="!saving" class="flex items-center">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Salva Modifiche
+                            </span>
+                            <span x-show="saving" class="flex items-center">
+                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Salvando...
+                            </span>
                         </button>
                     </div>
                 </div>
             </div>
         </form>
+            </div>
         </div>
     </div>
 
@@ -616,6 +657,85 @@
     @push('scripts')
         @vite('resources/js/admin/courses/course-edit.js')
         <script>
+            // Alpine.js data for course edit form
+            window.courseEditData = {
+                activeTab: 'basic',
+                imagePreview: @json($course->image ? Storage::url($course->image) : null),
+                saving: false,
+                message: '',
+                messageType: '',
+
+                submitForm(event) {
+                    console.log('submitForm chiamata', event);
+
+                    const form = event.target;
+                    const formData = new FormData(form);
+                    const submitButton = event.submitter;
+
+                    console.log('Form:', form);
+                    console.log('Submit button:', submitButton);
+
+                    // Get submit action from clicked button
+                    if (submitButton && submitButton.name === 'submit_action') {
+                        formData.append('submit_action', submitButton.value);
+                        console.log('Submit action:', submitButton.value);
+                    }
+
+                    // Set loading state
+                    this.saving = true;
+                    this.message = '';
+
+                    console.log('Inviando richiesta AJAX...');
+
+                    // Perform AJAX request
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector("meta[name='csrf-token']").getAttribute('content'),
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => {
+                        console.log('Risposta ricevuta:', response);
+
+                        if (!response.ok) {
+                            throw new Error('Errore HTTP: ' + response.status);
+                        }
+
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Dati ricevuti:', data);
+                        this.saving = false;
+
+                        if (data.success) {
+                            this.message = data.message || 'Corso aggiornato con successo!';
+                            this.messageType = 'success';
+
+                            // Update image preview if new image was uploaded
+                            if (data.image_url) {
+                                this.imagePreview = data.image_url;
+                            }
+
+                            // Auto-hide success message after 3 seconds
+                            setTimeout(() => {
+                                this.message = '';
+                            }, 3000);
+                        } else {
+                            this.message = data.message || 'Si è verificato un errore durante il salvataggio.';
+                            this.messageType = 'error';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Errore completo:', error);
+                        this.saving = false;
+                        this.message = 'Errore di connessione. Riprova più tardi.';
+                        this.messageType = 'error';
+                    });
+                }
+            };
+
             // Pass data to JavaScript modules
             window.availableRooms = @json(collect($availableRooms)->mapWithKeys(function($room, $index) { return [$index => $room]; })->toArray());
             window.scheduleSlotIndex = {{ count($scheduleData ?? []) }};
@@ -640,28 +760,66 @@
             }
 
             function addEquipmentField() {
-                const container = document.querySelector('div:has(> input[name="equipment[]"])').parentElement;
+                const container = document.getElementById('equipment-container');
                 if (container) {
+                    const addButton = container.querySelector('button');
+
+                    // Crea wrapper per input e pulsante rimuovi
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'flex items-center space-x-2';
+
+                    // Crea nuovo input
                     const newInput = document.createElement('input');
                     newInput.type = 'text';
                     newInput.name = 'equipment[]';
                     newInput.value = '';
-                    newInput.className = 'w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500';
+                    newInput.className = 'flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors';
                     newInput.placeholder = 'Inserisci abbigliamento richiesto';
-                    container.insertBefore(newInput, container.lastElementChild);
+
+                    // Crea pulsante rimuovi
+                    const removeButton = document.createElement('button');
+                    removeButton.type = 'button';
+                    removeButton.innerHTML = '×';
+                    removeButton.className = 'px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors';
+                    removeButton.onclick = function() { wrapper.remove(); };
+
+                    wrapper.appendChild(newInput);
+                    wrapper.appendChild(removeButton);
+
+                    // Inserisce il wrapper prima del pulsante
+                    container.insertBefore(wrapper, addButton);
                 }
             }
 
             function addObjectiveField() {
-                const container = document.querySelector('div:has(> input[name="objectives[]"])').parentElement;
+                const container = document.getElementById('objectives-container');
                 if (container) {
+                    const addButton = container.querySelector('button');
+
+                    // Crea wrapper per input e pulsante rimuovi
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'flex items-center space-x-2';
+
+                    // Crea nuovo input
                     const newInput = document.createElement('input');
                     newInput.type = 'text';
                     newInput.name = 'objectives[]';
                     newInput.value = '';
-                    newInput.className = 'w-full border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500';
+                    newInput.className = 'flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors';
                     newInput.placeholder = 'Inserisci obiettivo del corso';
-                    container.insertBefore(newInput, container.lastElementChild);
+
+                    // Crea pulsante rimuovi
+                    const removeButton = document.createElement('button');
+                    removeButton.type = 'button';
+                    removeButton.innerHTML = '×';
+                    removeButton.className = 'px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors';
+                    removeButton.onclick = function() { wrapper.remove(); };
+
+                    wrapper.appendChild(newInput);
+                    wrapper.appendChild(removeButton);
+
+                    // Inserisce il wrapper prima del pulsante
+                    container.insertBefore(wrapper, addButton);
                 }
             }
 
@@ -686,7 +844,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Giorno</label>
-                                <select name="schedule_slots[${index}][day]" class="w-full px-3 py-2 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                                <select name="schedule_slots[${index}][day]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                     <option value="">Seleziona giorno</option>
                                     <option value="Lunedì">Lunedì</option>
                                     <option value="Martedì">Martedì</option>
@@ -699,11 +857,11 @@
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Ora Inizio</label>
-                                <input type="time" name="schedule_slots[${index}][start_time]" class="w-full px-3 py-2 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors" onchange="calculateDuration(this)">
+                                <input type="time" name="schedule_slots[${index}][start_time]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors" onchange="calculateDuration(this)">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Ora Fine</label>
-                                <input type="time" name="schedule_slots[${index}][end_time]" class="w-full px-3 py-2 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors" onchange="calculateDuration(this)">
+                                <input type="time" name="schedule_slots[${index}][end_time]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors" onchange="calculateDuration(this)">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Durata</label>
@@ -714,7 +872,7 @@
                         </div>
                         <div class="mt-4">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Sala</label>
-                            <select name="schedule_slots[${index}][room_id]" class="w-full px-3 py-2 border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                            <select name="schedule_slots[${index}][room_id]" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500 transition-colors">
                                 <option value="">Seleziona una sala</option>
                                 ${Object.entries(window.availableRooms || {}).map(([key, value]) => `<option value="${key}">${value}</option>`).join('')}
                             </select>
