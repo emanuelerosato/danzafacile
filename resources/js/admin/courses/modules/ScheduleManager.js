@@ -61,11 +61,16 @@ export class ScheduleManager {
             return;
         }
 
+        console.log(`[ScheduleManager] Adding new schedule slot #${this.scheduleSlotIndex + 1}`);
+        console.log(`[ScheduleManager] Available rooms:`, this.availableRooms);
+
         const slotHtml = this.generateScheduleSlotHTML(this.scheduleSlotIndex);
         this.container.insertAdjacentHTML('beforeend', slotHtml);
 
-        // Initialize room dropdown for the new slot
-        this.initializeRoomDropdown(this.scheduleSlotIndex);
+        // Wait for DOM to update, then initialize room dropdown for the new slot
+        setTimeout(() => {
+            this.initializeLastRoomDropdown();
+        }, 10);
 
         this.scheduleSlotIndex++;
 
@@ -273,6 +278,43 @@ export class ScheduleManager {
             option.textContent = room.name || room;
             dropdown.appendChild(option);
         });
+    }
+
+    /**
+     * Initialize room dropdown for the last added slot
+     */
+    initializeLastRoomDropdown() {
+        console.log('[ScheduleManager] Initializing room dropdown for last slot...');
+
+        const slots = this.container.querySelectorAll('.schedule-slot');
+        const lastSlot = slots[slots.length - 1];
+
+        if (!lastSlot) {
+            console.error('[ScheduleManager] No slots found');
+            return;
+        }
+
+        const dropdown = lastSlot.querySelector('.room-dropdown');
+        if (!dropdown) {
+            console.error('[ScheduleManager] Room dropdown not found in last slot');
+            return;
+        }
+
+        console.log('[ScheduleManager] Found dropdown, populating with rooms:', this.availableRooms);
+
+        // Clear existing options except the first one
+        dropdown.innerHTML = '<option value="">Seleziona una sala</option>';
+
+        // Add room options
+        this.availableRooms.forEach(room => {
+            const option = document.createElement('option');
+            option.value = room.id || room;
+            option.textContent = room.name || room;
+            dropdown.appendChild(option);
+            console.log(`[ScheduleManager] Added room option: ${room.name} (${room.id})`);
+        });
+
+        console.log('[ScheduleManager] Room dropdown initialized successfully');
     }
 
     /**
