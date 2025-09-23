@@ -10,6 +10,7 @@ use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class AdminCourseController extends AdminBaseController
@@ -119,6 +120,20 @@ class AdminCourseController extends AdminBaseController
 
         $validated['school_id'] = $this->school->id;
         $validated['active'] = $validated['active'] ?? true;
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+
+            // Validate image
+            $request->validate([
+                'image' => 'image|mimes:jpeg,png,jpg,gif|max:5048'
+            ]);
+
+            // Store new image
+            $imagePath = $image->store('courses', 'public');
+            $validated['image'] = $imagePath;
+        }
 
         // Process schedule_slots if provided
         if (isset($validated['schedule_slots']) && is_array($validated['schedule_slots'])) {
@@ -288,6 +303,25 @@ class AdminCourseController extends AdminBaseController
             if (!$instructorExists) {
                 return back()->withErrors(['instructor_id' => 'L\'istruttore selezionato non è valido per questa scuola.'])->withInput();
             }
+        }
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+
+            // Validate image
+            $request->validate([
+                'image' => 'image|mimes:jpeg,png,jpg,gif|max:5048'
+            ]);
+
+            // Delete old image if exists
+            if ($course->image && \Storage::disk('public')->exists($course->image)) {
+                \Storage::disk('public')->delete($course->image);
+            }
+
+            // Store new image
+            $imagePath = $image->store('courses', 'public');
+            $validated['image'] = $imagePath;
         }
 
         // Process schedule_slots if provided

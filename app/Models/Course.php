@@ -32,6 +32,7 @@ class Course extends Model
         'code',
         'description',
         'short_description',
+        'image',
         'dance_type',
         'level',
         'difficulty_level',

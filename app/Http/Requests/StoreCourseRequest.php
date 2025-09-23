@@ -27,6 +27,7 @@ class StoreCourseRequest extends FormRequest
             'dance_type' => 'nullable|string|max:100',
             'description' => 'nullable|string',
             'short_description' => 'nullable|string|max:500',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5048',
             'level' => 'required|in:Principiante,Intermedio,Avanzato,Professionale,beginner,intermediate,advanced,professional,principiante,base,intermedio,avanzato,professionale',
             'min_age' => 'nullable|integer|min:1|max:100',
             'max_age' => 'nullable|integer|min:1|max:100',
