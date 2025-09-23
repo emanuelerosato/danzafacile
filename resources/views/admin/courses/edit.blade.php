@@ -894,7 +894,9 @@
             };
 
             // Pass data to JavaScript modules
-            window.availableRooms = @json(collect($availableRooms)->mapWithKeys(function($room, $index) { return [$index => $room]; })->toArray());
+            window.availableRooms = @json(collect($availableRooms)->map(function($room, $index) {
+                return ['id' => $index, 'name' => $room];
+            })->values()->toArray());
             window.scheduleSlotIndex = {{ count($scheduleData ?? []) }};
 
             // Legacy functions for onclick handlers (will be deprecated)
