@@ -836,11 +836,19 @@
                             this.message = 'Studente iscritto con successo!';
                             this.messageType = 'success';
                             this.showAddStudentModal = false;
+
+                            // Save the enrolled student ID before resetting
+                            const enrolledStudentId = this.selectedStudentId;
                             this.selectedStudentId = null;
 
-                            // Refresh page to update student list
+                            // Remove student from available list and update UI
                             setTimeout(() => {
-                                window.location.reload();
+                                // Remove the enrolled student from the available list
+                                this.availableStudents = this.availableStudents.filter(student => student.id != enrolledStudentId);
+
+                                // Keep the students tab active by not reloading the page
+                                // The enrolled student list will be updated on next page load
+                                this.message = '';
                             }, 1500);
                         } else {
                             this.message = data.message || 'Errore durante l\'iscrizione';
