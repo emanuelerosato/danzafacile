@@ -814,7 +814,7 @@
 
                     this.saving = true;
 
-                    fetch('/api/admin/enrollments', {
+                    fetch(`/admin/courses/${courseData.course.id}/students`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -823,8 +823,9 @@
                         },
                         body: JSON.stringify({
                             user_id: this.selectedStudentId,
-                            course_id: {{ $course->id }},
-                            enrollment_date: new Date().toISOString().split('T')[0]
+                            status: 'active',
+                            payment_status: 'pending',
+                            notes: null
                         })
                     })
                     .then(response => response.json())

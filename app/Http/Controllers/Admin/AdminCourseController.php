@@ -270,7 +270,7 @@ class AdminCourseController extends AdminBaseController
             })
         ]);
 
-        return view('admin.courses.edit', compact('course', 'instructors', 'levels', 'availableRooms'));
+        return view('admin.courses.edit', compact('course', 'instructors', 'levels', 'availableRooms'))->with('school', $this->school);
     }
 
     /**
@@ -374,9 +374,16 @@ class AdminCourseController extends AdminBaseController
         $this->clearSchoolCache();
 
         if ($request->ajax()) {
-            return $this->jsonResponse(true, 'Corso aggiornato con successo.', [
+            $responseData = [
                 'course' => $course->fresh()->load(['instructor', 'enrollments'])
-            ]);
+            ];
+
+            // Include image URL if image was uploaded
+            if ($course->image) {
+                $responseData['image_url'] = \Storage::disk('public')->url($course->image);
+            }
+
+            return $this->jsonResponse(true, 'Corso aggiornato con successo.', $responseData);
         }
 
         return redirect()->route('admin.courses.edit', $course)
@@ -770,6 +777,12 @@ class AdminCourseController extends AdminBaseController
             ->first();
 
         if ($existingEnrollment) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lo studente è già iscritto a questo corso.'
+                ], 422);
+            }
             return redirect()->back()->withErrors(['user_id' => 'Lo studente è già iscritto a questo corso.']);
         }
 
@@ -788,6 +801,19 @@ class AdminCourseController extends AdminBaseController
             'status' => $enrollment->status,
             'payment_status' => $enrollment->payment_status
         ]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Studente aggiunto al corso con successo.',
+                'enrollment' => [
+                    'id' => $enrollment->id,
+                    'user' => $enrollment->user,
+                    'status' => $enrollment->status,
+                    'payment_status' => $enrollment->payment_status
+                ]
+            ]);
+        }
 
         return redirect()->back()->with('success', 'Studente aggiunto al corso con successo.');
     }

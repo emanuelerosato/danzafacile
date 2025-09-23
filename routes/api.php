@@ -98,17 +98,17 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
         Route::post('courses/bulk-action', [WebAdminCourseController::class, 'bulkAction'])->name('api.admin.courses.bulk-action');
         
         // Enrollments API
-        Route::apiResource('enrollments', EnrollmentController::class)->names([
+        Route::apiResource('enrollments', WebEnrollmentController::class)->names([
             'index' => 'api.admin.enrollments.index',
             'store' => 'api.admin.enrollments.store',
             'show' => 'api.admin.enrollments.show',
             'update' => 'api.admin.enrollments.update',
             'destroy' => 'api.admin.enrollments.destroy'
         ]);
-        Route::post('enrollments/{enrollment}/cancel', [EnrollmentController::class, 'cancel'])->name('api.admin.enrollments.cancel');
-        Route::post('enrollments/{enrollment}/reactivate', [EnrollmentController::class, 'reactivate'])->name('api.admin.enrollments.reactivate');
-        Route::post('enrollments/bulk-action', [EnrollmentController::class, 'bulkAction'])->name('api.admin.enrollments.bulk-action');
-        Route::get('enrollments/statistics', [EnrollmentController::class, 'getStatistics'])->name('api.admin.enrollments.statistics');
+        Route::post('enrollments/{enrollment}/cancel', [WebEnrollmentController::class, 'cancel'])->name('api.admin.enrollments.cancel');
+        Route::post('enrollments/{enrollment}/reactivate', [WebEnrollmentController::class, 'reactivate'])->name('api.admin.enrollments.reactivate');
+        Route::post('enrollments/bulk-action', [WebEnrollmentController::class, 'bulkAction'])->name('api.admin.enrollments.bulk-action');
+        Route::get('enrollments/statistics', [WebEnrollmentController::class, 'getStatistics'])->name('api.admin.enrollments.statistics');
         
         // Payments API
         Route::apiResource('payments', AdminPaymentController::class)->names([
