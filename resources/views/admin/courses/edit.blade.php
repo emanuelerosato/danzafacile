@@ -119,6 +119,25 @@
                     ->where('active', true)
                     ->whereNotIn('id', $enrolledUserIds)
                     ->get(['id', 'name', 'email']);
+
+                // Prepare enrolled students data for Alpine.js
+                $enrolledStudents = $course->enrollments()
+                    ->with('user')
+                    ->where('status', 'active')
+                    ->get()
+                    ->map(function($enrollment) {
+                        return [
+                            'id' => $enrollment->id,
+                            'user_id' => $enrollment->user_id,
+                            'user' => [
+                                'id' => $enrollment->user->id,
+                                'name' => $enrollment->user->name,
+                                'email' => $enrollment->user->email
+                            ],
+                            'enrollment_date' => $enrollment->created_at->format('d/m/Y'),
+                            'status' => $enrollment->status
+                        ];
+                    });
             @endphp
 
             <!-- Form Sections -->
@@ -415,18 +434,15 @@
                             </div>
                         </div>
 
-                        <!-- Students List -->
-                        @php
-                            $activeEnrollments = $course->enrollments()->with('user')->where('status', 'active')->get();
-                        @endphp
+                        <!-- Students List (Dynamic) -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                            @forelse ($activeEnrollments as $enrollment)
+                            <template x-for="enrollment in enrolledStudents" :key="enrollment.id">
                                 <div class="bg-gray-50 rounded-lg p-4 border">
                                     <div class="flex items-center justify-between">
                                         <div>
-                                            <h4 class="font-medium text-gray-900">{{ $enrollment->user->name ?? 'N/A' }}</h4>
-                                            <p class="text-sm text-gray-600">{{ $enrollment->user->email ?? 'N/A' }}</p>
-                                            <p class="text-xs text-gray-500">Iscritto: {{ $enrollment->created_at->format('d/m/Y') }}</p>
+                                            <h4 class="font-medium text-gray-900" x-text="enrollment.user.name"></h4>
+                                            <p class="text-sm text-gray-600" x-text="enrollment.user.email"></p>
+                                            <p class="text-xs text-gray-500" x-text="'Iscritto: ' + enrollment.enrollment_date"></p>
                                         </div>
                                         <div class="flex space-x-1">
                                             <button type="button" class="text-blue-600 hover:text-blue-800">
@@ -442,15 +458,16 @@
                                         </div>
                                     </div>
                                 </div>
-                            @empty
-                                <div class="col-span-full text-center py-8">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
-                                    </svg>
-                                    <h3 class="mt-2 text-sm font-medium text-gray-900">Nessuno studente iscritto</h3>
-                                    <p class="mt-1 text-sm text-gray-500">Inizia aggiungendo il primo studente al corso.</p>
-                                </div>
-                            @endforelse
+                            </template>
+
+                            <!-- Empty state -->
+                            <div x-show="enrolledStudents.length === 0" class="col-span-full text-center py-8">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                                </svg>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">Nessuno studente iscritto</h3>
+                                <p class="mt-1 text-sm text-gray-500">Inizia aggiungendo il primo studente al corso.</p>
+                            </div>
                         </div>
 
                         <!-- Add Student Modal -->
@@ -733,6 +750,7 @@
                 messageType: '',
                 showAddStudentModal: false,
                 availableStudents: @json($availableStudents),
+                enrolledStudents: @json($enrolledStudents),
                 selectedStudentId: null,
 
                 submitForm(event) {
@@ -841,13 +859,27 @@
                             const enrolledStudentId = this.selectedStudentId;
                             this.selectedStudentId = null;
 
-                            // Remove student from available list and update UI
+                            // Update UI without page reload
                             setTimeout(() => {
                                 // Remove the enrolled student from the available list
                                 this.availableStudents = this.availableStudents.filter(student => student.id != enrolledStudentId);
 
-                                // Keep the students tab active by not reloading the page
-                                // The enrolled student list will be updated on next page load
+                                // Add the new enrollment to the enrolled students list
+                                if (data.enrollment && data.enrollment.user) {
+                                    this.enrolledStudents.push({
+                                        id: data.enrollment.id,
+                                        user_id: data.enrollment.user.id,
+                                        user: {
+                                            id: data.enrollment.user.id,
+                                            name: data.enrollment.user.name,
+                                            email: data.enrollment.user.email
+                                        },
+                                        enrollment_date: new Date().toLocaleDateString('it-IT'),
+                                        status: data.enrollment.status
+                                    });
+                                }
+
+                                // Clear success message
                                 this.message = '';
                             }, 1500);
                         } else {
