@@ -111,6 +111,14 @@
                 }
                 $equipment = old('equipment', $course->equipment ?? []);
                 $objectives = old('objectives', $course->objectives ?? []);
+
+                // Prepare available students for enrollment
+                $enrolledUserIds = $course->enrollments()->where('status', 'active')->pluck('user_id');
+                $availableStudents = $school->users()
+                    ->where('role', 'user') // Students have role 'user' in this system
+                    ->where('active', true)
+                    ->whereNotIn('id', $enrolledUserIds)
+                    ->get(['id', 'name', 'email']);
             @endphp
 
             <!-- Form Sections -->
@@ -380,7 +388,7 @@
                         <div class="flex items-center justify-between">
                             <h3 class="text-lg font-semibold text-gray-900">Gestione Studenti Iscritti</h3>
                             <div class="flex space-x-3">
-                                <button type="button"
+                                <button type="button" @click="showAddStudentModal = true"
                                         class="px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 text-sm font-medium">
                                     <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -443,6 +451,65 @@
                                     <p class="mt-1 text-sm text-gray-500">Inizia aggiungendo il primo studente al corso.</p>
                                 </div>
                             @endforelse
+                        </div>
+
+                        <!-- Add Student Modal -->
+                        <div x-show="showAddStudentModal"
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0"
+                             x-transition:enter-end="opacity-100"
+                             x-transition:leave="transition ease-in duration-200"
+                             x-transition:leave-start="opacity-100"
+                             x-transition:leave-end="opacity-0"
+                             class="fixed inset-0 z-50 overflow-y-auto"
+                             style="display: none;">
+                            <div class="flex min-h-screen items-center justify-center px-4">
+                                <div class="fixed inset-0 bg-black bg-opacity-50" @click="showAddStudentModal = false"></div>
+                                <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h3 class="text-lg font-semibold text-gray-900">Aggiungi Studente al Corso</h3>
+                                        <button type="button" @click="showAddStudentModal = false" class="text-gray-400 hover:text-gray-600">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <div class="space-y-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">Seleziona Studente</label>
+                                            <select x-model="selectedStudentId" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-rose-500 focus:border-rose-500">
+                                                <option value="">-- Seleziona uno studente --</option>
+                                                <template x-for="student in availableStudents" :key="student.id">
+                                                    <option :value="student.id" x-text="`${student.name} (${student.email})`"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+
+                                        <div x-show="availableStudents.length === 0" class="text-center py-4">
+                                            <p class="text-sm text-gray-500">Nessuno studente disponibile per l'iscrizione</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex space-x-3 mt-6">
+                                        <button type="button" @click="showAddStudentModal = false"
+                                                class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
+                                            Annulla
+                                        </button>
+                                        <button type="button" @click="enrollStudent()" :disabled="!selectedStudentId || saving"
+                                                class="flex-1 px-4 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                                            <span x-show="!saving">Iscrive</span>
+                                            <span x-show="saving" class="flex items-center justify-center">
+                                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Iscrivendo...
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -664,6 +731,9 @@
                 saving: false,
                 message: '',
                 messageType: '',
+                showAddStudentModal: false,
+                availableStudents: @json($availableStudents),
+                selectedStudentId: null,
 
                 submitForm(event) {
                     console.log('submitForm chiamata', event);
@@ -729,6 +799,55 @@
                     })
                     .catch(error => {
                         console.error('Errore completo:', error);
+                        this.saving = false;
+                        this.message = 'Errore di connessione. Riprova più tardi.';
+                        this.messageType = 'error';
+                    });
+                },
+
+                enrollStudent() {
+                    if (!this.selectedStudentId) {
+                        this.message = 'Seleziona uno studente';
+                        this.messageType = 'error';
+                        return;
+                    }
+
+                    this.saving = true;
+
+                    fetch('/api/admin/enrollments', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector("meta[name='csrf-token']").getAttribute('content'),
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            user_id: this.selectedStudentId,
+                            course_id: {{ $course->id }},
+                            enrollment_date: new Date().toISOString().split('T')[0]
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        this.saving = false;
+
+                        if (data.success) {
+                            this.message = 'Studente iscritto con successo!';
+                            this.messageType = 'success';
+                            this.showAddStudentModal = false;
+                            this.selectedStudentId = null;
+
+                            // Refresh page to update student list
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1500);
+                        } else {
+                            this.message = data.message || 'Errore durante l\'iscrizione';
+                            this.messageType = 'error';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Errore:', error);
                         this.saving = false;
                         this.message = 'Errore di connessione. Riprova più tardi.';
                         this.messageType = 'error';
