@@ -142,8 +142,16 @@
                                 </div>
                             </div>
                             <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $course->active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                    {{ $course->active ? 'Attivo' : 'Non attivo' }}
+                                @php
+                                    $statusConfig = [
+                                        'published' => ['class' => 'bg-green-100 text-green-800', 'label' => 'Pubblicato'],
+                                        'draft' => ['class' => 'bg-yellow-100 text-yellow-800', 'label' => 'Bozza'],
+                                        'archived' => ['class' => 'bg-gray-100 text-gray-800', 'label' => 'Archiviato'],
+                                    ];
+                                    $config = $statusConfig[$course->status] ?? ['class' => 'bg-red-100 text-red-800', 'label' => 'Sconosciuto'];
+                                @endphp
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $config['class'] }}">
+                                    {{ $config['label'] }}
                                 </span>
                                 <div class="flex items-center space-x-2">
                                     <a href="{{ route('admin.courses.edit', $course) }}"
