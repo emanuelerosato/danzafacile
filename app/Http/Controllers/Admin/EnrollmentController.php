@@ -7,6 +7,7 @@ use App\Http\Requests\StoreEnrollmentRequest;
 use App\Models\CourseEnrollment;
 use App\Models\Course;
 use App\Models\User;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 
 class EnrollmentController extends Controller
@@ -165,7 +166,19 @@ class EnrollmentController extends Controller
             abort(403, 'Non autorizzato');
         }
 
-        $enrollment->load(['user', 'course', 'payments']);
+        // Carica le relazioni principali
+        $enrollment->load(['user', 'course']);
+
+        // Carica i pagamenti manualmente per evitare errori di relazione
+        try {
+            $enrollment->load(['payments']);
+        } catch (\Exception $e) {
+            // Se la relazione payments non funziona, caricala manualmente
+            $enrollment->payments = Payment::where('course_id', $enrollment->course_id)
+                                          ->where('user_id', $enrollment->user_id)
+                                          ->where('payment_type', Payment::TYPE_COURSE_ENROLLMENT)
+                                          ->get();
+        }
 
         return view('admin.enrollments.show', compact('enrollment'));
     }

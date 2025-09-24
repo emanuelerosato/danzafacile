@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CourseEnrollment extends Model
 {
@@ -68,6 +69,17 @@ class CourseEnrollment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Ottiene tutti i pagamenti relativi a questa iscrizione
+     * Relazione personalizzata che filtra per course_id, user_id e tipo
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'user_id', 'user_id')
+                    ->whereColumn('payments.course_id', 'course_enrollments.course_id')
+                    ->where('payment_type', Payment::TYPE_COURSE_ENROLLMENT);
     }
 
     // SCOPES

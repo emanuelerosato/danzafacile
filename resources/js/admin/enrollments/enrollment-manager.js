@@ -1,17 +1,27 @@
 /**
  * EnrollmentManager - Controller principale gestione iscrizioni
  * APPROCCIO NON-INTRUSIVO: Preserva funzionalità esistenti, aggiunge moderne
+ *
+ * Phase 5: Integrazione moduli avanzati
+ * - StatusManager per gestione stati
+ * - BulkActionManager per azioni multiple
  */
 import { EnrollmentApiService } from './services/enrollment-api.js';
 import { NotificationManager } from './modules/NotificationManager.js';
+import StatusManager from './modules/StatusManager.js';
+import BulkActionManager from './modules/BulkActionManager.js';
 
 class EnrollmentManager {
     constructor(enrollmentsData, csrfToken) {
         this.apiService = new EnrollmentApiService(csrfToken);
         this.notification = new NotificationManager();
 
+        // Initialize advanced modules (Phase 5)
+        this.statusManager = new StatusManager(this.apiService, this.notification);
+        this.bulkActionManager = new BulkActionManager(this.apiService, this.notification, this.statusManager);
+
         this.enrollments = enrollmentsData || [];
-        this.selectedIds = [];
+        this.selectedIds = []; // Legacy - now handled by bulkActionManager
         this.csrfToken = csrfToken;
 
         this.init();
@@ -23,7 +33,20 @@ class EnrollmentManager {
     init() {
         this.bindEvents();
         this.preserveExistingFunctionality();
+        this.exposeManagersGlobally();
         console.log('✅ EnrollmentManager initialized - preserving existing functionality');
+        console.log('🚀 Phase 5: Advanced modules loaded (StatusManager, BulkActionManager)');
+    }
+
+    /**
+     * Espone i manager per integrazione con Alpine.js
+     */
+    exposeManagersGlobally() {
+        // Rende accessibili i manager avanzati
+        window.enrollmentStatusManager = this.statusManager;
+        window.enrollmentBulkManager = this.bulkActionManager;
+
+        console.log('🌐 Advanced managers exposed globally for Alpine.js integration');
     }
 
     /**
@@ -76,23 +99,81 @@ class EnrollmentManager {
     }
 
     /**
-     * Toggle status iscrizione
+     * Toggle status iscrizione (Phase 5: Implementazione completa)
      */
     async toggleStatus(enrollmentId) {
         console.log('🔄 Toggle status for enrollment:', enrollmentId);
-        this.notification.showSuccess('Funzionalità toggle status attiva (da implementare)');
 
-        // TODO: Implementeremo nella prossima fase
+        // Ottieni status attuale dalla UI
+        const currentStatus = this.getCurrentStatusFromUI(enrollmentId);
+
+        // Delega al StatusManager
+        const success = await this.statusManager.toggleStatus(parseInt(enrollmentId), currentStatus);
+
+        if (success) {
+            console.log('✅ Status toggled successfully for:', enrollmentId);
+            // Aggiorna stats se necessario
+            this.updateStats();
+        }
     }
 
     /**
-     * Elimina iscrizione
+     * Elimina iscrizione (Phase 5: Implementazione completa)
      */
     async deleteEnrollment(enrollmentId) {
         console.log('🗑️ Delete enrollment:', enrollmentId);
-        this.notification.showSuccess('Funzionalità delete attiva (da implementare)');
 
-        // TODO: Implementeremo nella prossima fase
+        const enrollment = this.findEnrollment(enrollmentId);
+        const enrollmentName = enrollment?.user?.name || `Iscrizione ${enrollmentId}`;
+
+        if (!confirm(`Sei sicuro di voler eliminare definitivamente l'iscrizione di "${enrollmentName}"?\n\nQuesta operazione non può essere annullata.`)) {
+            return;
+        }
+
+        try {
+            const result = await this.apiService.delete(enrollmentId);
+
+            if (result.success) {
+                this.notification.showSuccess(result.message || 'Iscrizione eliminata con successo');
+
+                // Rimuovi dalla UI
+                const row = document.querySelector(`[data-enrollment-id="${enrollmentId}"]`);
+                if (row) {
+                    row.remove();
+                }
+
+                // Aggiorna stats
+                this.updateStats();
+
+                // Ricarica pagina se necessario
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                this.notification.showError(result.message || 'Errore durante l\'eliminazione');
+            }
+        } catch (error) {
+            console.error('❌ Delete error:', error);
+            this.notification.showError('Errore di connessione durante l\'eliminazione');
+        }
+    }
+
+    /**
+     * Ottieni status attuale dall'interfaccia utente
+     */
+    getCurrentStatusFromUI(enrollmentId) {
+        const row = document.querySelector(`[data-enrollment-id="${enrollmentId}"]`);
+        if (!row) return 'active';
+
+        const statusBadge = row.querySelector('.status-badge');
+        if (!statusBadge) return 'active';
+
+        const statusText = statusBadge.textContent.toLowerCase().trim();
+        const statusMap = {
+            'attivo': 'active',
+            'cancellato': 'cancelled',
+            'in attesa': 'pending'
+        };
+
+        return statusMap[statusText] || 'active';
     }
 
     /**
@@ -103,11 +184,75 @@ class EnrollmentManager {
     }
 
     /**
-     * Aggiorna statistiche (preparazione)
+     * Aggiorna statistiche (Phase 5: Implementazione completa)
      */
     async updateStats() {
-        console.log('📊 Stats update requested');
-        // TODO: Implementeremo nella prossima fase
+        console.log('📊 Updating stats...');
+
+        try {
+            const result = await this.apiService.getStatistics();
+
+            if (result.success && result.stats) {
+                this.updateStatsCards(result.stats);
+                console.log('✅ Stats updated successfully');
+            }
+        } catch (error) {
+            console.error('❌ Stats update error:', error);
+            // Non mostriamo errore all'utente per le stats - operazione di background
+        }
+    }
+
+    /**
+     * Aggiorna le cards delle statistiche nell'UI
+     */
+    updateStatsCards(stats) {
+        // Aggiorna total enrollments
+        const totalCard = document.querySelector('[data-stat="total"]');
+        if (totalCard && stats.total !== undefined) {
+            const valueElement = totalCard.querySelector('.stat-value');
+            if (valueElement) valueElement.textContent = stats.total;
+        }
+
+        // Aggiorna active enrollments
+        const activeCard = document.querySelector('[data-stat="active"]');
+        if (activeCard && stats.active !== undefined) {
+            const valueElement = activeCard.querySelector('.stat-value');
+            if (valueElement) valueElement.textContent = stats.active;
+        }
+
+        // Aggiorna pending enrollments
+        const pendingCard = document.querySelector('[data-stat="pending"]');
+        if (pendingCard && stats.pending !== undefined) {
+            const valueElement = pendingCard.querySelector('.stat-value');
+            if (valueElement) valueElement.textContent = stats.pending;
+        }
+
+        // Aggiorna cancelled enrollments
+        const cancelledCard = document.querySelector('[data-stat="cancelled"]');
+        if (cancelledCard && stats.cancelled !== undefined) {
+            const valueElement = cancelledCard.querySelector('.stat-value');
+            if (valueElement) valueElement.textContent = stats.cancelled;
+        }
+    }
+
+    /**
+     * Cleanup delle risorse
+     */
+    cleanup() {
+        this.statusManager?.cleanup();
+        this.bulkActionManager?.cleanup();
+        console.log('🧹 EnrollmentManager cleaned up');
+    }
+
+    /**
+     * Ottieni informazioni sui manager avanzati
+     */
+    getManagersInfo() {
+        return {
+            statusManager: !!this.statusManager,
+            bulkActionManager: !!this.bulkActionManager,
+            selectedCount: this.bulkActionManager?.getSelectedIds()?.length || 0
+        };
     }
 }
 

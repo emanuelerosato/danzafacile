@@ -5,7 +5,7 @@
 export class EnrollmentApiService {
     constructor(csrfToken) {
         this.csrfToken = csrfToken;
-        this.baseUrl = '/admin/enrollments';
+        this.baseUrl = '/api/v1/admin/enrollments'; // Correzione: usa endpoint API
     }
 
     /**
@@ -30,8 +30,9 @@ export class EnrollmentApiService {
     /**
      * Aggiorna status iscrizione (endpoint cancel/reactivate esistenti)
      */
-    async updateStatus(enrollmentId, status) {
-        const endpoint = status === 'cancelled' ? 'cancel' : 'reactivate';
+    async updateStatus(enrollmentId, statusData) {
+        const targetStatus = statusData.status || statusData;
+        const endpoint = targetStatus === 'cancelled' ? 'cancel' : 'reactivate';
         try {
             const response = await fetch(`${this.baseUrl}/${enrollmentId}/${endpoint}`, {
                 method: 'POST',
@@ -50,8 +51,31 @@ export class EnrollmentApiService {
     /**
      * Operazioni bulk (endpoint esistente)
      */
-    async bulkAction(action, enrollmentIds) {
+    async bulkAction(params) {
+        // Supporta sia oggetti che parametri separati per retrocompatibilità
+        let action, enrollmentIds, status;
+
+        if (typeof params === 'object' && params.action) {
+            action = params.action;
+            enrollmentIds = params.ids || params.enrollment_ids;
+            status = params.status;
+        } else {
+            // Legacy: bulkAction(action, ids)
+            action = arguments[0];
+            enrollmentIds = arguments[1];
+        }
+
         try {
+            const payload = {
+                action: action,
+                enrollment_ids: enrollmentIds
+            };
+
+            // Aggiungi status se presente (per update_status)
+            if (status) {
+                payload.status = status;
+            }
+
             const response = await fetch(`${this.baseUrl}/bulk-action`, {
                 method: 'POST',
                 headers: {
@@ -59,10 +83,7 @@ export class EnrollmentApiService {
                     'Accept': 'application/json',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    action: action,
-                    enrollment_ids: enrollmentIds
-                })
+                body: JSON.stringify(payload)
             });
             return await response.json();
         } catch (error) {
@@ -76,7 +97,7 @@ export class EnrollmentApiService {
      */
     async getStatistics(period = 'month') {
         try {
-            const response = await fetch(`/api/admin/enrollments/statistics?period=${period}`, {
+            const response = await fetch(`/api/v1/admin/enrollments/statistics?period=${period}`, {
                 headers: {
                     'X-CSRF-TOKEN': this.csrfToken,
                     'Accept': 'application/json'

@@ -24,7 +24,8 @@
 
 
 
-<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8" x-data="enrollmentManager()">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between mb-6">
         <div>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -155,51 +156,160 @@
         </div>
     </div>
 
+    <!-- Bulk Actions Panel (Nuovo - appare solo con selezioni) -->
+    <div x-show="selectedIds.length > 0"
+         x-transition
+         class="bulk-actions-panel bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <span class="text-sm font-medium text-blue-900">
+                    <span x-text="selectedIds.length"></span> iscrizione/i selezionate
+                </span>
+                <button @click="clearSelection()"
+                        class="text-sm text-blue-700 hover:text-blue-900 hover:underline">
+                    Deseleziona tutto
+                </button>
+            </div>
+
+            <div class="flex items-center space-x-2">
+                <select x-model="bulkAction"
+                        class="text-sm border border-blue-300 rounded px-3 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Seleziona azione...</option>
+                    <option value="cancel">Cancella selezionate</option>
+                    <option value="reactivate">Riattiva selezionate</option>
+                    <option value="delete">Elimina selezionate</option>
+                    <option value="export">Esporta selezionate</option>
+                </select>
+
+                <button @click="executeBulkAction()"
+                        :disabled="!bulkAction || processing"
+                        class="inline-flex items-center px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 transition-colors duration-200">
+                    <svg x-show="processing" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span x-show="!processing">Esegui</span>
+                    <span x-show="processing">Elaborazione...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Enrollments List -->
-    <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
+    <div class="bg-white rounded-lg shadow">
         <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-medium text-gray-900">Lista Iscrizioni ({{ $enrollments->total() ?? 0 }})</h3>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <!-- Checkbox Seleziona Tutto (Nuovo) -->
+                    <div class="flex items-center">
+                        <input x-bind:checked="allSelected"
+                               @change="toggleAll($event.target.checked)"
+                               type="checkbox"
+                               id="select-all-checkbox"
+                               class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded">
+                        <label class="ml-2 text-sm text-gray-700">
+                            Seleziona tutto
+                        </label>
+                    </div>
+                    <div class="h-4 border-l border-gray-300"></div>
+                    <h3 class="text-lg font-medium text-gray-900">
+                        Lista Iscrizioni ({{ $enrollments->total() ?? 0 }})
+                    </h3>
+                </div>
+            </div>
         </div>
 
         @if($enrollments->count() > 0)
             <div class="divide-y divide-gray-200">
                 @foreach($enrollments as $enrollment)
-                    <div class="p-6 hover:bg-gray-50">
+                    <div class="p-6 hover:bg-gray-50"
+                         :class="{ 'bg-blue-50': selectedIds && selectedIds.includes({{ $enrollment->id }}) }"
+                         data-enrollment-id="{{ $enrollment->id }}">
                         <div class="flex items-center justify-between">
-                            <div class="flex-1">
-                                <div class="flex items-center space-x-4">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-12 h-12 bg-gradient-to-r from-rose-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                                            {{ strtoupper(substr($enrollment->user->name ?? 'N/A', 0, 2)) }}
-                                        </div>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <h4 class="text-lg font-medium text-gray-900 truncate">
-                                            {{ $enrollment->user->name ?? 'Studente N/A' }}
-                                        </h4>
-                                        <div class="flex items-center space-x-4 mt-1">
-                                            <span class="text-sm text-gray-500">
-                                                Corso: {{ $enrollment->course->name ?? 'N/A' }}
-                                            </span>
-                                            <span class="text-sm text-gray-500">
-                                                Iscritto il: {{ $enrollment->enrollment_date ? $enrollment->enrollment_date->format('d/m/Y') : 'N/A' }}
-                                            </span>
-                                        </div>
-                                        @if($enrollment->notes)
-                                            <p class="text-sm text-gray-600 mt-2 truncate">{{ $enrollment->notes }}</p>
-                                        @endif
+                            <div class="flex items-center space-x-4">
+                                <!-- Checkbox Selezione (Nuovo) -->
+                                <div class="flex-shrink-0">
+                                    <input @change="toggleSelection({{ $enrollment->id }}, $event.target.checked)"
+                                           :checked="selectedIds && selectedIds.includes({{ $enrollment->id }})"
+                                           type="checkbox"
+                                           class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded">
+                                </div>
+
+                                <!-- Avatar (Preservato) -->
+                                <div class="flex-shrink-0">
+                                    <div class="w-12 h-12 bg-gradient-to-r from-rose-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                        {{ strtoupper(substr($enrollment->user->name ?? 'N/A', 0, 2)) }}
                                     </div>
                                 </div>
+
+                                <!-- Info Enrollment (Preservato) -->
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-lg font-medium text-gray-900 truncate">
+                                        {{ $enrollment->user->name ?? 'Studente N/A' }}
+                                    </h4>
+                                    <div class="flex items-center space-x-4 mt-1">
+                                        <span class="text-sm text-gray-500">
+                                            Corso: {{ $enrollment->course->name ?? 'N/A' }}
+                                        </span>
+                                        <span class="text-sm text-gray-500">
+                                            Iscritto il: {{ $enrollment->enrollment_date ? $enrollment->enrollment_date->format('d/m/Y') : 'N/A' }}
+                                        </span>
+                                    </div>
+                                    @if($enrollment->notes)
+                                        <p class="text-sm text-gray-600 mt-2 truncate">{{ $enrollment->notes }}</p>
+                                    @endif
+                                </div>
                             </div>
-                            <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $enrollment->status == 'active' ? 'bg-green-100 text-green-800' : ($enrollment->status == 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800') }}">
+
+                            <!-- Actions (Espanse) -->
+                            <div class="flex items-center space-x-3">
+                                <!-- Status Badge (Preservato) -->
+                                <span class="status-badge inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $enrollment->status == 'active' ? 'bg-green-100 text-green-800' : ($enrollment->status == 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800') }}">
                                     {{ ucfirst($enrollment->status ?? 'Unknown') }}
                                 </span>
+
+                                <!-- Action Buttons (Espanse) -->
                                 <div class="flex items-center space-x-2">
+                                    <!-- Dettagli (Preservato) -->
                                     <a href="{{ route('admin.enrollments.show', $enrollment) }}"
-                                       class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
-                                        Dettagli
+                                       class="text-blue-600 hover:text-blue-900 p-2 rounded-full hover:bg-blue-100 transition-colors duration-200"
+                                       title="Visualizza dettagli">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
                                     </a>
+
+                                    <!-- Toggle Status (Nuovo) -->
+                                    @if($enrollment->status !== 'cancelled')
+                                        <button data-enrollment-action="toggle-status"
+                                                data-enrollment-id="{{ $enrollment->id }}"
+                                                class="text-red-600 hover:text-red-900 p-2 rounded-full hover:bg-red-100 transition-colors duration-200"
+                                                title="Cancella iscrizione">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </button>
+                                    @else
+                                        <button data-enrollment-action="toggle-status"
+                                                data-enrollment-id="{{ $enrollment->id }}"
+                                                class="text-green-600 hover:text-green-900 p-2 rounded-full hover:bg-green-100 transition-colors duration-200"
+                                                title="Riattiva iscrizione">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </button>
+                                    @endif
+
+                                    <!-- Delete (Nuovo) -->
+                                    <button data-enrollment-action="delete"
+                                            data-enrollment-id="{{ $enrollment->id }}"
+                                            class="text-red-600 hover:text-red-900 p-2 rounded-full hover:bg-red-100 transition-colors duration-200"
+                                            title="Elimina iscrizione">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -319,6 +429,142 @@ function enrollmentFilters() {
             } finally {
                 this.loading = false;
             }
+        }
+    }
+}
+
+// Alpine.js Component: Enrollment Manager (Unified Component)
+function enrollmentManager() {
+    return {
+        selectedIds: [],
+        bulkAction: '',
+        processing: false,
+
+        get allSelected() {
+            const totalRows = document.querySelectorAll('[data-enrollment-id]').length;
+            return this.selectedIds.length === totalRows && totalRows > 0;
+        },
+
+        // Inizializzazione
+        init() {
+            console.log('🎯 Alpine.js EnrollmentManager initialized');
+
+            // Aggiorna quando il BulkActionManager JS è pronto
+            this.$nextTick(() => {
+                if (window.enrollmentBulkManager) {
+                    // Sincronizza con il manager JavaScript
+                    setInterval(() => {
+                        const jsSelectedIds = window.enrollmentBulkManager.getSelectedIds();
+                        if (JSON.stringify(this.selectedIds) !== JSON.stringify(jsSelectedIds)) {
+                            this.selectedIds = [...jsSelectedIds];
+                        }
+                    }, 100);
+                }
+            });
+        },
+
+        // Toggle selezione di un elemento
+        toggleSelection(enrollmentId, isSelected) {
+            if (isSelected) {
+                if (!this.selectedIds.includes(enrollmentId)) {
+                    this.selectedIds.push(enrollmentId);
+                }
+            } else {
+                this.selectedIds = this.selectedIds.filter(id => id !== enrollmentId);
+            }
+
+            // Delega al manager JavaScript se disponibile
+            if (window.enrollmentBulkManager) {
+                window.enrollmentBulkManager.toggleSelection(enrollmentId, isSelected);
+            }
+
+            console.log('🎯 Selection updated:', this.selectedIds);
+        },
+
+        // Toggle select all
+        toggleAll(selectAll) {
+            const enrollmentRows = document.querySelectorAll('[data-enrollment-id]');
+
+            if (selectAll) {
+                this.selectedIds = Array.from(enrollmentRows).map(row =>
+                    parseInt(row.getAttribute('data-enrollment-id'))
+                );
+
+                // Aggiorna checkboxes individuali
+                enrollmentRows.forEach(row => {
+                    const checkbox = row.querySelector('input[type="checkbox"]');
+                    if (checkbox) checkbox.checked = true;
+                });
+            } else {
+                this.selectedIds = [];
+
+                // Aggiorna checkboxes individuali
+                enrollmentRows.forEach(row => {
+                    const checkbox = row.querySelector('input[type="checkbox"]');
+                    if (checkbox) checkbox.checked = false;
+                });
+            }
+
+            // Delega al manager JavaScript se disponibile
+            if (window.enrollmentBulkManager) {
+                window.enrollmentBulkManager.toggleSelectAll(selectAll);
+            }
+
+            console.log('🎯 Select all toggled:', selectAll, this.selectedIds);
+        },
+
+        // Esegue azione bulk
+        async executeBulkAction() {
+            if (!this.bulkAction || !this.selectedIds.length) {
+                console.warn('⚠️ No action or selection');
+                return;
+            }
+
+            this.processing = true;
+
+            // Delega al manager JavaScript se disponibile
+            if (window.enrollmentBulkManager) {
+                const success = await window.enrollmentBulkManager.executeBulkAction(this.bulkAction);
+                if (success) {
+                    this.bulkAction = '';
+                    this.selectedIds = [];
+                }
+                this.processing = false;
+                return;
+            }
+
+            // Fallback se manager JavaScript non disponibile
+            if (!window.enrollmentManager?.apiService) {
+                console.error('❌ API service not available');
+                this.processing = false;
+                return;
+            }
+
+            try {
+                const result = await window.enrollmentManager.apiService.bulkAction({
+                    action: this.bulkAction,
+                    ids: this.selectedIds
+                });
+
+                if (result.success) {
+                    window.enrollmentManager.notification.showSuccess(result.message);
+                    this.selectedIds = [];
+                    this.bulkAction = '';
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    window.enrollmentManager.notification.showError(result.message);
+                }
+            } catch (error) {
+                console.error('Bulk action error:', error);
+                window.enrollmentManager.notification.showError('Errore durante l\'operazione');
+            } finally {
+                this.processing = false;
+            }
+        },
+
+        // Controlla se un elemento è selezionato
+        isSelected(enrollmentId) {
+            return this.selectedIds.includes(enrollmentId);
         }
     }
 }
