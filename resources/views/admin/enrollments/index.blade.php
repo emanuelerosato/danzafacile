@@ -637,11 +637,27 @@ function enrollmentManager() {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
 
-                const result = await response.json();
+                console.log('🔍 Response status:', response.status);
+                console.log('🔍 Response headers:', response.headers.get('content-type'));
+
+                // Debug: log raw response before parsing
+                const responseText = await response.text();
+                console.log('🔍 Raw response:', responseText.substring(0, 200));
+
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('❌ JSON Parse Error:', parseError);
+                    console.error('❌ Full response:', responseText);
+                    this.showNotification('Errore del server - controlla la console', 'error');
+                    return;
+                }
 
                 if (result.success) {
                     // Mostra messaggio di successo
@@ -661,6 +677,8 @@ function enrollmentManager() {
         // Elimina enrollment
         async deleteEnrollment(enrollmentId) {
             console.log('🗑️ Delete enrollment:', enrollmentId);
+            console.log('🗑️ enrollmentId type:', typeof enrollmentId);
+            console.log('🗑️ enrollmentId value:', JSON.stringify(enrollmentId));
 
             // Conferma eliminazione
             const enrollmentRow = document.querySelector(`[data-enrollment-id="${enrollmentId}"]`);
@@ -676,16 +694,35 @@ function enrollmentManager() {
                 return;
             }
 
+            const deleteUrl = `/admin/enrollments/${enrollmentId}`;
+            console.log('🗑️ Delete URL:', deleteUrl);
+
             try {
-                const response = await fetch(`/admin/enrollments/${enrollmentId}`, {
+                const response = await fetch(deleteUrl, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': csrfToken,
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
 
-                const result = await response.json();
+                console.log('🗑️ Delete Response status:', response.status);
+                console.log('🗑️ Delete Response headers:', response.headers.get('content-type'));
+
+                // Debug: log raw response before parsing
+                const responseText = await response.text();
+                console.log('🗑️ Raw delete response:', responseText.substring(0, 200));
+
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('❌ Delete JSON Parse Error:', parseError);
+                    console.error('❌ Delete Full response:', responseText);
+                    this.showNotification('Errore del server - controlla la console', 'error');
+                    return;
+                }
 
                 if (result.success) {
                     this.showNotification(result.message || 'Iscrizione eliminata con successo', 'success');
