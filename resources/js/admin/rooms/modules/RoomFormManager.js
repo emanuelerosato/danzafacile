@@ -15,7 +15,7 @@ export class RoomFormManager {
         this.capacityField = document.getElementById('roomCapacity');
         this.equipmentField = document.getElementById('roomEquipment');
 
-        this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        this.csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || document.querySelector('input[name="_token"]')?.value || '';
     }
 
     /**

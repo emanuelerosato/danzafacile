@@ -188,153 +188,33 @@
     </div>
 </div>
 
+@vite('resources/js/admin/rooms/room-manager.js')
+
 <script>
-let roomsData = @json($rooms);
+document.addEventListener('DOMContentLoaded', function() {
+    // Dati delle sale dal backend (preservato identico)
+    const roomsData = @json($rooms);
+    const csrfToken = '{{ csrf_token() }}';
 
-// Show add room form
-function showAddRoomForm() {
-    document.getElementById('modalTitle').textContent = 'Aggiungi Nuova Sala';
-    document.getElementById('roomForm').reset();
-    document.getElementById('roomId').value = '';
-    document.getElementById('roomModal').classList.remove('hidden');
-    document.getElementById('roomModal').classList.add('flex');
-}
+    // Inizializza il Room Manager moderno
+    window.roomManager = new window.RoomManager(roomsData, csrfToken);
 
-// Show edit room form
-function showEditRoomForm(roomId) {
-    const room = roomsData.find(r => r.id === roomId);
-    if (!room) {
-        console.error('❌ Room not found:', roomId);
-        return;
-    }
+    console.log('✅ Room Management System initialized with modern modular architecture');
+});
 
-    document.getElementById('modalTitle').textContent = 'Modifica Sala';
-    document.getElementById('roomId').value = room.id;
-    document.getElementById('roomName').value = room.name;
-    document.getElementById('roomDescription').value = room.description || '';
-    document.getElementById('roomCapacity').value = room.capacity || '';
-    document.getElementById('roomEquipment').value = room.equipment ? room.equipment.join(', ') : '';
-
-    document.getElementById('roomModal').classList.remove('hidden');
-    document.getElementById('roomModal').classList.add('flex');
-}
-
-// Close modal
-function closeRoomModal() {
-    document.getElementById('roomModal').classList.add('hidden');
-    document.getElementById('roomModal').classList.remove('flex');
-}
-
-// Submit form
+// Funzione global per submit form (preservata per compatibilità)
 function submitRoomForm(event) {
-    event.preventDefault();
-
-    const formData = new FormData(event.target);
-    const roomId = formData.get('room_id');
-    const isEdit = roomId && roomId !== '';
-
-    // Convert equipment string to array
-    const equipmentString = formData.get('equipment');
-    const equipment = equipmentString ? equipmentString.split(',').map(item => item.trim()).filter(item => item) : [];
-
-    const data = {
-        name: formData.get('name'),
-        description: formData.get('description'),
-        capacity: formData.get('capacity') ? parseInt(formData.get('capacity')) : null,
-        equipment: equipment,
-        _token: '{{ csrf_token() }}'
-    };
-
-    if (isEdit) {
-        data._method = 'PUT';
-    }
-
-    const url = isEdit ? `/admin/rooms/${roomId}` : '/admin/rooms';
-
-    fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showNotification(data.message || (isEdit ? 'Sala aggiornata con successo' : 'Sala creata con successo'), 'success');
-            closeRoomModal();
-            location.reload(); // Reload to show updated list
-        } else {
-            showNotification(data.message || 'Errore durante il salvataggio', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showNotification('Errore di connessione', 'error');
-    });
+    // Il nuovo RoomManager gestisce tutto tramite event delegation
+    // Questa funzione viene mantenuta per compatibilità ma non è più usata
+    console.warn('⚠️ submitRoomForm legacy function called - handled by RoomManager now');
 }
 
-// Delete room
-function deleteRoom(roomId) {
-    const room = roomsData.find(r => r.id === roomId);
-    if (!room) return;
-
-    if (!confirm(`Sei sicuro di voler eliminare la sala "${room.name}"?`)) {
-        return;
-    }
-
-    fetch(`/admin/rooms/${roomId}`, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showNotification(data.message || 'Sala eliminata con successo', 'success');
-            document.querySelector(`[data-room-id="${roomId}"]`).remove();
-
-            // Update roomsData
-            roomsData = roomsData.filter(r => r.id !== roomId);
-        } else {
-            showNotification(data.message || 'Errore durante l\'eliminazione', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showNotification('Errore di connessione', 'error');
-    });
-}
-
-// Show notification
-function showNotification(message, type = 'success') {
-    const notification = document.getElementById('notification');
-    const notificationMessage = document.getElementById('notificationMessage');
-
-    notificationMessage.textContent = message;
-
-    // Set color based on type
-    if (type === 'error') {
-        notification.querySelector('div').className = 'bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg';
-    } else {
-        notification.querySelector('div').className = 'bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg';
-    }
-
-    // Show notification
-    notification.classList.remove('translate-x-full');
-
-    // Auto hide after 3 seconds
-    setTimeout(() => {
-        notification.classList.add('translate-x-full');
-    }, 3000);
-}
-
-// Close modal on outside click
-document.getElementById('roomModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeRoomModal();
+// Mantieni binding diretto per il form onsubmit esistente
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('roomForm');
+    if (form && form.getAttribute('onsubmit')) {
+        // Rimuove l'onsubmit esistente perché ora è gestito dai moduli
+        form.removeAttribute('onsubmit');
     }
 });
 </script>
