@@ -950,7 +950,8 @@ class AdminCourseController extends AdminBaseController
         request()->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:500',
-            'capacity' => 'nullable|integer|min:1'
+            'capacity' => 'nullable|integer|min:1',
+            'equipment' => 'nullable|array'
         ]);
 
         try {
@@ -958,6 +959,7 @@ class AdminCourseController extends AdminBaseController
                 'name' => trim(request('name')),
                 'description' => request('description'),
                 'capacity' => request('capacity'),
+                'equipment' => request('equipment', []),
                 'active' => true
             ]);
 
@@ -1020,6 +1022,7 @@ class AdminCourseController extends AdminBaseController
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:500',
             'capacity' => 'nullable|integer|min:1',
+            'equipment' => 'nullable|array',
             'active' => 'boolean'
         ]);
 
@@ -1031,6 +1034,7 @@ class AdminCourseController extends AdminBaseController
                 'name' => $newName,
                 'description' => request('description'),
                 'capacity' => request('capacity'),
+                'equipment' => request('equipment', []),
                 'active' => request('active', true)
             ]);
 
