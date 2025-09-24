@@ -280,32 +280,32 @@
                                         </svg>
                                     </a>
 
-                                    <!-- Toggle Status (Nuovo) -->
+                                    <!-- Toggle Status (Migliorato) -->
                                     @if($enrollment->status !== 'cancelled')
                                         <button data-enrollment-action="toggle-status"
                                                 data-enrollment-id="{{ $enrollment->id }}"
-                                                class="text-red-600 hover:text-red-900 p-2 rounded-full hover:bg-red-100 transition-colors duration-200"
-                                                title="Cancella iscrizione">
+                                                class="text-orange-600 hover:text-orange-900 p-2 rounded-full hover:bg-orange-100 transition-colors duration-200"
+                                                title="🔸 Sospendi iscrizione (reversibile)">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
                                         </button>
                                     @else
                                         <button data-enrollment-action="toggle-status"
                                                 data-enrollment-id="{{ $enrollment->id }}"
                                                 class="text-green-600 hover:text-green-900 p-2 rounded-full hover:bg-green-100 transition-colors duration-200"
-                                                title="Riattiva iscrizione">
+                                                title="✅ Riattiva iscrizione">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                             </svg>
                                         </button>
                                     @endif
 
-                                    <!-- Delete (Nuovo) -->
+                                    <!-- Delete (Migliorato) -->
                                     <button data-enrollment-action="delete"
                                             data-enrollment-id="{{ $enrollment->id }}"
-                                            class="text-red-600 hover:text-red-900 p-2 rounded-full hover:bg-red-100 transition-colors duration-200"
-                                            title="Elimina iscrizione">
+                                            class="text-red-700 hover:text-red-900 p-2 rounded-full hover:bg-red-100 transition-colors duration-200"
+                                            title="⚠️ Elimina DEFINITIVAMENTE (non reversibile!)">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                         </svg>
@@ -449,6 +449,9 @@ function enrollmentManager() {
         init() {
             console.log('🎯 Alpine.js EnrollmentManager initialized');
 
+            // Aggiunge event listener per pulsanti azione
+            this.bindActionButtons();
+
             // Aggiorna quando il BulkActionManager JS è pronto
             this.$nextTick(() => {
                 if (window.enrollmentBulkManager) {
@@ -459,6 +462,31 @@ function enrollmentManager() {
                             this.selectedIds = [...jsSelectedIds];
                         }
                     }, 100);
+                }
+            });
+        },
+
+        // Bind event listener per i pulsanti di azione
+        bindActionButtons() {
+            document.addEventListener('click', (event) => {
+                const button = event.target.closest('[data-enrollment-action]');
+                if (!button) return;
+
+                event.preventDefault();
+                const action = button.dataset.enrollmentAction;
+                const enrollmentId = button.dataset.enrollmentId;
+
+                console.log('🎯 Action button clicked:', action, enrollmentId);
+
+                switch (action) {
+                    case 'toggle-status':
+                        this.toggleEnrollmentStatus(parseInt(enrollmentId));
+                        break;
+                    case 'delete':
+                        this.deleteEnrollment(parseInt(enrollmentId));
+                        break;
+                    default:
+                        console.warn('⚠️ Unknown action:', action);
                 }
             });
         },
@@ -565,6 +593,194 @@ function enrollmentManager() {
         // Controlla se un elemento è selezionato
         isSelected(enrollmentId) {
             return this.selectedIds.includes(enrollmentId);
+        },
+
+        // Toggle status di un enrollment
+        async toggleEnrollmentStatus(enrollmentId) {
+            console.log('🔄 Toggle status for enrollment:', enrollmentId);
+
+            // Ottieni CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (!csrfToken) {
+                console.error('❌ CSRF token not found');
+                return;
+            }
+
+            // Determina status attuale dalla UI
+            const row = document.querySelector(`[data-enrollment-id="${enrollmentId}"]`);
+            const statusBadge = row?.querySelector('.status-badge');
+            const currentStatus = statusBadge?.textContent.toLowerCase().trim();
+
+            const statusMap = {
+                'attivo': 'active',
+                'cancellato': 'cancelled',
+                'in attesa': 'pending'
+            };
+            const mappedStatus = statusMap[currentStatus] || 'active';
+
+            // Determina azione e nuovo status
+            const action = mappedStatus === 'cancelled' ? 'reactivate' : 'cancel';
+            const newStatus = mappedStatus === 'cancelled' ? 'active' : 'cancelled';
+
+            // Conferma azione
+            const actionMessages = {
+                'cancel': '🔸 Sospendere questa iscrizione?\n\n• L\'iscrizione sarà temporaneamente sospesa\n• Può essere riattivata in qualsiasi momento\n• I dati rimangono salvati',
+                'reactivate': '✅ Riattivare questa iscrizione?\n\n• L\'iscrizione tornerà attiva\n• Lo studente potrà accedere nuovamente al corso'
+            };
+
+            if (!confirm(actionMessages[action])) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/enrollments/${enrollmentId}/${action}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Mostra messaggio di successo
+                    this.showNotification(result.message || 'Status aggiornato con successo', 'success');
+
+                    // Aggiorna UI
+                    this.updateStatusInUI(enrollmentId, newStatus);
+                } else {
+                    this.showNotification(result.message || 'Errore durante l\'aggiornamento', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Toggle status error:', error);
+                this.showNotification('Errore di connessione', 'error');
+            }
+        },
+
+        // Elimina enrollment
+        async deleteEnrollment(enrollmentId) {
+            console.log('🗑️ Delete enrollment:', enrollmentId);
+
+            // Conferma eliminazione
+            const enrollmentRow = document.querySelector(`[data-enrollment-id="${enrollmentId}"]`);
+            const studentName = enrollmentRow?.querySelector('h4')?.textContent || 'questo studente';
+
+            if (!confirm(`⚠️ ELIMINAZIONE DEFINITIVA\n\nEliminare l'iscrizione di ${studentName}?\n\n• L'iscrizione sarà CANCELLATA per sempre\n• Tutti i dati associati andranno persi\n• NON È POSSIBILE ANNULLARE questa operazione\n\nSei SICURO di voler procedere?`)) {
+                return;
+            }
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (!csrfToken) {
+                console.error('❌ CSRF token not found');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/admin/enrollments/${enrollmentId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    this.showNotification(result.message || 'Iscrizione eliminata con successo', 'success');
+
+                    // Rimuovi dalla UI
+                    const row = document.querySelector(`[data-enrollment-id="${enrollmentId}"]`);
+                    if (row) {
+                        row.remove();
+                    }
+
+                    // Ricarica dopo 2 secondi per aggiornare contatori
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    this.showNotification(result.message || 'Errore durante l\'eliminazione', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Delete error:', error);
+                this.showNotification('Errore di connessione durante l\'eliminazione', 'error');
+            }
+        },
+
+        // Aggiorna status nella UI
+        updateStatusInUI(enrollmentId, newStatus) {
+            const row = document.querySelector(`[data-enrollment-id="${enrollmentId}"]`);
+            if (!row) return;
+
+            const statusBadge = row.querySelector('.status-badge');
+            if (statusBadge) {
+                // Rimuovi classi esistenti
+                statusBadge.className = statusBadge.className.replace(/(bg-\w+-100|text-\w+-800)/g, '');
+
+                // Aggiungi nuove classi
+                const statusClasses = {
+                    'active': 'bg-green-100 text-green-800',
+                    'cancelled': 'bg-red-100 text-red-800',
+                    'pending': 'bg-yellow-100 text-yellow-800'
+                };
+
+                statusBadge.className += ` ${statusClasses[newStatus] || 'bg-gray-100 text-gray-800'}`;
+                statusBadge.textContent = {
+                    'active': 'Attivo',
+                    'cancelled': 'Cancellato',
+                    'pending': 'In Attesa'
+                }[newStatus] || newStatus;
+            }
+
+            // Aggiorna pulsante toggle
+            const toggleButton = row.querySelector('[data-enrollment-action="toggle-status"]');
+            if (toggleButton) {
+                if (newStatus === 'cancelled') {
+                    toggleButton.className = 'text-green-600 hover:text-green-900 p-2 rounded-full hover:bg-green-100 transition-colors duration-200';
+                    toggleButton.title = 'Riattiva iscrizione';
+                    toggleButton.querySelector('path').setAttribute('d', 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z');
+                } else {
+                    toggleButton.className = 'text-red-600 hover:text-red-900 p-2 rounded-full hover:bg-red-100 transition-colors duration-200';
+                    toggleButton.title = 'Sospendi iscrizione';
+                    toggleButton.querySelector('path').setAttribute('d', 'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z');
+                }
+            }
+        },
+
+        // Sistema di notifiche
+        showNotification(message, type = 'success') {
+            // Usa il notification manager se disponibile
+            if (window.enrollmentManager?.notification) {
+                if (type === 'success') {
+                    window.enrollmentManager.notification.showSuccess(message);
+                } else {
+                    window.enrollmentManager.notification.showError(message);
+                }
+                return;
+            }
+
+            // Fallback con alert
+            if (type === 'error') {
+                alert('❌ ' + message);
+            } else {
+                alert('✅ ' + message);
+            }
+        },
+
+        // Pulisce la selezione
+        clearSelection() {
+            this.selectedIds = [];
+
+            // Deseleziona tutti i checkbox
+            document.querySelectorAll('[data-enrollment-id] input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+
+            const selectAllCheckbox = document.querySelector('#select-all-checkbox');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            }
         }
     }
 }

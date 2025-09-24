@@ -64,17 +64,25 @@ class EnrollmentManager {
 
     /**
      * Event binding (solo per nuove funzionalità)
+     * NOTA: I button clicks sono gestiti da Alpine.js per evitare duplicazioni
      */
     bindEvents() {
-        // Per ora solo logging - implementeremo gradualmente
-        document.addEventListener('click', this.handleGlobalClick.bind(this));
-        console.log('📡 Event listeners attached');
+        // DISABILITATO: I button clicks sono gestiti da Alpine.js
+        // document.addEventListener('click', this.handleGlobalClick.bind(this));
+
+        // Altri event listeners non-button potrebbero essere aggiunti qui
+        console.log('📡 Event listeners attached (button clicks delegated to Alpine.js)');
     }
 
     /**
-     * Handler click globale (non intrusivo)
+     * Handler click globale (DISABILITATO - gestito da Alpine.js)
      */
     handleGlobalClick(event) {
+        // DISABILITATO: Gestito da Alpine.js per evitare esecuzioni doppie
+        console.warn('🚫 handleGlobalClick called but disabled - Alpine.js handles button clicks');
+        return;
+
+        /*
         const target = event.target.closest('[data-enrollment-action]');
         if (!target) return; // Non interferisce con elementi esistenti
 
@@ -96,6 +104,7 @@ class EnrollmentManager {
             default:
                 console.warn('⚠️ Unknown enrollment action:', action);
         }
+        */
     }
 
     /**
