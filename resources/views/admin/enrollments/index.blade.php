@@ -95,6 +95,66 @@
         />
     </div>
 
+    <!-- Filters Bar (Nuova funzionalità) -->
+    <div x-data="enrollmentFilters()" class="bg-white rounded-lg shadow mb-6 p-4">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <!-- Search -->
+            <div class="flex-1 max-w-lg">
+                <div class="relative">
+                    <input x-model="filters.search"
+                           @input="debounceFilter()"
+                           type="text"
+                           placeholder="Cerca studente o corso..."
+                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                    <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                <!-- Status Filter -->
+                <select x-model="filters.status"
+                        @change="applyFilters()"
+                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                    <option value="">Tutti gli stati</option>
+                    <option value="active">Attivo</option>
+                    <option value="pending">In Attesa</option>
+                    <option value="cancelled">Cancellato</option>
+                </select>
+
+                <!-- Course Filter (Sarà popolato dinamicamente se necessario) -->
+                <select x-model="filters.course_id"
+                        @change="applyFilters()"
+                        class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                    <option value="">Tutti i corsi</option>
+                    {{-- Popolato dinamicamente o via backend --}}
+                </select>
+
+                <!-- Export Button -->
+                <button @click="exportData()"
+                        :disabled="loading"
+                        class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors duration-200">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    <span x-show="!loading">Esporta</span>
+                    <span x-show="loading">Esportando...</span>
+                </button>
+
+                <!-- Reset Filters -->
+                <button @click="resetFilters()"
+                        class="inline-flex items-center px-3 py-2 bg-gray-500 text-white text-sm font-medium rounded-lg hover:bg-gray-600 transition-colors duration-200">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Reset
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Enrollments List -->
     <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
         <div class="px-6 py-4 border-b border-gray-200">
@@ -181,6 +241,87 @@
 // Expose data to JavaScript (preserva funzionalità esistenti)
 window.enrollmentsData = @json($enrollments->items() ?? []);
 console.log('📋 Enrollment index loaded with', (window.enrollmentsData || []).length, 'enrollments');
+
+// Alpine.js component for filters (preserva URL filtering esistente)
+function enrollmentFilters() {
+    return {
+        filters: {
+            search: '{{ request('search', '') }}',
+            status: '{{ request('status', '') }}',
+            course_id: '{{ request('course_id', '') }}'
+        },
+        loading: false,
+        debounceTimeout: null,
+
+        // Inizializzazione - popolamento filtri da URL esistenti
+        init() {
+            console.log('🔍 Filters initialized with:', this.filters);
+            this.populateFromURL();
+        },
+
+        // Preserva sistema di filtri via URL già esistente nel backend
+        populateFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            this.filters.search = urlParams.get('search') || '';
+            this.filters.status = urlParams.get('status') || '';
+            this.filters.course_id = urlParams.get('course_id') || '';
+        },
+
+        // Debounce per search (evita troppe richieste)
+        debounceFilter() {
+            clearTimeout(this.debounceTimeout);
+            this.debounceTimeout = setTimeout(() => {
+                this.applyFilters();
+            }, 500);
+        },
+
+        // Applica filtri (usa sistema URL esistente del backend)
+        applyFilters() {
+            const params = new URLSearchParams();
+
+            // Costruisce URL con parametri (sistema già supportato dal backend)
+            if (this.filters.search.trim()) params.append('search', this.filters.search.trim());
+            if (this.filters.status) params.append('status', this.filters.status);
+            if (this.filters.course_id) params.append('course_id', this.filters.course_id);
+
+            // Reindirizza con nuovi parametri (preserva paginazione backend)
+            const url = new URL(window.location);
+            url.search = params.toString();
+
+            console.log('🔄 Applying filters:', url.toString());
+            window.location.href = url.toString();
+        },
+
+        // Reset filtri
+        resetFilters() {
+            console.log('🔄 Resetting filters');
+            window.location.href = window.location.pathname;
+        },
+
+        // Export data (utilizza API backend esistente)
+        async exportData() {
+            if (!window.enrollmentManager?.apiService) {
+                console.warn('⚠️ API service not available');
+                return;
+            }
+
+            this.loading = true;
+            try {
+                const result = await window.enrollmentManager.apiService.export(this.filters);
+                if (result && result.success) {
+                    window.enrollmentManager.notification.showSuccess(result.message);
+                } else {
+                    window.enrollmentManager.notification.showError(result.message || 'Errore durante export');
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                window.enrollmentManager.notification.showError('Errore durante l\'export');
+            } finally {
+                this.loading = false;
+            }
+        }
+    }
+}
 </script>
 
 </x-app-layout>
