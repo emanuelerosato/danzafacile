@@ -277,9 +277,36 @@
     </div>
 </div>
 
+@vite('resources/js/admin/attendance/attendance-manager.js')
+
 <script>
+// Preparazione dati per il modulo JavaScript moderno
+window.attendanceData = {
+    attendances: @json($attendances->items()),
+    courses: @json($courses),
+    events: @json($events),
+    csrfToken: '{{ csrf_token() }}',
+    stats: @json($stats)
+};
+
+// Alpine.js component - Ora integrato con moduli moderni
 function attendanceManager() {
+    // Attende che il manager moderno sia pronto
+    const waitForManager = () => {
+        return new Promise((resolve) => {
+            const checkManager = () => {
+                if (window.attendanceManager) {
+                    resolve(window.attendanceManager);
+                } else {
+                    setTimeout(checkManager, 50);
+                }
+            };
+            checkManager();
+        });
+    };
+
     return {
+        // Stato base
         filters: {
             search: '',
             date_from: '',
@@ -300,46 +327,49 @@ function attendanceManager() {
         courses: @json($courses),
         events: @json($events),
 
-        applyFilters() {
-            const params = new URLSearchParams(this.filters);
+        // Metodi delegati ai moduli moderni
+        async applyFilters() {
+            console.log('🎯 Alpine.js applyFilters called - delegating to FilterManager');
+            const manager = await waitForManager();
 
-            fetch(`{{ route('admin.attendance.index') }}?${params.toString()}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('attendance-table-container').innerHTML = data.data.html;
-                    this.attendanceCount = data.data.pagination ?
-                        parseInt(data.data.pagination.match(/\d+/)?.[0] || 0) : 0;
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showAlert('Errore durante il caricamento dei dati', 'error');
-            });
+            // Sincronizza filtri Alpine -> Manager
+            manager.filterManager.setFilters(this.filters);
+
+            // Applica filtri tramite manager moderno
+            await manager.filterManager.applyFilters();
+
+            // Sincronizza conteggio Manager -> Alpine
+            this.attendanceCount = manager.filterManager.attendanceCount;
         },
 
-        resetFilters() {
-            this.filters = {
-                search: '',
-                date_from: '',
-                date_to: '',
-                status: '',
-                course_id: '',
-                event_id: ''
-            };
-            this.applyFilters();
+        async resetFilters() {
+            console.log('🔄 Alpine.js resetFilters called - delegating to FilterManager');
+            const manager = await waitForManager();
+
+            // Reset tramite manager
+            await manager.filterManager.resetFilters();
+
+            // Sincronizza Alpine con stato resettato
+            this.filters = manager.filterManager.getFilters();
+            this.attendanceCount = manager.filterManager.attendanceCount;
         },
 
-        openBulkMarkModal() {
+        async openBulkMarkModal() {
+            console.log('📦 Alpine.js openBulkMarkModal called - delegating to BulkActionManager');
+            const manager = await waitForManager();
+
             this.showBulkModal = true;
+            manager.bulkActionManager.openBulkMarkModal();
         },
 
-        closeBulkMarkModal() {
+        async closeBulkMarkModal() {
+            console.log('📦 Alpine.js closeBulkMarkModal called - delegating to BulkActionManager');
+            const manager = await waitForManager();
+
             this.showBulkModal = false;
+            manager.bulkActionManager.closeBulkMarkModal();
+
+            // Reset bulkMark data
             this.bulkMark = {
                 date: '{{ now()->format("Y-m-d") }}',
                 type: '',
@@ -349,54 +379,67 @@ function attendanceManager() {
             };
         },
 
-        updateSubjectOptions() {
-            if (this.bulkMark.type === 'course') {
-                this.bulkMark.subjects = this.courses;
-            } else if (this.bulkMark.type === 'event') {
-                this.bulkMark.subjects = this.events;
-            } else {
-                this.bulkMark.subjects = [];
-            }
-            this.bulkMark.subject_id = '';
+        async updateSubjectOptions() {
+            console.log('📦 Alpine.js updateSubjectOptions called');
+            const manager = await waitForManager();
+
+            // Sincronizza bulkMark -> Manager
+            manager.bulkActionManager.updateBulkMarkData('type', this.bulkMark.type);
+
+            // Aggiorna opzioni tramite manager
+            manager.bulkActionManager.updateSubjectOptions();
+
+            // Sincronizza Manager -> Alpine
+            const bulkData = manager.bulkActionManager.getBulkMarkData();
+            this.bulkMark.subjects = bulkData.subjects;
+            this.bulkMark.subject_id = bulkData.subject_id;
         },
 
-        submitBulkMark() {
-            // This would navigate to a dedicated bulk marking interface
-            const params = new URLSearchParams({
-                date: this.bulkMark.date,
-                type: this.bulkMark.type,
-                subject_id: this.bulkMark.subject_id,
-                default_status: this.bulkMark.defaultStatus
+        async submitBulkMark() {
+            console.log('📦 Alpine.js submitBulkMark called - delegating to BulkActionManager');
+            const manager = await waitForManager();
+
+            // Sincronizza dati Alpine -> Manager
+            Object.keys(this.bulkMark).forEach(key => {
+                manager.bulkActionManager.updateBulkMarkData(key, this.bulkMark[key]);
             });
 
-            const route = this.bulkMark.type === 'course' ?
-                `{{ url('admin/attendance/course') }}/${this.bulkMark.subject_id}?${params.toString()}` :
-                `{{ url('admin/attendance/event') }}/${this.bulkMark.subject_id}?${params.toString()}`;
-
-            window.location.href = route;
+            // Submit tramite manager
+            await manager.bulkActionManager.submitBulkMark();
         },
 
-        exportData() {
-            const params = new URLSearchParams(this.filters);
-            window.location.href = `{{ route('admin.attendance.export') }}?${params.toString()}`;
+        async exportData() {
+            console.log('📤 Alpine.js exportData called - delegating to AttendanceManager');
+            const manager = await waitForManager();
+
+            // Sincronizza filtri e export
+            manager.filterManager.setFilters(this.filters);
+            manager.exportAttendanceData();
         },
 
-        quickMarkToday() {
-            // Quick shortcut to mark attendance for today
+        async quickMarkToday() {
+            console.log('⚡ Alpine.js quickMarkToday called');
+            const manager = await waitForManager();
+
+            // Quick action tramite manager
+            await manager.bulkActionManager.quickActions.markAllPresentToday();
+
+            // Aggiorna Alpine state
+            this.showBulkModal = true;
             this.bulkMark.date = '{{ now()->format("Y-m-d") }}';
-            this.openBulkMarkModal();
-        }
-    }
-}
+            this.bulkMark.defaultStatus = 'present';
+        },
 
-function showAlert(message, type = 'info') {
-    // Simple alert for now - you can replace with a better notification system
-    if (type === 'success') {
-        alert('✅ ' + message);
-    } else if (type === 'error') {
-        alert('❌ ' + message);
-    } else {
-        alert('ℹ️ ' + message);
+        // Initialization hook
+        init() {
+            console.log('🎯 Alpine.js attendanceManager initialized');
+            console.log('⏳ Waiting for modern AttendanceManager...');
+
+            waitForManager().then(manager => {
+                console.log('✅ Modern AttendanceManager connected to Alpine.js');
+                console.log('📊 Manager debug info:', manager.getDebugInfo());
+            });
+        }
     }
 }
 </script>
