@@ -8,7 +8,8 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/js/app.js',
                 'resources/js/admin/courses/course-edit.js',
-                'resources/css/admin/courses/course-edit.css'
+                'resources/css/admin/courses/course-edit.css',
+                'resources/js/admin/rooms/room-manager.js'
             ],
             refresh: true,
         }),
