@@ -35,37 +35,33 @@ class RoomManager {
     }
 
     /**
-     * Gestore click globale
+     * Gestore click globale con data attributes (elimina doppia gestione)
      */
     handleGlobalClick(event) {
-        const target = event.target.closest('button');
+        const target = event.target.closest('[data-room-action]');
         if (!target) return;
 
-        // Gestisce pulsante "Aggiungi Nuova Sala"
-        if (target.hasAttribute('onclick') && target.getAttribute('onclick').includes('showAddRoomForm')) {
-            event.preventDefault();
-            this.showAddRoomForm();
-            return;
-        }
+        event.preventDefault();
 
-        // Gestisce pulsanti "Modifica"
-        if (target.hasAttribute('onclick') && target.getAttribute('onclick').includes('showEditRoomForm')) {
-            event.preventDefault();
-            const match = target.getAttribute('onclick').match(/showEditRoomForm\((\d+)\)/);
-            if (match) {
-                this.showEditRoomForm(parseInt(match[1]));
-            }
-            return;
-        }
+        const action = target.dataset.roomAction;
+        const roomId = target.dataset.roomId;
 
-        // Gestisce pulsanti "Elimina"
-        if (target.hasAttribute('onclick') && target.getAttribute('onclick').includes('deleteRoom')) {
-            event.preventDefault();
-            const match = target.getAttribute('onclick').match(/deleteRoom\((\d+)\)/);
-            if (match) {
-                this.deleteRoom(parseInt(match[1]));
-            }
-            return;
+        switch (action) {
+            case 'add':
+                this.showAddRoomForm();
+                break;
+            case 'edit':
+                if (roomId) {
+                    this.showEditRoomForm(parseInt(roomId));
+                }
+                break;
+            case 'delete':
+                if (roomId) {
+                    this.deleteRoom(parseInt(roomId));
+                }
+                break;
+            default:
+                console.warn('⚠️ Unknown room action:', action);
         }
     }
 
