@@ -90,6 +90,7 @@ class AdminEventController extends AdminBaseController
         $validated['requires_registration'] = $validated['requires_registration'] ?? false;
         $validated['is_public'] = $validated['is_public'] ?? true;
         $validated['active'] = $validated['active'] ?? true;
+        $validated['price'] = $validated['price'] ?? 0.00;
 
         $event = Event::create($validated);
 
@@ -184,6 +185,7 @@ class AdminEventController extends AdminBaseController
             'active' => 'boolean'
         ]);
 
+        $validated['price'] = $validated['price'] ?? 0.00;
         $event->update($validated);
         $this->clearSchoolCache();
 
