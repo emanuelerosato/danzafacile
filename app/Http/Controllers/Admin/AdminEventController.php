@@ -20,7 +20,13 @@ class AdminEventController extends AdminBaseController
         $events = $this->getFilteredResults($query, $request, 15);
 
         // Get filter options
-        $eventTypes = ['Saggio', 'Workshop', 'Competizione', 'Masterclass', 'Festa', 'Esibizione', 'Altro'];
+        $eventTypes = [
+            'saggio' => 'Saggio',
+            'workshop' => 'Workshop',
+            'competizione' => 'Competizione',
+            'seminario' => 'Seminario',
+            'altro' => 'Altro'
+        ];
 
         if ($request->ajax()) {
             return $this->jsonResponse(true, 'Eventi recuperati con successo', [
@@ -47,7 +53,13 @@ class AdminEventController extends AdminBaseController
      */
     public function create()
     {
-        $eventTypes = ['Saggio', 'Workshop', 'Competizione', 'Masterclass', 'Festa', 'Esibizione', 'Altro'];
+        $eventTypes = [
+            'saggio' => 'Saggio',
+            'workshop' => 'Workshop',
+            'competizione' => 'Competizione',
+            'seminario' => 'Seminario',
+            'altro' => 'Altro'
+        ];
 
         return view('admin.events.create', compact('eventTypes'));
     }
@@ -60,7 +72,7 @@ class AdminEventController extends AdminBaseController
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|in:Saggio,Workshop,Competizione,Masterclass,Festa,Esibizione,Altro',
+            'type' => 'required|in:saggio,workshop,competizione,seminario,altro',
             'start_date' => 'required|date|after_or_equal:today',
             'end_date' => 'required|date|after_or_equal:start_date',
             'location' => 'nullable|string|max:255',
@@ -134,7 +146,13 @@ class AdminEventController extends AdminBaseController
             abort(404, 'Evento non trovato.');
         }
 
-        $eventTypes = ['Saggio', 'Workshop', 'Competizione', 'Masterclass', 'Festa', 'Esibizione', 'Altro'];
+        $eventTypes = [
+            'saggio' => 'Saggio',
+            'workshop' => 'Workshop',
+            'competizione' => 'Competizione',
+            'seminario' => 'Seminario',
+            'altro' => 'Altro'
+        ];
 
         return view('admin.events.edit', compact('event', 'eventTypes'));
     }
@@ -152,7 +170,7 @@ class AdminEventController extends AdminBaseController
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|in:Saggio,Workshop,Competizione,Masterclass,Festa,Esibizione,Altro',
+            'type' => 'required|in:saggio,workshop,competizione,seminario,altro',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'location' => 'nullable|string|max:255',

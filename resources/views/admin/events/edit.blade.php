@@ -89,9 +89,9 @@
                             <select id="type" name="type"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('type') border-red-500 @enderror" required>
                                 <option value="">Seleziona tipo...</option>
-                                @foreach($eventTypes as $eventType)
-                                    <option value="{{ $eventType }}" {{ old('type', $event->type) == $eventType ? 'selected' : '' }}>
-                                        {{ $eventType }}
+                                @foreach($eventTypes as $value => $label)
+                                    <option value="{{ $value }}" {{ old('type', $event->type) == $value ? 'selected' : '' }}>
+                                        {{ $label }}
                                     </option>
                                 @endforeach
                             </select>

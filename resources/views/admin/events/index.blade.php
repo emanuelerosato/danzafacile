@@ -163,8 +163,8 @@
                         @change="applyFilters"
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500">
                     <option value="">Tutti i tipi</option>
-                    @foreach($eventTypes as $type)
-                        <option value="{{ $type }}">{{ $type }}</option>
+                    @foreach($eventTypes as $value => $label)
+                        <option value="{{ $value }}">{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
