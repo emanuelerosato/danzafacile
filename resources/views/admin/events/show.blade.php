@@ -530,3 +530,4 @@ function showAlert(message, type = 'info') {
     }
 }
 </script>
+</x-app-layout>
