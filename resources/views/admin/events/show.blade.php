@@ -319,7 +319,7 @@
                             @endif
                         </button>
 
-                        <a href="{{ route('admin.events-export') }}?event_ids[]={{ $event->id }}"
+                        <a href="{{ route('admin.events.export') }}?event_ids[]={{ $event->id }}"
                            class="w-full bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg transition-colors duration-200 inline-block text-center">
                             <i class="fas fa-download mr-2"></i>
                             Esporta Dati
