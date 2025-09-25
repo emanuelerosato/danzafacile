@@ -437,7 +437,15 @@ function attendanceManager() {
 
             waitForManager().then(manager => {
                 console.log('✅ Modern AttendanceManager connected to Alpine.js');
-                console.log('📊 Manager debug info:', manager.getDebugInfo());
+
+                // Safe debug info extraction
+                if (manager && typeof manager.getDebugInfo === 'function') {
+                    console.log('📊 Manager debug info:', manager.getDebugInfo());
+                } else {
+                    console.log('📊 Manager type:', typeof manager, manager);
+                }
+            }).catch(error => {
+                console.error('❌ Failed to connect AttendanceManager:', error);
             });
         }
     }
