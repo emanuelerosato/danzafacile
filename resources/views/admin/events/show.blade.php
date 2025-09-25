@@ -470,7 +470,7 @@ function toggleEventStatus(eventId, newStatus) {
         return;
     }
 
-    fetch(`{{ url('admin/events') }}/${eventId}/toggle-active`, {
+    fetch(`/admin/events/${eventId}/toggle-active`, {
         method: 'PATCH',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -494,11 +494,12 @@ function toggleEventStatus(eventId, newStatus) {
 }
 
 function deleteEvent(eventId) {
+    console.log('Deleting event with ID:', eventId);
     if (!confirm('Sei sicuro di voler eliminare questo evento? Questa azione non può essere annullata.')) {
         return;
     }
 
-    fetch(`{{ url('admin/events') }}/${eventId}`, {
+    fetch(`/admin/events/${eventId}`, {
         method: 'DELETE',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
