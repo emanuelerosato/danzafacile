@@ -22,10 +22,9 @@
         <li class="text-gray-900 font-medium">Eventi</li>
     </x-slot>
 
-
-
-
-<div class="space-y-6" x-data="eventsManager">
+    <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="space-y-6" x-data="eventsManager">
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div>
@@ -78,72 +77,72 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <!-- Total Events -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600">Eventi Totali</p>
-                    <p class="text-xl md:text-2xl font-bold text-gray-900">{{ $stats['total_events'] }}</p>
-                </div>
-                <div class="p-3 bg-blue-100 rounded-full">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                 </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Eventi Totali</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $stats['total_events'] }}</p>
+                    <p class="text-xs text-gray-500">{{ $stats['active_events'] }} attivi</p>
+                </div>
             </div>
-            <p class="mt-2 text-xs text-gray-500">{{ $stats['active_events'] }} attivi</p>
         </div>
 
         <!-- Upcoming Events -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600">Eventi in Arrivo</p>
-                    <p class="text-xl md:text-2xl font-bold text-gray-900">{{ $stats['upcoming_events'] }}</p>
-                </div>
-                <div class="p-3 bg-green-100 rounded-full">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Eventi in Arrivo</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $stats['upcoming_events'] }}</p>
+                    <p class="text-xs text-gray-500">Prossimi eventi</p>
+                </div>
             </div>
-            <p class="mt-2 text-xs text-gray-500">Prossimi eventi</p>
         </div>
 
         <!-- Total Registrations -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600">Registrazioni</p>
-                    <p class="text-xl md:text-2xl font-bold text-gray-900">{{ $stats['total_registrations'] }}</p>
-                </div>
-                <div class="p-3 bg-purple-100 rounded-full">
-                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
                 </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Registrazioni</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $stats['total_registrations'] }}</p>
+                    <p class="text-xs text-gray-500">Totale iscrizioni</p>
+                </div>
             </div>
-            <p class="mt-2 text-xs text-gray-500">Totale iscrizioni</p>
         </div>
 
         <!-- Active Events -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm font-medium text-gray-600">Eventi Attivi</p>
-                    <p class="text-xl md:text-2xl font-bold text-gray-900">{{ $stats['active_events'] }}</p>
-                </div>
-                <div class="p-3 bg-orange-100 rounded-full">
-                    <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
                     </svg>
                 </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Eventi Attivi</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $stats['active_events'] }}</p>
+                    <p class="text-xs text-gray-500">Pubblicati e attivi</p>
+                </div>
             </div>
-            <p class="mt-2 text-xs text-gray-500">Pubblicati e attivi</p>
         </div>
     </div>
 
     <!-- Filters and Search -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+    <div class="bg-white rounded-lg shadow p-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <!-- Search -->
             <div>
@@ -207,7 +206,7 @@
     </div>
 
     <!-- Events Table -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+    <div class="bg-white rounded-lg shadow">
         <div id="events-table-container">
             @include('admin.events.partials.table', ['events' => $events])
         </div>
@@ -378,4 +377,7 @@ window.applyFilters = () => {
     }
 };
 </script>
+            </div>
+        </div>
+    </div>
 </x-app-layout>
