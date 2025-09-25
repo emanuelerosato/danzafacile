@@ -11,7 +11,8 @@ export default defineConfig({
                 'resources/css/admin/courses/course-edit.css',
                 'resources/js/admin/rooms/room-manager.js',
                 'resources/js/admin/enrollments/enrollment-manager.js',
-                'resources/js/admin/attendance/attendance-manager.js'
+                'resources/js/admin/attendance/attendance-manager.js',
+                'resources/js/admin/events/events-manager.js'
             ],
             refresh: true,
         }),
