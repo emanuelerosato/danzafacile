@@ -219,7 +219,7 @@ class AdminEventController extends AdminBaseController
 
         $this->clearSchoolCache();
 
-        if (request()->ajax()) {
+        if (request()->ajax() || request()->wantsJson()) {
             return $this->jsonResponse(true, "Evento {$eventName} eliminato con successo.");
         }
 
@@ -243,7 +243,7 @@ class AdminEventController extends AdminBaseController
         $status = $event->active ? 'attivato' : 'disattivato';
         $message = "Evento {$status} con successo.";
 
-        if (request()->ajax()) {
+        if (request()->ajax() || request()->wantsJson()) {
             return $this->jsonResponse(true, $message, [
                 'status' => $event->active
             ]);
