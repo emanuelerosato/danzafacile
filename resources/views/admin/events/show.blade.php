@@ -494,7 +494,6 @@ function toggleEventStatus(eventId, newStatus) {
 }
 
 function deleteEvent(eventId) {
-    console.log('Deleting event with ID:', eventId);
     if (!confirm('Sei sicuro di voler eliminare questo evento? Questa azione non può essere annullata.')) {
         return;
     }
@@ -508,15 +507,12 @@ function deleteEvent(eventId) {
         }
     })
     .then(response => {
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers.get('content-type'));
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
-        console.log('Response data:', data);
         if (data.success) {
             showAlert(data.message, 'success');
             window.location.href = '{{ route("admin.events.index") }}';
