@@ -474,7 +474,8 @@ function toggleEventStatus(eventId, newStatus) {
         method: 'PATCH',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         }
     })
     .then(response => response.json())
@@ -501,7 +502,8 @@ function deleteEvent(eventId) {
         method: 'DELETE',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         }
     })
     .then(response => response.json())
