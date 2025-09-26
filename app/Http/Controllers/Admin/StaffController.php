@@ -121,6 +121,14 @@ class StaffController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Errori di validazione',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
             return redirect()->back()
                            ->withErrors($validator)
                            ->withInput();
@@ -169,6 +177,15 @@ class StaffController extends Controller
             'can_substitute' => $request->boolean('can_substitute'),
             'notes' => $request->notes,
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Staff member creato con successo!',
+                'data' => $staff->load('user'),
+                'redirect' => route('admin.staff.show', $staff)
+            ], 201);
+        }
 
         return redirect()->route('admin.staff.show', $staff)
                         ->with('success', 'Staff member creato con successo!');
@@ -467,5 +484,37 @@ class StaffController extends Controller
         }
 
         return redirect()->back()->with('success', $message);
+    }
+
+    /**
+     * Validate email uniqueness for AJAX requests
+     */
+    public function validateEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'exclude_id' => 'nullable|integer|exists:staff,id'
+        ]);
+
+        $email = $request->input('email');
+        $excludeId = $request->input('exclude_id');
+
+        // Check if email exists in users table (for staff accounts)
+        $query = \App\Models\User::where('email', $email);
+
+        if ($excludeId) {
+            // If editing, exclude current staff's user
+            $currentStaff = Staff::find($excludeId);
+            if ($currentStaff && $currentStaff->user_id) {
+                $query->where('id', '!=', $currentStaff->user_id);
+            }
+        }
+
+        $emailExists = $query->exists();
+
+        return response()->json([
+            'unique' => !$emailExists,
+            'message' => $emailExists ? 'Email già in uso' : 'Email disponibile'
+        ]);
     }
 }

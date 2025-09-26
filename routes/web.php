@@ -233,6 +233,7 @@ Route::middleware('auth')->group(function () {
         Route::get('staff-export', [StaffController::class, 'export'])->name('staff.export');
         Route::post('staff/{staff}/assign-course', [StaffController::class, 'assignToCourse'])->name('staff.assign-course');
         Route::delete('staff/{staff}/assignments/{assignment}', [StaffController::class, 'removeAssignment'])->name('staff.remove-assignment');
+        Route::post('staff/validate-email', [StaffController::class, 'validateEmail'])->name('staff.validate-email');
 
         // Schedules management
         Route::prefix('schedules')->name('schedules.')->group(function () {
