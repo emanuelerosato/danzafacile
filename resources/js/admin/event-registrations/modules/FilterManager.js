@@ -31,10 +31,12 @@ export default class FilterManager {
      */
     init() {
         if (!this.form) {
-            console.error('[FilterManager] Form not found:', this.options.formSelector);
+            console.warn('[FilterManager] Form not found:', this.options.formSelector, '- Filter manager disabled for this page');
+            this.isDisabled = true;
             return;
         }
 
+        this.isDisabled = false;
         this.bindEvents();
         this.initializeFromURL();
     }
@@ -81,6 +83,8 @@ export default class FilterManager {
      * Handle search input with debounce
      */
     handleSearchInput(value) {
+        if (this.isDisabled) return;
+
         if (this.debounceTimer) {
             clearTimeout(this.debounceTimer);
         }
@@ -101,6 +105,8 @@ export default class FilterManager {
      * Handle form submission
      */
     handleFormSubmit() {
+        if (this.isDisabled) return;
+
         const filters = this.extractFiltersFromForm();
 
         if (this.validateFilters(filters)) {
@@ -119,6 +125,8 @@ export default class FilterManager {
      * Handle general filter change
      */
     handleFilterChange() {
+        if (this.isDisabled) return;
+
         const filters = this.extractFiltersFromForm();
 
         if (this.validateFilters(filters)) {
@@ -132,6 +140,8 @@ export default class FilterManager {
      * Clear all filters
      */
     clearFilters() {
+        if (this.isDisabled) return;
+
         // Reset form
         this.form.reset();
 
@@ -160,6 +170,11 @@ export default class FilterManager {
      * Extract filters from form
      */
     extractFiltersFromForm() {
+        // Return empty filters if form doesn't exist
+        if (!this.form) {
+            return {};
+        }
+
         const formData = new FormData(this.form);
         const filters = {};
 
@@ -317,6 +332,8 @@ export default class FilterManager {
      * Initialize filters from URL parameters
      */
     initializeFromURL() {
+        if (this.isDisabled) return;
+
         const urlParams = new URLSearchParams(window.location.search);
         const filters = {};
 
@@ -344,6 +361,8 @@ export default class FilterManager {
      * Set filters programmatically
      */
     setFilters(filters) {
+        if (this.isDisabled) return;
+
         Object.entries(filters).forEach(([key, value]) => {
             const input = this.form.querySelector(`[name="${key}"]`);
             if (input) {
@@ -375,6 +394,10 @@ export default class FilterManager {
      * Get filter summary for display
      */
     getFilterSummary() {
+        if (this.isDisabled) {
+            return 'Filtri non disponibili';
+        }
+
         const activeFilters = Object.entries(this.currentFilters)
             .filter(([key, value]) => value && value.toString().trim() !== '');
 
@@ -387,7 +410,7 @@ export default class FilterManager {
                 case 'search':
                     return `Ricerca: "${value}"`;
                 case 'event_id':
-                    const eventOption = this.form.querySelector(`[name="event_id"] option[value="${value}"]`);
+                    const eventOption = this.form?.querySelector(`[name="event_id"] option[value="${value}"]`);
                     return `Evento: ${eventOption ? eventOption.textContent : value}`;
                 case 'status':
                     const statusMap = {
