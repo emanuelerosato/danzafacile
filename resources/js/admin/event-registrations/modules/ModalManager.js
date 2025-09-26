@@ -303,8 +303,13 @@ export default class ModalManager {
      * Handle event selection change
      */
     async handleEventChange(eventId) {
+        console.log('[ModalManager] 🔄 Event changed to:', eventId);
+
         const userSelect = document.querySelector(this.options.userSelectSelector);
-        if (!userSelect) return;
+        if (!userSelect) {
+            console.warn('[ModalManager] ⚠️ User select not found');
+            return;
+        }
 
         if (!eventId) {
             this.clearUserOptions();
@@ -313,10 +318,12 @@ export default class ModalManager {
 
         try {
             this.showUserLoading();
+            console.log('[ModalManager] 📡 Fetching users for event:', eventId);
             const users = await this.fetchAvailableUsers(eventId);
+            console.log('[ModalManager] 👥 Received users:', users.length);
             this.populateUserOptions(users);
         } catch (error) {
-            console.error('[ModalManager] Error fetching users:', error);
+            console.error('[ModalManager] ❌ Error fetching users:', error);
             this.showUserError('Errore nel caricamento degli utenti');
         }
     }
@@ -377,7 +384,7 @@ export default class ModalManager {
      * Fetch available users for event
      */
     async fetchAvailableUsers(eventId) {
-        const response = await fetch(`/admin/events/${eventId}/available-users`, {
+        const response = await fetch(`/admin/event-registrations/event/${eventId}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json',

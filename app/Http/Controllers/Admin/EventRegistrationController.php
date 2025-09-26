@@ -82,12 +82,37 @@ class EventRegistrationController extends AdminBaseController
     }
 
     /**
-     * Show registrations for a specific event
+     * Show registrations for a specific event or return available users for AJAX
      */
-    public function byEvent(Event $event): View
+    public function byEvent(Request $request, Event $event): View|JsonResponse
     {
         if ($event->school_id !== $this->school->id) {
             abort(404, 'Evento non trovato.');
+        }
+
+        // If AJAX request, return available users for registration
+        if ($request->ajax()) {
+            // Get all users in the school
+            $allUsers = User::where('school_id', $this->school->id)
+                ->where('role', 'user')
+                ->select('id', 'name', 'email')
+                ->orderBy('name')
+                ->get();
+
+            // Get users already registered for this event
+            $registeredUserIds = EventRegistration::where('event_id', $event->id)
+                ->pluck('user_id')
+                ->toArray();
+
+            // Filter out already registered users
+            $availableUsers = $allUsers->filter(function($user) use ($registeredUserIds) {
+                return !in_array($user->id, $registeredUserIds);
+            })->values();
+
+            return response()->json([
+                'success' => true,
+                'users' => $availableUsers
+            ]);
         }
 
         $registrations = EventRegistration::with('user')

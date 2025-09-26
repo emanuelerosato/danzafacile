@@ -233,7 +233,7 @@
                 </button>
             </div>
 
-            <form id="addRegistrationForm" onsubmit="submitRegistration(event)">
+            <form id="addRegistrationForm">
                 <div class="mb-4">
                     <label for="modal_event_id" class="block text-sm font-medium text-gray-700 mb-2">Evento</label>
                     <select id="modal_event_id" name="event_id" required
