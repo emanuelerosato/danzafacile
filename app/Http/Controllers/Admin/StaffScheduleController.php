@@ -37,6 +37,21 @@ class StaffScheduleController extends Controller
             $query->whereDate('date', '<=', $request->date_to);
         }
 
+        // Ricerca testuale
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%")
+                  ->orWhereHas('staff', function($sq) use ($search) {
+                      $sq->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                  });
+            });
+        }
+
         // Ordinamento predefinito
         $query->orderBy('date', 'desc')->orderBy('start_time', 'asc');
 
@@ -53,6 +68,21 @@ class StaffScheduleController extends Controller
             ])->count(),
             'pending_confirmations' => StaffSchedule::where('status', 'scheduled')->count(),
         ];
+
+        // Return JSON for AJAX requests
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'schedules' => $schedules->items(),
+                'pagination' => [
+                    'current_page' => $schedules->currentPage(),
+                    'last_page' => $schedules->lastPage(),
+                    'per_page' => $schedules->perPage(),
+                    'total' => $schedules->total(),
+                ],
+                'stats' => $stats,
+                'staff' => $staff
+            ]);
+        }
 
         return view('admin.staff-schedules.index', compact('schedules', 'staff', 'stats'));
     }
