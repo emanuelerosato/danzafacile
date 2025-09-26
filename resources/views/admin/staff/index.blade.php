@@ -324,9 +324,11 @@
         </div>
 
                     <!-- Pagination -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        {{ $staff->withQueryString()->links() }}
-                    </div>
+                    @if($staff->hasPages())
+                        <div class="bg-white rounded-lg shadow p-6">
+                            {{ $staff->withQueryString()->links() }}
+                        </div>
+                    @endif
                 @else
                     <!-- Empty State -->
                     <div class="empty-state bg-white rounded-lg shadow p-12">
