@@ -44,7 +44,7 @@
         @method('PUT')
 
         <!-- Account Utente -->
-        <div class="bg-white rounded-lg shadow-md">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h2 class="text-xl font-semibold text-gray-900">
                     <i class="fas fa-user-circle text-blue-600 mr-2"></i>Account Utente
@@ -96,7 +96,7 @@
         </div>
 
         <!-- Informazioni Staff -->
-        <div class="bg-white rounded-lg shadow-md">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h2 class="text-xl font-semibold text-gray-900">
                     <i class="fas fa-id-badge text-green-600 mr-2"></i>Informazioni Staff
@@ -179,7 +179,7 @@
         </div>
 
         <!-- Informazioni Personali -->
-        <div class="bg-white rounded-lg shadow-md">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h2 class="text-xl font-semibold text-gray-900">
                     <i class="fas fa-user text-purple-600 mr-2"></i>Informazioni Personali
@@ -251,7 +251,7 @@
         </div>
 
         <!-- Informazioni Professionali -->
-        <div class="bg-white rounded-lg shadow-md">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h2 class="text-xl font-semibold text-gray-900">
                     <i class="fas fa-briefcase text-orange-600 mr-2"></i>Informazioni Professionali
@@ -317,7 +317,7 @@
         </div>
 
         <!-- Informazioni Finanziarie -->
-        <div class="bg-white rounded-lg shadow-md">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h2 class="text-xl font-semibold text-gray-900">
                     <i class="fas fa-euro-sign text-green-600 mr-2"></i>Informazioni Finanziarie
@@ -380,7 +380,7 @@
         </div>
 
         <!-- Disponibilità & Orari -->
-        <div class="bg-white rounded-lg shadow-md">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h2 class="text-xl font-semibold text-gray-900">
                     <i class="fas fa-calendar-alt text-blue-600 mr-2"></i>Disponibilità & Orari
@@ -462,7 +462,7 @@
         </div>
 
         <!-- Note -->
-        <div class="bg-white rounded-lg shadow-md">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h2 class="text-xl font-semibold text-gray-900">
                     <i class="fas fa-sticky-note text-yellow-600 mr-2"></i>Note

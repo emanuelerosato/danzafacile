@@ -370,13 +370,11 @@
                 <div class="p-6">
                     <p class="text-gray-700">{{ $staff->notes }}</p>
                 </div>
-                        </div>
-                        @endif
-                    </div>
-                </div>
             </div>
+            @endif
         </div>
     </div>
+</div>
 
 <!-- Modal Assegnazione Corso -->
 <div id="assignCourseModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">

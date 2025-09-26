@@ -102,7 +102,7 @@
             </div>
 
             <!-- Informazioni Professionali -->
-            <div class="bg-white rounded-lg shadow-md">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h2 class="text-xl font-semibold text-gray-900">
                         <i class="fas fa-briefcase text-green-600 mr-2"></i>Informazioni Professionali
@@ -169,7 +169,7 @@
             </div>
 
             <!-- Assegnazioni Corsi -->
-            <div class="bg-white rounded-lg shadow-md">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <div class="flex items-center justify-between">
                         <h2 class="text-xl font-semibold text-gray-900">
@@ -245,7 +245,7 @@
         <!-- Sidebar -->
         <div class="space-y-6">
             <!-- Informazioni Finanziarie -->
-            <div class="bg-white rounded-lg shadow-md">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900">
                         <i class="fas fa-euro-sign text-green-600 mr-2"></i>Info Finanziarie
@@ -276,7 +276,7 @@
             </div>
 
             <!-- Disponibilità -->
-            <div class="bg-white rounded-lg shadow-md">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900">
                         <i class="fas fa-calendar-alt text-blue-600 mr-2"></i>Disponibilità
@@ -336,7 +336,7 @@
 
             <!-- Contatto di Emergenza -->
             @if($staff->emergency_contact_name || $staff->emergency_contact_phone)
-            <div class="bg-white rounded-lg shadow-md">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900">
                         <i class="fas fa-phone-alt text-red-600 mr-2"></i>Contatto Emergenza
@@ -361,7 +361,7 @@
 
             <!-- Note -->
             @if($staff->notes)
-            <div class="bg-white rounded-lg shadow-md">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h2 class="text-lg font-semibold text-gray-900">
                         <i class="fas fa-sticky-note text-yellow-600 mr-2"></i>Note
@@ -370,13 +370,11 @@
                 <div class="p-6">
                     <p class="text-gray-700">{{ $staff->notes }}</p>
                 </div>
-                        </div>
-                        @endif
-                    </div>
-                </div>
             </div>
+            @endif
         </div>
     </div>
+</div>
 
 <!-- Modal Assegnazione Corso -->
 <div id="assignCourseModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden">

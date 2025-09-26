@@ -38,7 +38,7 @@
     </nav>
 
     <!-- Header -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+    <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-sm border border-gray-200 mb-6">
         <div class="px-6 py-4 border-b border-gray-200">
             <div class="flex justify-between items-center">
                 <div>
@@ -54,7 +54,7 @@
     </div>
 
     <!-- Form -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-sm border border-gray-200">
         <form method="POST" action="{{ route('admin.staff.store') }}" class="p-6 space-y-8">
             @csrf
 
