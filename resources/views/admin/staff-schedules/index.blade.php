@@ -104,65 +104,115 @@
                 </div>
 
                 <!-- Filters -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <form method="GET" action="{{ route('admin.staff-schedules.index') }}" class="flex flex-wrap gap-4 items-center">
-                        <div class="flex-1 min-w-64">
-                            <select id="staff_id" name="staff_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200">
-                                <option value="">Tutti gli staff</option>
-                                @foreach($staff as $member)
-                                    <option value="{{ $member->id }}" {{ request('staff_id') == $member->id ? 'selected' : '' }}>
-                                        {{ $member->full_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <select id="type" name="type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
-                                <option value="">Tutti i tipi</option>
-                                <option value="course" {{ request('type') == 'course' ? 'selected' : '' }}>Corso</option>
-                                <option value="event" {{ request('type') == 'event' ? 'selected' : '' }}>Evento</option>
-                                <option value="administrative" {{ request('type') == 'administrative' ? 'selected' : '' }}>Amministrativo</option>
-                                <option value="maintenance" {{ request('type') == 'maintenance' ? 'selected' : '' }}>Manutenzione</option>
-                                <option value="other" {{ request('type') == 'other' ? 'selected' : '' }}>Altro</option>
-                            </select>
-                        </div>
-                        <div>
-                            <select id="status" name="status" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
-                                <option value="">Tutti gli stati</option>
-                                <option value="scheduled" {{ request('status') == 'scheduled' ? 'selected' : '' }}>Programmato</option>
-                                <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confermato</option>
-                                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completato</option>
-                                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Annullato</option>
-                                <option value="no_show" {{ request('status') == 'no_show' ? 'selected' : '' }}>Assente</option>
-                            </select>
-                        </div>
-                        <div>
-                            <input type="date" id="date_from" name="date_from" value="{{ request('date_from') }}"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200"
-                                   placeholder="Data da">
-                        </div>
-                        <div>
-                            <input type="date" id="date_to" name="date_to" value="{{ request('date_to') }}"
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200"
-                                   placeholder="Data a">
-                        </div>
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                            </svg>
-                            Filtra
+                <div class="bg-white rounded-lg shadow p-6 filters-container">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-medium text-gray-900">Filtri</h3>
+                        <button id="toggle-filters-btn" class="text-sm text-gray-500 hover:text-gray-700 lg:hidden">
+                            Nascondi filtri
                         </button>
-                        @if(request()->hasAny(['staff_id', 'type', 'status', 'date_from', 'date_to']))
-                            <a href="{{ route('admin.staff-schedules.index') }}"
-                               class="inline-flex items-center px-4 py-2 text-gray-500 hover:text-gray-700 text-sm font-medium rounded-lg transition-colors duration-200">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                                Reset
-                            </a>
-                        @endif
+                    </div>
+
+                    <form method="GET" action="{{ route('admin.staff-schedules.index') }}" class="filter-form">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+                            <!-- Search -->
+                            <div class="lg:col-span-2">
+                                <label for="filter-search" class="block text-sm font-medium text-gray-700 mb-1">Ricerca</label>
+                                <input type="text" id="filter-search" name="search" value="{{ request('search') }}"
+                                       placeholder="Cerca per titolo, staff, descrizione..."
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200">
+                            </div>
+
+                            <!-- Staff Filter -->
+                            <div>
+                                <label for="filter-staff" class="block text-sm font-medium text-gray-700 mb-1">Staff</label>
+                                <select id="filter-staff" name="staff_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200">
+                                    <option value="">Tutti gli staff</option>
+                                    @foreach($staff as $member)
+                                        <option value="{{ $member->id }}" {{ request('staff_id') == $member->id ? 'selected' : '' }}>
+                                            {{ $member->full_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Type Filter -->
+                            <div>
+                                <label for="filter-type" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                                <select id="filter-type" name="type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                                    <option value="">Tutti i tipi</option>
+                                    <option value="course" {{ request('type') == 'course' ? 'selected' : '' }}>Corso</option>
+                                    <option value="event" {{ request('type') == 'event' ? 'selected' : '' }}>Evento</option>
+                                    <option value="administrative" {{ request('type') == 'administrative' ? 'selected' : '' }}>Amministrativo</option>
+                                    <option value="maintenance" {{ request('type') == 'maintenance' ? 'selected' : '' }}>Manutenzione</option>
+                                    <option value="other" {{ request('type') == 'other' ? 'selected' : '' }}>Altro</option>
+                                </select>
+                            </div>
+
+                            <!-- Status Filter -->
+                            <div>
+                                <label for="filter-status" class="block text-sm font-medium text-gray-700 mb-1">Stato</label>
+                                <select id="filter-status" name="status" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                                    <option value="">Tutti gli stati</option>
+                                    <option value="scheduled" {{ request('status') == 'scheduled' ? 'selected' : '' }}>Programmato</option>
+                                    <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Confermato</option>
+                                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completato</option>
+                                    <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Annullato</option>
+                                    <option value="no_show" {{ request('status') == 'no_show' ? 'selected' : '' }}>Assente</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Date Range -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <label for="filter-date-from" class="block text-sm font-medium text-gray-700 mb-1">Data da</label>
+                                <input type="date" id="filter-date-from" name="date_from" value="{{ request('date_from') }}"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200">
+                            </div>
+                            <div>
+                                <label for="filter-date-to" class="block text-sm font-medium text-gray-700 mb-1">Data a</label>
+                                <input type="date" id="filter-date-to" name="date_to" value="{{ request('date_to') }}"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200">
+                            </div>
+                        </div>
+
+                        <!-- Filter Actions -->
+                        <div class="flex items-center justify-between mt-6">
+                            <div class="flex items-center space-x-4">
+                                <button type="submit" data-filter-apply class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                    Applica filtri
+                                </button>
+                                @if(request()->hasAny(['staff_id', 'type', 'status', 'date_from', 'date_to', 'search']))
+                                    <a href="{{ route('admin.staff-schedules.index') }}" id="reset-filters-btn"
+                                       class="inline-flex items-center px-4 py-2 text-gray-500 hover:text-gray-700 text-sm font-medium rounded-lg transition-colors duration-200">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                        Reset filtri
+                                    </a>
+                                @endif
+                            </div>
+
+                            <div class="flex items-center space-x-2">
+                                <button type="button" id="calendar-view-toggle" class="inline-flex items-center px-3 py-2 text-gray-500 hover:text-gray-700 text-sm font-medium rounded-lg transition-colors duration-200">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    Vista calendario
+                                </button>
+                            </div>
+                        </div>
                     </form>
                 </div>
+
+                <!-- Time Overlap Errors Container -->
+                <div id="time-overlap-errors"></div>
+
+                <!-- Schedule Conflicts Container -->
+                <div id="schedule-conflicts"></div>
 
                 <!-- Schedules Table -->
                 <div class="bg-white rounded-lg shadow overflow-hidden">
@@ -184,6 +234,10 @@
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <input type="checkbox" id="select-all-checkbox"
+                                           class="w-4 h-4 text-rose-600 bg-gray-100 border-gray-300 rounded focus:ring-rose-500 focus:ring-2">
+                                </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Staff</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Orario</th>
@@ -197,6 +251,10 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($schedules as $schedule)
                                 <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <input type="checkbox" data-schedule-checkbox data-schedule-id="{{ $schedule->id }}"
+                                               class="w-4 h-4 text-rose-600 bg-gray-100 border-gray-300 rounded focus:ring-rose-500 focus:ring-2">
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
                                             <div class="w-8 h-8 bg-gradient-to-r from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
@@ -299,4 +357,6 @@
             </div>
         </div>
     </div>
+
+    @vite('resources/js/admin/staff-schedules.js')
 </x-app-layout>

@@ -41,7 +41,7 @@
 
                 <!-- Form -->
                 <div class="bg-white rounded-lg shadow overflow-hidden">
-            <form method="POST" action="{{ route('admin.staff-schedules.store') }}" class="p-6 space-y-6">
+            <form id="staff-schedule-form" method="POST" action="{{ route('admin.staff-schedules.store') }}" class="p-6 space-y-6">
                 @csrf
 
                 @if ($errors->any())
@@ -265,4 +265,6 @@
             </div>
         </div>
     </div>
+
+    @vite('resources/js/admin/staff-schedules.js')
 </x-app-layout>

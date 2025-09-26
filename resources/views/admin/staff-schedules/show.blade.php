@@ -362,4 +362,6 @@
             </div>
         </div>
     </div>
+
+    @vite('resources/js/admin/staff-schedules.js')
 </x-app-layout>
