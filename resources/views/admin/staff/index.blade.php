@@ -299,7 +299,7 @@
                                class="bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm px-3 py-2 rounded-lg transition-colors duration-200">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <form method="POST" action="{{ route('admin.staff.toggle-status', $member) }}" class="inline">
+                            <form method="POST" action="{{ route('admin.staff.toggle-active', $member) }}" class="inline">
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit"

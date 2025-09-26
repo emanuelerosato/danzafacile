@@ -130,7 +130,7 @@ export class BulkActionManager {
      */
     async bulkActivate(staffIds) {
         return await this.processBatch('activate', staffIds, async (staffId) => {
-            const response = await fetch(`/admin/staff/${staffId}/toggle-status`, {
+            const response = await fetch(`/admin/staff/${staffId}/toggle-active`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -155,7 +155,7 @@ export class BulkActionManager {
      */
     async bulkDeactivate(staffIds) {
         return await this.processBatch('deactivate', staffIds, async (staffId) => {
-            const response = await fetch(`/admin/staff/${staffId}/toggle-status`, {
+            const response = await fetch(`/admin/staff/${staffId}/toggle-active`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

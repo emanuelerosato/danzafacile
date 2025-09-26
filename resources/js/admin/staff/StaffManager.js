@@ -135,7 +135,7 @@ class StaffManager {
             this.setLoading(true);
             const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
 
-            const response = await fetch(`/admin/staff/${staffId}/toggle-status`, {
+            const response = await fetch(`/admin/staff/${staffId}/toggle-active`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
