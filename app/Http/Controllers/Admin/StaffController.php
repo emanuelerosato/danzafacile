@@ -214,7 +214,13 @@ class StaffController extends Controller
             'weekly_earnings' => $staff->getEstimatedWeeklyEarnings(),
         ];
 
-        return view('admin.staff.show', compact('staff', 'stats'));
+        // Corsi disponibili per l'assegnazione
+        $availableCourses = \App\Models\Course::where('school_id', auth()->user()->school_id)
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get(['id', 'name', 'start_date', 'end_date']);
+
+        return view('admin.staff.show', compact('staff', 'stats', 'availableCourses'));
     }
 
     /**
