@@ -194,8 +194,18 @@ export default class EventRegistrationsManager {
             const response = await this.createRegistration(formData);
 
             if (response.success) {
+                // Show success notification
+                this.notificationManager.showSuccess(response.message || 'Registrazione creata con successo');
+
+                // Close modal
+                this.modalManager.close();
+
+                // Reload table to show new registration
+                await this.reloadTable();
+
+                // Dispatch event for other components
                 document.dispatchEvent(new CustomEvent('eventRegistration:registrationCreated', {
-                    detail: { registration: response.data }
+                    detail: { registration: response.registration }
                 }));
             } else {
                 this.notificationManager.showError(response.message || 'Errore durante la creazione');
@@ -300,6 +310,7 @@ export default class EventRegistrationsManager {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
             },
             body: formData
