@@ -287,6 +287,7 @@ export default class EventRegistrationsManager {
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
@@ -335,6 +336,7 @@ export default class EventRegistrationsManager {
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({ status: status })
@@ -375,6 +377,7 @@ export default class EventRegistrationsManager {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                    'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json'
                 }
             });
