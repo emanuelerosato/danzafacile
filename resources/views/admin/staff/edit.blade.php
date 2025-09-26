@@ -39,7 +39,7 @@
         </div>
     </div>
 
-    <form action="{{ route('admin.staff.update', $staff) }}" method="POST" class="space-y-8">
+    <form id="staff-form" action="{{ route('admin.staff.update', $staff) }}" method="POST" class="space-y-8" enctype="multipart/form-data" data-staff-id="{{ $staff->id }}">
         @csrf
         @method('PUT')
 
@@ -494,59 +494,35 @@
     </form>
 </div>
 
+@push('scripts')
+@vite('resources/js/admin/staff/staff-manager.js')
 <script>
-function toggleDayInputs(day) {
-    const checkbox = document.getElementById(`availability_${day}_available`);
-    const timeInputs = document.getElementById(`time_inputs_${day}`);
+    // Mark this as a staff page for the JavaScript system
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.setAttribute('data-page', 'staff');
+        document.body.classList.add('staff-edit-page');
+    });
 
-    if (checkbox.checked) {
-        timeInputs.classList.remove('hidden');
-    } else {
-        timeInputs.classList.add('hidden');
-    }
-}
+    // Legacy function compatibility for existing template functionality
+    function toggleDayInputs(day) {
+        const checkbox = document.getElementById(`availability_${day}_available`);
+        const timeInputs = document.getElementById(`time_inputs_${day}`);
 
-// Auto-generate employee ID based on role selection
-document.getElementById('role').addEventListener('change', function() {
-    const employeeIdField = document.getElementById('employee_id');
-    if (!employeeIdField.value) {
-        // Auto-suggest employee ID based on role
-        const role = this.value;
-        if (role) {
-            const prefixes = {
-                'instructor': 'INS',
-                'coordinator': 'COORD',
-                'admin_assistant': 'ADMIN',
-                'receptionist': 'REC',
-                'cleaner': 'CLEAN',
-                'maintenance': 'MAINT'
-            };
-            const prefix = prefixes[role] || 'EMP';
-            // In a real application, you would fetch the next available number via AJAX
-            employeeIdField.placeholder = `${prefix}XXXX (auto-generato)`;
+        if (checkbox && timeInputs) {
+            if (checkbox.checked) {
+                timeInputs.classList.remove('hidden');
+            } else {
+                timeInputs.classList.add('hidden');
+            }
         }
     }
-});
 
-// Initialize availability toggles on page load
-document.addEventListener('DOMContentLoaded', function() {
-    @foreach($days as $day => $dayName)
-    toggleDayInputs('{{ $day }}');
-    @endforeach
-});
-
-// Financial fields logic
-document.getElementById('employment_type').addEventListener('change', function() {
-    const hourlyRateField = document.getElementById('hourly_rate');
-    const monthlySalaryField = document.getElementById('monthly_salary');
-
-    if (this.value === 'full_time') {
-        monthlySalaryField.setAttribute('required', '');
-        hourlyRateField.removeAttribute('required');
-    } else {
-        hourlyRateField.setAttribute('required', '');
-        monthlySalaryField.removeAttribute('required');
-    }
-});
+    // Initialize availability toggles after FormManager loads
+    document.addEventListener('staffSystemReady', function() {
+        @foreach($days ?? [] as $day => $dayName)
+        toggleDayInputs('{{ $day }}');
+        @endforeach
+    });
 </script>
+@endpush
 </x-app-layout>

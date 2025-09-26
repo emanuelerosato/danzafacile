@@ -55,7 +55,7 @@
 
     <!-- Form -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-        <form method="POST" action="{{ route('admin.staff.store') }}" class="p-6 space-y-8">
+        <form id="staff-form" method="POST" action="{{ route('admin.staff.store') }}" class="p-6 space-y-8" enctype="multipart/form-data">
             @csrf
 
             <!-- User Account Information -->
@@ -502,17 +502,21 @@
                         <label class="block text-sm font-medium text-gray-700 mb-2">
                             Giorni Disponibili
                         </label>
-                        <div class="grid grid-cols-7 gap-2">
-                            @foreach(['monday' => 'Lun', 'tuesday' => 'Mar', 'wednesday' => 'Mer', 'thursday' => 'Gio', 'friday' => 'Ven', 'saturday' => 'Sab', 'sunday' => 'Dom'] as $day => $label)
-                                <label class="flex items-center justify-center p-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
-                                    <input type="checkbox"
-                                           name="availability[]"
-                                           value="{{ $day }}"
-                                           {{ is_array(old('availability')) && in_array($day, old('availability')) ? 'checked' : '' }}
-                                           class="hidden">
-                                    <span class="text-sm">{{ $label }}</span>
-                                </label>
-                            @endforeach
+                        <div class="availability-container">
+                            <div class="grid grid-cols-7 gap-2">
+                                @foreach(['monday' => 'Lun', 'tuesday' => 'Mar', 'wednesday' => 'Mer', 'thursday' => 'Gio', 'friday' => 'Ven', 'saturday' => 'Sab', 'sunday' => 'Dom'] as $day => $label)
+                                    <label class="flex items-center justify-center p-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                        <input type="checkbox"
+                                               name="availability[]"
+                                               value="{{ $day }}"
+                                               {{ is_array(old('availability')) && in_array($day, old('availability')) ? 'checked' : '' }}
+                                               class="availability-day hidden">
+                                        <span class="text-sm">{{ $label }}</span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            <!-- Visual calendar will be inserted here by FormManager -->
+                            <div class="availability-visual"></div>
                         </div>
                     </div>
 
@@ -549,65 +553,13 @@
 </div>
 
 @push('scripts')
+@vite('resources/js/admin/staff/staff-manager.js')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Availability days selection
-    const availabilityLabels = document.querySelectorAll('label[for="availability[]"]');
-    availabilityLabels.forEach(label => {
-        label.addEventListener('click', function() {
-            const checkbox = this.querySelector('input[type="checkbox"]');
-            const span = this.querySelector('span');
-
-            checkbox.checked = !checkbox.checked;
-
-            if (checkbox.checked) {
-                this.classList.add('bg-blue-100', 'border-blue-500', 'text-blue-700');
-                this.classList.remove('hover:bg-gray-50');
-            } else {
-                this.classList.remove('bg-blue-100', 'border-blue-500', 'text-blue-700');
-                this.classList.add('hover:bg-gray-50');
-            }
-        });
+    // Mark this as a staff page for the JavaScript system
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.setAttribute('data-page', 'staff');
+        document.body.classList.add('staff-form-page');
     });
-
-    // Initialize availability days appearance
-    const checkedBoxes = document.querySelectorAll('input[name="availability[]"]:checked');
-    checkedBoxes.forEach(checkbox => {
-        const label = checkbox.closest('label');
-        label.classList.add('bg-blue-100', 'border-blue-500', 'text-blue-700');
-        label.classList.remove('hover:bg-gray-50');
-    });
-
-    // Role-based field suggestions
-    const roleSelect = document.getElementById('role');
-    const departmentSelect = document.getElementById('department');
-
-    roleSelect.addEventListener('change', function() {
-        const role = this.value;
-        let suggestedDepartment = '';
-
-        switch(role) {
-            case 'instructor':
-            case 'coordinator':
-                suggestedDepartment = 'dance';
-                break;
-            case 'admin_assistant':
-                suggestedDepartment = 'administration';
-                break;
-            case 'receptionist':
-                suggestedDepartment = 'front_desk';
-                break;
-            case 'cleaner':
-            case 'maintenance':
-                suggestedDepartment = 'maintenance';
-                break;
-        }
-
-        if (suggestedDepartment && !departmentSelect.value) {
-            departmentSelect.value = suggestedDepartment;
-        }
-    });
-});
 </script>
 @endpush
 

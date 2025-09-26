@@ -436,32 +436,42 @@
     </div>
 </div>
 
+@push('scripts')
+@vite('resources/js/admin/staff/staff-manager.js')
 <script>
-function openAssignCourseModal() {
-    document.getElementById('assignCourseModal').classList.remove('hidden');
-}
+    // Mark this as a staff page for the JavaScript system
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.setAttribute('data-page', 'staff');
+        document.body.classList.add('staff-show-page');
+    });
 
-function closeAssignCourseModal() {
-    document.getElementById('assignCourseModal').classList.add('hidden');
-}
-
-function editAssignment(id) {
-    // Implementare edit assignment logic
-    console.log('Edit assignment:', id);
-}
-
-function removeAssignment(id) {
-    if (confirm('Sei sicuro di voler rimuovere questa assegnazione?')) {
-        // Implementare remove assignment logic
-        console.log('Remove assignment:', id);
+    // Legacy function compatibility - these will be handled by StaffManager
+    function openAssignCourseModal() {
+        if (window.staffManager && window.staffManager.openStaffModal) {
+            window.staffManager.openStaffModal();
+        }
     }
-}
 
-// Chiudi modal cliccando fuori
-document.getElementById('assignCourseModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeAssignCourseModal();
+    function closeAssignCourseModal() {
+        // Handled by modern modal system
     }
-});
+
+    function editAssignment(id) {
+        if (window.staffManager) {
+            window.StaffUtils.showInfo('Modifica assegnazione: ' + id);
+        }
+    }
+
+    function removeAssignment(id) {
+        if (window.StaffUtils && window.StaffUtils.confirm) {
+            window.StaffUtils.confirm('Rimuovi Assegnazione', 'Sei sicuro di voler rimuovere questa assegnazione?')
+                .then(confirmed => {
+                    if (confirmed) {
+                        window.StaffUtils.showSuccess('Assegnazione rimossa: ' + id);
+                    }
+                });
+        }
+    }
 </script>
+@endpush
 </x-app-layout>

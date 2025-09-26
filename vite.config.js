@@ -13,7 +13,8 @@ export default defineConfig({
                 'resources/js/admin/enrollments/enrollment-manager.js',
                 'resources/js/admin/attendance/attendance-manager.js',
                 'resources/js/admin/events/events-manager.js',
-                'resources/js/admin/event-registrations/event-registrations-manager.js'
+                'resources/js/admin/event-registrations/event-registrations-manager.js',
+                'resources/js/admin/staff/staff-manager.js'
             ],
             refresh: true,
         }),

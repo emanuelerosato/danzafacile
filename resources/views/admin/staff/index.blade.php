@@ -178,8 +178,8 @@
                             @csrf
                             <div class="flex items-center gap-4">
                                 <div class="flex items-center">
-                                    <input type="checkbox" id="selectAll" class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded">
-                                    <label for="selectAll" class="ml-2 text-sm text-gray-700">Seleziona tutti</label>
+                                    <input type="checkbox" id="select-all-staff" class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded">
+                                    <label for="select-all-staff" class="ml-2 text-sm text-gray-700">Seleziona tutti</label>
                                 </div>
                                 <div class="flex gap-2">
                                     <select name="action" class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
@@ -201,9 +201,9 @@
                 @endif
                 <!-- Staff Grid -->
                 @if($staff->count() > 0)
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="staff-table grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-loading>
                         @foreach($staff as $member)
-                            <div class="bg-white rounded-lg shadow overflow-hidden hover:shadow-md transition-shadow duration-200">
+                            <div class="staff-row bg-white rounded-lg shadow overflow-hidden hover:shadow-md transition-shadow duration-200" data-staff-id="{{ $member->id }}">
                                 <!-- Header -->
                                 <div class="px-6 py-4 border-b border-gray-200">
                                     <div class="flex items-start justify-between">
@@ -332,7 +332,7 @@
                     </div>
                 @else
                     <!-- Empty State -->
-                    <div class="bg-white rounded-lg shadow p-12">
+                    <div class="empty-state bg-white rounded-lg shadow p-12">
                         <div class="text-center">
                             <svg class="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
@@ -371,3 +371,13 @@
     </div>
 
 </x-app-layout>
+
+@push('scripts')
+@vite('resources/js/admin/staff/staff-manager.js')
+<script>
+    // Mark this as a staff page for the JavaScript system
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.setAttribute('data-page', 'staff');
+    });
+</script>
+@endpush
