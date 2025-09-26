@@ -103,7 +103,6 @@
                         </div>
                     </div>
                 </div>
-    </div>
 
                 <!-- Filters -->
                 <div class="bg-white rounded-lg shadow p-6">
@@ -210,18 +209,18 @@
                                         <div class="flex items-center gap-3">
                                             <input type="checkbox" name="staff_ids[]" value="{{ $member->id }}" form="bulkActionForm"
                                                    class="staff-checkbox h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded">
-                                <div>
-                                    <h3 class="font-semibold text-gray-900 line-clamp-1">{{ $member->user->name }}</h3>
-                                    <p class="text-sm text-gray-600">{{ $member->employee_id }}</p>
+                                            <div>
+                                                <h3 class="font-semibold text-gray-900 line-clamp-1">{{ $member->user->name }}</h3>
+                                                <p class="text-sm text-gray-600">{{ $member->employee_id }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-1">
+                                            <span class="text-xs px-2 py-1 rounded-full {{ $member->status_badge }}">
+                                                {{ \App\Models\Staff::getAvailableStatuses()[$member->status] }}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="flex gap-1">
-                                <span class="text-xs px-2 py-1 rounded-full {{ $member->status_badge }}">
-                                    {{ \App\Models\Staff::getAvailableStatuses()[$member->status] }}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Content -->
                     <div class="px-6 py-4">
@@ -323,8 +322,6 @@
                 </div>
             @endforeach
         </div>
-
-                    </div>
 
                     <!-- Pagination -->
                     <div class="bg-white rounded-lg shadow p-6">
