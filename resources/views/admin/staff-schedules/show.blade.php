@@ -1,40 +1,58 @@
 <x-app-layout>
-
-
-<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        <!-- Header -->
-        <div class="mb-8">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-900 mb-2">Dettagli Turno</h1>
-                    <p class="text-gray-600">{{ $staffSchedule->title }}</p>
-                </div>
-                <div class="flex space-x-3">
-                    <a href="{{ route('admin.staff-schedules.index') }}"
-                       class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition duration-200">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    Dettagli Turno
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">
+                    {{ $staffSchedule->title }}
+                </p>
+            </div>
+            <div class="flex space-x-3">
+                <a href="{{ route('admin.staff-schedules.index') }}"
+                   class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Torna alla Lista
+                </a>
+                @if($staffSchedule->isEditable())
+                    <a href="{{ route('admin.staff-schedules.edit', $staffSchedule) }}"
+                       class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                         </svg>
-                        Torna alla Lista
+                        Modifica
                     </a>
-                    @if($staffSchedule->isEditable())
-                        <a href="{{ route('admin.staff-schedules.edit', $staffSchedule) }}"
-                           class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition duration-200">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                            </svg>
-                            Modifica
-                        </a>
-                    @endif
-                </div>
+                @endif
             </div>
         </div>
+    </x-slot>
+
+    <x-slot name="breadcrumb">
+        <li class="flex items-center">
+            <a href="{{ route('admin.dashboard') }}" class="text-gray-500 hover:text-gray-700">Dashboard</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="flex items-center">
+            <a href="{{ route('admin.staff-schedules.index') }}" class="text-gray-500 hover:text-gray-700">Turni Staff</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="text-gray-900 font-medium">{{ $staffSchedule->title }}</li>
+    </x-slot>
+
+    <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="space-y-6">
 
         <!-- Status Actions -->
         @if($staffSchedule->canBeConfirmed() || $staffSchedule->canBeCompleted() || $staffSchedule->canBeCancelled() || $staffSchedule->status === 'confirmed')
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6 mb-8">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Azioni Turno</h3>
                 <div class="flex flex-wrap gap-3">
                     @if($staffSchedule->canBeConfirmed())
@@ -98,7 +116,7 @@
             <!-- Left Column -->
             <div class="lg:col-span-2 space-y-8">
                 <!-- Basic Information -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="bg-white rounded-lg shadow p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-6">Informazioni Generali</h3>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -153,7 +171,7 @@
 
                 <!-- Financial Information -->
                 @if($staffSchedule->hourly_rate || $staffSchedule->max_hours)
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="bg-white rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-6">Informazioni Finanziarie</h3>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -186,7 +204,7 @@
 
                 <!-- Requirements -->
                 @if($staffSchedule->requirements && count($staffSchedule->requirements) > 0)
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="bg-white rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-6">Requisiti Specifici</h3>
 
                         <ul class="space-y-2">
@@ -204,7 +222,7 @@
 
                 <!-- Notes -->
                 @if($staffSchedule->notes)
-                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="bg-white rounded-lg shadow p-6">
                         <h3 class="text-lg font-semibold text-gray-900 mb-6">Note Aggiuntive</h3>
                         <p class="text-gray-900 leading-relaxed">{{ $staffSchedule->notes }}</p>
                     </div>
@@ -214,7 +232,7 @@
             <!-- Right Column -->
             <div class="space-y-8">
                 <!-- Staff Information -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="bg-white rounded-lg shadow p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-6">Staff Member</h3>
 
                     <div class="flex items-center space-x-4 mb-6">
@@ -243,7 +261,7 @@
 
                     <div class="pt-4 border-t border-gray-200">
                         <a href="{{ route('admin.staff.show', $staffSchedule->staff) }}"
-                           class="inline-flex items-center text-indigo-600 hover:text-indigo-800 transition duration-200">
+                           class="inline-flex items-center text-rose-600 hover:text-rose-800 transition duration-200">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                             </svg>
@@ -253,7 +271,7 @@
                 </div>
 
                 <!-- Timeline -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="bg-white rounded-lg shadow p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-6">Timeline</h3>
 
                     <div class="space-y-4">
@@ -314,7 +332,7 @@
                 </div>
 
                 <!-- Quick Stats -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="bg-white rounded-lg shadow p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-6">Statistiche Rapide</h3>
 
                     <div class="space-y-4">
@@ -344,5 +362,4 @@
             </div>
         </div>
     </div>
-</div>
 </x-app-layout>
