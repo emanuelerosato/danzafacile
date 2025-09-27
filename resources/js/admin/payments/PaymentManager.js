@@ -355,9 +355,6 @@ export class PaymentManager {
         const reasonField = document.getElementById('refund_reason');
         const reason = reasonField?.value?.trim();
 
-        console.log('[PaymentManager] Reason field found:', !!reasonField);
-        console.log('[PaymentManager] Reason text:', reason);
-
         if (!reason) {
             this.showNotification('Inserisci il motivo del rimborso', 'error');
             return;

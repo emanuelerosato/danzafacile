@@ -397,31 +397,22 @@ class AdminPaymentController extends AdminBaseController
      */
     public function refund(Request $request, Payment $payment): JsonResponse
     {
-        Log::info('Refund request received', ['payment_id' => $payment->id, 'status' => $payment->status]);
-
         $this->authorizePayment($payment);
 
         $request->validate([
             'refund_reason' => 'required|string|max:500'
         ]);
 
-        Log::info('Checking if payment can be refunded', ['payment_id' => $payment->id, 'canBeRefunded' => $payment->canBeRefunded()]);
-
         if (!$payment->canBeRefunded()) {
-            Log::warning('Payment cannot be refunded', ['payment_id' => $payment->id, 'status' => $payment->status]);
             return $this->jsonResponse(false, 'Payment cannot be refunded.', [], 422);
         }
 
         try {
-            Log::info('Processing refund', ['payment_id' => $payment->id, 'reason' => $request->get('refund_reason')]);
-
             $payment->update([
                 'status' => Payment::STATUS_REFUNDED,
                 'refund_reason' => $request->get('refund_reason'),
                 'processed_by_user_id' => $this->user->id,
             ]);
-
-            Log::info('Refund processed successfully', ['payment_id' => $payment->id, 'new_status' => $payment->fresh()->status]);
 
             $this->clearSchoolCache();
 

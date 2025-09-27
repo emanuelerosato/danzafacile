@@ -33,7 +33,7 @@ $classes = $baseClasses . ' ' . $variantClasses[$variant] . ' ' . $sizeClasses[$
     {{ $attributes->merge(['class' => $classes]) }}
     @if($disabled) disabled @endif
     x-data="{ loading: false }"
-    x-on:click="loading = true; setTimeout(() => loading = false, 3000)"
+    x-on:click="setTimeout(() => { loading = true; setTimeout(() => loading = false, 3000); }, 100);"
     :disabled="loading || {{ $disabled ? 'true' : 'false' }}"
 >
     <!-- Loading Spinner -->
