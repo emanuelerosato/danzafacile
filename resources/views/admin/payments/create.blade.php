@@ -133,6 +133,19 @@
                                 @enderror
                             </div>
 
+                            <!-- Payment Date -->
+                            <div>
+                                <label for="payment_date" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Data Pagamento <span class="text-red-500">*</span>
+                                </label>
+                                <input type="date" name="payment_date" id="payment_date" required
+                                       value="{{ old('payment_date', now()->format('Y-m-d')) }}"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200">
+                                @error('payment_date')
+                                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
                             <!-- Due Date -->
                             <div>
                                 <label for="due_date" class="block text-sm font-medium text-gray-700 mb-2">
@@ -145,55 +158,56 @@
                                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
+                        </div>
 
-                            <!-- Status -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Payment Method -->
                             <div>
-                                <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Stato <span class="text-red-500">*</span>
+                                <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Metodo Pagamento <span class="text-red-500">*</span>
                                 </label>
-                                <select name="status" id="status" required
+                                <select name="payment_method" id="payment_method" required
                                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200">
-                                    <option value="pending" selected>In Attesa</option>
-                                    <option value="completed">Completato</option>
-                                    <option value="cancelled">Annullato</option>
+                                    <option value="">Seleziona metodo</option>
+                                    <option value="cash">Contanti</option>
+                                    <option value="bank_transfer">Bonifico Bancario</option>
+                                    <option value="card">Carta di Credito/Debito</option>
+                                    <option value="paypal">PayPal</option>
+                                    <option value="other">Altro</option>
                                 </select>
-                                @error('status')
+                                @error('payment_method')
+                                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Reference Number -->
+                            <div>
+                                <label for="reference_number" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Numero Riferimento
+                                </label>
+                                <input type="text" name="reference_number" id="reference_number"
+                                       value="{{ old('reference_number') }}"
+                                       placeholder="Es. numero bonifico, numero transazione..."
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200">
+                                @error('reference_number')
                                     <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
                         </div>
 
-                        <!-- Description -->
+                        <!-- Notes -->
                         <div>
-                            <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-                                Descrizione
+                            <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
+                                Note
                             </label>
-                            <textarea name="description" id="description" rows="3"
+                            <textarea name="notes" id="notes" rows="3"
                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200"
-                                      placeholder="Descrizione aggiuntiva del pagamento (opzionale)">{{ old('description') }}</textarea>
-                            @error('description')
+                                      placeholder="Note aggiuntive del pagamento (opzionale)">{{ old('notes') }}</textarea>
+                            @error('notes')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
-                        <!-- Payment Method (if status is completed) -->
-                        <div id="payment_method_section" style="display: none;">
-                            <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-2">
-                                Metodo Pagamento
-                            </label>
-                            <select name="payment_method" id="payment_method"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200">
-                                <option value="">Seleziona metodo</option>
-                                <option value="cash">Contanti</option>
-                                <option value="bank_transfer">Bonifico Bancario</option>
-                                <option value="card">Carta di Credito/Debito</option>
-                                <option value="paypal">PayPal</option>
-                                <option value="other">Altro</option>
-                            </select>
-                            @error('payment_method')
-                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
 
                         <!-- Action Buttons -->
                         <div class="flex items-center justify-between pt-6 border-t border-gray-200">
@@ -222,10 +236,8 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const paymentTypeSelect = document.getElementById('payment_type');
-            const statusSelect = document.getElementById('status');
             const courseSection = document.getElementById('course_section');
             const eventSection = document.getElementById('event_section');
-            const paymentMethodSection = document.getElementById('payment_method_section');
             const courseSelect = document.getElementById('course_id');
             const eventSelect = document.getElementById('event_id');
             const amountInput = document.getElementById('amount');
@@ -246,14 +258,6 @@
                 }
             }
 
-            // Toggle payment method section based on status
-            function togglePaymentMethod() {
-                if (statusSelect.value === 'completed') {
-                    paymentMethodSection.style.display = 'block';
-                } else {
-                    paymentMethodSection.style.display = 'none';
-                }
-            }
 
             // Auto-fill amount based on course/event selection
             function updateAmount() {
@@ -305,13 +309,11 @@
                 toggleSections();
                 updateAmount(); // Update amount when payment type changes
             });
-            statusSelect.addEventListener('change', togglePaymentMethod);
             courseSelect.addEventListener('change', updateAmount);
             eventSelect.addEventListener('change', updateAmount);
 
             // Initialize on page load
             toggleSections();
-            togglePaymentMethod();
         });
     </script>
 </x-app-layout>
