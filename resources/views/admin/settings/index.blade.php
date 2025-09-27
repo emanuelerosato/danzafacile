@@ -176,6 +176,164 @@
                         </div>
                     </div>
 
+                    <!-- Configurazione PayPal -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="border-b border-gray-200 pb-4 mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                                </svg>
+                                Pagamenti PayPal
+                            </h3>
+                            <p class="text-sm text-gray-600">Configura l'integrazione PayPal per i pagamenti online</p>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div class="flex items-center">
+                                <div class="flex items-center h-5">
+                                    <input type="hidden" name="paypal_enabled" value="0">
+                                    <input type="checkbox" name="paypal_enabled" id="paypal_enabled" value="1"
+                                           class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                           {{ old('paypal_enabled', $settings['paypal_enabled'] ?? false) ? 'checked' : '' }}
+                                           onchange="togglePayPalSettings(this.checked)">
+                                </div>
+                                <div class="ml-3 text-sm">
+                                    <label for="paypal_enabled" class="font-medium text-gray-700">
+                                        Abilita pagamenti PayPal
+                                    </label>
+                                    <p class="text-gray-500">Permetti agli studenti di pagare tramite PayPal</p>
+                                </div>
+                            </div>
+
+                            <div id="paypal_settings" class="space-y-6" style="display: {{ old('paypal_enabled', $settings['paypal_enabled'] ?? false) ? 'block' : 'none' }}">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label for="paypal_mode" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Modalità PayPal <span class="text-red-500">*</span>
+                                        </label>
+                                        <select name="paypal_mode" id="paypal_mode"
+                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200">
+                                            <option value="sandbox" {{ old('paypal_mode', $settings['paypal_mode'] ?? 'sandbox') === 'sandbox' ? 'selected' : '' }}>
+                                                Sandbox (Test)
+                                            </option>
+                                            <option value="live" {{ old('paypal_mode', $settings['paypal_mode'] ?? 'sandbox') === 'live' ? 'selected' : '' }}>
+                                                Live (Produzione)
+                                            </option>
+                                        </select>
+                                        @error('paypal_mode')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                        <p class="mt-1 text-xs text-gray-500">Usa Sandbox per i test, Live per i pagamenti reali</p>
+                                    </div>
+
+                                    <div>
+                                        <label for="paypal_currency" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Valuta <span class="text-red-500">*</span>
+                                        </label>
+                                        <select name="paypal_currency" id="paypal_currency"
+                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200">
+                                            <option value="EUR" {{ old('paypal_currency', $settings['paypal_currency'] ?? 'EUR') === 'EUR' ? 'selected' : '' }}>EUR - Euro</option>
+                                            <option value="USD" {{ old('paypal_currency', $settings['paypal_currency'] ?? 'EUR') === 'USD' ? 'selected' : '' }}>USD - Dollaro USA</option>
+                                            <option value="GBP" {{ old('paypal_currency', $settings['paypal_currency'] ?? 'EUR') === 'GBP' ? 'selected' : '' }}>GBP - Sterlina</option>
+                                        </select>
+                                        @error('paypal_currency')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="paypal_client_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                        PayPal Client ID <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="paypal_client_id" id="paypal_client_id"
+                                           value="{{ old('paypal_client_id', $settings['paypal_client_id'] ?? '') }}"
+                                           placeholder="Es. AYSq3RDGsmBLJE-otTkBtM-jBRd1TCQwFf9RGfwddNXWz0uFU9ztymylOhRS"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200">
+                                    @error('paypal_client_id')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                    <p class="mt-1 text-xs text-gray-500">Ottenibile dalla PayPal Developer Console</p>
+                                </div>
+
+                                <div>
+                                    <label for="paypal_client_secret" class="block text-sm font-medium text-gray-700 mb-2">
+                                        PayPal Client Secret <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="password" name="paypal_client_secret" id="paypal_client_secret"
+                                           value="{{ old('paypal_client_secret', $settings['paypal_client_secret'] ?? '') }}"
+                                           placeholder="Es. EGnHDxD_qRPdaLdZz8iCr8N7_MzF-YHPTkjs6NKYQvQSBngp4PTTVWkPZRbL"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200">
+                                    @error('paypal_client_secret')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                    <p class="mt-1 text-xs text-gray-500">Mantieni questo valore privato e sicuro</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label for="paypal_fee_percentage" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Commissione PayPal (%)
+                                        </label>
+                                        <input type="number" name="paypal_fee_percentage" id="paypal_fee_percentage" step="0.01" min="0" max="100"
+                                               value="{{ old('paypal_fee_percentage', $settings['paypal_fee_percentage'] ?? '3.4') }}"
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200">
+                                        @error('paypal_fee_percentage')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                        <p class="mt-1 text-xs text-gray-500">Percentuale commissioni PayPal (default: 3.4%)</p>
+                                    </div>
+
+                                    <div>
+                                        <label for="paypal_fixed_fee" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Commissione Fissa (€)
+                                        </label>
+                                        <input type="number" name="paypal_fixed_fee" id="paypal_fixed_fee" step="0.01" min="0"
+                                               value="{{ old('paypal_fixed_fee', $settings['paypal_fixed_fee'] ?? '0.35') }}"
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200">
+                                        @error('paypal_fixed_fee')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                        <p class="mt-1 text-xs text-gray-500">Commissione fissa per transazione (default: €0.35)</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="paypal_webhook_url" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Webhook URL (Solo lettura)
+                                    </label>
+                                    <input type="text" id="paypal_webhook_url" readonly
+                                           value="{{ url('/webhook/paypal') }}"
+                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-600">
+                                    <p class="mt-1 text-xs text-gray-500">Configura questo URL nella PayPal Developer Console per ricevere notifiche dei pagamenti</p>
+                                </div>
+
+                                <!-- PayPal Test Info -->
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <div class="flex">
+                                        <div class="flex-shrink-0">
+                                            <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h3 class="text-sm font-medium text-blue-800">Come configurare PayPal</h3>
+                                            <div class="mt-2 text-sm text-blue-700">
+                                                <ol class="list-decimal list-inside space-y-1">
+                                                    <li>Vai su <a href="https://developer.paypal.com" target="_blank" class="underline">developer.paypal.com</a></li>
+                                                    <li>Crea una nuova App PayPal</li>
+                                                    <li>Copia Client ID e Client Secret qui</li>
+                                                    <li>Configura il Webhook URL nella console PayPal</li>
+                                                    <li>Attiva gli eventi: PAYMENT.CAPTURE.COMPLETED, PAYMENT.CAPTURE.DENIED</li>
+                                                </ol>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Configurazione Ricevute -->
                     <div class="bg-white rounded-lg shadow p-6">
                         <div class="border-b border-gray-200 pb-4 mb-6">
@@ -319,4 +477,32 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function togglePayPalSettings(isEnabled) {
+            const settingsContainer = document.getElementById('paypal_settings');
+            if (settingsContainer) {
+                settingsContainer.style.display = isEnabled ? 'block' : 'none';
+
+                // Animazione smooth per migliore UX
+                if (isEnabled) {
+                    settingsContainer.style.opacity = '0';
+                    settingsContainer.style.transform = 'translateY(-10px)';
+                    setTimeout(() => {
+                        settingsContainer.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                        settingsContainer.style.opacity = '1';
+                        settingsContainer.style.transform = 'translateY(0)';
+                    }, 10);
+                }
+            }
+        }
+
+        // Inizializza al caricamento pagina
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkbox = document.getElementById('paypal_enabled');
+            if (checkbox) {
+                togglePayPalSettings(checkbox.checked);
+            }
+        });
+    </script>
 </x-app-layout>

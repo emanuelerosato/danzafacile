@@ -46,6 +46,15 @@ class AdminSettingsController extends Controller
 
             // Additional Notes
             'receipt_notes' => Setting::get("school.{$school->id}.receipt.notes", ''),
+
+            // PayPal Configuration
+            'paypal_enabled' => Setting::get("school.{$school->id}.paypal.enabled", false),
+            'paypal_mode' => Setting::get("school.{$school->id}.paypal.mode", 'sandbox'),
+            'paypal_currency' => Setting::get("school.{$school->id}.paypal.currency", 'EUR'),
+            'paypal_client_id' => Setting::get("school.{$school->id}.paypal.client_id", ''),
+            'paypal_client_secret' => Setting::get("school.{$school->id}.paypal.client_secret", ''),
+            'paypal_fee_percentage' => Setting::get("school.{$school->id}.paypal.fee_percentage", '3.4'),
+            'paypal_fixed_fee' => Setting::get("school.{$school->id}.paypal.fixed_fee", '0.35'),
         ];
 
         return view('admin.settings.index', compact('settings', 'school'));
@@ -74,6 +83,15 @@ class AdminSettingsController extends Controller
             'payment_terms' => 'nullable|string|max:500',
             'payment_bank_details' => 'nullable|string|max:1000',
             'receipt_notes' => 'nullable|string|max:1000',
+
+            // PayPal Validation Rules
+            'paypal_enabled' => 'boolean',
+            'paypal_mode' => 'required_if:paypal_enabled,1|in:sandbox,live',
+            'paypal_currency' => 'required_if:paypal_enabled,1|in:EUR,USD,GBP',
+            'paypal_client_id' => 'required_if:paypal_enabled,1|string|max:255',
+            'paypal_client_secret' => 'required_if:paypal_enabled,1|string|max:255',
+            'paypal_fee_percentage' => 'nullable|numeric|min:0|max:100',
+            'paypal_fixed_fee' => 'nullable|numeric|min:0',
         ]);
 
         $school = Auth::user()->school;
@@ -108,6 +126,15 @@ class AdminSettingsController extends Controller
 
             // Additional Notes
             "school.{$school->id}.receipt.notes" => ['value' => $request->receipt_notes, 'type' => 'string'],
+
+            // PayPal Configuration
+            "school.{$school->id}.paypal.enabled" => ['value' => $request->has('paypal_enabled') && $request->paypal_enabled, 'type' => 'boolean'],
+            "school.{$school->id}.paypal.mode" => ['value' => $request->paypal_mode ?? 'sandbox', 'type' => 'string'],
+            "school.{$school->id}.paypal.currency" => ['value' => $request->paypal_currency ?? 'EUR', 'type' => 'string'],
+            "school.{$school->id}.paypal.client_id" => ['value' => $request->paypal_client_id, 'type' => 'string'],
+            "school.{$school->id}.paypal.client_secret" => ['value' => $request->paypal_client_secret, 'type' => 'string'],
+            "school.{$school->id}.paypal.fee_percentage" => ['value' => $request->paypal_fee_percentage ?? '3.4', 'type' => 'string'],
+            "school.{$school->id}.paypal.fixed_fee" => ['value' => $request->paypal_fixed_fee ?? '0.35', 'type' => 'string'],
         ];
 
         foreach ($settingsToSave as $key => $data) {
