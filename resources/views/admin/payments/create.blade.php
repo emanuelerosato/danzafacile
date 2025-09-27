@@ -257,24 +257,54 @@
 
             // Auto-fill amount based on course/event selection
             function updateAmount() {
-                const courseOption = courseSelect.options[courseSelect.selectedIndex];
-                const eventOption = eventSelect.options[eventSelect.selectedIndex];
+                // Clear amount first
+                amountInput.value = '';
 
-                if (courseOption && courseOption.value) {
-                    const coursePrice = courseOption.text.match(/€([\d,]+\.?\d*)/);
-                    if (coursePrice && !amountInput.value) {
-                        amountInput.value = coursePrice[1].replace(',', '');
+                // Check which section is visible and update accordingly
+                const paymentType = paymentTypeSelect.value;
+
+                if (paymentType === 'course_enrollment') {
+                    // Only check course selection for course enrollments
+                    const courseOption = courseSelect.options[courseSelect.selectedIndex];
+                    if (courseOption && courseOption.value) {
+                        const coursePrice = courseOption.text.match(/€([\d,]+\.?\d*)/);
+                        if (coursePrice) {
+                            amountInput.value = coursePrice[1].replace(',', '');
+                        }
                     }
-                } else if (eventOption && eventOption.value) {
-                    const eventPrice = eventOption.text.match(/€([\d,]+\.?\d*)/);
-                    if (eventPrice && !amountInput.value) {
-                        amountInput.value = eventPrice[1].replace(',', '');
+                } else if (paymentType === 'event_registration') {
+                    // Only check event selection for event registrations
+                    const eventOption = eventSelect.options[eventSelect.selectedIndex];
+                    if (eventOption && eventOption.value) {
+                        const eventPrice = eventOption.text.match(/€([\d,]+\.?\d*)/);
+                        if (eventPrice) {
+                            amountInput.value = eventPrice[1].replace(',', '');
+                        }
+                    }
+                } else {
+                    // For other types, check both but prioritize based on which has a selection
+                    const courseOption = courseSelect.options[courseSelect.selectedIndex];
+                    const eventOption = eventSelect.options[eventSelect.selectedIndex];
+
+                    if (courseOption && courseOption.value) {
+                        const coursePrice = courseOption.text.match(/€([\d,]+\.?\d*)/);
+                        if (coursePrice) {
+                            amountInput.value = coursePrice[1].replace(',', '');
+                        }
+                    } else if (eventOption && eventOption.value) {
+                        const eventPrice = eventOption.text.match(/€([\d,]+\.?\d*)/);
+                        if (eventPrice) {
+                            amountInput.value = eventPrice[1].replace(',', '');
+                        }
                     }
                 }
             }
 
             // Event listeners
-            paymentTypeSelect.addEventListener('change', toggleSections);
+            paymentTypeSelect.addEventListener('change', function() {
+                toggleSections();
+                updateAmount(); // Update amount when payment type changes
+            });
             statusSelect.addEventListener('change', togglePaymentMethod);
             courseSelect.addEventListener('change', updateAmount);
             eventSelect.addEventListener('change', updateAmount);
