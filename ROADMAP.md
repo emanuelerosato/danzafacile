@@ -209,7 +209,7 @@
 - `AdminDashboardController` - School dashboard, statistics, quick actions
 - `CourseController` - Course CRUD, scheduling, capacity management
 - `EnrollmentController` - Student enrollment, status management, bulk operations
-- `SchoolPaymentController` - Payment tracking, invoicing, reports
+- `AdminPaymentController` - Payment tracking, invoicing, reports, PayPal integration
 - `SchoolUserController` - School staff/student management, invitations
 
 **Student Controllers:**

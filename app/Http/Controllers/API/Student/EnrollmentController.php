@@ -19,7 +19,7 @@ class EnrollmentController extends BaseApiController
 
         $validated = $request->validate([
             'course_id' => 'required|exists:courses,id',
-            'payment_method' => 'nullable|in:credit_card,bank_transfer,cash',
+            'payment_method' => 'nullable|in:' . implode(',', array_keys(Payment::getAvailablePaymentMethods())),
             'notes' => 'nullable|string|max:500',
         ]);
 
@@ -121,7 +121,7 @@ class EnrollmentController extends BaseApiController
                 ];
                 $responseData['next_steps'] = [
                     'complete_payment' => "Please complete payment of €{$course->price} within 7 days",
-                    'payment_methods' => ['credit_card', 'bank_transfer', 'cash'],
+                    'payment_methods' => array_keys(Payment::getAvailablePaymentMethods()),
                     'contact_school' => 'Contact the school for payment instructions'
                 ];
             }

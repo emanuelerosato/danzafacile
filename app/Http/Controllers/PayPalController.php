@@ -52,7 +52,7 @@ class PayPalController extends Controller
                 'amount' => $request->amount,
                 'currency' => $paypalService->getSettings()['currency'],
                 'status' => 'pending',
-                'payment_method' => 'paypal',
+                'payment_method' => Payment::METHOD_PAYPAL,
                 'description' => $request->description ?? 'Pagamento corso',
             ]);
 
