@@ -3,7 +3,6 @@
      x-on:open-modal="open = true"
      x-on:close-modal="open = false"
      x-show="open" x-cloak
-     x-trap="open"
      id="refundModal"
      role="dialog"
      aria-labelledby="refund-modal-title"
