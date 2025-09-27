@@ -1,3 +1,6 @@
+{{-- Load the payment management system BEFORE Alpine.js initialization --}}
+@vite('resources/js/admin/payments/payment-manager.js')
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -419,6 +422,4 @@
 </div>
 
 @include('admin.payments.modals.refund')
-
-{{-- Load the modern payment management system --}}
-@vite('resources/js/admin/payments/payment-manager.js')</x-app-layout>
+</x-app-layout>
