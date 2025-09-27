@@ -1,6 +1,6 @@
 # 📚 Guida Completa - Sistema Scuola di Danza
 
-**Ultima modifica:** 25 Settembre 2025
+**Ultima modifica:** 27 Settembre 2025
 **Versione:** 1.0.0 - Sistema Completo
 **Stato:** 🎉 **PRODUZIONE READY**
 
@@ -92,6 +92,19 @@
 - Autenticazione JWT/Sanctum
 - Payload ridotti per performance
 - Support offline-first
+
+### **🎨 Frontend JavaScript Moderno**
+- **Architecture ES6 modulare** con bundle ottimizzati
+- **Moduli Payments:** 6 moduli specializzati (3,361 righe)
+  - PaymentManager.js - Orchestratore principale (486 righe)
+  - FilterManager.js - Filtri real-time con debouncing (371 righe)
+  - BulkActionManager.js - Operazioni batch con progress (572 righe)
+  - StatsManager.js - Statistiche real-time animate (580 righe)
+  - ExportManager.js - Export multi-formato (CSV/Excel/PDF/JSON) (572 righe)
+  - ReceiptManager.js - Generazione PDF e invio email (580 righe)
+- **Performance Bundle:** 52.68 kB (12.19 kB gzipped) - più efficiente nel progetto
+- **Alpine.js Integration** con gestione timing e fallback
+- **Zero inline JavaScript** - codice completamente modulare
 
 ---
 
