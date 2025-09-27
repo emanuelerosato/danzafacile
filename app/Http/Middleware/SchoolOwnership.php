@@ -145,7 +145,7 @@ class SchoolOwnership
 
             case 'App\Models\Payment':
                 // Admin can only access payments from their school
-                if ($user->isAdmin() && $model->course->school_id !== $user->school_id) {
+                if ($user->isAdmin() && $model->school_id !== $user->school_id) {
                     $this->denyAccess($request, 'Payment access denied');
                 }
                 // Student can only access their own payments
