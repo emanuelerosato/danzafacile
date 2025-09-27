@@ -1,3 +1,6 @@
+{{-- Load the payment management system for actions --}}
+@vite('resources/js/admin/payments/payment-manager.js')
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -349,4 +352,7 @@
             </div>
         </div>
     </div>
+
+    {{-- Include refund modal for actions --}}
+    @include('admin.payments.modals.refund')
 </x-app-layout>
