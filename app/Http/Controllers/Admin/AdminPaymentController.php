@@ -460,6 +460,7 @@ class AdminPaymentController extends AdminBaseController
             'bank_swift' => Setting::get("school.{$this->school->id}.bank.swift", ''),
         ];
 
+
         $data = [
             'payment' => $payment,
             'school' => $this->school,
