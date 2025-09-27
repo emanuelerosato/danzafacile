@@ -15,7 +15,8 @@ export default defineConfig({
                 'resources/js/admin/events/events-manager.js',
                 'resources/js/admin/event-registrations/event-registrations-manager.js',
                 'resources/js/admin/staff/staff-manager.js',
-                'resources/js/admin/staff-schedules.js'
+                'resources/js/admin/staff-schedules.js',
+                'resources/js/admin/payments/payment-manager.js'
             ],
             refresh: true,
         }),

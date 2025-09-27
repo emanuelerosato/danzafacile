@@ -6,7 +6,7 @@
                     Gestione Pagamenti
                 </h2>
                 <p class="text-sm text-gray-600 mt-1">
-                    Gestione pagamenti della tua scuola
+                    Monitora e gestisci tutti i pagamenti della scuola
                 </p>
             </div>
         </div>
@@ -26,11 +26,7 @@
 
 <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8" x-data="paymentManager()">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h1 class="text-xl md:text-2xl font-bold text-gray-900">Gestione Pagamenti</h1>
-            <p class="text-gray-600">Tutti i pagamenti della tua scuola di danza</p>
-        </div>
+    <div class="flex items-center justify-end mb-6">
         <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
             <button @click="openBulkModal()"
                     class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
@@ -40,7 +36,7 @@
                 Azioni Multiple
             </button>
             <button @click="exportPayments()"
-                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200">
+                    class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
@@ -100,7 +96,7 @@
     </div>
 
     <!-- Filters and Search -->
-    <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 mb-6">
+    <div class="bg-white rounded-lg shadow mb-6">
         <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-medium text-gray-900">Filtri e Ricerca</h3>
         </div>
@@ -110,7 +106,7 @@
                 <div>
                     <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Ricerca</label>
                     <input type="text" id="search" name="search"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
                            placeholder="Nome, email, ricevuta..."
                            value="{{ request('search') }}">
                 </div>
@@ -119,7 +115,7 @@
                 <div>
                     <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Stato</label>
                     <select id="status" name="status"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent">
                         <option value="">Tutti</option>
                         @foreach($filterOptions['statuses'] ?? [] as $key => $label)
                             <option value="{{ $key }}"
@@ -134,7 +130,7 @@
                 <div>
                     <label for="payment_method" class="block text-sm font-medium text-gray-700 mb-1">Metodo</label>
                     <select id="payment_method" name="payment_method"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent">
                         <option value="">Tutti</option>
                         @foreach($filterOptions['methods'] ?? [] as $key => $label)
                             <option value="{{ $key }}"
@@ -149,7 +145,7 @@
                 <div>
                     <label for="payment_type" class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
                     <select id="payment_type" name="payment_type"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent">
                         <option value="">Tutti</option>
                         @foreach($filterOptions['types'] ?? [] as $key => $label)
                             <option value="{{ $key }}"
@@ -175,15 +171,15 @@
 
                 <div class="lg:col-span-5 flex justify-end space-x-3">
                     <button type="submit"
-                            class="px-4 py-2 bg-rose-600 text-white rounded-md hover:bg-rose-700 transition-colors">
+                            class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200">
                         Applica Filtri
                     </button>
                     <a href="{{ route('admin.payments.index') }}"
-                       class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition-colors">
+                       class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
                         Reset
                     </a>
                     <a href="{{ route('admin.payments.export', request()->all()) }}"
-                       class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors">
+                       class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
                         Esporta CSV
                     </a>
                 </div>
@@ -192,7 +188,7 @@
     </div>
 
     <!-- Payments Table -->
-    <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20">
+    <div class="bg-white rounded-lg shadow">
         <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
             <h3 class="text-lg font-medium text-gray-900">Lista Pagamenti</h3>
             <div class="relative inline-block text-left">
@@ -424,257 +420,5 @@
 
 @include('admin.payments.modals.refund')
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Select all functionality
-    const selectAllCheckbox = document.getElementById('selectAll');
-    const paymentCheckboxes = document.querySelectorAll('.payment-checkbox');
-    const bulkActionBtn = document.getElementById('bulkActionBtn');
-
-    selectAllCheckbox.addEventListener('change', function() {
-        paymentCheckboxes.forEach(checkbox => {
-            checkbox.checked = this.checked;
-        });
-        updateBulkActionBtn();
-    });
-
-    paymentCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateBulkActionBtn);
-    });
-
-    function updateBulkActionBtn() {
-        const checkedBoxes = document.querySelectorAll('.payment-checkbox:checked');
-        bulkActionBtn.disabled = checkedBoxes.length === 0;
-    }
-
-    // Bulk actions
-    document.querySelectorAll('#bulkDropdown a[data-action]').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            const action = this.dataset.action;
-            const checkedPayments = Array.from(document.querySelectorAll('.payment-checkbox:checked'))
-                                         .map(cb => cb.value);
-
-            if (checkedPayments.length === 0) {
-                alert('Seleziona almeno un pagamento');
-                return;
-            }
-
-            if (action === 'delete' && !confirm('Sei sicuro di voler eliminare i pagamenti selezionati?')) {
-                return;
-            }
-
-            bulkAction(action, checkedPayments);
-        });
-    });
-
-    function bulkAction(action, paymentIds) {
-        fetch('{{ route("admin.payments.bulk-action") }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({
-                action: action,
-                payment_ids: paymentIds
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Errore: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Si è verificato un errore');
-        });
-    }
-});
-
-function markCompleted(paymentId) {
-    if (!confirm('Sei sicuro di voler segnare questo pagamento come completato?')) {
-        return;
-    }
-
-    fetch(`/admin/payments/${paymentId}/mark-completed`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Errore: ' + data.message);
-        }
-    });
-}
-
-function processRefund(paymentId) {
-    const reason = prompt('Inserisci il motivo del rimborso:');
-    if (!reason) return;
-
-    fetch(`/admin/payments/${paymentId}/refund`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        },
-        body: JSON.stringify({
-            refund_reason: reason
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Errore: ' + data.message);
-        }
-    });
-}
-
-function sendReceipt(paymentId) {
-    fetch(`/admin/payments/${paymentId}/send-receipt`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Ricevuta inviata con successo!');
-        } else {
-            alert('Errore: ' + data.message);
-        }
-    });
-}
-
-function deletePayment(paymentId) {
-    if (!confirm('Sei sicuro di voler eliminare questo pagamento? Questa azione non può essere annullata.')) {
-        return;
-    }
-
-    fetch(`/admin/payments/${paymentId}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert('Errore: ' + data.message);
-        }
-    });
-}
-
-// Global dropdown state management
-let activeDropdown = null;
-let dropdownClickListener = null;
-
-// Dropdown toggle functions
-function toggleBulkDropdown() {
-    const dropdown = document.getElementById('bulkDropdown');
-
-    // Close any existing dropdown
-    closeActiveDropdown();
-
-    dropdown.classList.toggle('hidden');
-
-    if (!dropdown.classList.contains('hidden')) {
-        setActiveDropdown('bulkDropdown');
-    }
-}
-
-function togglePaymentDropdown(paymentId) {
-    const dropdown = document.getElementById(`paymentDropdown${paymentId}`);
-
-    // Close any existing dropdown
-    closeActiveDropdown();
-
-    // Close all other payment dropdowns
-    document.querySelectorAll('[id^="paymentDropdown"]').forEach(d => {
-        if (d.id !== `paymentDropdown${paymentId}`) {
-            d.classList.add('hidden');
-        }
-    });
-
-    dropdown.classList.toggle('hidden');
-
-    if (!dropdown.classList.contains('hidden')) {
-        setActiveDropdown(`paymentDropdown${paymentId}`);
-    }
-}
-
-// Helper functions for dropdown management
-function setActiveDropdown(dropdownId) {
-    activeDropdown = dropdownId;
-
-    // Remove any existing listener
-    if (dropdownClickListener) {
-        document.removeEventListener('click', dropdownClickListener);
-    }
-
-    // Add new listener
-    dropdownClickListener = function(e) {
-        const dropdown = document.getElementById(activeDropdown);
-        const trigger = dropdownId === 'bulkDropdown'
-            ? document.getElementById('bulkActionBtn')
-            : e.target.closest(`[onclick*="${activeDropdown}"]`);
-
-        if (!e.target.closest(`#${activeDropdown}`) && !e.target.closest(trigger?.tagName || 'button')) {
-            closeActiveDropdown();
-        }
-    };
-
-    document.addEventListener('click', dropdownClickListener);
-}
-
-function closeActiveDropdown() {
-    if (activeDropdown) {
-        const dropdown = document.getElementById(activeDropdown);
-        if (dropdown) {
-            dropdown.classList.add('hidden');
-        }
-
-        if (dropdownClickListener) {
-            document.removeEventListener('click', dropdownClickListener);
-            dropdownClickListener = null;
-        }
-
-        activeDropdown = null;
-    }
-}
-
-// Alpine.js Payment Manager Component
-function paymentManager() {
-    return {
-        selectedPayments: [],
-
-        openBulkModal() {
-            // Implement bulk modal if needed
-            console.log('Bulk modal opened');
-        },
-
-        exportPayments() {
-            // Trigger export
-            window.location.href = '{{ route("admin.payments.export", request()->all()) }}';
-        }
-    };
-}
-</script>
-@endpush</x-app-layout>
+{{-- Load the modern payment management system --}}
+@vite('resources/js/admin/payments/payment-manager.js')</x-app-layout>
