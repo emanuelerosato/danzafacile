@@ -334,63 +334,83 @@
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="relative inline-block text-left">
                                     <button type="button"
-                                            class="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
-                                            onclick="togglePaymentDropdown({{ $payment->id }})">
+                                            class="inline-flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200"
+                                            data-dropdown-toggle="paymentDropdown{{ $payment->id }}"
+                                            onclick="
+                                                if(typeof togglePaymentDropdown !== 'undefined') {
+                                                    togglePaymentDropdown({{ $payment->id }});
+                                                } else {
+                                                    const dropdown = document.getElementById('paymentDropdown{{ $payment->id }}');
+                                                    if (dropdown) {
+                                                        dropdown.classList.toggle('hidden');
+                                                    }
+                                                }
+                                            "
+                                            title="Azioni disponibili">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
                                         </svg>
                                     </button>
-                                    <div id="paymentDropdown{{ $payment->id }}" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-                                        <div class="py-1">
-                                            <a href="{{ route('admin.payments.show', $payment) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div id="paymentDropdown{{ $payment->id }}" class="hidden absolute right-0 mt-2 w-56 rounded-lg shadow-xl bg-white ring-1 ring-black ring-opacity-5 border border-gray-200 z-50">
+                                        <div class="py-2">
+                                            <!-- Azioni di visualizzazione -->
+                                            <a href="{{ route('admin.payments.show', $payment) }}" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-rose-50 hover:text-rose-700 transition-all duration-200">
+                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                                 </svg>
-                                                Visualizza
+                                                <span class="font-medium">Visualizza Dettagli</span>
                                             </a>
-                                            <a href="{{ route('admin.payments.edit', $payment) }}" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <a href="{{ route('admin.payments.edit', $payment) }}" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200">
+                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                 </svg>
-                                                Modifica
+                                                <span class="font-medium">Modifica</span>
                                             </a>
                                             @if($payment->status === 'pending')
-                                            <a href="#" onclick="markCompleted({{ $payment->id }})" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <!-- Separatore -->
+                                            <div class="border-t border-gray-100 my-1"></div>
+                                            <!-- Azioni di stato -->
+                                            <a href="#" onclick="markCompleted({{ $payment->id }})" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-all duration-200">
+                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                                 </svg>
-                                                Segna Completato
+                                                <span class="font-medium">Segna Completato</span>
                                             </a>
                                             @endif
                                             @if($payment->canBeRefunded())
-                                            <a href="#" onclick="processRefundWithModal({{ $payment->id }})" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <a href="#" onclick="processRefundWithModal({{ $payment->id }})" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-all duration-200">
+                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
                                                 </svg>
-                                                Rimborsa
+                                                <span class="font-medium">Rimborsa</span>
                                             </a>
                                             @endif
                                             @if($payment->receipt_number)
-                                            <a href="{{ route('admin.payments.receipt', $payment) }}" target="_blank" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                            <!-- Separatore -->
+                                            <div class="border-t border-gray-100 my-1"></div>
+                                            <!-- Azioni documenti -->
+                                            <a href="{{ route('admin.payments.receipt', $payment) }}" target="_blank" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-all duration-200">
+                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                                 </svg>
-                                                Scarica Ricevuta
+                                                <span class="font-medium">Scarica Ricevuta</span>
                                             </a>
-                                            <a href="#" onclick="sendReceipt({{ $payment->id }})" class="group flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <a href="#" onclick="sendReceipt({{ $payment->id }})" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200">
+                                                <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                                 </svg>
-                                                Invia Ricevuta
+                                                <span class="font-medium">Invia Ricevuta</span>
                                             </a>
                                             @endif
-                                            <div class="border-t border-gray-100"></div>
-                                            <a href="#" onclick="deletePayment({{ $payment->id }})" class="group flex items-center px-4 py-2 text-sm text-red-700 hover:bg-red-50">
+                                            <!-- Separatore per azioni pericolose -->
+                                            <div class="border-t border-gray-100 my-1"></div>
+                                            <!-- Azioni pericolose -->
+                                            <a href="#" onclick="deletePayment({{ $payment->id }})" class="group flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200">
                                                 <svg class="mr-3 h-4 w-4 text-red-400 group-hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                 </svg>
-                                                Elimina
+                                                <span class="font-medium">Elimina Pagamento</span>
                                             </a>
                                         </div>
                                     </div>
