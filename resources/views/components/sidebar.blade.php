@@ -122,6 +122,9 @@
                 <x-nav-item href="{{ route('admin.galleries.index') }}" :active="request()->routeIs('admin.galleries.*')" icon="photograph">
                     Gallerie
                 </x-nav-item>
+                <x-nav-item href="{{ route('admin.settings.index') }}" :active="request()->routeIs('admin.settings.*')" icon="cog">
+                    Impostazioni
+                </x-nav-item>
             </x-nav-group>
 
             <x-nav-group title="Analytics" icon="chart-bar">

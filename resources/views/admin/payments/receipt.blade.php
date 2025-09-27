@@ -242,30 +242,42 @@
         <!-- Header -->
         <div class="header">
             <div class="school-info">
-                @if($school->logo_path)
-                    <img src="{{ public_path('storage/' . $school->logo_path) }}" alt="Logo" style="height: 60px; margin-bottom: 10px;">
+                @if($settings['receipt_logo_path'])
+                    <img src="{{ public_path('storage/' . $settings['receipt_logo_path']) }}" alt="Logo" style="height: 60px; margin-bottom: 10px;">
                 @endif
-                <div class="school-name">{{ $school->name }}</div>
+                <div class="school-name">{{ $settings['school_name'] }}</div>
                 <div class="school-details">
-                    @if($school->address)
-                        {{ $school->address }}<br>
+                    @if($settings['school_address'])
+                        {{ $settings['school_address'] }}<br>
                     @endif
-                    @if($school->city && $school->postal_code)
-                        {{ $school->postal_code }} {{ $school->city }}<br>
+                    @if($settings['school_city'] && $settings['school_postal_code'])
+                        {{ $settings['school_postal_code'] }} {{ $settings['school_city'] }}<br>
                     @endif
-                    @if($school->phone)
-                        Tel: {{ $school->phone }}<br>
+                    @if($settings['vat_number'])
+                        P.IVA: {{ $settings['vat_number'] }}<br>
                     @endif
-                    @if($school->email)
-                        Email: {{ $school->email }}<br>
+                    @if($settings['tax_code'])
+                        C.F.: {{ $settings['tax_code'] }}<br>
                     @endif
-                    @if($school->website)
-                        Web: {{ $school->website }}
+                    @if($settings['school_phone'])
+                        Tel: {{ $settings['school_phone'] }}<br>
+                    @endif
+                    @if($settings['school_email'])
+                        Email: {{ $settings['school_email'] }}<br>
+                    @endif
+                    @if($settings['school_website'])
+                        Web: {{ $settings['school_website'] }}
                     @endif
                 </div>
             </div>
             <div class="receipt-info">
-                <div class="receipt-title">RICEVUTA DI PAGAMENTO</div>
+                <div class="receipt-title">
+                    @if($settings['receipt_header_text'])
+                        {{ $settings['receipt_header_text'] }}
+                    @else
+                        RICEVUTA DI PAGAMENTO
+                    @endif
+                </div>
                 <div class="receipt-number">N. {{ $payment->receipt_number }}</div>
                 <div class="receipt-date">{{ $generated_at->format('d/m/Y H:i') }}</div>
             </div>
@@ -425,10 +437,33 @@
         </div>
         @endif
 
+        <!-- Payment Information Section -->
+        @if($settings['payment_terms'] || $settings['bank_name'] || $settings['bank_iban'])
+        <div class="notes-section">
+            <div class="section-title">Informazioni Bancarie e Termini</div>
+            @if($settings['payment_terms'])
+            <p><strong>Termini di Pagamento:</strong> {{ $settings['payment_terms'] }}</p>
+            @endif
+            @if($settings['bank_name'])
+            <p><strong>Banca:</strong> {{ $settings['bank_name'] }}</p>
+            @endif
+            @if($settings['bank_iban'])
+            <p><strong>IBAN:</strong> {{ $settings['bank_iban'] }}</p>
+            @endif
+            @if($settings['bank_swift'])
+            <p><strong>SWIFT/BIC:</strong> {{ $settings['bank_swift'] }}</p>
+            @endif
+        </div>
+        @endif
+
         <!-- Footer -->
         <div class="footer">
-            <p>Ricevuta generata automaticamente da {{ $school->name }} il {{ $generated_at->format('d/m/Y \a\l\l\e H:i') }}</p>
-            <p>Documento valido ai fini fiscali secondo le normative vigenti</p>
+            @if($settings['receipt_footer_text'])
+                <p>{{ $settings['receipt_footer_text'] }}</p>
+            @else
+                <p>Ricevuta generata automaticamente da {{ $settings['school_name'] }} il {{ $generated_at->format('d/m/Y \a\l\l\e H:i') }}</p>
+                <p>Documento valido ai fini fiscali secondo le normative vigenti</p>
+            @endif
             @if($generated_by)
             <p>Elaborata da: {{ $generated_by->full_name ?? $generated_by->name }}</p>
             @endif

@@ -6,6 +6,7 @@ use App\Models\Payment;
 use App\Models\User;
 use App\Models\Course;
 use App\Models\Event;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -439,9 +440,30 @@ class AdminPaymentController extends AdminBaseController
             $payment->generateReceiptNumber();
         }
 
+        // Get school-specific settings for receipt
+        $settings = [
+            'school_name' => Setting::get("school.{$this->school->id}.name", $this->school->name),
+            'school_address' => Setting::get("school.{$this->school->id}.address", $this->school->address ?? ''),
+            'school_city' => Setting::get("school.{$this->school->id}.city", $this->school->city ?? ''),
+            'school_postal_code' => Setting::get("school.{$this->school->id}.postal_code", $this->school->postal_code ?? ''),
+            'school_phone' => Setting::get("school.{$this->school->id}.phone", $this->school->phone ?? ''),
+            'school_email' => Setting::get("school.{$this->school->id}.email", $this->school->email ?? ''),
+            'school_website' => Setting::get("school.{$this->school->id}.website", $this->school->website ?? ''),
+            'vat_number' => Setting::get("school.{$this->school->id}.vat_number", ''),
+            'tax_code' => Setting::get("school.{$this->school->id}.tax_code", ''),
+            'receipt_header_text' => Setting::get("school.{$this->school->id}.receipt.header_text", ''),
+            'receipt_footer_text' => Setting::get("school.{$this->school->id}.receipt.footer_text", ''),
+            'receipt_logo_path' => Setting::get("school.{$this->school->id}.receipt.logo_path", $this->school->logo_path ?? ''),
+            'payment_terms' => Setting::get("school.{$this->school->id}.payment.terms", ''),
+            'bank_name' => Setting::get("school.{$this->school->id}.bank.name", ''),
+            'bank_iban' => Setting::get("school.{$this->school->id}.bank.iban", ''),
+            'bank_swift' => Setting::get("school.{$this->school->id}.bank.swift", ''),
+        ];
+
         $data = [
             'payment' => $payment,
             'school' => $this->school,
+            'settings' => $settings,
             'generated_at' => now(),
             'generated_by' => $this->user
         ];
@@ -466,10 +488,31 @@ class AdminPaymentController extends AdminBaseController
         try {
             $payment->load(['user', 'school']);
 
+            // Get school-specific settings for receipt
+            $settings = [
+                'school_name' => Setting::get("school.{$this->school->id}.name", $this->school->name),
+                'school_address' => Setting::get("school.{$this->school->id}.address", $this->school->address ?? ''),
+                'school_city' => Setting::get("school.{$this->school->id}.city", $this->school->city ?? ''),
+                'school_postal_code' => Setting::get("school.{$this->school->id}.postal_code", $this->school->postal_code ?? ''),
+                'school_phone' => Setting::get("school.{$this->school->id}.phone", $this->school->phone ?? ''),
+                'school_email' => Setting::get("school.{$this->school->id}.email", $this->school->email ?? ''),
+                'school_website' => Setting::get("school.{$this->school->id}.website", $this->school->website ?? ''),
+                'vat_number' => Setting::get("school.{$this->school->id}.vat_number", ''),
+                'tax_code' => Setting::get("school.{$this->school->id}.tax_code", ''),
+                'receipt_header_text' => Setting::get("school.{$this->school->id}.receipt.header_text", ''),
+                'receipt_footer_text' => Setting::get("school.{$this->school->id}.receipt.footer_text", ''),
+                'receipt_logo_path' => Setting::get("school.{$this->school->id}.receipt.logo_path", $this->school->logo_path ?? ''),
+                'payment_terms' => Setting::get("school.{$this->school->id}.payment.terms", ''),
+                'bank_name' => Setting::get("school.{$this->school->id}.bank.name", ''),
+                'bank_iban' => Setting::get("school.{$this->school->id}.bank.iban", ''),
+                'bank_swift' => Setting::get("school.{$this->school->id}.bank.swift", ''),
+            ];
+
             // Generate PDF
             $pdf = PDF::loadView('admin.payments.receipt', [
                 'payment' => $payment,
                 'school' => $this->school,
+                'settings' => $settings,
                 'generated_at' => now(),
                 'generated_by' => $this->user
             ]);

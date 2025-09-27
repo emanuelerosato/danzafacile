@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\EventRegistrationController;
 use App\Http\Controllers\Admin\StaffScheduleController;
+use App\Http\Controllers\Admin\AdminSettingsController;
 
 // Controllers Student
 use App\Http\Controllers\Student\StudentDashboardController;
@@ -272,6 +273,10 @@ Route::middleware('auth')->group(function () {
             Route::get('/export-pdf', [ReportsController::class, 'exportPdf'])->name('export-pdf');
             Route::get('/export-excel', [ReportsController::class, 'exportExcel'])->name('export-excel');
         });
+
+        // School Settings (Receipts Configuration)
+        Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
+        Route::post('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
     });
     
     // STUDENT ROUTES
