@@ -379,7 +379,7 @@
                                             </a>
                                             @endif
                                             @if($payment->canBeRefunded())
-                                            <a href="#" onclick="processRefundWithModal({{ $payment->id }})" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-all duration-200">
+                                            <a href="#" onclick="processRefund({{ $payment->id }})" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-all duration-200">
                                                 <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
                                                 </svg>

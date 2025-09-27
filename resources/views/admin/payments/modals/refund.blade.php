@@ -63,6 +63,7 @@
                         <x-secure-input
                             type="textarea"
                             name="refund_reason"
+                            id="refund_reason"
                             placeholder="Inserisci il motivo del rimborso (min. 10 caratteri)..."
                             :required="true"
                             :max-length="500"
@@ -103,64 +104,3 @@
     </div>
 </div>
 
-<script>
-// Funzione per aprire il modal rimborso
-function openRefundModal() {
-    // Metodo sicuro per aprire modal Alpine.js usando eventi custom
-    document.getElementById('refundModal').dispatchEvent(new CustomEvent('open-modal'));
-
-    // Initialize validation for refund form when modal opens
-    setTimeout(() => {
-        FormValidator.init('#refundForm');
-    }, 100);
-}
-
-// Aggiorna la funzione processRefund per usare il nuovo modal
-function processRefundWithModal(paymentId) {
-    // Imposta l'ID del pagamento nel form
-    document.getElementById('refundForm').dataset.paymentId = paymentId;
-
-    // Apri il modal
-    openRefundModal();
-
-    // Gestisci il submit del form
-    document.getElementById('refundForm').onsubmit = function(e) {
-        e.preventDefault();
-
-        const reason = document.getElementById('refund_reason').value.trim();
-        if (!reason) {
-            alert('Inserisci il motivo del rimborso');
-            return;
-        }
-
-        // Processa il rimborso
-        fetch(`/admin/payments/${paymentId}/refund`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({
-                refund_reason: reason
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Chiudi il modal usando evento custom
-                document.getElementById('refundModal').dispatchEvent(new CustomEvent('close-modal'));
-                // Reset form
-                document.getElementById('refund_reason').value = '';
-                // Ricarica la pagina
-                location.reload();
-            } else {
-                alert('Errore: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Si è verificato un errore');
-        });
-    };
-}
-</script>

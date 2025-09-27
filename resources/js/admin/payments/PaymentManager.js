@@ -297,11 +297,78 @@ export class PaymentManager {
     }
 
     /**
-     * Process payment refund
+     * Process payment refund using modal
      */
     async processRefund(paymentId) {
-        const reason = prompt('Inserisci il motivo del rimborso:');
-        if (!reason) return;
+        // Open the refund modal
+        this.openRefundModal(paymentId);
+    }
+
+    /**
+     * Open refund modal
+     */
+    openRefundModal(paymentId) {
+        console.log('[PaymentManager] Opening refund modal for payment:', paymentId);
+
+        const modal = document.getElementById('refundModal');
+        const form = document.getElementById('refundForm');
+
+        console.log('[PaymentManager] Modal found:', !!modal);
+        console.log('[PaymentManager] Form found:', !!form);
+
+        if (!modal || !form) {
+            console.error('[PaymentManager] Refund modal not found - modal:', !!modal, 'form:', !!form);
+            alert('Modal di rimborso non trovato. Ricarica la pagina e riprova.');
+            return;
+        }
+
+        // Set payment ID in form
+        form.dataset.paymentId = paymentId;
+
+        // Clear previous content
+        const textarea = document.getElementById('refund_reason');
+        if (textarea) {
+            textarea.value = '';
+        }
+
+        // Open modal
+        modal.dispatchEvent(new CustomEvent('open-modal'));
+
+        // Initialize validation
+        setTimeout(() => {
+            if (window.FormValidator) {
+                window.FormValidator.init('#refundForm');
+            }
+        }, 100);
+
+        // Set up form submission (remove previous handlers)
+        form.onsubmit = (e) => this.handleRefundSubmit(e, paymentId);
+    }
+
+    /**
+     * Handle refund form submission
+     */
+    async handleRefundSubmit(e, paymentId) {
+        e.preventDefault();
+        console.log('[PaymentManager] Handling refund submit for payment:', paymentId);
+
+        const reasonField = document.getElementById('refund_reason');
+        const reason = reasonField?.value?.trim();
+
+        console.log('[PaymentManager] Reason field found:', !!reasonField);
+        console.log('[PaymentManager] Reason text:', reason);
+
+        if (!reason) {
+            this.showNotification('Inserisci il motivo del rimborso', 'error');
+            return;
+        }
+
+        if (reason.length < 10) {
+            this.showNotification('Il motivo deve essere di almeno 10 caratteri', 'error');
+            return;
+        }
+
+        console.log('[PaymentManager] Sending refund request...');
 
         this.setLoading(true);
 
@@ -320,13 +387,20 @@ export class PaymentManager {
             const data = await response.json();
 
             if (data.success) {
+                // Close modal
+                document.getElementById('refundModal').dispatchEvent(new CustomEvent('close-modal'));
+
+                // Reset form
+                if (reasonField) reasonField.value = '';
+
                 this.showNotification('Rimborso elaborato con successo!', 'success');
                 this.reloadPage();
             } else {
                 this.showNotification('Errore: ' + data.message, 'error');
             }
+
         } catch (error) {
-            console.error('[PaymentManager] Error processing refund:', error);
+            console.error('[PaymentManager] Refund error:', error);
             this.showNotification('Si è verificato un errore', 'error');
         } finally {
             this.setLoading(false);
