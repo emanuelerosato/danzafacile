@@ -109,7 +109,7 @@
                                     <option value="">Seleziona evento (opzionale)</option>
                                     @foreach($events as $event)
                                         <option value="{{ $event->id }}" {{ $preselected['event_id'] == $event->id ? 'selected' : '' }}>
-                                            {{ $event->title }} - €{{ number_format($event->price, 2) }}
+                                            {{ $event->name }} - €{{ number_format($event->price, 2) }}
                                         </option>
                                     @endforeach
                                 </select>
