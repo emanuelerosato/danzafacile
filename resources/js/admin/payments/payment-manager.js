@@ -12,10 +12,61 @@ import { PaymentManager } from './PaymentManager.js';
 // Global variables for configuration
 let paymentManagerInstance = null;
 
-// Declare paymentManager function early to prevent Alpine.js timing issues
+// Immediate Alpine.js function declaration to prevent timing issues
 window.paymentManager = function() {
-    console.log('[Alpine] Early paymentManager called, delegating to main function');
-    return createPaymentManager();
+    console.log('[Alpine] PaymentManager function called');
+
+    // If instance is ready, return it
+    if (paymentManagerInstance) {
+        return paymentManagerInstance.alpinePaymentManager();
+    }
+
+    // Return fallback Alpine data with initialization promise
+    console.log('[Alpine] PaymentManager not ready, returning fallback data');
+    return {
+        selectedPayments: [],
+        isLoading: false,
+        _initialized: false,
+
+        openBulkModal() {
+            console.log('[Alpine] Bulk modal requested (fallback)');
+        },
+
+        exportPayments() {
+            console.log('[Alpine] Export requested (fallback)');
+            // Fallback export using current URL
+            const currentUrl = new URL(window.location.href);
+            currentUrl.pathname = currentUrl.pathname.replace('/index', '/export');
+            window.location.href = currentUrl.toString();
+        },
+
+        // Initialize and update when manager becomes available
+        init() {
+            console.log('[Alpine] PaymentManager Alpine component initialized');
+
+            const checkForManager = () => {
+                if (paymentManagerInstance && !this._initialized) {
+                    console.log('[Alpine] PaymentManager now available, updating component');
+                    this._initialized = true;
+
+                    // Update this object with real manager data
+                    const realData = paymentManagerInstance.alpinePaymentManager();
+                    Object.assign(this, realData);
+
+                    // Trigger Alpine reactivity
+                    this.$nextTick(() => {
+                        console.log('[Alpine] Component updated with real data');
+                    });
+                } else if (!paymentManagerInstance) {
+                    // Keep checking every 50ms
+                    setTimeout(checkForManager, 50);
+                }
+            };
+
+            // Start checking
+            setTimeout(checkForManager, 10);
+        }
+    };
 };
 
 /**
@@ -47,69 +98,6 @@ function initializePaymentSystem() {
     }
 }
 
-/**
- * Alpine.js integration
- * Provides reactive data and methods for the payment templates
- */
-function createPaymentManager() {
-    // Wait for PaymentManager to be initialized
-    if (!paymentManagerInstance) {
-        console.warn('[Alpine] PaymentManager not ready, waiting for initialization...');
-
-        // Return a proxy that will update once the manager is ready
-        const alpineData = {
-            selectedPayments: [],
-            isLoading: false,
-            _initialized: false,
-
-            openBulkModal() {
-                if (paymentManagerInstance) {
-                    paymentManagerInstance.bulkActionManager?.openBulkModal();
-                } else {
-                    console.log('[Alpine] Bulk modal requested (waiting for manager)');
-                }
-            },
-
-            exportPayments() {
-                if (paymentManagerInstance) {
-                    paymentManagerInstance.exportManager?.exportPayments();
-                } else {
-                    console.log('[Alpine] Export requested (fallback)');
-                    // Fallback export using current URL
-                    const currentUrl = new URL(window.location.href);
-                    currentUrl.pathname = currentUrl.pathname.replace('/index', '/export');
-                    window.location.href = currentUrl.toString();
-                }
-            },
-
-            // Auto-update when manager becomes available
-            init() {
-                console.log('[Alpine] PaymentManager component initialized');
-
-                // Check periodically for manager availability
-                const checkManager = () => {
-                    if (paymentManagerInstance && !this._initialized) {
-                        console.log('[Alpine] PaymentManager now available, updating data');
-                        this._initialized = true;
-
-                        // Update with real data
-                        Object.assign(this, paymentManagerInstance.alpinePaymentManager());
-                    } else if (!paymentManagerInstance) {
-                        // Keep checking
-                        setTimeout(checkManager, 50);
-                    }
-                };
-
-                checkManager();
-            }
-        };
-
-        return alpineData;
-    }
-
-    // Return PaymentManager Alpine integration
-    return paymentManagerInstance.alpinePaymentManager();
-}
 
 /**
  * Global utility functions for backward compatibility
