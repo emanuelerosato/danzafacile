@@ -342,3 +342,17 @@ Route::middleware('auth')->group(function () {
     Route::post('media/{mediaItem}/move', [MediaItemController::class, 'move'])->name('media.move');
     Route::get('media/{mediaItem}/download', [MediaItemController::class, 'download'])->name('media.download');
 });
+
+// PayPal Routes (accessible without authentication for webhooks)
+Route::prefix('paypal')->name('paypal.')->group(function () {
+    // Webhook endpoint (no authentication required)
+    Route::post('/webhook', [App\Http\Controllers\PayPalController::class, 'webhook'])->name('webhook');
+
+    // Payment flow endpoints (require authentication)
+    Route::middleware('auth')->group(function () {
+        Route::post('/create-payment', [App\Http\Controllers\PayPalController::class, 'createPayment'])->name('create');
+        Route::get('/success', [App\Http\Controllers\PayPalController::class, 'paymentSuccess'])->name('success');
+        Route::get('/cancel', [App\Http\Controllers\PayPalController::class, 'paymentCancel'])->name('cancel');
+        Route::get('/status/{paymentId}', [App\Http\Controllers\PayPalController::class, 'getPaymentStatus'])->name('status');
+    });
+});
