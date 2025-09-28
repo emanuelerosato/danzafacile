@@ -1,8 +1,6 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
-
-use App\Http\Controllers\Controller;
 use App\Models\MediaGallery;
 use App\Models\MediaItem;
 use App\Models\Course;
@@ -11,13 +9,39 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
-class MediaGalleryController extends Controller
+class MediaGalleryController extends AdminBaseController
 {
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Trova un media item in modo sicuro bypassando il global scope
+     */
+    private function findMediaItemSecurely(MediaGallery $gallery, $mediaItemId): MediaItem
+    {
+        // Bypass global scope usando la relazione della galleria
+        $mediaItem = $gallery->mediaItems()->find($mediaItemId);
+
+        // Controllo esplicito di sicurezza
+        if (!$mediaItem || $mediaItem->mediaGallery->school_id !== $this->school->id) {
+            abort(404, 'Media item non trovato o non autorizzato');
+        }
+
+        return $mediaItem;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+        $this->setupContext();
+
         $galleries = MediaGallery::with(['course:id,name', 'createdBy:id,name', 'mediaItems'])
                                 ->withCount('mediaItems')
                                 ->latest()
@@ -31,8 +55,10 @@ class MediaGalleryController extends Controller
      */
     public function create()
     {
+        $this->setupContext();
+
         $courses = Course::select('id', 'name')
-                        ->bySchool(Auth::user()->school_id)
+                        ->bySchool($this->school->id)
                         ->active()
                         ->orderBy('name')
                         ->get();
@@ -46,6 +72,8 @@ class MediaGalleryController extends Controller
      */
     public function store(Request $request)
     {
+        $this->setupContext();
+
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255',
             'description' => 'nullable|string|max:1000',
@@ -62,9 +90,9 @@ class MediaGalleryController extends Controller
         }
 
         $gallery = MediaGallery::create([
-            'school_id' => Auth::user()->school_id,
+            'school_id' => $this->school->id,
             'course_id' => $request->course_id,
-            'created_by' => Auth::id(),
+            'created_by' => $this->user->id,
             'title' => $request->title,
             'description' => $request->description,
             'type' => $request->type,
@@ -287,15 +315,12 @@ class MediaGalleryController extends Controller
      */
     public function getMediaData(MediaGallery $gallery, $mediaItemId)
     {
-        // Trova il media item attraverso la relazione della galleria per bypassare il global scope
-        $mediaItem = $gallery->mediaItems()->find($mediaItemId);
+        $this->setupContext();
 
-        if (!$mediaItem) {
-            abort(404);
-        }
+        // Usa il metodo sicuro per trovare il media item
+        $mediaItem = $this->findMediaItemSecurely($gallery, $mediaItemId);
 
-        return response()->json([
-            'success' => true,
+        return $this->jsonResponse(true, '', [
             'media' => [
                 'id' => $mediaItem->id,
                 'title' => $mediaItem->title,
@@ -312,12 +337,10 @@ class MediaGalleryController extends Controller
      */
     public function updateMediaItem(Request $request, MediaGallery $gallery, $mediaItemId)
     {
-        // Trova il media item attraverso la relazione della galleria per bypassare il global scope
-        $mediaItem = $gallery->mediaItems()->find($mediaItemId);
+        $this->setupContext();
 
-        if (!$mediaItem) {
-            abort(404);
-        }
+        // Usa il metodo sicuro per trovare il media item
+        $mediaItem = $this->findMediaItemSecurely($gallery, $mediaItemId);
 
         $validator = Validator::make($request->all(), [
             'title' => 'nullable|string|max:255',
@@ -327,9 +350,7 @@ class MediaGalleryController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Errore di validazione',
+            return $this->jsonResponse(false, 'Errore di validazione', [
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -340,36 +361,17 @@ class MediaGalleryController extends Controller
             'is_featured' => $request->boolean('is_featured'),
         ];
 
-        \Log::info('Media update request', [
-            'media_id' => $mediaItem->id,
-            'request_data' => $request->all(),
-            'update_data' => $updateData,
-            'original_title' => $mediaItem->title,
-            'original_description' => $mediaItem->description,
-            'original_is_featured' => $mediaItem->is_featured
-        ]);
-
         // Se è specificato un nuovo ordine, sposta l'elemento
         if ($request->has('order') && $request->order != $mediaItem->order) {
             $mediaItem->moveToPosition($request->order);
         }
 
-        $updated = $mediaItem->update($updateData);
-
-        \Log::info('Media update result', [
-            'media_id' => $mediaItem->id,
-            'update_success' => $updated,
-            'new_title' => $mediaItem->title,
-            'new_description' => $mediaItem->description,
-            'new_is_featured' => $mediaItem->is_featured
-        ]);
+        $mediaItem->update($updateData);
 
         // Ricarica il media item attraverso la galleria per assicurarsi che abbiamo i dati aggiornati
-        $updatedMediaItem = $gallery->mediaItems()->find($mediaItem->id);
+        $updatedMediaItem = $this->findMediaItemSecurely($gallery, $mediaItem->id);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Media aggiornato con successo!',
+        return $this->jsonResponse(true, 'Media aggiornato con successo!', [
             'item' => $updatedMediaItem
         ]);
     }
@@ -379,16 +381,14 @@ class MediaGalleryController extends Controller
      */
     public function deleteMediaItem(MediaGallery $gallery, $mediaItemId)
     {
-        // Trova il media item attraverso la relazione della galleria per bypassare il global scope
-        $mediaItem = $gallery->mediaItems()->find($mediaItemId);
+        $this->setupContext();
 
-        if (!$mediaItem) {
-            abort(404);
-        }
+        // Usa il metodo sicuro per trovare il media item
+        $mediaItem = $this->findMediaItemSecurely($gallery, $mediaItemId);
 
         // Verifica che l'utente possa eliminare questo media
-        if (!$mediaItem->canBeDeletedBy(Auth::user())) {
-            abort(403, 'Non hai i permessi per eliminare questo media');
+        if (!$mediaItem->canBeDeletedBy($this->user)) {
+            return $this->jsonResponse(false, 'Non hai i permessi per eliminare questo media', [], 403);
         }
 
         // Elimina il file fisico se presente
@@ -398,10 +398,7 @@ class MediaGalleryController extends Controller
 
         $mediaItem->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Media eliminato con successo!'
-        ]);
+        return $this->jsonResponse(true, 'Media eliminato con successo!');
     }
 
     /**
@@ -409,32 +406,21 @@ class MediaGalleryController extends Controller
      */
     public function setCoverImage(Request $request, MediaGallery $gallery)
     {
+        $this->setupContext();
+
         $validator = Validator::make($request->all(), [
             'media_item_id' => 'required|exists:media_items,id',
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Media item non valido'
-            ], 422);
+            return $this->jsonResponse(false, 'Media item non valido', [], 422);
         }
 
-        $mediaItem = MediaItem::find($request->media_item_id);
-
-        // Verifica che il media item appartenga alla galleria
-        if ($mediaItem->gallery_id !== $gallery->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Il media non appartiene a questa galleria'
-            ], 422);
-        }
+        // Usa il metodo sicuro per trovare il media item
+        $mediaItem = $this->findMediaItemSecurely($gallery, $request->media_item_id);
 
         $gallery->update(['cover_image_id' => $mediaItem->id]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Immagine di copertina impostata con successo!'
-        ]);
+        return $this->jsonResponse(true, 'Immagine di copertina impostata con successo!');
     }
 }
