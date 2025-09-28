@@ -19,14 +19,41 @@ class StoreDocumentRequest extends FormRequest
      */
     public function rules(): array
     {
+        $categories = array_keys(\App\Models\Document::getCategories());
+
         return [
-            'user_id' => 'required|exists:users,id',
-            'type' => 'required|in:medical_certificate,identity_document,insurance,other',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:500',
-            'file' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120', // 5MB max
-            'expiry_date' => 'nullable|date|after:today',
-            'is_required' => 'boolean',
+            'user_id' => 'sometimes|exists:users,id', // Sometimes because auto-filled from auth
+            'name' => 'required|string|max:255',
+            'category' => 'required|in:' . implode(',', $categories),
+            'file' => [
+                'required',
+                'file',
+                'max:10240', // 10MB consistent with controllers
+                'mimes:pdf,jpg,jpeg,png,doc,docx',
+                // Additional security: check actual MIME type
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        $allowedMimes = [
+                            'application/pdf',
+                            'image/jpeg',
+                            'image/png',
+                            'application/msword',
+                            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                        ];
+
+                        $actualMime = $value->getMimeType();
+                        if (!in_array($actualMime, $allowedMimes)) {
+                            $fail('Il tipo di file non è sicuro o consentito.');
+                        }
+
+                        // Prevent path traversal in filename
+                        $filename = $value->getClientOriginalName();
+                        if (strpos($filename, '..') !== false || strpos($filename, '/') !== false || strpos($filename, '\\') !== false) {
+                            $fail('Il nome del file non è valido.');
+                        }
+                    }
+                },
+            ],
         ];
     }
 
@@ -36,17 +63,14 @@ class StoreDocumentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'user_id.required' => 'L\'utente è obbligatorio.',
             'user_id.exists' => 'L\'utente selezionato non esiste.',
-            'type.required' => 'Il tipo di documento è obbligatorio.',
-            'type.in' => 'Tipo di documento non valido.',
-            'title.required' => 'Il titolo è obbligatorio.',
-            'title.max' => 'Il titolo non può superare 255 caratteri.',
-            'description.max' => 'La descrizione non può superare 500 caratteri.',
+            'name.required' => 'Il nome del documento è obbligatorio.',
+            'name.max' => 'Il nome non può superare 255 caratteri.',
+            'category.required' => 'La categoria è obbligatoria.',
+            'category.in' => 'Categoria non valida.',
             'file.required' => 'Il file è obbligatorio.',
-            'file.mimes' => 'Il file deve essere in formato PDF, DOC, DOCX, JPG, JPEG o PNG.',
-            'file.max' => 'Il file non può superare 5MB.',
-            'expiry_date.after' => 'La data di scadenza deve essere futura.',
+            'file.mimes' => 'Il file deve essere in formato PDF, JPG, PNG, DOC o DOCX.',
+            'file.max' => 'Il file non può superare 10MB.',
         ];
     }
 }

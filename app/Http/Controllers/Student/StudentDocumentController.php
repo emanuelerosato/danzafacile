@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreDocumentRequest;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -49,18 +50,19 @@ class StudentDocumentController extends Controller
     /**
      * Store new document
      */
-    public function store(Request $request)
+    public function store(StoreDocumentRequest $request)
     {
         $user = auth()->user();
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'file' => 'required|file|max:10240|mimes:pdf,jpg,jpeg,png,doc,docx',
-            'category' => 'required|in:' . implode(',', array_keys(Document::getCategories())),
-        ]);
-
         $file = $request->file('file');
-        $filename = Str::slug($request->name) . '-' . time() . '.' . $file->getClientOriginalExtension();
+
+        // Secure filename generation
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = $file->getClientOriginalExtension();
+        $safeName = Str::slug($request->name) . '-' . time() . '-' . Str::random(8);
+        $filename = $safeName . '.' . $extension;
+
+        // Secure path structure
         $path = $file->storeAs('documents/' . $user->school_id . '/' . $user->id, $filename, 'private');
 
         Document::create([
@@ -106,11 +108,20 @@ class StudentDocumentController extends Controller
             abort(403, 'Non autorizzato');
         }
 
+        // Security check: ensure file path is within allowed directory
+        $allowedPath = 'documents/' . $user->school_id . '/' . $user->id;
+        if (!str_starts_with($document->file_path, $allowedPath)) {
+            abort(403, 'Accesso negato al file');
+        }
+
         if (!Storage::disk('private')->exists($document->file_path)) {
             abort(404, 'File non trovato');
         }
 
-        return Storage::disk('private')->download($document->file_path, $document->name . '.' . $document->file_type);
+        // Secure filename for download
+        $downloadName = Str::slug($document->name) . '.' . $document->file_type;
+
+        return Storage::disk('private')->download($document->file_path, $downloadName);
     }
 
     /**

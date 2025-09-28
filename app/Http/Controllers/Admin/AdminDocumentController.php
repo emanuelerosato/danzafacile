@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminBaseController;
+use App\Http\Requests\StoreDocumentRequest;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -91,7 +92,7 @@ class AdminDocumentController extends AdminBaseController
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreDocumentRequest $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
