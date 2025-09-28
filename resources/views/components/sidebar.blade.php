@@ -153,7 +153,7 @@
             </x-nav-group>
 
             <x-nav-group title="Profilo" icon="user">
-                <x-nav-item href="{{ route('documents.index') }}" :active="request()->routeIs('documents.*')" icon="document">
+                <x-nav-item href="{{ route('student.documents.index') }}" :active="request()->routeIs('student.documents.*')" icon="document">
                     Documenti
                 </x-nav-item>
             </x-nav-group>

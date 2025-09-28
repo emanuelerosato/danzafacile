@@ -9,7 +9,7 @@
                     Gestisci i tuoi documenti personali
                 </p>
             </div>
-            <a href="{{ route('documents.create') }}"
+            <a href="{{ route('student.documents.create') }}"
                class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -187,7 +187,7 @@
                                     <!-- Actions -->
                                     <div class="flex items-center space-x-2">
                                         @if($document->file_path)
-                                    <a href="{{ route('documents.download', $document) }}"
+                                    <a href="{{ route('student.documents.download', $document) }}"
                                        class="inline-flex items-center px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-200">
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -195,7 +195,7 @@
                                         Scarica
                                     </a>
                                 @endif
-                                <a href="{{ route('documents.show', $document) }}"
+                                <a href="{{ route('student.documents.show', $document) }}"
                                    class="inline-flex items-center px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -224,7 +224,7 @@
                             <h3 class="mt-4 text-lg font-medium text-gray-900">Nessun documento caricato</h3>
                             <p class="mt-2 text-gray-600">Non hai ancora caricato documenti. Inizia caricando il tuo primo documento.</p>
                             <div class="mt-6">
-                                <a href="{{ route('documents.create') }}"
+                                <a href="{{ route('student.documents.create') }}"
                                    class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 transition-all duration-200">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
