@@ -1,41 +1,68 @@
 <x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <div>
+                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                    {{ $gallery->title }}
+                </h2>
+                <p class="text-sm text-gray-600 mt-1">
+                    {{ \App\Models\MediaGallery::getAvailableTypes()[$gallery->type] }}
+                    @if($gallery->course) - {{ $gallery->course->name }}@endif
+                </p>
+            </div>
+        </div>
+    </x-slot>
 
+    <x-slot name="breadcrumb">
+        <li class="flex items-center">
+            <a href="{{ route('admin.dashboard') }}" class="text-gray-500 hover:text-gray-700">Dashboard</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="flex items-center">
+            <a href="{{ route('admin.galleries.index') }}" class="text-gray-500 hover:text-gray-700">Gallerie</a>
+            <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+        </li>
+        <li class="text-gray-900 font-medium">{{ $gallery->title }}</li>
+    </x-slot>
 
-<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Breadcrumb -->
-    <nav class="mb-6">
-        <ol class="flex items-center space-x-2 text-sm text-gray-600">
-            <li><a href="{{ route('admin.dashboard') }}" class="hover:text-gray-900">Dashboard</a></li>
-            <li><i class="fas fa-chevron-right text-gray-400 mx-2"></i></li>
-            <li><a href="{{ route('admin.galleries.index') }}" class="hover:text-gray-900">Gallerie</a></li>
-            <li><i class="fas fa-chevron-right text-gray-400 mx-2"></i></li>
-            <li class="text-gray-900">{{ $gallery->title }}</li>
-        </ol>
-    </nav>
-
-    <!-- Gallery Header -->
-    <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-sm border border-gray-200 mb-6">
+<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Gallery Header -->
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 mb-6">
         <div class="px-6 py-4 border-b border-gray-200">
             <div class="flex justify-between items-start">
                 <div class="flex-1">
                     <div class="flex items-center gap-3 mb-2">
                         <h1 class="text-2xl font-semibold text-gray-900">{{ $gallery->title }}</h1>
                         <div class="flex gap-2">
-                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
                                 {{ \App\Models\MediaGallery::getAvailableTypes()[$gallery->type] }}
                             </span>
                             @if($gallery->is_featured)
-                                <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
-                                    <i class="fas fa-star"></i> In Evidenza
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                    </svg>
+                                    In Evidenza
                                 </span>
                             @endif
                             @if($gallery->is_public)
-                                <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
-                                    <i class="fas fa-globe"></i> Pubblica
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    Pubblica
                                 </span>
                             @else
-                                <span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
-                                    <i class="fas fa-lock"></i> Privata
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    </svg>
+                                    Privata
                                 </span>
                             @endif
                         </div>
@@ -47,26 +74,56 @@
 
                     <div class="flex items-center gap-6 text-sm text-gray-500">
                         @if($gallery->course)
-                            <div><i class="fas fa-graduation-cap"></i> {{ $gallery->course->name }}</div>
+                            <div class="flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+                                </svg>
+                                {{ $gallery->course->name }}
+                            </div>
                         @endif
-                        <div><i class="fas fa-user"></i> {{ $gallery->createdBy->name }}</div>
-                        <div><i class="fas fa-calendar"></i> {{ $gallery->created_at->format('d/m/Y H:i') }}</div>
-                        <div><i class="fas fa-images"></i> {{ $mediaItems->total() }} media</div>
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            {{ $gallery->createdBy->name }}
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            {{ $gallery->created_at->format('d/m/Y H:i') }}
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            {{ $mediaItems->total() }} media
+                        </div>
                     </div>
                 </div>
 
                 <div class="flex gap-2 ml-4">
                     <a href="{{ route('admin.galleries.edit', $gallery) }}"
-                       class="bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-lg transition-colors duration-200">
-                        <i class="fas fa-edit"></i> Modifica
+                       class="inline-flex items-center px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-medium rounded-lg transition-colors duration-200">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                        Modifica
                     </a>
                     <button onclick="openUploadModal()"
-                            class="bg-green-50 hover:bg-green-100 text-green-700 px-4 py-2 rounded-lg transition-colors duration-200">
-                        <i class="fas fa-upload"></i> Carica File
+                            class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                        Carica File
                     </button>
                     <button onclick="openLinkModal()"
-                            class="bg-purple-50 hover:bg-purple-100 text-purple-700 px-4 py-2 rounded-lg transition-colors duration-200">
-                        <i class="fas fa-link"></i> Aggiungi Link
+                            class="inline-flex items-center px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 text-sm font-medium rounded-lg transition-colors duration-200">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                        </svg>
+                        Aggiungi Link
                     </button>
                 </div>
             </div>
@@ -77,7 +134,7 @@
     @if($mediaItems->count() > 0)
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6" id="mediaGrid">
             @foreach($mediaItems as $media)
-                <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-sm border border-gray-200 overflow-hidden group media-item" data-id="{{ $media->id }}">
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden group media-item hover:shadow-xl transition-all duration-200 transform hover:scale-105" data-id="{{ $media->id }}">
                     <!-- Media Preview -->
                     <div class="aspect-w-16 aspect-h-12 bg-gray-100 relative">
                         @if($media->is_image)
@@ -167,24 +224,32 @@
         </div>
 
         <!-- Pagination -->
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-sm border border-gray-200 px-6 py-4">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 px-6 py-4">
             {{ $mediaItems->links() }}
         </div>
     @else
         <!-- Empty State -->
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-sm border border-gray-200 py-16">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 py-16">
             <div class="text-center">
-                <i class="fas fa-images text-6xl text-gray-300 mb-4"></i>
+                <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
                 <h3 class="text-xl font-medium text-gray-900 mb-2">Galleria vuota</h3>
                 <p class="text-gray-600 mb-8">Inizia aggiungendo foto, video o link esterni alla galleria.</p>
                 <div class="flex justify-center gap-4">
                     <button onclick="openUploadModal()"
-                            class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors duration-200">
-                        <i class="fas fa-upload"></i> Carica File
+                            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                        Carica File
                     </button>
                     <button onclick="openLinkModal()"
-                            class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg transition-colors duration-200">
-                        <i class="fas fa-link"></i> Aggiungi Link
+                            class="inline-flex items-center px-6 py-3 bg-purple-50 hover:bg-purple-100 text-purple-700 text-sm font-medium rounded-lg transition-colors duration-200">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                        </svg>
+                        Aggiungi Link
                     </button>
                 </div>
             </div>
