@@ -217,6 +217,64 @@ abstract class AdminBaseController extends Controller
     }
 
     /**
+     * Verifica che un model appartenga alla scuola corrente
+     */
+    protected function verifyResourceOwnership($model, string $resourceName = 'Resource'): void
+    {
+        $this->setupContext();
+
+        if (!$model) {
+            abort(404, $resourceName . ' non trovato.');
+        }
+
+        // Verifica ownership diretta tramite school_id
+        if (property_exists($model, 'school_id') && $model->school_id !== $this->school->id) {
+            abort(404, $resourceName . ' non trovato o accesso negato.');
+        }
+
+        // Verifica ownership tramite relazione user per model senza school_id
+        if (!property_exists($model, 'school_id') && method_exists($model, 'user')) {
+            $user = $model->user;
+            if (!$user || $user->school_id !== $this->school->id) {
+                abort(404, $resourceName . ' non trovato o accesso negato.');
+            }
+        }
+    }
+
+    /**
+     * Trova un model in modo sicuro bypassando il global scope
+     */
+    protected function findResourceSecurely(string $modelClass, $id, string $resourceName = 'Resource')
+    {
+        $model = $modelClass::withoutGlobalScopes()->find($id);
+        $this->verifyResourceOwnership($model, $resourceName);
+        return $model;
+    }
+
+    /**
+     * Response helper methods per consistenza
+     */
+    protected function successResponse(string $message = 'Operazione completata con successo', array $data = []): \Illuminate\Http\JsonResponse
+    {
+        return $this->jsonResponse(true, $message, $data, 200);
+    }
+
+    protected function errorResponse(string $message = 'Si è verificato un errore', array $errors = [], int $status = 422): \Illuminate\Http\JsonResponse
+    {
+        return $this->jsonResponse(false, $message, ['errors' => $errors], $status);
+    }
+
+    protected function notFoundResponse(string $message = 'Risorsa non trovata'): \Illuminate\Http\JsonResponse
+    {
+        return $this->jsonResponse(false, $message, [], 404);
+    }
+
+    protected function unauthorizedResponse(string $message = 'Accesso non autorizzato'): \Illuminate\Http\JsonResponse
+    {
+        return $this->jsonResponse(false, $message, [], 403);
+    }
+
+    /**
      * Handle bulk actions with proper validation
      */
     protected function handleBulkAction(Request $request, $model, array $allowedActions = ['activate', 'deactivate', 'delete']): \Illuminate\Http\JsonResponse

@@ -17,6 +17,8 @@ class AdminStudentController extends AdminBaseController
      */
     public function index(Request $request)
     {
+        $this->setupContext();
+
         $query = $this->school->users()->where('role', 'user');
 
         $students = $this->getFilteredResults($query, $request, 15);
@@ -49,6 +51,8 @@ class AdminStudentController extends AdminBaseController
      */
     public function create()
     {
+        $this->setupContext();
+
         return view('admin.students.create');
     }
 
@@ -57,6 +61,8 @@ class AdminStudentController extends AdminBaseController
      */
     public function store(Request $request)
     {
+        $this->setupContext();
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'first_name' => 'required|string|max:255',
@@ -123,6 +129,9 @@ class AdminStudentController extends AdminBaseController
      */
     public function show(User $student)
     {
+        $this->setupContext();
+        $this->verifyResourceOwnership($student, 'Studente');
+
         // Ensure student belongs to current school
         if ($student->school_id !== $this->school->id || $student->role !== 'user') {
             abort(404, 'Studente non trovato.');
@@ -160,6 +169,9 @@ class AdminStudentController extends AdminBaseController
      */
     public function edit(User $student)
     {
+        $this->setupContext();
+        $this->verifyResourceOwnership($student, 'Studente');
+
         // Ensure student belongs to current school
         if ($student->school_id !== $this->school->id || $student->role !== 'user') {
             abort(404, 'Studente non trovato.');
@@ -173,6 +185,9 @@ class AdminStudentController extends AdminBaseController
      */
     public function update(Request $request, User $student)
     {
+        $this->setupContext();
+        $this->verifyResourceOwnership($student, 'Studente');
+
         // Ensure student belongs to current school
         if ($student->school_id !== $this->school->id || $student->role !== 'user') {
             abort(404, 'Studente non trovato.');

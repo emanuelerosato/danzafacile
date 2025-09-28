@@ -14,6 +14,19 @@ class Course extends Model
     use HasFactory;
 
     /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        // Global scope per multi-tenant security
+        static::addGlobalScope('school', function (Builder $builder) {
+            if (auth()->check() && auth()->user()->school_id) {
+                $builder->where('school_id', auth()->user()->school_id);
+            }
+        });
+    }
+
+    /**
      * Enum per i livelli del corso
      */
     const LEVEL_BEGINNER = 'beginner';

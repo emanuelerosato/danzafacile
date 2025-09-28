@@ -20,6 +20,8 @@ class AdminCourseController extends AdminBaseController
      */
     public function index(Request $request)
     {
+        $this->setupContext();
+
         $query = $this->school->courses()->with(['instructor', 'enrollments']);
 
         $courses = $this->getFilteredResults($query, $request, 15);

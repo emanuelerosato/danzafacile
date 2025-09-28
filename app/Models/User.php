@@ -17,6 +17,19 @@ class User extends Authenticatable
     use HasFactory, Notifiable, HasApiTokens;
 
     /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        // Global scope per multi-tenant security (esclusi super_admin)
+        static::addGlobalScope('school', function (Builder $builder) {
+            if (auth()->check() && auth()->user()->school_id && auth()->user()->role !== self::ROLE_SUPER_ADMIN) {
+                $builder->where('school_id', auth()->user()->school_id);
+            }
+        });
+    }
+
+    /**
      * Enum per i ruoli utente
      */
     const ROLE_SUPER_ADMIN = 'super_admin';
