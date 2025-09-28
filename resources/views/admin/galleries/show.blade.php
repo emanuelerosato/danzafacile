@@ -134,7 +134,11 @@
     @if($mediaItems->count() > 0)
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6" id="mediaGrid">
             @foreach($mediaItems as $media)
-                <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden group media-item hover:shadow-xl transition-all duration-200 transform hover:scale-105" data-id="{{ $media->id }}">
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden group media-item hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+                     data-id="{{ $media->id }}"
+                     data-title="{{ $media->title }}"
+                     data-description="{{ $media->description }}"
+                     data-featured="{{ $media->is_featured ? 'true' : 'false' }}">
                     <!-- Media Preview -->
                     <div class="aspect-w-16 aspect-h-12 bg-gray-100 relative">
                         @if($media->is_image)
@@ -148,7 +152,9 @@
                                      onclick="openLightbox('{{ $media->embed_url }}', '{{ $media->title }}', 'youtube')">
                                     <img src="{{ $media->thumbnail_url }}" class="w-full h-full object-cover">
                                     <div class="absolute inset-0 flex items-center justify-center">
-                                        <i class="fab fa-youtube text-red-500 text-3xl"></i>
+                                        <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                        </svg>
                                     </div>
                                 </div>
                             @elseif($media->type === 'vimeo')
@@ -158,7 +164,9 @@
                                         <img src="{{ $media->thumbnail_url }}" class="w-full h-full object-cover">
                                     @endif
                                     <div class="absolute inset-0 flex items-center justify-center">
-                                        <i class="fab fa-vimeo text-blue-500 text-3xl"></i>
+                                        <svg class="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M23.977 6.416c-.105 2.338-1.739 5.543-4.894 9.609-3.268 4.247-6.026 6.37-8.29 6.37-1.409 0-2.578-1.294-3.553-3.881L5.322 11.4C4.603 8.816 3.834 7.522 3.01 7.522c-.179 0-.806.378-1.881 1.132L0 7.197a315.065 315.065 0 0 0 3.501-3.128C5.08 2.701 6.266 1.984 7.055 1.91c1.867-.18 3.016 1.1 3.447 3.838.465 2.953.789 4.789.971 5.507.539 2.45 1.131 3.674 1.776 3.674.502 0 1.256-.796 2.265-2.385 1.004-1.589 1.54-2.797 1.612-3.628.144-1.371-.395-2.061-1.614-2.061-.574 0-1.167.121-1.777.391 1.186-3.868 3.434-5.757 6.762-5.637 2.473.06 3.628 1.664 3.493 4.797l-.013.01z"/>
+                                        </svg>
                                     </div>
                                 </div>
                             @else
@@ -167,6 +175,32 @@
                                     <source src="{{ $media->file_url }}" type="{{ $media->file_type }}">
                                 </video>
                             @endif
+                        @elseif($media->is_external)
+                            <div class="w-full h-32 bg-black flex items-center justify-center cursor-pointer"
+                                 onclick="window.open('{{ $media->external_url }}', '_blank')">
+                                @if($media->type === 'youtube')
+                                    <div class="text-center">
+                                        <svg class="w-8 h-8 text-red-500 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                        </svg>
+                                        <p class="text-white text-xs mt-1">YouTube</p>
+                                    </div>
+                                @elseif($media->type === 'vimeo')
+                                    <div class="text-center">
+                                        <svg class="w-8 h-8 text-blue-500 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M23.977 6.416c-.105 2.338-1.739 5.543-4.894 9.609-3.268 4.247-6.026 6.37-8.29 6.37-1.409 0-2.578-1.294-3.553-3.881L5.322 11.4C4.603 8.816 3.834 7.522 3.01 7.522c-.179 0-.806.378-1.881 1.132L0 7.197a315.065 315.065 0 0 0 3.501-3.128C5.08 2.701 6.266 1.984 7.055 1.91c1.867-.18 3.016 1.1 3.447 3.838.465 2.953.789 4.789.971 5.507.539 2.45 1.131 3.674 1.776 3.674.502 0 1.256-.796 2.265-2.385 1.004-1.589 1.54-2.797 1.612-3.628.144-1.371-.395-2.061-1.614-2.061-.574 0-1.167.121-1.777.391 1.186-3.868 3.434-5.757 6.762-5.637 2.473.06 3.628 1.664 3.493 4.797l-.013.01z"/>
+                                        </svg>
+                                        <p class="text-white text-xs mt-1">Vimeo</p>
+                                    </div>
+                                @else
+                                    <div class="text-center">
+                                        <svg class="w-8 h-8 text-gray-300 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                        </svg>
+                                        <p class="text-white text-xs mt-1">Link Esterno</p>
+                                    </div>
+                                @endif
+                            </div>
                         @else
                             <div class="w-full h-32 bg-gray-200 flex items-center justify-center">
                                 <i class="{{ $media->file_icon }} text-2xl text-gray-400"></i>
@@ -174,20 +208,26 @@
                         @endif
 
                         <!-- Overlay actions -->
-                        <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <div class="absolute top-2 right-2 z-20 opacity-90 group-hover:opacity-100 transition-opacity duration-200">
                             <div class="flex gap-1">
                                 @if($media->is_featured)
-                                    <span class="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">
-                                        <i class="fas fa-star"></i>
+                                    <span class="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full flex items-center shadow-lg">
+                                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        </svg>
                                     </span>
                                 @endif
-                                <button onclick="editMedia({{ $media->id }})"
-                                        class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full transition-colors duration-200">
-                                    <i class="fas fa-edit"></i>
+                                <button onclick="editMedia({{ $media->id }})" type="button"
+                                        class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full transition-colors duration-200 flex items-center shadow-lg cursor-pointer">
+                                    <svg class="w-3 h-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
                                 </button>
-                                <button onclick="deleteMedia({{ $media->id }})"
-                                        class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full transition-colors duration-200">
-                                    <i class="fas fa-trash"></i>
+                                <button onclick="deleteMedia({{ $media->id }})" type="button"
+                                        class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full transition-colors duration-200 flex items-center shadow-lg cursor-pointer">
+                                    <svg class="w-3 h-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
                                 </button>
                             </div>
                         </div>
@@ -195,8 +235,10 @@
                         <!-- Media type indicator -->
                         <div class="absolute bottom-2 left-2">
                             @if($media->is_external)
-                                <span class="bg-purple-500 text-white text-xs px-2 py-1 rounded-full">
-                                    <i class="fas fa-external-link-alt"></i>
+                                <span class="bg-purple-500 text-white text-xs px-2 py-1 rounded-full flex items-center">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
                                 </span>
                             @endif
                         </div>
@@ -339,13 +381,74 @@
     </div>
 </div>
 
+<!-- Edit Media Modal -->
+<div id="editMediaModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 max-w-lg w-full">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">Modifica Media</h3>
+            </div>
+            <form id="editMediaForm" class="p-6 space-y-4">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" id="editMediaId" name="media_id">
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Titolo</label>
+                    <input type="text" name="title" id="editMediaTitle" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                           placeholder="Titolo del media">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Descrizione</label>
+                    <textarea name="description" id="editMediaDescription" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                              placeholder="Descrizione opzionale"></textarea>
+                </div>
+
+                <div class="flex items-center">
+                    <input type="checkbox" name="is_featured" id="editMediaFeatured" value="1"
+                           class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded">
+                    <label for="editMediaFeatured" class="ml-2 text-sm text-gray-700">
+                        Media in evidenza
+                    </label>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <button type="button" id="setCoverButton"
+                            class="inline-flex items-center px-3 py-2 bg-purple-500 hover:bg-purple-600 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Imposta come Copertina
+                    </button>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeEditModal()"
+                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors duration-200">
+                        Annulla
+                    </button>
+                    <button type="submit"
+                            class="bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg transition-all duration-200">
+                        Salva Modifiche
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Lightbox -->
 <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-90 hidden z-50">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="relative max-w-4xl max-h-full">
             <button onclick="closeLightbox()"
                     class="absolute top-4 right-4 text-white hover:text-gray-300 text-2xl z-10">
-                <i class="fas fa-times"></i>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
             </button>
             <div id="lightboxContent"></div>
         </div>
@@ -371,7 +474,7 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
     const submitBtn = this.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
 
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Caricamento...';
+    submitBtn.innerHTML = '<svg class="w-4 h-4 animate-spin inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Caricamento...';
     submitBtn.disabled = true;
 
     fetch('{{ route("admin.galleries.upload", $gallery) }}', {
@@ -417,7 +520,7 @@ document.getElementById('linkForm').addEventListener('submit', function(e) {
     const submitBtn = this.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
 
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aggiunta...';
+    submitBtn.innerHTML = '<svg class="w-4 h-4 animate-spin inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Aggiunta...';
     submitBtn.disabled = true;
 
     fetch('{{ route("admin.galleries.external-link", $gallery) }}', {
@@ -428,15 +531,12 @@ document.getElementById('linkForm').addEventListener('submit', function(e) {
         }
     })
     .then(response => {
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
     })
     .then(data => {
-        console.log('Response data:', data);
         if (data.success) {
             closeLinkModal();
             location.reload(); // Simple reload for now
@@ -477,8 +577,82 @@ function closeLightbox() {
 
 // Media management
 function editMedia(mediaId) {
-    // TODO: Implement edit media modal
-    alert('Funzionalità di modifica in arrivo');
+    // Fetch media data
+    fetch(`{{ route("admin.galleries.media.data", ["gallery" => $gallery, "mediaItem" => ":id"]) }}`.replace(':id', mediaId))
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const media = data.media;
+
+                // Populate form
+                document.getElementById('editMediaId').value = media.id;
+                document.getElementById('editMediaTitle').value = media.title || '';
+                document.getElementById('editMediaDescription').value = media.description || '';
+                document.getElementById('editMediaFeatured').checked = media.is_featured;
+
+                // Show modal
+                document.getElementById('editMediaModal').classList.remove('hidden');
+
+                // Setup cover button
+                setupCoverButton(media.id);
+            } else {
+                alert('Errore nel caricamento dei dati del media');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Fallback - use data attributes if available
+            const mediaElement = document.querySelector(`[data-id="${mediaId}"]`);
+            if (mediaElement) {
+                document.getElementById('editMediaId').value = mediaId;
+                document.getElementById('editMediaTitle').value = mediaElement.dataset.title || '';
+                document.getElementById('editMediaDescription').value = mediaElement.dataset.description || '';
+                document.getElementById('editMediaFeatured').checked = mediaElement.dataset.featured === 'true';
+
+                document.getElementById('editMediaModal').classList.remove('hidden');
+                setupCoverButton(mediaId);
+            } else {
+                alert('Errore nel caricamento dei dati del media');
+            }
+        });
+}
+
+function closeEditModal() {
+    document.getElementById('editMediaModal').classList.add('hidden');
+}
+
+function setupCoverButton(mediaId) {
+    const coverButton = document.getElementById('setCoverButton');
+    coverButton.onclick = function() {
+        setCoverImage(mediaId);
+    };
+}
+
+function setCoverImage(mediaId) {
+    fetch(`{{ route("admin.galleries.cover-image", $gallery) }}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            media_item_id: mediaId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Immagine di copertina impostata con successo!');
+            closeEditModal();
+            location.reload(); // Refresh to show changes
+        } else {
+            alert('Errore: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Errore durante l\'impostazione della copertina');
+    });
 }
 
 function deleteMedia(mediaId) {
@@ -505,11 +679,60 @@ function deleteMedia(mediaId) {
     }
 }
 
+// Edit Media Form Handler
+document.getElementById('editMediaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    const mediaId = document.getElementById('editMediaId').value;
+
+    // Raccoglie i dati del form manualmente
+    const formData = {
+        title: document.getElementById('editMediaTitle').value,
+        description: document.getElementById('editMediaDescription').value,
+        is_featured: document.getElementById('editMediaFeatured').checked ? 1 : 0
+    };
+
+    console.log('Sending data:', formData);
+
+    submitBtn.innerHTML = '<svg class="w-4 h-4 animate-spin inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Salvando...';
+    submitBtn.disabled = true;
+
+    fetch(`{{ route("admin.galleries.media.update", ["gallery" => $gallery, "mediaItem" => ":id"]) }}`.replace(':id', mediaId), {
+        method: 'PATCH',
+        body: JSON.stringify(formData),
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeEditModal();
+            location.reload(); // Refresh to show changes
+        } else {
+            alert('Errore: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Errore durante il salvataggio');
+    })
+    .finally(() => {
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+});
+
 // Close modals on Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeUploadModal();
         closeLinkModal();
+        closeEditModal();
         closeLightbox();
     }
 });

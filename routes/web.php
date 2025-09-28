@@ -223,6 +223,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('galleries', MediaGalleryController::class);
         Route::post('galleries/{gallery}/upload', [MediaGalleryController::class, 'uploadMedia'])->name('galleries.upload');
         Route::post('galleries/{gallery}/external-link', [MediaGalleryController::class, 'addExternalLink'])->name('galleries.external-link');
+        Route::get('galleries/{gallery}/media/{mediaItem}/data', [MediaGalleryController::class, 'getMediaData'])->name('galleries.media.data');
         Route::patch('galleries/{gallery}/media/{mediaItem}', [MediaGalleryController::class, 'updateMediaItem'])->name('galleries.media.update');
         Route::delete('galleries/{gallery}/media/{mediaItem}', [MediaGalleryController::class, 'deleteMediaItem'])->name('galleries.media.delete');
         Route::post('galleries/{gallery}/cover-image', [MediaGalleryController::class, 'setCoverImage'])->name('galleries.cover-image');

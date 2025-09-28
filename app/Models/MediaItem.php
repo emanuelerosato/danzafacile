@@ -223,8 +223,8 @@ class MediaItem extends Model
     public function getThumbnailUrlAttribute(): ?string
     {
         // Se è un link esterno e ha una thumbnail URL, usala
-        if ($this->is_external && $this->thumbnail_url) {
-            return $this->thumbnail_url;
+        if ($this->is_external && $this->attributes['thumbnail_url']) {
+            return $this->attributes['thumbnail_url'];
         }
 
         // Se è YouTube, genera la thumbnail automaticamente

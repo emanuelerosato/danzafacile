@@ -268,6 +268,7 @@ class MediaGalleryController extends Controller
             'description' => $request->description,
             'order' => MediaItem::getNextOrderForGallery($gallery->id),
             'is_featured' => false,
+            'file_size' => 0, // I link esterni non hanno dimensione file
             'metadata' => [
                 'added_at' => now()->toISOString(),
                 'platform' => $request->type
@@ -282,12 +283,39 @@ class MediaGalleryController extends Controller
     }
 
     /**
+     * Get media item data for editing
+     */
+    public function getMediaData(MediaGallery $gallery, $mediaItemId)
+    {
+        // Trova il media item attraverso la relazione della galleria per bypassare il global scope
+        $mediaItem = $gallery->mediaItems()->find($mediaItemId);
+
+        if (!$mediaItem) {
+            abort(404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'media' => [
+                'id' => $mediaItem->id,
+                'title' => $mediaItem->title,
+                'description' => $mediaItem->description,
+                'is_featured' => $mediaItem->is_featured,
+                'type' => $mediaItem->type,
+                'order' => $mediaItem->order
+            ]
+        ]);
+    }
+
+    /**
      * Update media item
      */
-    public function updateMediaItem(Request $request, MediaGallery $gallery, MediaItem $mediaItem)
+    public function updateMediaItem(Request $request, MediaGallery $gallery, $mediaItemId)
     {
-        // Verifica che il media item appartenga alla galleria
-        if ($mediaItem->gallery_id !== $gallery->id) {
+        // Trova il media item attraverso la relazione della galleria per bypassare il global scope
+        $mediaItem = $gallery->mediaItems()->find($mediaItemId);
+
+        if (!$mediaItem) {
             abort(404);
         }
 
@@ -312,27 +340,49 @@ class MediaGalleryController extends Controller
             'is_featured' => $request->boolean('is_featured'),
         ];
 
+        \Log::info('Media update request', [
+            'media_id' => $mediaItem->id,
+            'request_data' => $request->all(),
+            'update_data' => $updateData,
+            'original_title' => $mediaItem->title,
+            'original_description' => $mediaItem->description,
+            'original_is_featured' => $mediaItem->is_featured
+        ]);
+
         // Se è specificato un nuovo ordine, sposta l'elemento
         if ($request->has('order') && $request->order != $mediaItem->order) {
             $mediaItem->moveToPosition($request->order);
         }
 
-        $mediaItem->update($updateData);
+        $updated = $mediaItem->update($updateData);
+
+        \Log::info('Media update result', [
+            'media_id' => $mediaItem->id,
+            'update_success' => $updated,
+            'new_title' => $mediaItem->title,
+            'new_description' => $mediaItem->description,
+            'new_is_featured' => $mediaItem->is_featured
+        ]);
+
+        // Ricarica il media item attraverso la galleria per assicurarsi che abbiamo i dati aggiornati
+        $updatedMediaItem = $gallery->mediaItems()->find($mediaItem->id);
 
         return response()->json([
             'success' => true,
             'message' => 'Media aggiornato con successo!',
-            'item' => $mediaItem->fresh()
+            'item' => $updatedMediaItem
         ]);
     }
 
     /**
      * Delete media item
      */
-    public function deleteMediaItem(MediaGallery $gallery, MediaItem $mediaItem)
+    public function deleteMediaItem(MediaGallery $gallery, $mediaItemId)
     {
-        // Verifica che il media item appartenga alla galleria
-        if ($mediaItem->gallery_id !== $gallery->id) {
+        // Trova il media item attraverso la relazione della galleria per bypassare il global scope
+        $mediaItem = $gallery->mediaItems()->find($mediaItemId);
+
+        if (!$mediaItem) {
             abort(404);
         }
 
