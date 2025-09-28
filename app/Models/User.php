@@ -21,12 +21,12 @@ class User extends Authenticatable
      */
     protected static function booted(): void
     {
-        // Global scope per multi-tenant security (esclusi super_admin)
-        static::addGlobalScope('school', function (Builder $builder) {
-            if (auth()->check() && auth()->user()->school_id && auth()->user()->role !== self::ROLE_SUPER_ADMIN) {
-                $builder->where('school_id', auth()->user()->school_id);
-            }
-        });
+        // Global scope per multi-tenant security - TEMPORANEAMENTE DISABILITATO
+        // static::addGlobalScope('school', function (Builder $builder) {
+        //     if (auth()->check() && auth()->user()->school_id && auth()->user()->role !== self::ROLE_SUPER_ADMIN) {
+        //         $builder->where('school_id', auth()->user()->school_id);
+        //     }
+        // });
     }
 
     /**

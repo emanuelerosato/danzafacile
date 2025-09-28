@@ -18,12 +18,12 @@ class Course extends Model
      */
     protected static function booted(): void
     {
-        // Global scope per multi-tenant security
-        static::addGlobalScope('school', function (Builder $builder) {
-            if (auth()->check() && auth()->user()->school_id) {
-                $builder->where('school_id', auth()->user()->school_id);
-            }
-        });
+        // Global scope per multi-tenant security - TEMPORANEAMENTE DISABILITATO
+        // static::addGlobalScope('school', function (Builder $builder) {
+        //     if (auth()->check() && auth()->user()->school_id) {
+        //         $builder->where('school_id', auth()->user()->school_id);
+        //     }
+        // });
     }
 
     /**
