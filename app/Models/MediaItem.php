@@ -33,6 +33,18 @@ class MediaItem extends Model
                 });
             }
         });
+
+        // Invalida cache quando viene creato un nuovo media item
+        static::created(function ($mediaItem) {
+            $cacheKey = "gallery_{$mediaItem->gallery_id}_max_order";
+            cache()->forget($cacheKey);
+        });
+
+        // Invalida cache quando viene eliminato un media item
+        static::deleted(function ($mediaItem) {
+            $cacheKey = "gallery_{$mediaItem->gallery_id}_max_order";
+            cache()->forget($cacheKey);
+        });
     }
 
     /**
@@ -324,7 +336,10 @@ class MediaItem extends Model
      */
     public static function getNextOrderForGallery(int $galleryId): int
     {
-        $maxOrder = static::where('gallery_id', $galleryId)->max('order');
+        $cacheKey = "gallery_{$galleryId}_max_order";
+        $maxOrder = cache()->remember($cacheKey, 300, function () use ($galleryId) {
+            return static::where('gallery_id', $galleryId)->max('order');
+        });
         return ($maxOrder ?? 0) + 1;
     }
 
@@ -355,7 +370,13 @@ class MediaItem extends Model
         }
 
         $this->order = $newOrder;
-        return $this->save();
+        $result = $this->save();
+
+        // Invalida la cache dell'ordine massimo per questa galleria
+        $cacheKey = "gallery_{$this->gallery_id}_max_order";
+        cache()->forget($cacheKey);
+
+        return $result;
     }
 
     /**
@@ -473,13 +494,15 @@ class MediaItem extends Model
      */
     public static function getAvailableTypes(): array
     {
-        return [
-            self::TYPE_FILE => 'File Caricato',
-            self::TYPE_EXTERNAL_LINK => 'Link Esterno',
-            self::TYPE_YOUTUBE => 'Video YouTube',
-            self::TYPE_VIMEO => 'Video Vimeo',
-            self::TYPE_INSTAGRAM => 'Post Instagram',
-        ];
+        return cache()->remember('media_item_types', 3600, function () {
+            return [
+                self::TYPE_FILE => 'File Caricato',
+                self::TYPE_EXTERNAL_LINK => 'Link Esterno',
+                self::TYPE_YOUTUBE => 'Video YouTube',
+                self::TYPE_VIMEO => 'Video Vimeo',
+                self::TYPE_INSTAGRAM => 'Post Instagram',
+            ];
+        });
     }
 
     /**

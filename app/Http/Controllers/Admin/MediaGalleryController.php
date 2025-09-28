@@ -42,9 +42,7 @@ class MediaGalleryController extends AdminBaseController
     {
         $this->setupContext();
 
-        $galleries = MediaGallery::with(['course:id,name', 'createdBy:id,name', 'mediaItems'])
-                                ->withCount('mediaItems')
-                                ->latest()
+        $galleries = MediaGallery::forDashboard()
                                 ->paginate(12);
 
         return view('admin.galleries.index', compact('galleries'));
@@ -110,10 +108,17 @@ class MediaGalleryController extends AdminBaseController
      */
     public function show(MediaGallery $gallery)
     {
-        $gallery->load(['course:id,name', 'createdBy:id,name', 'coverImage']);
+        $this->setupContext();
+
+        $gallery->load([
+            'course:id,name',
+            'createdBy:id,name',
+            'coverImage:id,gallery_id,file_path,thumbnail_url,type,title'
+        ]);
 
         $mediaItems = $gallery->mediaItems()
                              ->with('user:id,name')
+                             ->select('id', 'gallery_id', 'user_id', 'type', 'file_path', 'thumbnail_url', 'external_url', 'title', 'description', 'order', 'is_featured', 'created_at')
                              ->ordered()
                              ->paginate(20);
 
@@ -125,8 +130,10 @@ class MediaGalleryController extends AdminBaseController
      */
     public function edit(MediaGallery $gallery)
     {
+        $this->setupContext();
+
         $courses = Course::select('id', 'name')
-                        ->bySchool(Auth::user()->school_id)
+                        ->bySchool($this->school->id)
                         ->active()
                         ->orderBy('name')
                         ->get();

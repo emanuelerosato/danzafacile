@@ -237,6 +237,49 @@ class MediaGallery extends Model
         return $query->where('created_by', $userId);
     }
 
+    /**
+     * Scope ottimizzato per la dashboard admin con eager loading
+     */
+    public function scopeForDashboard(Builder $query): Builder
+    {
+        return $query->with([
+            'course:id,name',
+            'createdBy:id,name',
+            'coverImage:id,gallery_id,file_path,thumbnail_url,type'
+        ])
+        ->withCount('mediaItems')
+        ->latest('created_at');
+    }
+
+    /**
+     * Scope ottimizzato per gallerie pubbliche
+     */
+    public function scopePublicWithPreview(Builder $query): Builder
+    {
+        return $query->where('is_public', true)
+                    ->with([
+                        'coverImage:id,gallery_id,file_path,thumbnail_url,type',
+                        'mediaItems' => function($q) {
+                            $q->select('id', 'gallery_id', 'type', 'file_path', 'thumbnail_url', 'title')
+                              ->ordered()
+                              ->limit(4);
+                        }
+                    ])
+                    ->withCount('mediaItems');
+    }
+
+    /**
+     * Scope ottimizzato per ricerca veloce
+     */
+    public function scopeSearchOptimized(Builder $query, string $searchTerm): Builder
+    {
+        return $query->select('id', 'title', 'description', 'type', 'created_at', 'cover_image_id')
+                    ->where(function($q) use ($searchTerm) {
+                        $q->where('title', 'LIKE', "%{$searchTerm}%")
+                          ->orWhere('description', 'LIKE', "%{$searchTerm}%");
+                    });
+    }
+
     // MUTATORS
 
     /**
@@ -314,14 +357,16 @@ class MediaGallery extends Model
      */
     public static function getAvailableTypes(): array
     {
-        return [
-            self::TYPE_PHOTOS => 'Foto',
-            self::TYPE_VIDEOS => 'Video',
-            self::TYPE_MIXED => 'Misto',
-            self::TYPE_PERFORMANCES => 'Spettacoli',
-            self::TYPE_LESSONS => 'Lezioni',
-            self::TYPE_EVENTS => 'Eventi',
-        ];
+        return cache()->remember('media_gallery_types', 3600, function () {
+            return [
+                self::TYPE_PHOTOS => 'Foto',
+                self::TYPE_VIDEOS => 'Video',
+                self::TYPE_MIXED => 'Misto',
+                self::TYPE_PERFORMANCES => 'Spettacoli',
+                self::TYPE_LESSONS => 'Lezioni',
+                self::TYPE_EVENTS => 'Eventi',
+            ];
+        });
     }
 
     /**
