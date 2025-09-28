@@ -19,7 +19,7 @@ class StoreDocumentRequest extends FormRequest
      */
     public function rules(): array
     {
-        $categories = array_keys(\App\Models\Document::getCategories());
+        $categories = array_keys(\App\Models\Document::getAvailableCategories());
 
         return [
             'user_id' => 'sometimes|exists:users,id', // Sometimes because auto-filled from auth

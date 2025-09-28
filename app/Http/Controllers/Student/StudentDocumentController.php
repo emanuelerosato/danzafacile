@@ -32,8 +32,8 @@ class StudentDocumentController extends Controller
         }
 
         $documents = $query->paginate(10);
-        $categories = Document::getCategories();
-        $statuses = Document::getStatuses();
+        $categories = Document::getAvailableCategories();
+        $statuses = Document::getAvailableStatuses();
 
         return view('student.documents.index', compact('documents', 'categories', 'statuses'));
     }
@@ -43,7 +43,7 @@ class StudentDocumentController extends Controller
      */
     public function create()
     {
-        $categories = Document::getCategories();
+        $categories = Document::getAvailableCategories();
         return view('student.documents.create', compact('categories'));
     }
 
