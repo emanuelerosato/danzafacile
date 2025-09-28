@@ -281,7 +281,7 @@ function documentUpload() {
             const file = event.target.files[0];
             if (file) {
                 this.selectedFile = file;
-                this.autoFillTitle(file.name);
+                this.autoFillName(file.name);
             }
         },
 
@@ -293,7 +293,7 @@ function documentUpload() {
             if (files.length > 0) {
                 const file = files[0];
                 this.selectedFile = file;
-                this.autoFillTitle(file.name);
+                this.autoFillName(file.name);
 
                 // Set the file input
                 const fileInput = document.getElementById('file');
@@ -309,15 +309,15 @@ function documentUpload() {
             fileInput.value = '';
         },
 
-        autoFillTitle(filename) {
-            const titleInput = document.getElementById('title');
-            if (!titleInput.value) {
+        autoFillName(filename) {
+            const nameInput = document.getElementById('name');
+            if (!nameInput.value) {
                 // Remove extension and replace underscores/hyphens with spaces
-                const title = filename
+                const name = filename
                     .replace(/\.[^/.]+$/, '')
                     .replace(/[_-]/g, ' ')
                     .replace(/\b\w/g, l => l.toUpperCase());
-                titleInput.value = title;
+                nameInput.value = name;
             }
         },
 
