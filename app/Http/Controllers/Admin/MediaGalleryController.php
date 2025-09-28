@@ -31,7 +31,11 @@ class MediaGalleryController extends Controller
      */
     public function create()
     {
-        $courses = Course::select('id', 'name')->get();
+        $courses = Course::select('id', 'name')
+                        ->bySchool(Auth::user()->school_id)
+                        ->active()
+                        ->orderBy('name')
+                        ->get();
         $galleryTypes = MediaGallery::getAvailableTypes();
 
         return view('admin.galleries.create', compact('courses', 'galleryTypes'));
@@ -93,7 +97,11 @@ class MediaGalleryController extends Controller
      */
     public function edit(MediaGallery $gallery)
     {
-        $courses = Course::select('id', 'name')->get();
+        $courses = Course::select('id', 'name')
+                        ->bySchool(Auth::user()->school_id)
+                        ->active()
+                        ->orderBy('name')
+                        ->get();
         $galleryTypes = MediaGallery::getAvailableTypes();
 
         return view('admin.galleries.edit', compact('gallery', 'courses', 'galleryTypes'));
