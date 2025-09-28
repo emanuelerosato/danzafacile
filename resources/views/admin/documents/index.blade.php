@@ -25,90 +25,69 @@
 
 
 
-<div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <div class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-6">
-                <div>
-                    <h1 class="text-xl md:text-2xl font-bold text-gray-900">Gestione Documenti</h1>
-                    <p class="text-sm text-gray-600 mt-1">Gestisci e approva i documenti della scuola</p>
-                </div>
-                <div class="flex space-x-3">
-                    <button onclick="window.location.href='{{ route('admin.documents.create') }}'"
-                            class="inline-flex items-center px-4 py-2 bg-rose-600 text-white text-sm font-medium rounded-lg hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-colors duration-200">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                        Carica Documento
-                    </button>
-                </div>
+<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-gray-900">Gestione Documenti</h1>
+                <p class="text-gray-600">Tutti i documenti della tua scuola</p>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
+                <a href="{{ route('admin.documents.create') }}"
+                   class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    Carica Documento
+                </a>
             </div>
         </div>
-    </div>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Statistics Cards -->
+        <!-- Key Statistics -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Totale Documenti</p>
-                        <p class="text-xl md:text-2xl font-bold text-gray-900">{{ $statistics['total'] }}</p>
-                    </div>
-                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
+            <x-stats-card
+                title="Totale Documenti"
+                :value="number_format($statistics['total'] ?? 0)"
+                :subtitle="($statistics['approved'] ?? 0) . ' approvati'"
+                icon="document"
+                color="blue"
+                :change="$statistics['pending'] ?? 0"
+                changeType="increase"
+            />
 
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">In Attesa</p>
-                        <p class="text-xl md:text-2xl font-bold text-yellow-600">{{ $statistics['pending'] }}</p>
-                    </div>
-                    <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
+            <x-stats-card
+                title="In Attesa"
+                :value="number_format($statistics['pending'] ?? 0)"
+                :subtitle="'Da approvare'"
+                icon="clock"
+                color="yellow"
+                :change="5"
+                changeType="increase"
+            />
 
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Approvati</p>
-                        <p class="text-xl md:text-2xl font-bold text-green-600">{{ $statistics['approved'] }}</p>
-                    </div>
-                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
+            <x-stats-card
+                title="Approvati"
+                :value="number_format($statistics['approved'] ?? 0)"
+                :subtitle="'Attualmente approvati'"
+                icon="check"
+                color="green"
+                :change="7"
+                changeType="increase"
+            />
 
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Spazio Occupato</p>
-                        <p class="text-xl md:text-2xl font-bold text-purple-600">{{ $statistics['total_size'] }}</p>
-                    </div>
-                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path>
-                        </svg>
-                    </div>
-                </div>
-            </div>
+            <x-stats-card
+                title="Spazio Occupato"
+                :value="$statistics['total_size'] ?? '0 B'"
+                :subtitle="'Storage utilizzato'"
+                icon="folder"
+                color="purple"
+                :change="12"
+                changeType="increase"
+            />
         </div>
 
         <!-- Filters and Search -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6 mb-6">
             <form method="GET" action="{{ route('admin.documents.index') }}"
                   x-data="documentsFilters()"
                   x-init="initFilters()"
@@ -173,7 +152,7 @@
         </div>
 
         <!-- Documents Table -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-medium text-gray-900">Documenti</h3>

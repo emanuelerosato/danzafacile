@@ -1,11 +1,10 @@
 <x-app-layout>
 
 
-<div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <div class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-6">
+<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-6">
                 <div>
                     <nav class="flex" aria-label="Breadcrumb">
                         <ol class="inline-flex items-center space-x-1 md:space-x-3">
@@ -40,11 +39,7 @@
                     <h1 class="text-xl md:text-2xl font-bold text-gray-900 mt-1">Modifica Documento</h1>
                     <p class="text-sm text-gray-600 mt-1">Aggiorna le informazioni del documento</p>
                 </div>
-            </div>
         </div>
-    </div>
-
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <form action="{{ route('admin.documents.update', $document) }}" method="POST" enctype="multipart/form-data"
               x-data="documentEdit()"
               x-init="initEdit()"
@@ -53,7 +48,7 @@
             @method('PUT')
 
             <!-- Main Card -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
                 <!-- Card Header -->
                 <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
                     <h2 class="text-lg font-medium text-gray-900">Informazioni Documento</h2>
