@@ -427,8 +427,16 @@ document.getElementById('linkForm').addEventListener('submit', function(e) {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('Response data:', data);
         if (data.success) {
             closeLinkModal();
             location.reload(); // Simple reload for now
@@ -437,8 +445,8 @@ document.getElementById('linkForm').addEventListener('submit', function(e) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert('Errore durante l\'aggiunta del link');
+        console.error('Full error:', error);
+        alert('Errore durante l\'aggiunta del link: ' + error.message);
     })
     .finally(() => {
         submitBtn.innerHTML = originalText;
