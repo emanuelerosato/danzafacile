@@ -94,53 +94,31 @@ class AdminDocumentController extends AdminBaseController
      */
     public function store(StoreDocumentRequest $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'category' => 'required|in:general,medical,contract,identification,other',
-            'file' => 'required|file|max:10240|mimes:pdf,jpg,jpeg,png,gif,doc,docx,txt',
-            'user_id' => [
-                'nullable',
-                'exists:users,id',
-                function ($attribute, $value, $fail) {
-                    if ($value) {
-                        $user = \App\Models\User::find($value);
-                        if (!$user || $user->school_id !== auth()->user()->school_id || $user->role !== 'user') {
-                            $fail('Lo studente selezionato non è valido per la tua scuola.');
-                        }
-                    }
-                }
-            ],
-            'is_public' => 'boolean',
-            'requires_approval' => 'boolean',
-            'expires_at' => 'nullable|date|after:now'
-        ]);
+        // FormRequest già valida name, category, file - non serve validazione aggiuntiva
 
         try {
             $file = $request->file('file');
-            $originalName = $file->getClientOriginalName();
+            $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $extension = $file->getClientOriginalExtension();
-            $storedName = Str::uuid() . '.' . $extension;
 
-            // Salva il file nella directory privata per documenti
-            $filePath = $file->storeAs('documents', $storedName, 'private');
+            // Secure filename generation (consistent with StudentDocumentController)
+            $safeName = Str::slug($request->name) . '-' . time() . '-' . Str::random(8);
+            $filename = $safeName . '.' . $extension;
+
+            // Admin documents go to school folder
+            $schoolId = auth()->user()->school_id;
+            $filePath = $file->storeAs("documents/{$schoolId}/admin", $filename, 'private');
 
             $document = Document::create([
-                'school_id' => auth()->user()->school_id,
-                'user_id' => $request->user_id, // Associate with student if selected
-                'uploaded_by' => auth()->id(),
-                'title' => $request->title,
-                'description' => $request->description,
-                'original_filename' => $originalName,
-                'stored_filename' => $storedName,
+                'school_id' => $schoolId,
+                'user_id' => $request->user_id ?: auth()->id(), // Admin or selected student
+                'name' => $request->name,
                 'file_path' => $filePath,
-                'mime_type' => $file->getMimeType(),
+                'file_type' => $extension,
                 'file_size' => $file->getSize(),
                 'category' => $request->category,
-                'is_public' => $request->boolean('is_public'),
-                'requires_approval' => $request->boolean('requires_approval', true),
-                'expires_at' => $request->expires_at ? now()->parse($request->expires_at) : null,
-                'status' => $request->boolean('requires_approval', true) ? 'pending' : 'approved'
+                'status' => 'approved', // Admin uploads are auto-approved
+                'uploaded_at' => now(),
             ]);
 
             // Se non richiede approvazione, approvalo automaticamente

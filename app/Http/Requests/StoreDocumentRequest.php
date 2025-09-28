@@ -22,7 +22,19 @@ class StoreDocumentRequest extends FormRequest
         $categories = array_keys(\App\Models\Document::getAvailableCategories());
 
         return [
-            'user_id' => 'sometimes|exists:users,id', // Sometimes because auto-filled from auth
+            'user_id' => [
+                'sometimes',
+                'exists:users,id',
+                // Additional validation for admin context
+                function ($attribute, $value, $fail) {
+                    if ($value && auth()->user()?->isAdmin()) {
+                        $user = \App\Models\User::find($value);
+                        if (!$user || $user->school_id !== auth()->user()->school_id || $user->role !== 'user') {
+                            $fail('Lo studente selezionato non è valido per la tua scuola.');
+                        }
+                    }
+                },
+            ],
             'name' => 'required|string|max:255',
             'category' => 'required|in:' . implode(',', $categories),
             'file' => [
