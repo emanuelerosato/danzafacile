@@ -34,7 +34,7 @@ use App\Http\Controllers\Student\StudentCourseController;
 use App\Http\Controllers\Student\TicketController;
 
 // Controllers Shared
-use App\Http\Controllers\Shared\DocumentController;
+use App\Http\Controllers\Student\StudentDocumentController;
 use App\Http\Controllers\Shared\MediaItemController;
 
 // Home page
@@ -331,11 +331,11 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // Documents management
-    Route::resource('documents', DocumentController::class);
-    Route::post('documents/{document}/approve', [DocumentController::class, 'approve'])->name('documents.approve');
-    Route::post('documents/{document}/reject', [DocumentController::class, 'reject'])->name('documents.reject');
-    Route::get('documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+    // Documents management (Students only)
+    Route::prefix('student')->name('student.')->group(function () {
+        Route::resource('documents', StudentDocumentController::class);
+        Route::get('documents/{document}/download', [StudentDocumentController::class, 'download'])->name('documents.download');
+    });
     
     // Media management
     Route::resource('media', MediaItemController::class);

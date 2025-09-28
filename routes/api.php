@@ -23,7 +23,7 @@ use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Student\StudentDashboardController;
 use App\Http\Controllers\Student\StudentCourseController as WebStudentCourseController;
 use App\Http\Controllers\Student\ProfileController;
-use App\Http\Controllers\Shared\DocumentController;
+// use App\Http\Controllers\Shared\DocumentController; // Removed - controller consolidated
 use App\Http\Controllers\Shared\MediaItemController;
 
 // Public API routes
@@ -158,7 +158,9 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
 
     // SHARED API ROUTES
     
-    // Documents API (access controlled within controller)
+    // Documents API - DISABLED (controller consolidated)
+    // TODO: Re-implement API routes using role-specific controllers if needed
+    /*
     Route::apiResource('documents', DocumentController::class)->names([
         'index' => 'api.documents.index',
         'store' => 'api.documents.store',
@@ -169,6 +171,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
     Route::post('documents/{document}/approve', [DocumentController::class, 'approve'])->name('api.documents.approve');
     Route::post('documents/{document}/reject', [DocumentController::class, 'reject'])->name('api.documents.reject');
     Route::post('documents/bulk-action', [DocumentController::class, 'bulkAction'])->name('api.documents.bulk-action');
+    */
 
     // Media API (access controlled within controller)
     Route::apiResource('media', MediaItemController::class)->names([
