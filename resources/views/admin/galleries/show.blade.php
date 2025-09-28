@@ -543,3 +543,5 @@ document.addEventListener('keydown', function(e) {
 }
 </style>
 @endpush
+
+</x-app-layout>

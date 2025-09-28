@@ -229,3 +229,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
+
+</x-app-layout>

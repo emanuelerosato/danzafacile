@@ -370,3 +370,5 @@ document.addEventListener('keydown', function(e) {
 });
 </script>
 @endpush
+
+</x-app-layout>
