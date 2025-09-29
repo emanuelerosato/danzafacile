@@ -1,3 +1,5 @@
+@vite('resources/js/admin/settings/settings-manager.js')
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -22,26 +24,40 @@
         <li class="text-gray-900 font-medium">Impostazioni</li>
     </x-slot>
 
-    <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
+    <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8" x-data="settingsManager()">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="space-y-6">
 
                 @if (session('success'))
-                    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    <div x-show="showSuccessAlert"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 transform scale-95"
+                         x-transition:enter-end="opacity-100 transform scale-100"
+                         x-transition:leave="transition ease-in duration-200"
+                         x-transition:leave-start="opacity-100 transform scale-100"
+                         x-transition:leave-end="opacity-0 transform scale-95"
+                         class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm font-medium">{{ session('success') }}</p>
+                                </div>
+                            </div>
+                            <button @click="dismissAlert()" type="button" class="ml-4 flex-shrink-0 inline-flex text-green-500 hover:text-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 rounded-lg p-1.5 transition-colors duration-200">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                                 </svg>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm font-medium">{{ session('success') }}</p>
-                            </div>
+                            </button>
                         </div>
                     </div>
                 @endif
 
-                <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6">
+                <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6" @submit="handleSubmit()">
                     @csrf
 
                     <!-- Informazioni Generali -->
@@ -195,7 +211,8 @@
                                     <input type="checkbox" name="paypal_enabled" id="paypal_enabled" value="1"
                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                            {{ old('paypal_enabled', $settings['paypal_enabled'] ?? false) ? 'checked' : '' }}
-                                           onchange="togglePayPalSettings(this.checked)">
+                                           @change="togglePayPalSettings()"
+                                           x-model="paypalEnabled">
                                 </div>
                                 <div class="ml-3 text-sm">
                                     <label for="paypal_enabled" class="font-medium text-gray-700">
@@ -205,7 +222,14 @@
                                 </div>
                             </div>
 
-                            <div id="paypal_settings" class="space-y-6" style="display: {{ old('paypal_enabled', $settings['paypal_enabled'] ?? false) ? 'block' : 'none' }}">
+                            <div x-show="showPayPalSettings"
+                                 x-transition:enter="transition ease-out duration-300"
+                                 x-transition:enter-start="opacity-0 transform -translate-y-2"
+                                 x-transition:enter-end="opacity-100 transform translate-y-0"
+                                 x-transition:leave="transition ease-in duration-200"
+                                 x-transition:leave-start="opacity-100 transform translate-y-0"
+                                 x-transition:leave-end="opacity-0 transform -translate-y-2"
+                                 class="space-y-6">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label for="paypal_mode" class="block text-sm font-medium text-gray-700 mb-2">
@@ -464,11 +488,16 @@
                             </a>
 
                             <button type="submit"
-                                    class="inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 shadow-sm transition-all duration-200 transform hover:scale-105">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    :disabled="isSubmitting"
+                                    class="inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 shadow-sm transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                                <svg x-show="!isSubmitting" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                Salva Impostazioni
+                                <svg x-show="isSubmitting" class="w-5 h-5 mr-2 animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span x-text="isSubmitting ? 'Salvataggio...' : 'Salva Impostazioni'"></span>
                             </button>
                         </div>
                     </div>
@@ -477,32 +506,4 @@
             </div>
         </div>
     </div>
-
-    <script>
-        function togglePayPalSettings(isEnabled) {
-            const settingsContainer = document.getElementById('paypal_settings');
-            if (settingsContainer) {
-                settingsContainer.style.display = isEnabled ? 'block' : 'none';
-
-                // Animazione smooth per migliore UX
-                if (isEnabled) {
-                    settingsContainer.style.opacity = '0';
-                    settingsContainer.style.transform = 'translateY(-10px)';
-                    setTimeout(() => {
-                        settingsContainer.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                        settingsContainer.style.opacity = '1';
-                        settingsContainer.style.transform = 'translateY(0)';
-                    }, 10);
-                }
-            }
-        }
-
-        // Inizializza al caricamento pagina
-        document.addEventListener('DOMContentLoaded', function() {
-            const checkbox = document.getElementById('paypal_enabled');
-            if (checkbox) {
-                togglePayPalSettings(checkbox.checked);
-            }
-        });
-    </script>
 </x-app-layout>
