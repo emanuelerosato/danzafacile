@@ -1,5 +1,5 @@
-{{-- Temporaneamente disabilitato per debug --}}
-{{-- @vite('resources/js/admin/payments/payment-manager.js') --}}
+{{-- Usa la versione semplificata del PaymentManager --}}
+@vite('resources/js/admin/payments/payment-manager-simple.js')
 
 <x-app-layout>
     <x-slot name="header">
@@ -27,24 +27,29 @@
 
 
 
-<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8" x-data="{ selectedPayments: [], isLoading: false }">
+<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8" x-data="paymentManager()">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-end mb-6">
         <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
-            <button onclick="alert('Funzione azioni multiple temporaneamente disabilitata')"
+            <button @click="openBulkModal()"
                     class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                 </svg>
                 Azioni Multiple
             </button>
-            <a href="{{ route('admin.payments.export') }}"
-                    class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button @click="exportPayments()"
+                    :disabled="isLoading"
+                    class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" x-show="!isLoading">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
-                Esporta
-            </a>
+                <svg class="w-4 h-4 mr-2 animate-spin" fill="none" viewBox="0 0 24 24" x-show="isLoading">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span x-text="isLoading ? 'Esportando...' : 'Esporta'"></span>
+            </button>
             <a href="{{ route('admin.payments.create') }}"
                class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-all duration-200">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -379,7 +384,7 @@
                                             </a>
                                             @endif
                                             @if($payment->canBeRefunded())
-                                            <a href="#" onclick="processRefund({{ $payment->id }})" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-all duration-200">
+                                            <a href="#" @click.prevent="openRefundModal({{ $payment->id }})" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-all duration-200">
                                                 <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
                                                 </svg>
@@ -441,6 +446,173 @@
     </div>
 </div>
 
-{{-- Temporaneamente disabilitato per debug --}}
-{{-- @include('admin.payments.modals.refund') --}}
+{{-- Tutti i modali all'interno del componente Alpine.js principale --}}
+<!-- Modal Azioni Multiple -->
+<div x-show="showBulkModal"
+     x-cloak
+     class="fixed inset-0 z-50 overflow-y-auto"
+     x-transition:enter="ease-out duration-300"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="ease-in duration-200"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0">
+
+    <div class="fixed inset-0 bg-black/50" @click="closeBulkModal()"></div>
+
+    <div class="flex min-h-full items-center justify-center p-4">
+        <div class="relative w-full max-w-md transform overflow-hidden rounded-2xl bg-white shadow-2xl transition-all"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100"
+             x-transition:leave-end="opacity-0 scale-95">
+
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-900">
+                    Azioni Multiple
+                </h3>
+                <p class="text-sm text-gray-600 mt-1">
+                    <span x-text="selectedCount"></span> pagamenti selezionati
+                </p>
+            </div>
+
+            <div class="px-6 py-4 space-y-3">
+                <button @click="performBulkAction('mark_completed')"
+                        :disabled="isLoading"
+                        class="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:opacity-50">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    Marca come Completati
+                </button>
+
+                <button @click="performBulkAction('mark_pending')"
+                        :disabled="isLoading"
+                        class="w-full flex items-center justify-center px-4 py-2 bg-yellow-600 text-white text-sm font-medium rounded-lg hover:bg-yellow-700 disabled:opacity-50">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Marca come In Attesa
+                </button>
+
+                <button @click="performBulkAction('send_receipts')"
+                        :disabled="isLoading"
+                        class="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    Invia Ricevute
+                </button>
+
+                <div class="border-t border-gray-200 pt-3">
+                    <button @click="performBulkAction('delete')"
+                            :disabled="isLoading"
+                            class="w-full flex items-center justify-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                        Elimina Selezionati
+                    </button>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+                <button @click="closeBulkModal()"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
+                    Annulla
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Include Refund Modal --}}
+@include('admin.payments.modals.refund')
+
+<script>
+// Funzioni JavaScript per altre azioni
+function sendReceipt(paymentId) {
+    console.log('Sending receipt for payment:', paymentId);
+    // Implementare logica per inviare ricevuta
+}
+
+function deletePayment(paymentId) {
+    if (confirm('Sei sicuro di voler eliminare questo pagamento?')) {
+        console.log('Deleting payment:', paymentId);
+        // Implementare logica per eliminare pagamento
+    }
+}
+
+function markCompleted(paymentId) {
+    if (confirm('Sei sicuro di voler marcare questo pagamento come completato?')) {
+        fetch(`/admin/payments/${paymentId}/mark-completed`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Errore: ' + (data.message || 'Operazione fallita'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Errore durante l\'operazione');
+        });
+    }
+}
+
+function deletePayment(paymentId) {
+    if (confirm('Sei sicuro di voler eliminare questo pagamento? Questa azione non può essere annullata.')) {
+        fetch(`/admin/payments/${paymentId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Errore: ' + (data.message || 'Operazione fallita'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Errore durante l\'operazione');
+        });
+    }
+}
+
+function sendReceipt(paymentId) {
+    fetch(`/admin/payments/${paymentId}/send-receipt`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Ricevuta inviata con successo!');
+        } else {
+            alert('Errore: ' + (data.message || 'Invio fallito'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Errore durante l\'invio');
+    });
+}
+</script>
 </x-app-layout>

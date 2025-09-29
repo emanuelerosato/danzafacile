@@ -1,8 +1,5 @@
 <!-- Refund Modal - Tailwind Version -->
-<div x-data="{ open: false }"
-     x-on:open-modal="open = true"
-     x-on:close-modal="open = false"
-     x-show="open" x-cloak
+<div x-show="showRefundModal" x-cloak
      id="refundModal"
      role="dialog"
      aria-labelledby="refund-modal-title"
@@ -16,7 +13,7 @@
      x-transition:leave-end="opacity-0">
 
     <!-- Background overlay -->
-    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="open = false"></div>
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="closeRefundModal()"></div>
 
     <!-- Modal dialog -->
     <div class="flex min-h-full items-center justify-center p-4">
@@ -37,7 +34,7 @@
                         </svg>
                         Elabora Rimborso
                     </h3>
-                    <button @click="open = false" type="button"
+                    <button @click="closeRefundModal()" type="button"
                             aria-label="Chiudi modal"
                             class="rounded-lg p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100/50 transition-colors duration-200">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -87,7 +84,7 @@
 
                 <!-- Modal Footer -->
                 <div class="px-6 py-4 border-t border-gray-200/80 flex justify-end space-x-3">
-                    <button @click="open = false" type="button"
+                    <button @click="closeRefundModal()" type="button"
                             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200">
                         Annulla
                     </button>
