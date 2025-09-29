@@ -88,14 +88,13 @@ class MediaGalleryTestSimple extends TestCase
         ]);
 
         $mediaItem = MediaItem::create([
-            'media_gallery_id' => $gallery->id,
-            'filename' => 'test.jpg',
-            'original_filename' => 'original.jpg',
+            'gallery_id' => $gallery->id,
+            'user_id' => $this->user->id,
+            'type' => 'file',
             'file_path' => 'galleries/test.jpg',
+            'file_type' => 'image/jpeg',
             'file_size' => 1024,
-            'mime_type' => 'image/jpeg',
-            'type' => 'image',
-            'uploaded_at' => now()
+            'title' => 'Test Image'
         ]);
 
         $this->assertCount(1, $gallery->mediaItems);

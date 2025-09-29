@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Traits\HasSchoolScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
@@ -10,20 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MediaGallery extends Model
 {
-    use HasFactory;
-
-    /**
-     * The "booted" method of the model.
-     */
-    protected static function booted(): void
-    {
-        // Global scope per multi-tenant security - TEMPORANEAMENTE DISABILITATO
-        // static::addGlobalScope('school', function (Builder $builder) {
-        //     if (auth()->check() && auth()->user()->school_id) {
-        //         $builder->where('school_id', auth()->user()->school_id);
-        //     }
-        // });
-    }
+    use HasFactory, HasSchoolScope;
 
     /**
      * Enum per i tipi di galleria

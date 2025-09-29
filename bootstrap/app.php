@@ -12,9 +12,15 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Global middleware che si applica a tutte le richieste web autenticate
+        $middleware->web(append: [
+            \App\Http\Middleware\SchoolScopeMiddleware::class,
+        ]);
+
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'school.ownership' => \App\Http\Middleware\SchoolOwnership::class,
+            'school.scope' => \App\Http\Middleware\SchoolScopeMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
