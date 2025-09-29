@@ -1,5 +1,5 @@
 <!-- Sidebar -->
-<aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white/95 backdrop-blur-md border-r border-rose-100 shadow-lg lg:translate-x-0 transform transition-transform duration-300 ease-in-out"
+<aside class="fixed inset-y-0 left-0 z-50 w-64 bg-white/95 backdrop-blur-md border-r border-rose-100 shadow-lg lg:translate-x-0 transform transition-transform duration-300 ease-in-out flex flex-col"
        :class="{ '-translate-x-full': !sidebarOpen, 'translate-x-0': sidebarOpen }"
        x-show="sidebarOpen || window.innerWidth >= 1024"
        x-transition:enter="transition ease-in-out duration-300"
