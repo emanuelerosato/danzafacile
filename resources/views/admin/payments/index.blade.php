@@ -27,7 +27,7 @@
 
 
 
-<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8" x-data="paymentManager()">
+<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8" x-data="paymentManager()" x-init="console.log('Alpine paymentManager component initialized:', $data)">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-end mb-6">
         <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
@@ -449,7 +449,7 @@
 {{-- Tutti i modali all'interno del componente Alpine.js principale --}}
 <!-- Modal Azioni Multiple -->
 <div x-show="showBulkModal"
-     x-cloak
+     style="display: none"
      class="fixed inset-0 z-50 overflow-y-auto"
      x-transition:enter="ease-out duration-300"
      x-transition:enter-start="opacity-0"

@@ -1,5 +1,6 @@
 <!-- Refund Modal - Tailwind Version -->
-<div x-show="showRefundModal" x-cloak
+<div x-show="showRefundModal"
+     style="display: none"
      id="refundModal"
      role="dialog"
      aria-labelledby="refund-modal-title"
