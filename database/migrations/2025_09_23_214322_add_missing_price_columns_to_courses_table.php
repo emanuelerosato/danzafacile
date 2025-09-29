@@ -12,9 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('courses', function (Blueprint $table) {
-            $table->decimal('quarterly_price', 10, 2)->nullable()->after('monthly_price');
-            $table->decimal('yearly_price', 10, 2)->nullable()->after('quarterly_price');
-            $table->decimal('package_10_price', 10, 2)->nullable()->after('single_lesson_price');
+            $table->decimal('monthly_price', 10, 2)->nullable();
+            $table->decimal('quarterly_price', 10, 2)->nullable();
+            $table->decimal('yearly_price', 10, 2)->nullable();
+            $table->decimal('package_10_price', 10, 2)->nullable();
         });
     }
 
@@ -24,7 +25,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('courses', function (Blueprint $table) {
-            $table->dropColumn(['quarterly_price', 'yearly_price', 'package_10_price']);
+            $table->dropColumn(['monthly_price', 'quarterly_price', 'yearly_price', 'package_10_price']);
         });
     }
 };
