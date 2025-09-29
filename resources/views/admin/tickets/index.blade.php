@@ -1,4 +1,6 @@
 <x-app-layout>
+    @vite(['resources/js/admin/tickets/ticket-manager.js'])
+
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
@@ -30,7 +32,7 @@
         <li class="text-gray-900 font-medium">Ticket</li>
     </x-slot>
 
-    <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
+    <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8" x-data="ticketManager()">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="space-y-6">
 
@@ -75,14 +77,18 @@
 
                 <!-- Filters -->
                 <div class="bg-white rounded-lg shadow p-6">
-                    <div class="border-b border-gray-200 pb-4 mb-6">
+                    <div class="border-b border-gray-200 pb-4 mb-6 flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-gray-900">Filtri e Ricerca</h3>
+                        <span x-show="hasActiveFilters" x-transition class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
+                            <span x-text="activeFiltersCount"></span> filtri attivi
+                        </span>
                     </div>
-                    <form method="GET" action="{{ route('admin.tickets.index') }}" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <form id="filters-form" method="GET" action="{{ route('admin.tickets.index') }}" class="grid grid-cols-1 md:grid-cols-5 gap-4">
                         <!-- Search -->
                         <div>
                             <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Ricerca</label>
                             <input type="text" id="search" name="search"
+                                   x-model="filters.search"
                                    value="{{ request('search') }}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
                                    placeholder="Titolo, descrizione...">
@@ -92,6 +98,7 @@
                         <div>
                             <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Stato</label>
                             <select id="status" name="status"
+                                    x-model="filters.status"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
                                 <option value="">Tutti</option>
                                 @foreach($filterOptions['statuses'] as $key => $label)
@@ -106,6 +113,7 @@
                         <div>
                             <label for="priority" class="block text-sm font-medium text-gray-700 mb-1">Priorità</label>
                             <select id="priority" name="priority"
+                                    x-model="filters.priority"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
                                 <option value="">Tutte</option>
                                 @foreach($filterOptions['priorities'] as $key => $label)
@@ -120,6 +128,7 @@
                         <div>
                             <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
                             <select id="category" name="category"
+                                    x-model="filters.category"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
                                 <option value="">Tutte</option>
                                 @foreach($filterOptions['categories'] as $key => $label)
@@ -135,9 +144,11 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Periodo</label>
                             <div class="flex space-x-2">
                                 <input type="date" name="date_from"
+                                       x-model="filters.date_from"
                                        value="{{ request('date_from') }}"
                                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
                                 <input type="date" name="date_to"
+                                       x-model="filters.date_to"
                                        value="{{ request('date_to') }}"
                                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
                             </div>
@@ -156,15 +167,47 @@
                     </form>
                 </div>
 
+                <!-- Bulk Actions Toolbar -->
+                <div x-show="hasSelection"
+                     x-transition
+                     class="bg-rose-50 border border-rose-200 rounded-lg p-4 flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm font-medium text-gray-900">
+                            <span x-text="selectionCount"></span> ticket selezionati
+                        </span>
+                        <button @click="openBulkModal()"
+                                class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-xs font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 transition-all duration-200">
+                            Azioni Multiple
+                        </button>
+                        <button @click="selectedTickets = []"
+                                class="inline-flex items-center px-3 py-1.5 bg-gray-600 text-white text-xs font-medium rounded-lg hover:bg-gray-700 transition-all duration-200">
+                            Deseleziona Tutto
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Tickets Table -->
                 <div class="bg-white rounded-lg shadow">
-                    <div class="px-6 py-4 border-b border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-gray-900">Lista Ticket ({{ $tickets->total() }})</h3>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox"
+                                   @change="toggleAll()"
+                                   :checked="allSelected"
+                                   class="w-4 h-4 text-rose-600 border-gray-300 rounded focus:ring-rose-500">
+                            <span class="text-sm text-gray-600">Seleziona tutti</span>
+                        </label>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
+                                    <th class="px-4 py-3 text-left">
+                                        <input type="checkbox"
+                                               @change="toggleAll()"
+                                               :checked="allSelected"
+                                               class="w-4 h-4 text-rose-600 border-gray-300 rounded focus:ring-rose-500">
+                                    </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Studente</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Oggetto</th>
@@ -177,7 +220,13 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse($tickets as $ticket)
-                                <tr class="hover:bg-gray-50">
+                                <tr class="hover:bg-gray-50" :class="{ 'bg-rose-50': isSelected({{ $ticket->id }}) }">
+                                    <td class="px-4 py-4 whitespace-nowrap">
+                                        <input type="checkbox"
+                                               @change="toggleTicket({{ $ticket->id }})"
+                                               :checked="isSelected({{ $ticket->id }})"
+                                               class="w-4 h-4 text-rose-600 border-gray-300 rounded focus:ring-rose-500">
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                         #{{ $ticket->id }}
                                     </td>
@@ -230,7 +279,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="8" class="px-6 py-12 text-center">
+                                    <td colspan="9" class="px-6 py-12 text-center">
                                         <div class="text-gray-500">
                                             <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
@@ -248,6 +297,75 @@
                         {{ $tickets->links() }}
                     </div>
                     @endif
+                </div>
+
+                <!-- Bulk Actions Modal -->
+                <div x-show="showBulkModal"
+                     style="display: none"
+                     x-transition
+                     class="fixed inset-0 z-50 overflow-y-auto"
+                     @click.self="closeBulkModal()">
+                    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="closeBulkModal()"></div>
+
+                        <div class="relative inline-block w-full max-w-md overflow-hidden text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+                            <div class="px-6 py-4 bg-gradient-to-r from-rose-50 to-pink-50 border-b border-gray-200">
+                                <h3 class="text-lg font-semibold text-gray-900">Azioni Multiple</h3>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    <span x-text="selectionCount"></span> ticket selezionati
+                                </p>
+                            </div>
+
+                            <div class="px-6 py-4 space-y-4">
+                                <!-- Select Action -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Seleziona Azione</label>
+                                    <select x-model="bulkAction"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                                        <option value="">-- Seleziona --</option>
+                                        <option value="close">Chiudi Ticket</option>
+                                        <option value="reopen">Riapri Ticket</option>
+                                        <option value="assign">Assegna a Staff</option>
+                                    </select>
+                                </div>
+
+                                <!-- Assign To (conditional) -->
+                                <div x-show="bulkAction === 'assign'" x-transition>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Assegna a</label>
+                                    <select x-model="assignedTo"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                                        <option value="">-- Seleziona Staff --</option>
+                                        @php
+                                            $staffMembers = \App\Models\User::where('school_id', Auth::user()->school_id)
+                                                           ->where('role', 'admin')
+                                                           ->get();
+                                        @endphp
+                                        @foreach($staffMembers as $staff)
+                                            <option value="{{ $staff->id }}">{{ $staff->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="px-6 py-4 bg-gray-50 flex justify-end space-x-3">
+                                <button @click="closeBulkModal()"
+                                        type="button"
+                                        class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 transition-all duration-200">
+                                    Annulla
+                                </button>
+                                <button @click="executeBulkAction()"
+                                        :disabled="!bulkAction || isLoading"
+                                        type="button"
+                                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
+                                    <svg x-show="isLoading" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span x-text="isLoading ? 'Elaborazione...' : 'Esegui'"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>

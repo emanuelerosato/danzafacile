@@ -17,7 +17,8 @@ export default defineConfig({
                 'resources/js/admin/staff/staff-manager.js',
                 'resources/js/admin/staff-schedules.js',
                 'resources/js/admin/payments/payment-manager.js',
-                'resources/js/admin/settings/settings-manager.js'
+                'resources/js/admin/settings/settings-manager.js',
+                'resources/js/admin/tickets/ticket-manager.js'
             ],
             refresh: true,
         }),
