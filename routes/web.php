@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\EventRegistrationController;
 use App\Http\Controllers\Admin\StaffScheduleController;
 use App\Http\Controllers\Admin\AdminSettingsController;
+use App\Http\Controllers\Admin\AdminTicketController;
 
 // Controllers Student
 use App\Http\Controllers\Student\StudentDashboardController;
@@ -278,6 +279,20 @@ Route::middleware('auth')->group(function () {
         // School Settings (Receipts Configuration)
         Route::get('/settings', [AdminSettingsController::class, 'index'])->name('settings.index');
         Route::post('/settings', [AdminSettingsController::class, 'update'])->name('settings.update');
+
+        // Ticket Management
+        Route::prefix('tickets')->name('tickets.')->group(function () {
+            Route::get('/', [AdminTicketController::class, 'index'])->name('index');
+            Route::get('/stats', [AdminTicketController::class, 'getStats'])->name('stats');
+            Route::get('/recent', [AdminTicketController::class, 'getRecent'])->name('recent');
+            Route::get('/{ticket}', [AdminTicketController::class, 'show'])->name('show');
+            Route::patch('/{ticket}', [AdminTicketController::class, 'update'])->name('update');
+            Route::post('/{ticket}/reply', [AdminTicketController::class, 'reply'])->name('reply');
+            Route::patch('/{ticket}/close', [AdminTicketController::class, 'close'])->name('close');
+            Route::patch('/{ticket}/reopen', [AdminTicketController::class, 'reopen'])->name('reopen');
+            Route::patch('/{ticket}/assign', [AdminTicketController::class, 'assign'])->name('assign');
+            Route::post('/bulk-action', [AdminTicketController::class, 'bulkActions'])->name('bulk-action');
+        });
     });
     
     // STUDENT ROUTES

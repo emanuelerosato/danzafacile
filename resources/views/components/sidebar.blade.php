@@ -136,7 +136,21 @@
                     Dashboard Personalizzati
                 </x-nav-item> --}}
             </x-nav-group>
-            
+
+            <x-nav-group title="Supporto" icon="support">
+                <x-nav-item href="{{ route('admin.tickets.index') }}" :active="request()->routeIs('admin.tickets.*')" icon="chat">
+                    Ticket
+                    @php
+                        $openTickets = \App\Models\Ticket::whereHas('user', function($q) {
+                            $q->where('school_id', Auth::user()->school_id);
+                        })->whereIn('status', ['open', 'pending'])->count();
+                    @endphp
+                    @if($openTickets > 0)
+                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">{{ $openTickets }}</span>
+                    @endif
+                </x-nav-item>
+            </x-nav-group>
+
         @else
             <!-- Student Menu -->
             <x-nav-item href="{{ route('student.dashboard') }}" :active="request()->routeIs('student.dashboard')" icon="home">
