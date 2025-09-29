@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Payment;
 use App\Models\Document;
 use App\Models\Event;
+use App\Models\Ticket;
 use Illuminate\Http\Request;
 
 class AdminDashboardController extends Controller
@@ -56,6 +57,13 @@ class AdminDashboardController extends Controller
             'documents_pending' => Document::whereHas('user', function($q) use ($school) {
                 $q->where('school_id', $school->id);
             })->where('status', 'pending')->count(),
+            'tickets_open' => Ticket::whereHas('user', function($q) use ($school) {
+                $q->where('school_id', $school->id);
+            })->whereIn('status', ['open', 'pending'])->count(),
+            'tickets_urgent' => Ticket::whereHas('user', function($q) use ($school) {
+                $q->where('school_id', $school->id);
+            })->whereIn('status', ['open', 'pending'])
+              ->whereIn('priority', ['high', 'critical'])->count(),
         ];
 
         // Recent activities
@@ -96,6 +104,14 @@ class AdminDashboardController extends Controller
             ->orderBy('start_date')
             ->take(5)
             ->get();
+
+        $recentTickets = Ticket::whereHas('user', function($q) use ($school) {
+            $q->where('school_id', $school->id);
+        })
+        ->with(['user', 'assignedTo'])
+        ->latest()
+        ->take(5)
+        ->get();
 
         // Analytics data for charts
         $enrollmentTrends = CourseEnrollment::whereHas('course', function($q) use ($school) {
@@ -181,6 +197,8 @@ class AdminDashboardController extends Controller
             'pending_payments' => Payment::whereHas('user', function($q) use ($school) {
                 $q->where('school_id', $school->id);
             })->where('status', 'pending')->count(),
+            'open_tickets' => $stats['tickets_open'],
+            'urgent_tickets' => $stats['tickets_urgent'],
 
             // Dynamic change percentages
             'students_change' => abs($studentsChange),
@@ -206,6 +224,7 @@ class AdminDashboardController extends Controller
             'pendingDocuments',
             'upcomingCourses',
             'upcomingEvents',
+            'recentTickets',
             'analytics'
         ));
     }

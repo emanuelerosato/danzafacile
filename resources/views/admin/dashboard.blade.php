@@ -38,7 +38,7 @@
 
     <div class="space-y-6">
         <!-- Key Statistics -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
             <x-stats-card
                 title="Studenti Totali"
                 :value="number_format($quickStats['total_students'] ?? 0)"
@@ -77,6 +77,15 @@
                 color="rose"
                 :change="$quickStats['events_change'] ?? 0"
                 :changeType="$quickStats['events_change_type'] ?? 'neutral'"
+            />
+
+            <x-stats-card
+                title="Ticket Aperti"
+                :value="number_format($quickStats['open_tickets'] ?? 0)"
+                :subtitle="($quickStats['urgent_tickets'] ?? 0) . ' urgenti'"
+                icon="chat"
+                color="orange"
+                :change="null"
             />
         </div>
 
@@ -208,6 +217,56 @@
                         </div>
                     </div>
                 @endif
+
+                <!-- Recent Tickets Widget -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Ticket Recenti</h3>
+                        <a href="{{ route('admin.tickets.index') }}"
+                           class="text-sm font-medium text-rose-600 hover:text-rose-700">
+                            Vedi Tutti
+                        </a>
+                    </div>
+                    @if(isset($recentTickets) && $recentTickets->count() > 0)
+                        <div class="space-y-3">
+                            @foreach($recentTickets as $ticket)
+                                <a href="{{ route('admin.tickets.show', $ticket) }}"
+                                   class="block p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 truncate">
+                                                {{ $ticket->title }}
+                                            </p>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                {{ $ticket->user->name }}
+                                            </p>
+                                        </div>
+                                        <div class="ml-2 flex-shrink-0">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $ticket->status_color }}">
+                                                {{ ucfirst($ticket->status) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between mt-2">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $ticket->priority_color }}">
+                                            {{ ucfirst($ticket->priority) }}
+                                        </span>
+                                        <span class="text-xs text-gray-400">
+                                            {{ $ticket->created_at->diffForHumans() }}
+                                        </span>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-8">
+                            <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+                            </svg>
+                            <p class="mt-2 text-sm text-gray-500">Nessun ticket recente</p>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
