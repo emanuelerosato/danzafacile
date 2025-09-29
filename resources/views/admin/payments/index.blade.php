@@ -1,5 +1,5 @@
-{{-- Load the payment management system BEFORE Alpine.js initialization --}}
-@vite('resources/js/admin/payments/payment-manager.js')
+{{-- Temporaneamente disabilitato per debug --}}
+{{-- @vite('resources/js/admin/payments/payment-manager.js') --}}
 
 <x-app-layout>
     <x-slot name="header">
@@ -27,24 +27,24 @@
 
 
 
-<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8" x-data="paymentManager()">
+<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8" x-data="{ selectedPayments: [], isLoading: false }">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-end mb-6">
         <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
-            <button @click="openBulkModal()"
+            <button onclick="alert('Funzione azioni multiple temporaneamente disabilitata')"
                     class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                 </svg>
                 Azioni Multiple
             </button>
-            <button @click="exportPayments()"
+            <a href="{{ route('admin.payments.export') }}"
                     class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 Esporta
-            </button>
+            </a>
             <a href="{{ route('admin.payments.create') }}"
                class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-all duration-200">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -441,5 +441,6 @@
     </div>
 </div>
 
-@include('admin.payments.modals.refund')
+{{-- Temporaneamente disabilitato per debug --}}
+{{-- @include('admin.payments.modals.refund') --}}
 </x-app-layout>
