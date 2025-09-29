@@ -16,6 +16,14 @@ class AdminSettingsController extends Controller
     {
         $school = Auth::user()->school;
 
+        // Stats
+        $stats = [
+            'total_settings' => 20, // Numero totale impostazioni configurabili
+            'configured_settings' => $this->countConfiguredSettings($school),
+            'paypal_status' => Setting::get("school.{$school->id}.paypal.enabled", false) ? 'active' : 'inactive',
+            'receipt_configured' => !empty(Setting::get("school.{$school->id}.receipt.header_text", '')) || !empty(Setting::get("school.{$school->id}.receipt.footer_text", '')),
+        ];
+
         // Get current settings values
         $settings = [
             // Company Information
@@ -57,7 +65,35 @@ class AdminSettingsController extends Controller
             'paypal_fixed_fee' => Setting::get("school.{$school->id}.paypal.fixed_fee", '0.35'),
         ];
 
-        return view('admin.settings.index', compact('settings', 'school'));
+        return view('admin.settings.index', compact('settings', 'school', 'stats'));
+    }
+
+    /**
+     * Count configured settings
+     */
+    private function countConfiguredSettings($school)
+    {
+        $count = 0;
+        $settingsKeys = [
+            "school.{$school->id}.name",
+            "school.{$school->id}.email",
+            "school.{$school->id}.phone",
+            "school.{$school->id}.address",
+            "school.{$school->id}.vat_number",
+            "school.{$school->id}.tax_code",
+            "school.{$school->id}.receipt.header_text",
+            "school.{$school->id}.receipt.footer_text",
+            "school.{$school->id}.payment.terms",
+            "school.{$school->id}.payment.bank_details",
+        ];
+
+        foreach ($settingsKeys as $key) {
+            if (!empty(Setting::get($key, ''))) {
+                $count++;
+            }
+        }
+
+        return $count;
     }
 
     /**

@@ -57,6 +57,45 @@
                     </div>
                 @endif
 
+                <!-- Key Statistics -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <x-stats-card
+                        title="Configurazione"
+                        :value="$stats['configured_settings'] . '/' . $stats['total_settings']"
+                        :subtitle="'Impostazioni completate'"
+                        icon="cog"
+                        color="blue"
+                        :change="null"
+                    />
+
+                    <x-stats-card
+                        title="Stato PayPal"
+                        :value="$stats['paypal_status'] === 'active' ? 'Attivo' : 'Disattivo'"
+                        :subtitle="$stats['paypal_status'] === 'active' ? 'Pagamenti online abilitati' : 'Configura PayPal'"
+                        icon="credit-card"
+                        :color="$stats['paypal_status'] === 'active' ? 'green' : 'gray'"
+                        :change="null"
+                    />
+
+                    <x-stats-card
+                        title="Ricevute"
+                        :value="$stats['receipt_configured'] ? 'Configurate' : 'Da configurare'"
+                        :subtitle="'Template personalizzato'"
+                        icon="document"
+                        :color="$stats['receipt_configured'] ? 'green' : 'yellow'"
+                        :change="null"
+                    />
+
+                    <x-stats-card
+                        title="Dati Fiscali"
+                        :value="!empty($settings['school_vat_number']) || !empty($settings['school_tax_code']) ? 'Completi' : 'Incompleti'"
+                        :subtitle="'P.IVA e Cod. Fiscale'"
+                        icon="shield-check"
+                        :color="!empty($settings['school_vat_number']) || !empty($settings['school_tax_code']) ? 'green' : 'red'"
+                        :change="null"
+                    />
+                </div>
+
                 <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6" @submit="handleSubmit()">
                     @csrf
 
