@@ -1,6 +1,6 @@
-<x-app-layout>
-    @vite(['resources/js/admin/tickets/ticket-manager.js'])
+@vite('resources/js/admin/tickets/ticket-manager.js')
 
+<x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
