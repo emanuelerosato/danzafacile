@@ -173,8 +173,8 @@
             </x-nav-group>
         @endif
         
-        <!-- Common items for non-super-admin users only -->
-        @if(Auth::user()->role !== 'super_admin')
+        <!-- Common items for students only -->
+        @if(Auth::user()->role === 'user')
         <div class="border-t border-rose-100 pt-4 mt-4">
             <x-nav-item href="{{ route('student.tickets.index') }}" :active="request()->routeIs('student.tickets.*')" icon="chat">
                 Messaggi
