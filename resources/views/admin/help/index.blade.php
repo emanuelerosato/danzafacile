@@ -319,10 +319,27 @@
                                 <div>
                                     <h4 class="font-semibold text-lg text-gray-900 mb-3">⚠️ Problemi Comuni</h4>
                                     <div class="space-y-4">
-                                        @foreach($section['content']['common_issues'] as $issue)
+                                        @foreach($section['content']['common_issues'] as $category => $issueGroup)
                                         <div class="bg-orange-50 p-4 rounded-lg border-l-4 border-orange-400">
-                                            <p class="font-medium text-orange-900 mb-2">{{ $issue['problem'] }}</p>
-                                            <p class="text-orange-800">{{ $issue['solution'] }}</p>
+                                            @if(isset($issueGroup['title']))
+                                                <h5 class="font-medium text-orange-900 mb-3">{{ $issueGroup['title'] }}</h5>
+                                            @endif
+                                            @if(isset($issueGroup['issues']))
+                                                <ul class="space-y-2">
+                                                    @foreach($issueGroup['issues'] as $issue)
+                                                    <li class="flex items-start space-x-2">
+                                                        <svg class="w-4 h-4 text-orange-600 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                                        </svg>
+                                                        <span class="text-orange-800 text-sm">{{ $issue }}</span>
+                                                    </li>
+                                                    @endforeach
+                                                </ul>
+                                            @elseif(isset($issueGroup['problem']) && isset($issueGroup['solution']))
+                                                <!-- Legacy format support -->
+                                                <p class="font-medium text-orange-900 mb-2">{{ $issueGroup['problem'] }}</p>
+                                                <p class="text-orange-800">{{ $issueGroup['solution'] }}</p>
+                                            @endif
                                         </div>
                                         @endforeach
                                     </div>
