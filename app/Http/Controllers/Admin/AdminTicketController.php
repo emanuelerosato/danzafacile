@@ -103,7 +103,12 @@ class AdminTicketController extends Controller
             ],
         ];
 
-        return view('admin.tickets.index', compact('tickets', 'stats', 'filterOptions'));
+        // Staff members for bulk assign action
+        $staffMembers = User::where('school_id', $school->id)
+                           ->where('role', 'admin')
+                           ->get();
+
+        return view('admin.tickets.index', compact('tickets', 'stats', 'filterOptions', 'staffMembers'));
     }
 
     /**
