@@ -198,12 +198,12 @@
                                 </div>
                                 @endif
 
-                                <!-- Features -->
-                                @if(isset($section['content']['features']))
+                                <!-- Key Features -->
+                                @if(isset($section['content']['key_features']))
                                 <div>
-                                    <h4 class="font-semibold text-lg text-gray-900 mb-3">📋 Funzionalità Principali</h4>
+                                    <h4 class="font-semibold text-lg text-gray-900 mb-3">⭐ Funzionalità Principali</h4>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        @foreach($section['content']['features'] as $feature)
+                                        @foreach($section['content']['key_features'] as $feature)
                                         <div class="flex items-start space-x-2 bg-white p-3 rounded-lg">
                                             <svg class="w-5 h-5 text-green-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
@@ -215,36 +215,99 @@
                                 </div>
                                 @endif
 
-                                <!-- Steps -->
-                                @if(isset($section['content']['steps']))
+                                <!-- Operations (Nested Structure) -->
+                                @if(isset($section['content']['operations']))
+                                <div class="space-y-6">
+                                    @foreach($section['content']['operations'] as $opKey => $operation)
+                                    <div class="bg-white p-5 rounded-lg border border-gray-200">
+                                        <h4 class="font-semibold text-lg text-gray-900 mb-4">{{ $operation['title'] }}</h4>
+
+                                        @if(isset($operation['steps']))
+                                        <div class="space-y-3 mb-4">
+                                            @foreach($operation['steps'] as $index => $step)
+                                            <div class="flex items-start space-x-3">
+                                                <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                                                    {{ $index + 1 }}
+                                                </div>
+                                                <p class="text-gray-700 pt-1">{{ $step }}</p>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                        @endif
+
+                                        @if(isset($operation['features']))
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            @foreach($operation['features'] as $feature)
+                                            <div class="flex items-start space-x-2">
+                                                <svg class="w-4 h-4 text-green-500 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <span class="text-gray-600 text-sm">{{ $feature }}</span>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                        @endif
+
+                                        @if(isset($operation['tips']))
+                                        <div class="mt-4 bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-400">
+                                            <div class="flex items-start space-x-2">
+                                                <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                </svg>
+                                                <span class="text-yellow-800 text-sm">{{ $operation['tips'] }}</span>
+                                            </div>
+                                        </div>
+                                        @endif
+                                    </div>
+                                    @endforeach
+                                </div>
+                                @endif
+
+                                <!-- Workflow (if present) -->
+                                @if(isset($section['content']['workflow']))
                                 <div>
-                                    <h4 class="font-semibold text-lg text-gray-900 mb-3">📝 Guida Step-by-Step</h4>
+                                    <h4 class="font-semibold text-lg text-gray-900 mb-3">🔄 Workflow</h4>
                                     <div class="space-y-3">
-                                        @foreach($section['content']['steps'] as $index => $step)
+                                        @foreach($section['content']['workflow'] as $index => $step)
                                         <div class="flex items-start space-x-3 bg-white p-4 rounded-lg">
-                                            <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-rose-500 to-purple-600 text-white rounded-full flex items-center justify-center font-bold">
+                                            <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-full flex items-center justify-center font-bold">
                                                 {{ $index + 1 }}
                                             </div>
-                                            <div class="flex-1">
-                                                <p class="text-gray-700">{{ $step }}</p>
-                                            </div>
+                                            <p class="text-gray-700 pt-1">{{ $step }}</p>
                                         </div>
                                         @endforeach
                                     </div>
                                 </div>
                                 @endif
 
-                                <!-- Tips -->
-                                @if(isset($section['content']['tips']))
+                                <!-- Best Practices -->
+                                @if(isset($section['content']['best_practices']))
                                 <div>
-                                    <h4 class="font-semibold text-lg text-gray-900 mb-3">💡 Consigli Utili</h4>
+                                    <h4 class="font-semibold text-lg text-gray-900 mb-3">✅ Best Practices</h4>
                                     <div class="space-y-2">
-                                        @foreach($section['content']['tips'] as $tip)
-                                        <div class="flex items-start space-x-2 bg-yellow-50 p-3 rounded-lg border-l-4 border-yellow-400">
-                                            <svg class="w-5 h-5 text-yellow-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                        @foreach($section['content']['best_practices'] as $practice)
+                                        <div class="flex items-start space-x-2 bg-green-50 p-3 rounded-lg border-l-4 border-green-400">
+                                            <svg class="w-5 h-5 text-green-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                             </svg>
-                                            <span class="text-yellow-800">{{ $tip }}</span>
+                                            <span class="text-green-800">{{ $practice }}</span>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @endif
+
+                                <!-- Security Tips -->
+                                @if(isset($section['content']['security_tips']))
+                                <div>
+                                    <h4 class="font-semibold text-lg text-gray-900 mb-3">🔒 Sicurezza</h4>
+                                    <div class="space-y-2">
+                                        @foreach($section['content']['security_tips'] as $tip)
+                                        <div class="flex items-start space-x-2 bg-red-50 p-3 rounded-lg border-l-4 border-red-400">
+                                            <svg class="w-5 h-5 text-red-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <span class="text-red-800">{{ $tip }}</span>
                                         </div>
                                         @endforeach
                                     </div>
@@ -254,12 +317,12 @@
                                 <!-- Common Issues -->
                                 @if(isset($section['content']['common_issues']))
                                 <div>
-                                    <h4 class="font-semibold text-lg text-gray-900 mb-3">⚠️ Problemi Comuni e Soluzioni</h4>
+                                    <h4 class="font-semibold text-lg text-gray-900 mb-3">⚠️ Problemi Comuni</h4>
                                     <div class="space-y-4">
                                         @foreach($section['content']['common_issues'] as $issue)
-                                        <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-400">
-                                            <p class="font-medium text-red-800 mb-2">{{ $issue['problem'] }}</p>
-                                            <p class="text-red-700">{{ $issue['solution'] }}</p>
+                                        <div class="bg-orange-50 p-4 rounded-lg border-l-4 border-orange-400">
+                                            <p class="font-medium text-orange-900 mb-2">{{ $issue['problem'] }}</p>
+                                            <p class="text-orange-800">{{ $issue['solution'] }}</p>
                                         </div>
                                         @endforeach
                                     </div>
