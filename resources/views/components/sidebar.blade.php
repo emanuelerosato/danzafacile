@@ -151,6 +151,13 @@
                 </x-nav-item>
             </x-nav-group>
 
+            <!-- Help Section for Admin -->
+            <div class="border-t border-rose-100 pt-4 mt-4">
+                <x-nav-item href="{{ route('admin.help') }}" :active="request()->routeIs('admin.help')" icon="question-mark-circle">
+                    Aiuto
+                </x-nav-item>
+            </div>
+
         @else
             <!-- Student Menu -->
             <x-nav-item href="{{ route('student.dashboard') }}" :active="request()->routeIs('student.dashboard')" icon="home">

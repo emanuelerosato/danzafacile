@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\EventRegistrationController;
 use App\Http\Controllers\Admin\StaffScheduleController;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminTicketController;
+use App\Http\Controllers\Admin\AdminHelpController;
 
 // Controllers Student
 use App\Http\Controllers\Student\StudentDashboardController;
@@ -293,6 +294,9 @@ Route::middleware('auth')->group(function () {
             Route::patch('/{ticket}/assign', [AdminTicketController::class, 'assign'])->name('assign');
             Route::post('/bulk-action', [AdminTicketController::class, 'bulkActions'])->name('bulk-action');
         });
+
+        // Help/Guide system
+        Route::get('/help', [AdminHelpController::class, 'index'])->name('help');
     });
     
     // STUDENT ROUTES
