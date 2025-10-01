@@ -216,12 +216,63 @@ class PayPalController extends Controller
 
             Log::info('PayPal webhook received', [
                 'event_type' => $data['event_type'] ?? 'unknown',
-                'headers' => $headers,
+                'transmission_id' => $headers['paypal-transmission-id'][0] ?? 'unknown',
             ]);
 
             if (!isset($data['event_type'])) {
+                Log::warning('PayPal webhook rejected: invalid data format');
                 return response('Invalid webhook data', 400);
             }
+
+            // SECURITY: Verifica la signature del webhook
+            // Estrai school_id dal custom data del webhook per inizializzare il service corretto
+            $schoolId = $this->extractSchoolIdFromWebhook($data);
+
+            if (!$schoolId) {
+                Log::error('PayPal webhook rejected: cannot determine school_id', [
+                    'event_type' => $data['event_type']
+                ]);
+                return response('Cannot determine school', 400);
+            }
+
+            $school = School::find($schoolId);
+            if (!$school) {
+                Log::error('PayPal webhook rejected: school not found', [
+                    'school_id' => $schoolId
+                ]);
+                return response('School not found', 404);
+            }
+
+            // Inizializza PayPalService per verificare il webhook
+            try {
+                $paypalService = PayPalService::forSchool($school);
+            } catch (Exception $e) {
+                // PayPal non configurato per questa scuola, rifiuta webhook
+                Log::error('PayPal webhook rejected: PayPal not configured for school', [
+                    'school_id' => $schoolId,
+                    'error' => $e->getMessage()
+                ]);
+                return response('PayPal not configured', 400);
+            }
+
+            // CRITICAL SECURITY CHECK: Verifica signature
+            $isValid = $paypalService->verifyWebhook($headers, $body);
+
+            if (!$isValid) {
+                Log::critical('PayPal webhook SIGNATURE VERIFICATION FAILED - possible attack!', [
+                    'school_id' => $schoolId,
+                    'event_type' => $data['event_type'],
+                    'transmission_id' => $headers['paypal-transmission-id'][0] ?? 'unknown',
+                    'ip' => $request->ip()
+                ]);
+                return response('Signature verification failed', 403);
+            }
+
+            // Signature verificata! Procedi con l'elaborazione
+            Log::info('PayPal webhook signature verified - processing event', [
+                'school_id' => $schoolId,
+                'event_type' => $data['event_type']
+            ]);
 
             // Gestisce diversi tipi di eventi PayPal
             switch ($data['event_type']) {
@@ -245,11 +296,49 @@ class PayPalController extends Controller
         } catch (Exception $e) {
             Log::error('Error processing PayPal webhook:', [
                 'error' => $e->getMessage(),
-                'request_body' => $request->getContent(),
+                'trace' => $e->getTraceAsString(),
+                'request_body' => substr($request->getContent(), 0, 500), // Truncate for log
             ]);
 
             return response('Webhook processing error', 500);
         }
+    }
+
+    /**
+     * Estrae school_id dai dati del webhook
+     */
+    private function extractSchoolIdFromWebhook(array $data): ?int
+    {
+        // Prova a estrarre da custom data
+        if (isset($data['resource']['parent_payment'])) {
+            // Ottieni dettagli del pagamento per estrarre custom data
+            // In alternativa, cerca nel database per transaction_id
+            $transactionId = $data['resource']['id'] ?? null;
+            if ($transactionId) {
+                $payment = Payment::where('transaction_id', $transactionId)->first();
+                if ($payment) {
+                    return $payment->school_id;
+                }
+            }
+        }
+
+        // Prova a estrarre da custom field nel resource
+        if (isset($data['resource']['custom'])) {
+            $custom = json_decode($data['resource']['custom'], true);
+            if (isset($custom['school_id'])) {
+                return (int) $custom['school_id'];
+            }
+        }
+
+        // Fallback: cerca per sale_id o parent_payment
+        if (isset($data['resource']['sale_id'])) {
+            $payment = Payment::where('transaction_id', $data['resource']['sale_id'])->first();
+            if ($payment) {
+                return $payment->school_id;
+            }
+        }
+
+        return null;
     }
 
     /**

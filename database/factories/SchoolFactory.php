@@ -12,7 +12,9 @@ class SchoolFactory extends Factory
             'name' => fake()->company() . ' Dance School',
             'email' => fake()->unique()->companyEmail(),
             'phone' => fake()->phoneNumber(),
-            'address' => fake()->streetAddress() . ', ' . fake()->city() . ', ' . fake()->postcode(),
+            'address' => fake()->streetAddress(),
+            'city' => fake()->city(),
+            'postal_code' => fake()->postcode(),
             'description' => fake()->paragraph(),
             'active' => true,
         ];

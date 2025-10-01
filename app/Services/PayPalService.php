@@ -6,6 +6,7 @@ use App\Models\Setting;
 use App\Models\School;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 use Exception;
 
 class PayPalService
@@ -290,20 +291,159 @@ class PayPalService
     }
 
     /**
-     * Verifica se un webhook PayPal è valido
+     * Verifica se un webhook PayPal è valido tramite signature verification
+     *
+     * @param array $headers Headers della richiesta webhook
+     * @param string $body Body raw della richiesta
+     * @param string|null $webhookId Webhook ID (se null, usa quello delle settings)
+     * @return bool True se il webhook è verificato, false altrimenti
      */
-    public function verifyWebhook(array $headers, string $body): bool
+    public function verifyWebhook(array $headers, string $body, ?string $webhookId = null): bool
     {
         try {
-            // Implementazione verifica signature webhook PayPal
-            // Questo richiede la configurazione del webhook ID nelle impostazioni
-            return true; // Placeholder - implementare verifica reale
+            // Check se la verifica è abilitata
+            $verificationEnabled = config('paypal.webhook_verification.enabled', true);
+
+            if (!$verificationEnabled) {
+                Log::warning('PayPal webhook verification is DISABLED - accepting webhook without verification', [
+                    'school_id' => $this->school->id,
+                    'environment' => config('app.env')
+                ]);
+                return true;
+            }
+
+            // Ottieni webhook ID dalle settings della scuola o config globale
+            if ($webhookId === null) {
+                $schoolId = $this->school->id;
+                $webhookId = Setting::get("school.{$schoolId}.paypal.webhook_id", config('paypal.webhook_verification.webhook_id'));
+            }
+
+            if (empty($webhookId)) {
+                Log::error('PayPal webhook ID not configured - cannot verify webhook', [
+                    'school_id' => $this->school->id
+                ]);
+                return false;
+            }
+
+            // Costruisci i dati per la verifica
+            $verificationData = [
+                'auth_algo' => $headers['paypal-auth-algo'][0] ?? '',
+                'cert_url' => $headers['paypal-cert-url'][0] ?? '',
+                'transmission_id' => $headers['paypal-transmission-id'][0] ?? '',
+                'transmission_sig' => $headers['paypal-transmission-sig'][0] ?? '',
+                'transmission_time' => $headers['paypal-transmission-time'][0] ?? '',
+                'webhook_id' => $webhookId,
+                'webhook_event' => json_decode($body, true)
+            ];
+
+            // Verifica che tutti i campi necessari siano presenti
+            if (empty($verificationData['auth_algo']) ||
+                empty($verificationData['cert_url']) ||
+                empty($verificationData['transmission_id']) ||
+                empty($verificationData['transmission_sig']) ||
+                empty($verificationData['transmission_time'])) {
+
+                Log::warning('PayPal webhook missing required signature headers', [
+                    'school_id' => $this->school->id,
+                    'present_headers' => array_keys($headers)
+                ]);
+                return false;
+            }
+
+            // Chiama PayPal API per verificare il webhook
+            $result = $this->verifyWebhookSignature($verificationData);
+
+            if ($result) {
+                Log::info('PayPal webhook signature verified successfully', [
+                    'school_id' => $this->school->id,
+                    'transmission_id' => $verificationData['transmission_id']
+                ]);
+            } else {
+                Log::error('PayPal webhook signature verification FAILED', [
+                    'school_id' => $this->school->id,
+                    'transmission_id' => $verificationData['transmission_id']
+                ]);
+            }
+
+            return $result;
+
         } catch (Exception $e) {
-            Log::error('PayPal webhook verification failed:', [
+            Log::error('PayPal webhook verification exception:', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'school_id' => $this->school->id,
             ]);
             return false;
+        }
+    }
+
+    /**
+     * Chiama PayPal API per verificare la signature del webhook
+     *
+     * @param array $verificationData Dati per la verifica
+     * @return bool True se verificato, false altrimenti
+     */
+    private function verifyWebhookSignature(array $verificationData): bool
+    {
+        try {
+            // Ottieni access token
+            $this->client->setAccessToken($this->client->getAccessToken());
+            $accessToken = $this->client->getAccessToken()['access_token'] ?? null;
+
+            if (!$accessToken) {
+                Log::error('Cannot get PayPal access token for webhook verification');
+                return false;
+            }
+
+            // Determina l'endpoint API in base alla modalità
+            $apiUrl = $this->settings['mode'] === 'live'
+                ? 'https://api-m.paypal.com/v1/notifications/verify-webhook-signature'
+                : 'https://api-m.sandbox.paypal.com/v1/notifications/verify-webhook-signature';
+
+            // Chiama l'endpoint di verifica
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'Authorization' => "Bearer {$accessToken}"
+            ])->post($apiUrl, $verificationData);
+
+            if (!$response->successful()) {
+                Log::error('PayPal webhook verification API call failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                    'school_id' => $this->school->id
+                ]);
+                return false;
+            }
+
+            $result = $response->json();
+
+            // PayPal ritorna {"verification_status": "SUCCESS"} se valido
+            return isset($result['verification_status']) &&
+                   $result['verification_status'] === 'SUCCESS';
+
+        } catch (Exception $e) {
+            Log::error('PayPal webhook signature verification API exception:', [
+                'error' => $e->getMessage(),
+                'school_id' => $this->school->id
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Ottiene l'access token corrente (per testing/debugging)
+     */
+    public function getAccessToken(): ?string
+    {
+        try {
+            $token = $this->client->getAccessToken();
+            return $token['access_token'] ?? null;
+        } catch (Exception $e) {
+            Log::error('Error getting PayPal access token:', [
+                'error' => $e->getMessage(),
+                'school_id' => $this->school->id
+            ]);
+            return null;
         }
     }
 }

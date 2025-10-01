@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\School;
+use App\Helpers\QueryHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -363,12 +364,14 @@ abstract class AdminBaseController extends Controller
     /**
      * Get filtered and paginated results
      */
-    protected function getFilteredResults($query, Request $request, int $perPage = 15)
+    protected function getFilteredResults($query, Request $request, ?int $perPage = 15, array $allowedSortFields = ['created_at', 'updated_at'])
     {
-        // Apply search
+        // Apply search - SECURE: sanitized via applySearch method
         if ($request->filled('search')) {
-            $searchTerm = $request->get('search');
-            $query = $this->applySearch($query, $searchTerm);
+            $searchTerm = QueryHelper::sanitizeLikeInput($request->get('search'));
+            if (!empty($searchTerm)) {
+                $query = $this->applySearch($query, $searchTerm);
+            }
         }
 
         // Apply filters
@@ -376,12 +379,23 @@ abstract class AdminBaseController extends Controller
             $query->where('active', $request->get('status') === 'active');
         }
 
-        // Apply sorting
-        $sortField = $request->get('sort', 'created_at');
-        $sortDirection = $request->get('direction', 'desc');
-        $query->orderBy($sortField, $sortDirection);
+        // Apply sorting - SECURE: validated against whitelist
+        $query = QueryHelper::applySafeSort(
+            $query,
+            $request->get('sort'),
+            $request->get('direction'),
+            $allowedSortFields,
+            'created_at',
+            'desc'
+        );
 
-        return $query->paginate($perPage);
+        // Pagination - SECURE: validated per_page (null = get all without pagination)
+        if ($perPage === null) {
+            return $query->get();
+        }
+
+        $validatedPerPage = QueryHelper::validatePerPage($perPage, 15, 100);
+        return $query->paginate($validatedPerPage);
     }
 
     /**
