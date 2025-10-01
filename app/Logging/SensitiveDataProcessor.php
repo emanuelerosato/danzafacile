@@ -80,19 +80,20 @@ class SensitiveDataProcessor implements ProcessorInterface
     public function __invoke(LogRecord $record): LogRecord
     {
         // Sanitize context array (common logging pattern)
-        if (!empty($record->context)) {
-            $record->context = $this->sanitizeArray($record->context);
-        }
+        $sanitizedContext = !empty($record->context) ? $this->sanitizeArray($record->context) : [];
 
         // Sanitize extra data
-        if (!empty($record->extra)) {
-            $record->extra = $this->sanitizeArray($record->extra);
-        }
+        $sanitizedExtra = !empty($record->extra) ? $this->sanitizeArray($record->extra) : [];
 
         // Sanitize message string
-        $record->message = $this->sanitizeString($record->message);
+        $sanitizedMessage = $this->sanitizeString($record->message);
 
-        return $record;
+        // Return new LogRecord with sanitized data (Monolog v3 uses readonly properties)
+        return $record->with(
+            message: $sanitizedMessage,
+            context: $sanitizedContext,
+            extra: $sanitizedExtra
+        );
     }
 
     /**
