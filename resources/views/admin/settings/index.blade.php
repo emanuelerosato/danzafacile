@@ -262,13 +262,15 @@
                             </div>
 
                             <div x-show="showPayPalSettings"
+                                 x-cloak
                                  x-transition:enter="transition ease-out duration-300"
                                  x-transition:enter-start="opacity-0 transform -translate-y-2"
                                  x-transition:enter-end="opacity-100 transform translate-y-0"
                                  x-transition:leave="transition ease-in duration-200"
                                  x-transition:leave-start="opacity-100 transform translate-y-0"
                                  x-transition:leave-end="opacity-0 transform -translate-y-2"
-                                 class="space-y-6">
+                                 class="space-y-6"
+                                 style="display: none;">
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label for="paypal_mode" class="block text-sm font-medium text-gray-700 mb-2">
