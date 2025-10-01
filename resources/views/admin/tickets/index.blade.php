@@ -90,7 +90,7 @@
                         </span>
                     </div>
                     <form id="filters-form" method="GET" action="{{ route('admin.tickets.index') }}" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                             <!-- Search -->
                             <div>
                                 <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Ricerca</label>
@@ -99,6 +99,18 @@
                                        value="{{ request('search') }}"
                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
                                        placeholder="Titolo, descrizione...">
+                            </div>
+
+                            <!-- Direction -->
+                            <div>
+                                <label for="direction" class="block text-sm font-medium text-gray-700 mb-1">Direzione</label>
+                                <select id="direction" name="direction"
+                                        x-model="filters.direction"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                                    <option value="">Tutti</option>
+                                    <option value="received" {{ request('direction') == 'received' ? 'selected' : '' }}>Ricevuti (da Studenti)</option>
+                                    <option value="sent" {{ request('direction') == 'sent' ? 'selected' : '' }}>Inviati (a SuperAdmin)</option>
+                                </select>
                             </div>
 
                             <!-- Status -->
@@ -218,7 +230,8 @@
                                         </label>
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Studente</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Direzione</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Da/A</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Oggetto</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoria</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priorità</th>
@@ -240,6 +253,20 @@
                                         #{{ $ticket->id }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $ticket->direction_badge['color'] }}">
+                                            @if($ticket->direction === 'sent')
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+                                                </svg>
+                                            @else
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+                                                </svg>
+                                            @endif
+                                            {{ $ticket->direction_badge['text'] }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
                                             <div class="w-8 h-8 bg-gray-300 rounded-full mr-3 flex items-center justify-center">
                                                 <span class="text-xs font-medium text-gray-600">
@@ -248,7 +275,13 @@
                                             </div>
                                             <div>
                                                 <div class="text-sm font-medium text-gray-900">{{ $ticket->user->name }}</div>
-                                                <div class="text-sm text-gray-500">{{ $ticket->user->email }}</div>
+                                                <div class="text-sm text-gray-500">
+                                                    @if($ticket->direction === 'sent')
+                                                        <span class="text-purple-600 font-medium">→ SuperAdmin</span>
+                                                    @else
+                                                        {{ $ticket->user->email }}
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
@@ -288,7 +321,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="9" class="px-6 py-12 text-center">
+                                    <td colspan="10" class="px-6 py-12 text-center">
                                         <div class="text-gray-500">
                                             <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>

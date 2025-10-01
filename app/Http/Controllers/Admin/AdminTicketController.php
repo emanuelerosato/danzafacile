@@ -18,9 +18,18 @@ class AdminTicketController extends Controller
     {
         $school = Auth::user()->school;
 
-        // Base query - tickets from students of this school
-        $query = Ticket::whereHas('user', function($q) use ($school) {
-            $q->where('school_id', $school->id);
+        // Base query - tickets from students of this school OR sent by this admin
+        $query = Ticket::where(function($q) use ($school) {
+            // Tickets from students of this school
+            $q->whereHas('user', function($userQuery) use ($school) {
+                $userQuery->where('school_id', $school->id)
+                         ->where('role', 'user'); // Students only
+            })
+            // OR tickets created by admins of this school (sent to SuperAdmin)
+            ->orWhereHas('user', function($adminQuery) use ($school) {
+                $adminQuery->where('school_id', $school->id)
+                          ->where('role', 'admin');
+            });
         })->with(['user', 'assignedTo', 'responses']);
 
         // Filter by status
@@ -36,6 +45,21 @@ class AdminTicketController extends Controller
         // Filter by category
         if ($request->filled('category')) {
             $query->where('category', $request->category);
+        }
+
+        // Filter by direction (sent/received)
+        if ($request->filled('direction')) {
+            if ($request->direction === 'sent') {
+                // Show only tickets created by admins (sent to SuperAdmin)
+                $query->whereHas('user', function($q) {
+                    $q->where('role', 'admin');
+                });
+            } elseif ($request->direction === 'received') {
+                // Show only tickets created by students (received from students)
+                $query->whereHas('user', function($q) {
+                    $q->where('role', 'user');
+                });
+            }
         }
 
         // Search functionality

@@ -138,4 +138,40 @@ class Ticket extends Model
     {
         return $this->responses()->count();
     }
+
+    /**
+     * Get ticket direction for Admin view
+     * Returns 'sent' if admin created ticket (to SuperAdmin)
+     * Returns 'received' if student created ticket (from Students)
+     */
+    public function getDirectionAttribute(): string
+    {
+        // If creator is admin, ticket is sent TO SuperAdmin
+        if ($this->user && $this->user->role === 'admin') {
+            return 'sent';
+        }
+
+        // If creator is student/user, ticket is received FROM student
+        return 'received';
+    }
+
+    /**
+     * Get direction badge for UI
+     */
+    public function getDirectionBadgeAttribute(): array
+    {
+        if ($this->direction === 'sent') {
+            return [
+                'text' => 'Inviato a SuperAdmin',
+                'icon' => 'arrow-up',
+                'color' => 'bg-purple-100 text-purple-800 border-purple-200'
+            ];
+        }
+
+        return [
+            'text' => 'Ricevuto da Studente',
+            'icon' => 'arrow-down',
+            'color' => 'bg-blue-100 text-blue-800 border-blue-200'
+        ];
+    }
 }
