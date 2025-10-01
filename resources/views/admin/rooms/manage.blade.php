@@ -26,12 +26,11 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h1 class="text-xl md:text-2xl font-bold text-gray-900">Gestione Sale</h1>
-                <p class="text-gray-600">Tutte le sale della tua scuola di danza</p>
+                <!-- Header rimosso: già presente in x-slot header -->
             </div>
-            <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
+            <div>
                 <button data-room-action="add"
-                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-all duration-200 transform hover:scale-105">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                     </svg>
@@ -182,8 +181,11 @@
 </div>
 
 <!-- Toast Notification -->
-<div id="notification" class="fixed top-4 right-4 transform translate-x-full transition-transform duration-300 z-50">
-    <div class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+<div id="notification" class="fixed top-4 right-4 transform translate-x-full transition-transform duration-300 z-50 hidden">
+    <div id="notificationContent" class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center space-x-3">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
         <span id="notificationMessage">Operazione completata</span>
     </div>
 </div>
