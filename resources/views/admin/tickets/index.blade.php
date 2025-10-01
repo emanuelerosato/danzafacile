@@ -83,78 +83,83 @@
                             <span x-text="activeFiltersCount"></span> filtri attivi
                         </span>
                     </div>
-                    <form id="filters-form" method="GET" action="{{ route('admin.tickets.index') }}" class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <!-- Search -->
-                        <div>
-                            <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Ricerca</label>
-                            <input type="text" id="search" name="search"
-                                   x-model="filters.search"
-                                   value="{{ request('search') }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                                   placeholder="Titolo, descrizione...">
-                        </div>
+                    <form id="filters-form" method="GET" action="{{ route('admin.tickets.index') }}" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <!-- Search -->
+                            <div>
+                                <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Ricerca</label>
+                                <input type="text" id="search" name="search"
+                                       x-model="filters.search"
+                                       value="{{ request('search') }}"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                                       placeholder="Titolo, descrizione...">
+                            </div>
 
-                        <!-- Status -->
-                        <div>
-                            <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Stato</label>
-                            <select id="status" name="status"
-                                    x-model="filters.status"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
-                                <option value="">Tutti</option>
-                                @foreach($filterOptions['statuses'] as $key => $label)
-                                    <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>
-                                        {{ $label }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                            <!-- Status -->
+                            <div>
+                                <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Stato</label>
+                                <select id="status" name="status"
+                                        x-model="filters.status"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                                    <option value="">Tutti</option>
+                                    @foreach($filterOptions['statuses'] as $key => $label)
+                                        <option value="{{ $key }}" {{ request('status') == $key ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                        <!-- Priority -->
-                        <div>
-                            <label for="priority" class="block text-sm font-medium text-gray-700 mb-1">Priorità</label>
-                            <select id="priority" name="priority"
-                                    x-model="filters.priority"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
-                                <option value="">Tutte</option>
-                                @foreach($filterOptions['priorities'] as $key => $label)
-                                    <option value="{{ $key }}" {{ request('priority') == $key ? 'selected' : '' }}>
-                                        {{ $label }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                            <!-- Priority -->
+                            <div>
+                                <label for="priority" class="block text-sm font-medium text-gray-700 mb-1">Priorità</label>
+                                <select id="priority" name="priority"
+                                        x-model="filters.priority"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                                    <option value="">Tutte</option>
+                                    @foreach($filterOptions['priorities'] as $key => $label)
+                                        <option value="{{ $key }}" {{ request('priority') == $key ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                        <!-- Category -->
-                        <div>
-                            <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
-                            <select id="category" name="category"
-                                    x-model="filters.category"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
-                                <option value="">Tutte</option>
-                                @foreach($filterOptions['categories'] as $key => $label)
-                                    <option value="{{ $key }}" {{ request('category') == $key ? 'selected' : '' }}>
-                                        {{ $label }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <!-- Date Range -->
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Periodo</label>
-                            <div class="flex space-x-2">
-                                <input type="date" name="date_from"
-                                       x-model="filters.date_from"
-                                       value="{{ request('date_from') }}"
-                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
-                                <input type="date" name="date_to"
-                                       x-model="filters.date_to"
-                                       value="{{ request('date_to') }}"
-                                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500">
+                            <!-- Category -->
+                            <div>
+                                <label for="category" class="block text-sm font-medium text-gray-700 mb-1">Categoria</label>
+                                <select id="category" name="category"
+                                        x-model="filters.category"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                                    <option value="">Tutte</option>
+                                    @foreach($filterOptions['categories'] as $key => $label)
+                                        <option value="{{ $key }}" {{ request('category') == $key ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                         </div>
 
-                        <div class="md:col-span-5 flex justify-end space-x-3">
+                        <!-- Date Range - Full width row -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="date_from" class="block text-sm font-medium text-gray-700 mb-1">Data Da</label>
+                                <input type="date" id="date_from" name="date_from"
+                                       x-model="filters.date_from"
+                                       value="{{ request('date_from') }}"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label for="date_to" class="block text-sm font-medium text-gray-700 mb-1">Data A</label>
+                                <input type="date" id="date_to" name="date_to"
+                                       x-model="filters.date_to"
+                                       value="{{ request('date_to') }}"
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end space-x-3">
                             <button type="submit"
                                     class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 transition-all duration-200">
                                 Applica Filtri
@@ -169,8 +174,10 @@
 
                 <!-- Bulk Actions Toolbar -->
                 <div x-show="hasSelection"
+                     x-cloak
                      x-transition
-                     class="bg-rose-50 border border-rose-200 rounded-lg p-4 flex items-center justify-between">
+                     class="bg-rose-50 border border-rose-200 rounded-lg p-4 flex items-center justify-between"
+                     style="display: none;">
                     <div class="flex items-center space-x-4">
                         <span class="text-sm font-medium text-gray-900">
                             <span x-text="selectionCount"></span> ticket selezionati
@@ -190,23 +197,19 @@
                 <div class="bg-white rounded-lg shadow">
                     <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                         <h3 class="text-lg font-semibold text-gray-900">Lista Ticket ({{ $tickets->total() }})</h3>
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox"
-                                   @change="toggleAll()"
-                                   :checked="allSelected"
-                                   class="w-4 h-4 text-rose-600 border-gray-300 rounded focus:ring-rose-500">
-                            <span class="text-sm text-gray-600">Seleziona tutti</span>
-                        </label>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-4 py-3 text-left">
-                                        <input type="checkbox"
-                                               @change="toggleAll()"
-                                               :checked="allSelected"
-                                               class="w-4 h-4 text-rose-600 border-gray-300 rounded focus:ring-rose-500">
+                                        <label class="flex items-center cursor-pointer">
+                                            <input type="checkbox"
+                                                   @change="toggleAll()"
+                                                   :checked="allSelected"
+                                                   class="w-4 h-4 text-rose-600 border-gray-300 rounded focus:ring-rose-500">
+                                            <span class="ml-2 text-xs text-gray-600">Tutti</span>
+                                        </label>
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Studente</th>
@@ -301,10 +304,11 @@
 
                 <!-- Bulk Actions Modal -->
                 <div x-show="showBulkModal"
-                     style="display: none"
+                     x-cloak
                      x-transition
                      class="fixed inset-0 z-50 overflow-y-auto"
-                     @click.self="closeBulkModal()">
+                     @click.self="closeBulkModal()"
+                     style="display: none;">
                     <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
                         <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="closeBulkModal()"></div>
 
