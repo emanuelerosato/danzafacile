@@ -123,17 +123,21 @@ class SecurityHeaders
         // Prevents information disclosure about server technology
         $response->headers->remove('X-Powered-By');
 
-        // SECURITY HEADER #9: Cross-Origin-Resource-Policy
-        // Prevents cross-origin resource loading
-        $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
+        // SECURITY HEADER #9-11: Cross-Origin Policies
+        // Only apply in production (too restrictive for dev with Vite + external fonts)
+        if (!$isDevelopment) {
+            // SECURITY HEADER #9: Cross-Origin-Resource-Policy
+            // Prevents cross-origin resource loading
+            $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
 
-        // SECURITY HEADER #10: Cross-Origin-Embedder-Policy
-        // Enables cross-origin isolation
-        $response->headers->set('Cross-Origin-Embedder-Policy', 'require-corp');
+            // SECURITY HEADER #10: Cross-Origin-Embedder-Policy
+            // Enables cross-origin isolation
+            $response->headers->set('Cross-Origin-Embedder-Policy', 'require-corp');
 
-        // SECURITY HEADER #11: Cross-Origin-Opener-Policy
-        // Isolates browsing context
-        $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
+            // SECURITY HEADER #11: Cross-Origin-Opener-Policy
+            // Isolates browsing context
+            $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
+        }
 
         return $response;
     }
