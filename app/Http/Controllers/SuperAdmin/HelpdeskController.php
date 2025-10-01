@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreTicketResponseRequest;
 use App\Models\Ticket;
 use App\Models\TicketResponse;
 use App\Models\User;
@@ -133,23 +134,9 @@ class HelpdeskController extends Controller
     /**
      * Store new ticket response with file upload
      */
-    public function reply(Request $request, Ticket $ticket)
+    public function reply(StoreTicketResponseRequest $request, Ticket $ticket)
     {
-        $validator = Validator::make($request->all(), [
-            'message' => 'required|string|min:10|max:5000',
-            'is_internal' => 'boolean',
-            'attachments.*' => 'nullable|file|mimes:jpg,jpeg,png,gif,pdf|max:5120', // 5MB max
-        ], [
-            'message.required' => 'Il messaggio è obbligatorio.',
-            'message.min' => 'Il messaggio deve essere di almeno 10 caratteri.',
-            'message.max' => 'Il messaggio non può superare i 5000 caratteri.',
-            'attachments.*.mimes' => 'Solo file JPG, PNG, GIF, PDF sono permessi.',
-            'attachments.*.max' => 'Ogni file non può superare i 5MB.',
-        ]);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
+        // SECURITY: Validation with magic bytes check done in StoreTicketResponseRequest
 
         try {
             // Handle file uploads

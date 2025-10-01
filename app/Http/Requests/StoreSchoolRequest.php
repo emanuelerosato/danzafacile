@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\FileUploadHelper;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreSchoolRequest extends FormRequest
@@ -28,7 +29,28 @@ class StoreSchoolRequest extends FormRequest
             'email' => 'nullable|email|max:255|unique:schools,email',
             'website' => 'nullable|url|max:255',
             'description' => 'nullable|string|max:1000',
-            'logo_path' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'logo_path' => [
+                'nullable',
+                'file',
+                'max:2048',
+                'mimes:jpg,jpeg,png',
+                // SECURITY: Magic bytes validation
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        $validation = FileUploadHelper::validateFile($value, 'image', 2);
+
+                        if (!$validation['valid']) {
+                            $fail(implode(' ', $validation['errors']));
+                            return;
+                        }
+
+                        $filename = $value->getClientOriginalName();
+                        if (strpos($filename, '..') !== false || strpos($filename, '/') !== false || strpos($filename, '\\') !== false) {
+                            $fail('Il nome del file non è valido.');
+                        }
+                    }
+                },
+            ],
             'active' => 'boolean',
         ];
     }
