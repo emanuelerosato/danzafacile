@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Shared;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UploadMediaItemRequest;
+use App\Http\Requests\UpdateMediaItemRequest;
 use App\Models\MediaItem;
 use App\Models\MediaGallery;
 use App\Models\User;
@@ -100,15 +102,9 @@ class MediaItemController extends Controller
     /**
      * Store a newly created media item
      */
-    public function store(Request $request)
+    public function store(UploadMediaItemRequest $request)
     {
-        $request->validate([
-            'gallery_id' => 'required|exists:media_galleries,id',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:500',
-            'file' => 'required|file|mimes:jpg,jpeg,png,gif,mp4,avi,mov,pdf|max:10240', // 10MB
-            'type' => 'required|in:image,video,document',
-        ]);
+        // SECURITY: Validation with magic bytes check done in UploadMediaItemRequest
 
         $user = auth()->user();
         
@@ -184,17 +180,11 @@ class MediaItemController extends Controller
     /**
      * Update the specified media item
      */
-    public function update(Request $request, MediaItem $mediaItem)
+    public function update(UpdateMediaItemRequest $request, MediaItem $mediaItem)
     {
         $this->authorizeMediaItem($mediaItem);
 
-        $request->validate([
-            'gallery_id' => 'required|exists:media_galleries,id',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:500',
-            'file' => 'nullable|file|mimes:jpg,jpeg,png,gif,mp4,avi,mov,pdf|max:10240',
-            'type' => 'required|in:image,video,document',
-        ]);
+        // SECURITY: Validation with magic bytes check done in UpdateMediaItemRequest
 
         // Check gallery ownership for new gallery
         if ($request->gallery_id != $mediaItem->gallery_id) {

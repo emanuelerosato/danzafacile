@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\AdminBaseController;
 use App\Http\Requests\StoreDocumentRequest;
+use App\Http\Requests\UpdateDocumentRequest;
 use App\Models\Document;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -178,22 +179,14 @@ class AdminDocumentController extends AdminBaseController
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Document $document)
+    public function update(UpdateDocumentRequest $request, Document $document)
     {
         // Verifica che il documento appartenga alla scuola dell'admin
         if ($document->school_id !== auth()->user()->school_id) {
             abort(404);
         }
 
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'category' => 'required|in:general,medical,contract,identification,other',
-            'file' => 'nullable|file|max:10240|mimes:pdf,jpg,jpeg,png,gif,doc,docx,txt',
-            'is_public' => 'boolean',
-            'requires_approval' => 'boolean',
-            'expires_at' => 'nullable|date|after:now'
-        ]);
+        // SECURITY: Validation with magic bytes check done in UpdateDocumentRequest
 
         try {
             $data = [

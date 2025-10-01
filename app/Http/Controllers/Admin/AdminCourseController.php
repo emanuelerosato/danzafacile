@@ -127,16 +127,9 @@ class AdminCourseController extends AdminBaseController
         $validated['active'] = $validated['active'] ?? true;
 
         // Handle image upload
+        // SECURITY: Validation with magic bytes check done in StoreCourseRequest
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-
-            // Validate image
-            $request->validate([
-                'image' => 'image|mimes:jpeg,png,jpg,gif|max:5048'
-            ]);
-
-            // Store new image
-            $imagePath = $image->store('courses', 'public');
+            $imagePath = $request->file('image')->store('courses', 'public');
             $validated['image'] = $imagePath;
         }
 
@@ -311,21 +304,14 @@ class AdminCourseController extends AdminBaseController
         }
 
         // Handle image upload
+        // SECURITY: Validation with magic bytes check done in UpdateCourseRequest
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-
-            // Validate image
-            $request->validate([
-                'image' => 'image|mimes:jpeg,png,jpg,gif|max:5048'
-            ]);
-
             // Delete old image if exists
             if ($course->image && \Storage::disk('public')->exists($course->image)) {
                 \Storage::disk('public')->delete($course->image);
             }
 
-            // Store new image
-            $imagePath = $image->store('courses', 'public');
+            $imagePath = $request->file('image')->store('courses', 'public');
             $validated['image'] = $imagePath;
         }
 

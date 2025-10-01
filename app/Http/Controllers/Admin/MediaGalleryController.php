@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+use App\Http\Requests\UploadMediaGalleryRequest;
 use App\Models\MediaGallery;
 use App\Models\MediaItem;
 use App\Models\Course;
@@ -197,21 +198,9 @@ class MediaGalleryController extends AdminBaseController
     /**
      * Upload media files to gallery
      */
-    public function uploadMedia(Request $request, MediaGallery $gallery)
+    public function uploadMedia(UploadMediaGalleryRequest $request, MediaGallery $gallery)
     {
-        $validator = Validator::make($request->all(), [
-            'files.*' => 'required|file|max:10240|mimes:jpg,jpeg,png,gif,bmp,webp,mp4,avi,mov,wmv,flv,3gp',
-            'title.*' => 'nullable|string|max:255',
-            'description.*' => 'nullable|string|max:500',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Errore di validazione',
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        // SECURITY: Validation with magic bytes check done in UploadMediaGalleryRequest
 
         $uploadedItems = [];
         $files = $request->file('files');
