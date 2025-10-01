@@ -113,6 +113,56 @@ class AdminTicketController extends Controller
     }
 
     /**
+     * Show form to create a new ticket (Admin → SuperAdmin)
+     */
+    public function create()
+    {
+        $filterOptions = [
+            'categories' => [
+                'technical' => 'Problema Tecnico',
+                'billing' => 'Fatturazione',
+                'account' => 'Account/Accesso',
+                'feature' => 'Richiesta Funzionalità',
+                'general' => 'Generale',
+            ],
+            'priorities' => [
+                'low' => 'Bassa',
+                'medium' => 'Media',
+                'high' => 'Alta',
+                'urgent' => 'Urgente',
+            ],
+        ];
+
+        return view('admin.tickets.create', compact('filterOptions'));
+    }
+
+    /**
+     * Store a new ticket (Admin → SuperAdmin)
+     */
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'category' => 'required|in:technical,billing,account,feature,general',
+            'priority' => 'required|in:low,medium,high,urgent',
+        ]);
+
+        $ticket = Ticket::create([
+            'user_id' => Auth::id(),
+            'school_id' => Auth::user()->school_id,
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'category' => $validated['category'],
+            'priority' => $validated['priority'],
+            'status' => 'open',
+        ]);
+
+        return redirect()->route('admin.tickets.show', $ticket)
+                         ->with('success', 'Ticket creato con successo. Il SuperAdmin riceverà una notifica.');
+    }
+
+    /**
      * Display the specified ticket
      */
     public function show(Ticket $ticket)

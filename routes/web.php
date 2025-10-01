@@ -284,6 +284,8 @@ Route::middleware('auth')->group(function () {
         // Ticket Management
         Route::prefix('tickets')->name('tickets.')->group(function () {
             Route::get('/', [AdminTicketController::class, 'index'])->name('index');
+            Route::get('/create', [AdminTicketController::class, 'create'])->name('create');
+            Route::post('/', [AdminTicketController::class, 'store'])->name('store');
             Route::get('/stats', [AdminTicketController::class, 'getStats'])->name('stats');
             Route::get('/recent', [AdminTicketController::class, 'getRecent'])->name('recent');
             Route::get('/{ticket}', [AdminTicketController::class, 'show'])->name('show');
