@@ -27,12 +27,6 @@ window.settingsManager = function() {
             }
         },
 
-        // Toggle PayPal settings visibility
-        togglePayPalSettings() {
-            this.paypalEnabled = !this.paypalEnabled;
-            console.log('[SettingsManager] PayPal toggled:', this.paypalEnabled);
-        },
-
         // Dismiss success alert
         dismissAlert() {
             this.showSuccessAlert = false;

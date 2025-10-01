@@ -250,7 +250,6 @@
                                     <input type="checkbox" name="paypal_enabled" id="paypal_enabled" value="1"
                                            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                            {{ old('paypal_enabled', $settings['paypal_enabled'] ?? false) ? 'checked' : '' }}
-                                           @change="togglePayPalSettings()"
                                            x-model="paypalEnabled">
                                 </div>
                                 <div class="ml-3 text-sm">
