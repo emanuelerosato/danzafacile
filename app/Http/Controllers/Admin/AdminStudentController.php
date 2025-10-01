@@ -394,10 +394,35 @@ class AdminStudentController extends AdminBaseController
 
     /**
      * Generate a secure password for new students
+     *
+     * SECURITY: Generates strong random password with:
+     * - 2 random words (capitalized)
+     * - 4 random digits
+     * - 1 random special character
+     * Format: WordWord1234!
+     *
+     * @return string Strong password (e.g., "QuickLion5847!")
      */
     private function generateStudentPassword(): string
     {
-        return 'Student' . now()->year . str_pad(rand(100, 999), 3, '0', STR_PAD_LEFT);
+        // Word lists for memorable yet secure passwords
+        $words = [
+            'Quick', 'Brave', 'Swift', 'Bright', 'Clever', 'Bold', 'Smart', 'Wise',
+            'Strong', 'Mighty', 'Noble', 'Proud', 'Sharp', 'Keen', 'Fierce', 'Loyal',
+            'Lion', 'Tiger', 'Eagle', 'Wolf', 'Bear', 'Hawk', 'Fox', 'Owl',
+            'Dragon', 'Phoenix', 'Falcon', 'Panther', 'Leopard', 'Cheetah', 'Cobra', 'Shark'
+        ];
+
+        $specialChars = ['!', '@', '#', '$', '%', '&', '*'];
+
+        // Generate password components
+        $word1 = $words[array_rand($words)];
+        $word2 = $words[array_rand($words)];
+        $numbers = str_pad(random_int(1000, 9999), 4, '0', STR_PAD_LEFT);
+        $special = $specialChars[array_rand($specialChars)];
+
+        // Combine: WordWord1234!
+        return $word1 . $word2 . $numbers . $special;
     }
 
     /**

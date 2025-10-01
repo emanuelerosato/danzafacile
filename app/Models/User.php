@@ -38,27 +38,31 @@ class User extends Authenticatable
     const ROLE_STUDENT = 'student';
 
     /**
-     * The attributes that are mass assignable.
+     * SECURITY: Mass Assignment Protection
+     *
+     * Using $guarded instead of $fillable for stronger protection.
+     * Sensitive fields are explicitly blocked from mass assignment.
+     * Use safe methods like assignRole(), activateUser() instead.
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'school_id',
-        'role',
-        'first_name',
-        'last_name',
-        'phone',
-        'codice_fiscale',
-        'date_of_birth',
-        'address',
-        'emergency_contact',
-        'medical_notes',
-        'profile_image_path',
-        'active',
+    protected $guarded = [
+        'id',                    // Never allow mass assignment of ID
+        'role',                  // Use assignRole() method instead
+        'email_verified_at',     // Use markEmailAsVerified() instead
+        'remember_token',        // Laravel internal field
     ];
+
+    /**
+     * DEPRECATED: Fillable array replaced by $guarded for better security
+     * Keep commented for reference during migration
+     *
+     * protected $fillable = [
+     *     'name', 'email', 'password', 'school_id', 'role', 'first_name',
+     *     'last_name', 'phone', 'codice_fiscale', 'date_of_birth', 'address',
+     *     'emergency_contact', 'medical_notes', 'profile_image_path', 'active',
+     * ];
+     */
 
     /**
      * The attributes that should be hidden for serialization.
@@ -269,6 +273,92 @@ class User extends Authenticatable
     {
         $allowedRoles = ['super_admin', 'admin', 'user']; // Match database enum
         $this->attributes['role'] = in_array($value, $allowedRoles) ? $value : 'user';
+    }
+
+    // SECURITY: SAFE METHODS FOR SENSITIVE FIELDS
+
+    /**
+     * Safely assign role to user (prevents mass assignment privilege escalation)
+     *
+     * SECURITY: Only use this method to change user roles.
+     * Never allow role to be set via request->all() or mass assignment.
+     *
+     * @param string $role Role to assign (super_admin, admin, user)
+     * @param User|null $authorizedBy User authorizing this change (for audit)
+     * @return bool True if role was changed
+     */
+    public function assignRole(string $role, ?User $authorizedBy = null): bool
+    {
+        $allowedRoles = ['super_admin', 'admin', 'user'];
+
+        if (!in_array($role, $allowedRoles)) {
+            \Log::warning('Attempted to assign invalid role', [
+                'user_id' => $this->id,
+                'invalid_role' => $role,
+                'authorized_by' => $authorizedBy?->id
+            ]);
+            return false;
+        }
+
+        // Only super_admin can assign super_admin role
+        if ($role === 'super_admin' && !$authorizedBy?->isSuperAdmin()) {
+            \Log::critical('Unauthorized super_admin role assignment attempt', [
+                'user_id' => $this->id,
+                'attempted_by' => $authorizedBy?->id
+            ]);
+            return false;
+        }
+
+        $oldRole = $this->role;
+        $this->role = $role;
+        $this->save();
+
+        \Log::info('User role changed', [
+            'user_id' => $this->id,
+            'old_role' => $oldRole,
+            'new_role' => $role,
+            'authorized_by' => $authorizedBy?->id
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Safely activate/deactivate user account
+     *
+     * @param bool $active
+     * @param User|null $authorizedBy
+     * @return bool
+     */
+    public function setActiveStatus(bool $active, ?User $authorizedBy = null): bool
+    {
+        $this->active = $active;
+        $this->save();
+
+        \Log::info('User active status changed', [
+            'user_id' => $this->id,
+            'active' => $active,
+            'authorized_by' => $authorizedBy?->id
+        ]);
+
+        return true;
+    }
+
+    /**
+     * Mark email as verified (prevents mass assignment bypass)
+     *
+     * @return bool
+     */
+    public function markEmailAsVerified(): bool
+    {
+        if ($this->email_verified_at !== null) {
+            return false; // Already verified
+        }
+
+        $this->email_verified_at = now();
+        $this->save();
+
+        return true;
     }
 
     // HELPER METHODS
