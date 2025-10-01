@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Course;
 use App\Models\School;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class CourseFactory extends Factory
@@ -14,6 +15,7 @@ class CourseFactory extends Factory
     {
         return [
             'school_id' => School::factory(),
+            'instructor_id' => User::factory(),
             'name' => fake()->randomElement(['Danza Classica', 'Danza Moderna', 'Hip Hop', 'Jazz']) . ' - ' . fake()->randomElement(['Base', 'Intermedio', 'Avanzato']),
             'description' => fake()->paragraph(),
             'level' => fake()->randomElement(['beginner', 'intermediate', 'advanced']),
