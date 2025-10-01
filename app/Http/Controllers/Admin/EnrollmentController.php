@@ -26,8 +26,9 @@ class EnrollmentController extends Controller
             });
 
         // Search functionality
+        // SECURITY: Sanitize LIKE input to prevent SQL wildcard injection
         if ($request->filled('search')) {
-            $search = $request->get('search');
+            $search = \App\Helpers\QueryHelper::sanitizeLikeInput($request->get('search'));
             $query->where(function($q) use ($search) {
                 $q->whereHas('user', function($subq) use ($search) {
                     $subq->where('name', 'like', "%{$search}%")

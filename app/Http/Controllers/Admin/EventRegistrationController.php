@@ -30,8 +30,9 @@ class EventRegistrationController extends AdminBaseController
             $query->where('status', $request->status);
         }
 
+        // SECURITY: Sanitize LIKE input to prevent SQL wildcard injection
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = \App\Helpers\QueryHelper::sanitizeLikeInput($request->search);
             $query->whereHas('user', function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
