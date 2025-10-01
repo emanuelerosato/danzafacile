@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Requests\UploadProfilePictureRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -110,17 +111,9 @@ class ProfileController extends Controller
     /**
      * Update profile image
      */
-    public function updateImage(Request $request)
+    public function updateImage(UploadProfilePictureRequest $request)
     {
-        $request->validate([
-            'profile_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-        ], [
-            'profile_image.required' => 'Seleziona un\'immagine.',
-            'profile_image.image' => 'Il file deve essere un\'immagine.',
-            'profile_image.mimes' => 'L\'immagine deve essere in formato JPEG, PNG o JPG.',
-            'profile_image.max' => 'L\'immagine non può superare 2MB.',
-        ]);
-
+        // SECURITY: Validation with magic bytes check done in Form Request
         $user = auth()->user();
 
         // Delete old image if exists

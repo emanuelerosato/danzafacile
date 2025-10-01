@@ -21,11 +21,11 @@ class UploadCourseCoverRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'cover_image' => [
+            'image' => [
                 'nullable',
                 'file',
                 'max:5120', // 5MB
-                'mimes:jpg,jpeg,png',
+                'mimes:jpg,jpeg,png,gif',
                 // SECURITY: Magic bytes validation
                 function ($attribute, $value, $fail) {
                     if ($value) {
@@ -52,9 +52,9 @@ class UploadCourseCoverRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'cover_image.file' => 'Devi caricare un file valido.',
-            'cover_image.mimes' => 'L\'immagine deve essere in formato JPG o PNG.',
-            'cover_image.max' => 'L\'immagine non può superare 5MB.',
+            'image.file' => 'Devi caricare un file valido.',
+            'image.mimes' => 'L\'immagine deve essere in formato JPG, PNG o GIF.',
+            'image.max' => 'L\'immagine non può superare 5MB.',
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\FileUploadHelper;
 use Illuminate\Foundation\Http\FormRequest;
 use Carbon\Carbon;
 
@@ -27,7 +28,28 @@ class UpdateCourseRequest extends FormRequest
             'dance_type' => 'nullable|string|max:100',
             'description' => 'nullable|string',
             'short_description' => 'nullable|string|max:500',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5048',
+            'image' => [
+                'nullable',
+                'file',
+                'max:5120',
+                'mimes:jpg,jpeg,png,gif',
+                // SECURITY: Magic bytes validation
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        $validation = FileUploadHelper::validateFile($value, 'image', 5);
+
+                        if (!$validation['valid']) {
+                            $fail(implode(' ', $validation['errors']));
+                            return;
+                        }
+
+                        $filename = $value->getClientOriginalName();
+                        if (strpos($filename, '..') !== false || strpos($filename, '/') !== false || strpos($filename, '\\') !== false) {
+                            $fail('Il nome del file non è valido.');
+                        }
+                    }
+                },
+            ],
             'level' => 'required|in:beginner,intermediate,advanced,professional',
             'min_age' => 'nullable|integer|min:1|max:100',
             'max_age' => 'nullable|integer|min:1|max:100',
