@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // SECURITY: Global security headers middleware (applies to all responses)
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
         // Global middleware che si applica a tutte le richieste web autenticate
         $middleware->web(append: [
             \App\Http\Middleware\SchoolScopeMiddleware::class,
