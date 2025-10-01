@@ -31,8 +31,8 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-// API v1 routes
-Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
+// API v1 routes - SECURITY: Rate limited to 60 requests/min per user
+Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api-auth'])->group(function () {
 
     // User info endpoint
     Route::get('/user', function (Request $request) {
@@ -63,7 +63,11 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
             'destroy' => 'api.super-admin.schools.destroy'
         ]);
         Route::post('schools/{school}/toggle-status', [SuperAdminSchoolController::class, 'toggleStatus'])->name('api.super-admin.schools.toggle-status');
-        Route::post('schools/bulk-action', [SuperAdminSchoolController::class, 'bulkAction'])->name('api.super-admin.schools.bulk-action');
+
+        // SECURITY: Sensitive bulk operation - Rate limited to 5/min
+        Route::middleware('throttle:api-sensitive')->group(function () {
+            Route::post('schools/bulk-action', [SuperAdminSchoolController::class, 'bulkAction'])->name('api.super-admin.schools.bulk-action');
+        });
 
         // Users API
         Route::apiResource('users', SuperAdminUserController::class)->names([
@@ -74,8 +78,12 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
             'destroy' => 'api.super-admin.users.destroy'
         ]);
         Route::post('users/{user}/toggle-status', [SuperAdminUserController::class, 'toggleStatus'])->name('api.super-admin.users.toggle-status');
-        Route::post('users/bulk-action', [SuperAdminUserController::class, 'bulkAction'])->name('api.super-admin.users.bulk-action');
-        Route::post('users/{user}/impersonate', [SuperAdminUserController::class, 'impersonate'])->name('api.super-admin.users.impersonate');
+
+        // SECURITY: Sensitive operations - Rate limited to 5/min
+        Route::middleware('throttle:api-sensitive')->group(function () {
+            Route::post('users/bulk-action', [SuperAdminUserController::class, 'bulkAction'])->name('api.super-admin.users.bulk-action');
+            Route::post('users/{user}/impersonate', [SuperAdminUserController::class, 'impersonate'])->name('api.super-admin.users.impersonate');
+        });
     });
 
     // ADMIN API ROUTES
@@ -95,7 +103,11 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
         Route::post('courses/{course}/toggle-status', [WebAdminCourseController::class, 'toggleStatus'])->name('api.admin.courses.toggle-status');
         Route::post('courses/{course}/duplicate', [WebAdminCourseController::class, 'duplicate'])->name('api.admin.courses.duplicate');
         Route::get('courses/statistics', [WebAdminCourseController::class, 'getStatistics'])->name('api.admin.courses.statistics');
-        Route::post('courses/bulk-action', [WebAdminCourseController::class, 'bulkAction'])->name('api.admin.courses.bulk-action');
+
+        // SECURITY: Sensitive bulk operation - Rate limited to 5/min
+        Route::middleware('throttle:api-sensitive')->group(function () {
+            Route::post('courses/bulk-action', [WebAdminCourseController::class, 'bulkAction'])->name('api.admin.courses.bulk-action');
+        });
         
         // Enrollments API
         Route::apiResource('enrollments', WebEnrollmentController::class)->names([
@@ -107,8 +119,12 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
         ]);
         Route::post('enrollments/{enrollment}/cancel', [WebEnrollmentController::class, 'cancel'])->name('api.admin.enrollments.cancel');
         Route::post('enrollments/{enrollment}/reactivate', [WebEnrollmentController::class, 'reactivate'])->name('api.admin.enrollments.reactivate');
-        Route::post('enrollments/bulk-action', [WebEnrollmentController::class, 'bulkAction'])->name('api.admin.enrollments.bulk-action');
         Route::get('enrollments/statistics', [WebEnrollmentController::class, 'getStatistics'])->name('api.admin.enrollments.statistics');
+
+        // SECURITY: Sensitive bulk operation - Rate limited to 5/min
+        Route::middleware('throttle:api-sensitive')->group(function () {
+            Route::post('enrollments/bulk-action', [WebEnrollmentController::class, 'bulkAction'])->name('api.admin.enrollments.bulk-action');
+        });
         
         // Payments API
         Route::apiResource('payments', AdminPaymentController::class)->names([
@@ -121,12 +137,16 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
 
         // Payment actions
         Route::post('payments/{payment}/mark-completed', [AdminPaymentController::class, 'markCompleted'])->name('api.admin.payments.mark-completed');
-        Route::post('payments/{payment}/refund', [AdminPaymentController::class, 'refund'])->name('api.admin.payments.refund');
         Route::get('payments/{payment}/receipt', [AdminPaymentController::class, 'generateReceipt'])->name('api.admin.payments.receipt');
         Route::post('payments/{payment}/send-receipt', [AdminPaymentController::class, 'sendReceipt'])->name('api.admin.payments.send-receipt');
 
+        // SECURITY: Sensitive payment operations - Rate limited to 5/min
+        Route::middleware('throttle:api-sensitive')->group(function () {
+            Route::post('payments/{payment}/refund', [AdminPaymentController::class, 'refund'])->name('api.admin.payments.refund');
+            Route::post('payments/bulk-action', [AdminPaymentController::class, 'bulkAction'])->name('api.admin.payments.bulk-action');
+        });
+
         // Bulk operations and reports
-        Route::post('payments/bulk-action', [AdminPaymentController::class, 'bulkAction'])->name('api.admin.payments.bulk-action');
         Route::get('payments/statistics', [AdminPaymentController::class, 'getStats'])->name('api.admin.payments.statistics');
         Route::get('payments/export', [AdminPaymentController::class, 'export'])->name('api.admin.payments.export');
         Route::get('payments/overdue', [AdminPaymentController::class, 'getOverdue'])->name('api.admin.payments.overdue');
@@ -183,8 +203,12 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
     ]);
     Route::get('media/{mediaItem}/view', [MediaItemController::class, 'view'])->name('api.media.view');
     Route::get('galleries/{gallery}/media', [MediaItemController::class, 'getByGallery'])->name('api.media.by-gallery');
-    Route::post('media/bulk-action', [MediaItemController::class, 'bulkAction'])->name('api.media.bulk-action');
     Route::get('media/statistics', [MediaItemController::class, 'getStatistics'])->name('api.media.statistics');
+
+    // SECURITY: Sensitive bulk operation - Rate limited to 5/min
+    Route::middleware('throttle:api-sensitive')->group(function () {
+        Route::post('media/bulk-action', [MediaItemController::class, 'bulkAction'])->name('api.media.bulk-action');
+    });
 
     // General utility endpoints
     Route::get('/schools', function () {
@@ -233,17 +257,19 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:60,1'])->group(functi
 });
 
 // Mobile API routes for Flutter apps
-Route::prefix('mobile/v1')->middleware('throttle:120,1')->group(function () {
+Route::prefix('mobile/v1')->group(function () {
+
+    // Authentication endpoints (public) - SECURITY: Rate limited to 10 requests/min per IP
+    Route::middleware('throttle:api-public')->group(function () {
+        Route::post('/auth/login', [AuthController::class, 'login']);
+        Route::post('/auth/register', [AuthController::class, 'register']);
+        Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
+        Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
+    });
     
-    // Authentication endpoints (public)
-    Route::post('/auth/login', [AuthController::class, 'login']);
-    Route::post('/auth/register', [AuthController::class, 'register']);
-    Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
-    
-    // Protected mobile endpoints
-    Route::middleware('auth:sanctum')->group(function () {
-        
+    // Protected mobile endpoints - SECURITY: Rate limited to 60 requests/min per user
+    Route::middleware(['auth:sanctum', 'throttle:api-auth'])->group(function () {
+
         // Auth user endpoints
         Route::post('/auth/logout', [AuthController::class, 'logout']);
         Route::post('/auth/refresh', [AuthController::class, 'refresh']);
@@ -284,8 +310,12 @@ Route::prefix('mobile/v1')->middleware('throttle:120,1')->group(function () {
             Route::post('students/{student}/deactivate', [AdminStudentController::class, 'deactivate'])->name('api.mobile.admin.students.deactivate');
             Route::get('students/{student}/enrollments', [AdminStudentController::class, 'enrollments'])->name('api.mobile.admin.students.enrollments');
             Route::get('students/{student}/payments', [AdminStudentController::class, 'payments'])->name('api.mobile.admin.students.payments');
-            Route::post('students/{student}/reset-password', [AdminStudentController::class, 'resetPassword'])->name('api.mobile.admin.students.reset-password');
             Route::get('students/statistics', [AdminStudentController::class, 'statistics'])->name('api.mobile.admin.students.statistics');
+
+            // SECURITY: Sensitive password reset - Rate limited to 5/min
+            Route::middleware('throttle:api-sensitive')->group(function () {
+                Route::post('students/{student}/reset-password', [AdminStudentController::class, 'resetPassword'])->name('api.mobile.admin.students.reset-password');
+            });
         });
         
         // STUDENT MOBILE ROUTES
@@ -429,8 +459,8 @@ Route::prefix('mobile/v1')->middleware('throttle:120,1')->group(function () {
     });
 });
 
-// Webhook endpoints for external integrations
-Route::prefix('webhooks')->middleware('throttle:30,1')->group(function () {
+// Webhook endpoints for external integrations - SECURITY: Rate limited to 10 requests/min per IP
+Route::prefix('webhooks')->middleware('throttle:api-public')->group(function () {
     
     // Payment gateway webhooks
     Route::post('/payment/stripe', function (Request $request) {
