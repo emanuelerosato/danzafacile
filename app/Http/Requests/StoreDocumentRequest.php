@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\FileUploadHelper;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreDocumentRequest extends FormRequest
@@ -42,20 +43,19 @@ class StoreDocumentRequest extends FormRequest
                 'file',
                 'max:10240', // 10MB consistent with controllers
                 'mimes:pdf,jpg,jpeg,png,doc,docx',
-                // Additional security: check actual MIME type
+                // SECURITY: Advanced file validation with magic bytes checking
                 function ($attribute, $value, $fail) {
                     if ($value) {
-                        $allowedMimes = [
-                            'application/pdf',
-                            'image/jpeg',
-                            'image/png',
-                            'application/msword',
-                            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-                        ];
+                        // Determine category based on MIME type
+                        $mimeType = $value->getMimeType();
+                        $category = str_starts_with($mimeType, 'image/') ? 'images' : 'documents';
 
-                        $actualMime = $value->getMimeType();
-                        if (!in_array($actualMime, $allowedMimes)) {
-                            $fail('Il tipo di file non è sicuro o consentito.');
+                        // Validate with FileUploadHelper (magic bytes + MIME check)
+                        $validation = FileUploadHelper::validateFile($value, $category, 10);
+
+                        if (!$validation['valid']) {
+                            $fail(implode(' ', $validation['errors']));
+                            return;
                         }
 
                         // Prevent path traversal in filename

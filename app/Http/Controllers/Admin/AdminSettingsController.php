@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Helpers\EncryptionHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -60,12 +61,46 @@ class AdminSettingsController extends Controller
             'paypal_mode' => Setting::get("school.{$school->id}.paypal.mode", 'sandbox'),
             'paypal_currency' => Setting::get("school.{$school->id}.paypal.currency", 'EUR'),
             'paypal_client_id' => Setting::get("school.{$school->id}.paypal.client_id", ''),
-            'paypal_client_secret' => Setting::get("school.{$school->id}.paypal.client_secret", ''),
+            // SECURITY: Decrypt PayPal client secret for display (masked)
+            'paypal_client_secret' => $this->getDecryptedSecret($school->id),
             'paypal_fee_percentage' => Setting::get("school.{$school->id}.paypal.fee_percentage", '3.4'),
             'paypal_fixed_fee' => Setting::get("school.{$school->id}.paypal.fixed_fee", '0.35'),
         ];
 
         return view('admin.settings.index', compact('settings', 'school', 'stats'));
+    }
+
+    /**
+     * Get decrypted PayPal secret (masked for display)
+     *
+     * SECURITY: Decrypts stored PayPal client secret and masks it
+     *
+     * @param int $schoolId
+     * @return string Masked secret (e.g., "****1234")
+     */
+    private function getDecryptedSecret(int $schoolId): string
+    {
+        $encryptedSecret = Setting::get("school.{$schoolId}.paypal.client_secret", '');
+
+        if (empty($encryptedSecret)) {
+            return ''; // No secret configured
+        }
+
+        try {
+            // Decrypt the secret
+            $decryptedSecret = EncryptionHelper::decrypt($encryptedSecret);
+
+            // Mask for display (show only last 4 chars)
+            return EncryptionHelper::mask($decryptedSecret);
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to decrypt PayPal client secret', [
+                'school_id' => $schoolId,
+                'error' => $e->getMessage()
+            ]);
+
+            return '****'; // Return masked placeholder on error
+        }
     }
 
     /**
@@ -132,6 +167,30 @@ class AdminSettingsController extends Controller
 
         $school = Auth::user()->school;
 
+        // SECURITY: Encrypt PayPal client secret if provided and not already encrypted
+        $paypalClientSecret = $request->paypal_client_secret;
+        if (!empty($paypalClientSecret)) {
+            try {
+                // Only encrypt if not already encrypted (handles form resubmissions)
+                if (!EncryptionHelper::isEncrypted($paypalClientSecret)) {
+                    $paypalClientSecret = EncryptionHelper::encrypt($paypalClientSecret);
+                    \Log::info('PayPal client secret encrypted for school', [
+                        'school_id' => $school->id
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to encrypt PayPal client secret', [
+                    'school_id' => $school->id,
+                    'error' => $e->getMessage()
+                ]);
+
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->with('error', 'Errore durante la crittografia delle credenziali PayPal.');
+            }
+        }
+
         // Save all settings with school-specific keys
         $settingsToSave = [
             // Company Information
@@ -168,7 +227,8 @@ class AdminSettingsController extends Controller
             "school.{$school->id}.paypal.mode" => ['value' => $request->paypal_mode ?? 'sandbox', 'type' => 'string'],
             "school.{$school->id}.paypal.currency" => ['value' => $request->paypal_currency ?? 'EUR', 'type' => 'string'],
             "school.{$school->id}.paypal.client_id" => ['value' => $request->paypal_client_id, 'type' => 'string'],
-            "school.{$school->id}.paypal.client_secret" => ['value' => $request->paypal_client_secret, 'type' => 'string'],
+            // SECURITY: Store encrypted client secret
+            "school.{$school->id}.paypal.client_secret" => ['value' => $paypalClientSecret, 'type' => 'string'],
             "school.{$school->id}.paypal.fee_percentage" => ['value' => $request->paypal_fee_percentage ?? '3.4', 'type' => 'string'],
             "school.{$school->id}.paypal.fixed_fee" => ['value' => $request->paypal_fixed_fee ?? '0.35', 'type' => 'string'],
         ];
