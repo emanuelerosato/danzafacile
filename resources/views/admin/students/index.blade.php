@@ -24,17 +24,13 @@
 
 
 
-<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between mb-6">
-        <div>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Gestione Studenti - {{ $currentSchool->name }}
-            </h2>
-            <p class="text-sm text-gray-600 mt-1">
-                Tutti gli studenti iscritti alla tua scuola
-            </p>
-        </div>
-        <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
+<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <!-- Header rimosso: già presente in x-slot header -->
+            </div>
+            <div class="flex flex-col sm:flex-row items-center gap-3 sm:space-x-3 sm:gap-0">
             <button disabled title="Funzione in sviluppo"
                     class="inline-flex items-center px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,14 +131,20 @@
                                 </span>
                                 <div class="flex items-center space-x-2">
                                     <a href="{{ route('admin.students.edit', $student) }}"
-                                            class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
+                                       class="inline-flex items-center px-3 py-1.5 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                        </svg>
                                         Modifica
-                                    </button>
-                                    <span class="text-gray-300">|</span>
+                                    </a>
                                     <a href="{{ route('admin.students.show', $student) }}"
-                                            class="text-gray-600 hover:text-gray-900 text-sm font-medium">
+                                       class="inline-flex items-center px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                        </svg>
                                         Dettagli
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -165,12 +167,12 @@
                 <p class="mt-1 text-sm text-gray-500">Inizia aggiungendo il primo studente alla tua scuola.</p>
                 <div class="mt-6">
                     <a href="{{ route('admin.students.create') }}"
-                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700">
+                       class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 transition-all duration-200 transform hover:scale-105">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
                         </svg>
                         Nuovo Studente
-                    </button>
+                    </a>
                 </div>
             </div>
         @endif
