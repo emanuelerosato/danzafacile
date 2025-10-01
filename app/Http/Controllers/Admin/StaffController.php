@@ -7,6 +7,7 @@ use App\Models\Staff;
 use App\Models\StaffCourseAssignment;
 use App\Models\User;
 use App\Models\Course;
+use App\Helpers\QueryHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -23,13 +24,15 @@ class StaffController extends Controller
         $query = Staff::with(['user:id,name,email', 'school:id,name'])
                      ->withCount(['activeCourseAssignments']);
 
-        // Filtri
+        // Filtri - SECURE: sanitized LIKE input
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->whereHas('user', function($q) use ($search) {
-                $q->where('name', 'LIKE', "%{$search}%")
-                  ->orWhere('email', 'LIKE', "%{$search}%");
-            })->orWhere('employee_id', 'LIKE', "%{$search}%");
+            $search = QueryHelper::sanitizeLikeInput($request->search);
+            if (!empty($search)) {
+                $query->whereHas('user', function($q) use ($search) {
+                    $q->where('name', 'LIKE', "%{$search}%")
+                      ->orWhere('email', 'LIKE', "%{$search}%");
+                })->orWhere('employee_id', 'LIKE', "%{$search}%");
+            }
         }
 
         if ($request->filled('role')) {

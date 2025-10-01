@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Ticket;
 use App\Models\TicketResponse;
 use App\Models\User;
+use App\Helpers\QueryHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -53,15 +54,19 @@ class HelpdeskController extends Controller
                 $query->whereDate('created_at', '<=', $dateTo);
             }
 
+            // SECURE: sanitized LIKE input
             if ($search) {
-                $query->where(function($q) use ($search) {
-                    $q->where('title', 'LIKE', "%{$search}%")
-                      ->orWhere('description', 'LIKE', "%{$search}%")
-                      ->orWhereHas('user', function($userQuery) use ($search) {
-                          $userQuery->where('name', 'LIKE', "%{$search}%")
-                                   ->orWhere('email', 'LIKE', "%{$search}%");
-                      });
-                });
+                $sanitizedSearch = QueryHelper::sanitizeLikeInput($search);
+                if (!empty($sanitizedSearch)) {
+                    $query->where(function($q) use ($sanitizedSearch) {
+                        $q->where('title', 'LIKE', "%{$sanitizedSearch}%")
+                          ->orWhere('description', 'LIKE', "%{$sanitizedSearch}%")
+                          ->orWhereHas('user', function($userQuery) use ($sanitizedSearch) {
+                              $userQuery->where('name', 'LIKE', "%{$sanitizedSearch}%")
+                                       ->orWhere('email', 'LIKE', "%{$sanitizedSearch}%");
+                          });
+                    });
+                }
             }
 
             // Get paginated results

@@ -175,6 +175,75 @@ class SchoolOwnership
                     $this->denyAccess($request, 'Media access denied');
                 }
                 break;
+
+            case 'App\Models\Event':
+                // Admin can only access events from their school
+                if ($user->isAdmin() && $model->school_id !== $user->school_id) {
+                    $this->denyAccess($request, 'Event access denied');
+                }
+                // Student can only access events from their school
+                if ($user->isStudent() && $model->school_id !== $user->school_id) {
+                    $this->denyAccess($request, 'Event access denied');
+                }
+                break;
+
+            case 'App\Models\EventRegistration':
+                // Admin can only access event registrations from their school
+                if ($user->isAdmin() && $model->event->school_id !== $user->school_id) {
+                    $this->denyAccess($request, 'Event registration access denied');
+                }
+                // Student can only access their own event registrations
+                if ($user->isStudent() && $model->user_id !== $user->id) {
+                    $this->denyAccess($request, 'Event registration access denied');
+                }
+                break;
+
+            case 'App\Models\Staff':
+                // Admin can only access staff from their school
+                if ($user->isAdmin() && $model->user->school_id !== $user->school_id) {
+                    $this->denyAccess($request, 'Staff access denied');
+                }
+                break;
+
+            case 'App\Models\StaffSchedule':
+                // Admin can only access staff schedules from their school
+                if ($user->isAdmin() && $model->staff->user->school_id !== $user->school_id) {
+                    $this->denyAccess($request, 'Staff schedule access denied');
+                }
+                break;
+
+            case 'App\Models\Attendance':
+                // Admin can only access attendance from their school
+                if ($user->isAdmin() && $model->user->school_id !== $user->school_id) {
+                    $this->denyAccess($request, 'Attendance access denied');
+                }
+                // Student can only access their own attendance
+                if ($user->isStudent() && $model->user_id !== $user->id) {
+                    $this->denyAccess($request, 'Attendance access denied');
+                }
+                break;
+
+            case 'App\Models\MediaGallery':
+                // Admin can only access media galleries from their school
+                if ($user->isAdmin() && $model->school_id !== $user->school_id) {
+                    $this->denyAccess($request, 'Media gallery access denied');
+                }
+                // Student can only access public galleries from their school
+                if ($user->isStudent() && ($model->school_id !== $user->school_id || !$model->is_public)) {
+                    $this->denyAccess($request, 'Media gallery access denied');
+                }
+                break;
+
+            case 'App\Models\Ticket':
+                // Admin can only access tickets from users in their school
+                if ($user->isAdmin() && $model->user->school_id !== $user->school_id) {
+                    $this->denyAccess($request, 'Ticket access denied');
+                }
+                // Student can only access their own tickets
+                if ($user->isStudent() && $model->user_id !== $user->id) {
+                    $this->denyAccess($request, 'Ticket access denied');
+                }
+                break;
         }
     }
 
