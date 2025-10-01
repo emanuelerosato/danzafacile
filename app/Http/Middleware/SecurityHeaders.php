@@ -30,20 +30,59 @@ class SecurityHeaders
 
         // SECURITY HEADER #1: Content Security Policy (CSP)
         // Prevents XSS by controlling which resources can be loaded
+
+        $isDevelopment = config('app.env') !== 'production';
+
+        // Base CSP directives
         $csp = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.paypal.com https://www.paypalobjects.com",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
-            "font-src 'self' https://fonts.gstatic.com data:",
-            "img-src 'self' data: https: blob:",
-            "connect-src 'self' https://api.paypal.com https://api-m.paypal.com",
-            "frame-src 'self' https://www.paypal.com",
-            "object-src 'none'",
-            "base-uri 'self'",
-            "form-action 'self'",
-            "frame-ancestors 'self'",
-            "upgrade-insecure-requests",
         ];
+
+        // Script sources (different for dev/prod)
+        if ($isDevelopment) {
+            // Development: Allow Vite HMR and unpkg CDN
+            $csp[] = "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173 https://cdn.jsdelivr.net https://unpkg.com https://www.paypal.com https://www.paypalobjects.com";
+        } else {
+            // Production: Stricter policy
+            $csp[] = "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://www.paypal.com https://www.paypalobjects.com";
+        }
+
+        // Style sources (different for dev/prod)
+        if ($isDevelopment) {
+            // Development: Allow Vite HMR and fonts.bunny.net
+            $csp[] = "style-src 'self' 'unsafe-inline' http://localhost:5173 https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net";
+        } else {
+            // Production: Stricter policy
+            $csp[] = "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net";
+        }
+
+        // Font sources
+        $csp[] = "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net data:";
+
+        // Image sources
+        $csp[] = "img-src 'self' data: https: blob:";
+
+        // Connect sources (different for dev/prod)
+        if ($isDevelopment) {
+            // Development: Allow Vite WebSocket and source maps
+            $csp[] = "connect-src 'self' ws://localhost:5173 http://localhost:5173 https://cdn.jsdelivr.net https://api.paypal.com https://api-m.paypal.com";
+        } else {
+            // Production: No localhost
+            $csp[] = "connect-src 'self' https://cdn.jsdelivr.net https://api.paypal.com https://api-m.paypal.com";
+        }
+
+        // Other directives (same for dev/prod)
+        $csp[] = "frame-src 'self' https://www.paypal.com";
+        $csp[] = "object-src 'none'";
+        $csp[] = "base-uri 'self'";
+        $csp[] = "form-action 'self'";
+        $csp[] = "frame-ancestors 'self'";
+
+        // Only upgrade to HTTPS in production
+        if (!$isDevelopment) {
+            $csp[] = "upgrade-insecure-requests";
+        }
+
         $response->headers->set('Content-Security-Policy', implode('; ', $csp));
 
         // SECURITY HEADER #2: X-Frame-Options
