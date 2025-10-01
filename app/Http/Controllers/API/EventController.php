@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\QueryHelper;
 use App\Models\Event;
 use App\Models\EventRegistration;
 use Illuminate\Http\Request;
@@ -40,8 +41,9 @@ class EventController extends BaseApiController
         $this->applyFilters($query, $request, $filterableFields);
 
         // Search
+        // SECURITY: Sanitize LIKE input to prevent SQL wildcard injection
         if ($request->has('search')) {
-            $search = $request->get('search');
+            $search = QueryHelper::sanitizeLikeInput($request->get('search'));
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%")

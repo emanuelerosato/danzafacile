@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\Admin;
 
+use App\Helpers\QueryHelper;
 use App\Http\Controllers\API\BaseApiController;
 use App\Models\Course;
 use Illuminate\Http\JsonResponse;
@@ -69,8 +70,9 @@ class CourseController extends BaseApiController
             $query->where('active', $request->boolean('active'));
         }
 
+        // SECURITY: Sanitize LIKE input to prevent SQL wildcard injection
         if ($request->has('search')) {
-            $search = $request->get('search');
+            $search = QueryHelper::sanitizeLikeInput($request->get('search'));
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");

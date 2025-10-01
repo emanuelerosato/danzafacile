@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\QueryHelper;
 use App\Models\User;
 use App\Models\StaffRole;
 use Illuminate\Http\Request;
@@ -47,8 +48,9 @@ class StaffController extends BaseApiController
         }
 
         // Search functionality
+        // SECURITY: Sanitize LIKE input to prevent SQL wildcard injection
         if ($request->has('search')) {
-            $search = $request->get('search');
+            $search = QueryHelper::sanitizeLikeInput($request->get('search'));
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%")
