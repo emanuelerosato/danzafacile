@@ -79,6 +79,7 @@ class AuthController extends Controller
             ], 422);
         }
 
+        // SECURITY: Create user without sensitive fields (role, email_verified_at)
         $user = User::create([
             'name' => $request->name,
             'first_name' => $request->first_name,
@@ -88,10 +89,14 @@ class AuthController extends Controller
             'phone' => $request->phone,
             'date_of_birth' => $request->date_of_birth,
             'address' => $request->address,
-            'role' => 'user',
             'school_id' => $request->school_id,
-            'active' => true,
+            // Don't set role via mass assignment - use assignRole() instead
+            // Don't set active directly - use setActiveStatus() instead
         ]);
+
+        // SECURITY: Use safe methods for sensitive fields
+        $user->assignRole('user', null); // No authorizer for self-registration
+        $user->setActiveStatus(true, null);
 
         event(new Registered($user));
 
