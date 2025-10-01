@@ -12,7 +12,11 @@ use Illuminate\Validation\Rule;
 class CourseController extends BaseApiController
 {
     /**
-     * Sanitize input data to prevent XSS attacks
+     * SECURITY: Sanitize input data to prevent XSS attacks
+     * Uses Laravel's built-in htmlspecialchars() for robust HTML entity encoding
+     *
+     * @param array $data Input data to sanitize
+     * @return array Sanitized data
      */
     private function sanitizeInput(array $data): array
     {
@@ -20,35 +24,31 @@ class CourseController extends BaseApiController
 
         foreach ($data as $key => $value) {
             if (is_string($value)) {
-                // Remove null bytes
+                // Remove null bytes (security)
                 $value = str_replace("\0", '', $value);
-
-                // Remove script tags and their content
-                $value = preg_replace('/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/mi', '', $value);
-
-                // Remove javascript: URLs
-                $value = preg_replace('/javascript:/i', '', $value);
-
-                // Remove on* event handlers
-                $value = preg_replace('/\bon\w+\s*=\s*["\'][^"\']*["\']/', '', $value);
-
-                // Remove dangerous HTML elements
-                $dangerousTags = ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button', 'select', 'textarea', 'meta', 'link', 'style'];
-                foreach ($dangerousTags as $tag) {
-                    $value = preg_replace("/<\\/?{$tag}\\b[^>]*>/i", '', $value);
-                }
-
-                // For most fields, strip all HTML tags
-                if (!in_array($key, ['description'])) {
-                    $value = strip_tags($value);
-                }
 
                 // Trim whitespace
                 $value = trim($value);
 
+                // SECURITY: For description field, allow limited HTML but escape dangerous content
+                if ($key === 'description') {
+                    // Strip all tags except safe formatting tags
+                    $value = strip_tags($value, '<p><br><strong><em><ul><ol><li>');
+
+                    // Encode remaining HTML entities to prevent XSS
+                    $value = htmlspecialchars($value, ENT_QUOTES | ENT_HTML5, 'UTF-8', false);
+                } else {
+                    // For all other fields: strip tags completely and encode HTML entities
+                    $value = strip_tags($value);
+                    $value = htmlspecialchars($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                }
+
                 $sanitized[$key] = $value;
+            } elseif (is_array($value)) {
+                // Recursively sanitize arrays
+                $sanitized[$key] = $this->sanitizeInput($value);
             } else {
-                // Non-string values pass through unchanged
+                // Non-string values pass through unchanged (integers, booleans, etc.)
                 $sanitized[$key] = $value;
             }
         }
