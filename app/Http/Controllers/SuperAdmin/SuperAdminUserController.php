@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\SuperAdmin;
 
+use App\Helpers\QueryHelper;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\School;
@@ -19,8 +20,9 @@ class SuperAdminUserController extends Controller
         $query = User::with('school');
 
         // Search functionality
+        // SECURITY: Sanitize LIKE input to prevent SQL wildcard injection
         if ($request->filled('search')) {
-            $search = $request->get('search');
+            $search = QueryHelper::sanitizeLikeInput($request->get('search'));
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('first_name', 'like', "%{$search}%")

@@ -28,8 +28,9 @@ class SchoolUserController extends Controller
                     ->with(['courseEnrollments.course', 'payments', 'documents']);
 
         // Filtri di ricerca
+        // SECURITY: Sanitize LIKE input to prevent SQL wildcard injection
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = \App\Helpers\QueryHelper::sanitizeLikeInput($request->search);
             $query->where(function($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
                   ->orWhere('last_name', 'like', "%{$search}%")

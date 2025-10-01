@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\SuperAdmin;
 
+use App\Helpers\QueryHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSchoolRequest;
 use App\Http\Requests\UpdateSchoolRequest;
@@ -22,8 +23,9 @@ class SchoolController extends Controller
         }]);
 
         // Search functionality
+        // SECURITY: Sanitize LIKE input to prevent SQL wildcard injection
         if ($request->filled('search')) {
-            $search = $request->get('search');
+            $search = QueryHelper::sanitizeLikeInput($request->get('search'));
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('city', 'like', "%{$search}%")
@@ -342,8 +344,9 @@ class SchoolController extends Controller
         $query = School::with('users');
         
         // Apply same filters as index page
+        // SECURITY: Sanitize LIKE input to prevent SQL wildcard injection
         if ($request->filled('search')) {
-            $search = $request->get('search');
+            $search = QueryHelper::sanitizeLikeInput($request->get('search'));
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('city', 'like', "%{$search}%")

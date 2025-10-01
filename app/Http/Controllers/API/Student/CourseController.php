@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API\Student;
 
+use App\Helpers\QueryHelper;
 use App\Http\Controllers\API\BaseApiController;
 use App\Models\Course;
 use App\Models\CourseEnrollment;
@@ -28,8 +29,9 @@ class CourseController extends BaseApiController
             $query->where('difficulty_level', $request->get('difficulty_level'));
         }
 
+        // SECURITY: Sanitize LIKE input to prevent SQL wildcard injection
         if ($request->has('search')) {
-            $search = $request->get('search');
+            $search = QueryHelper::sanitizeLikeInput($request->get('search'));
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%")

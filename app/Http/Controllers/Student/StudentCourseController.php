@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Student;
 
+use App\Helpers\QueryHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\CourseEnrollment;
@@ -30,8 +31,9 @@ class StudentCourseController extends Controller
         });
 
         // Search functionality
+        // SECURITY: Sanitize LIKE input to prevent SQL wildcard injection
         if ($request->filled('search')) {
-            $search = $request->get('search');
+            $search = QueryHelper::sanitizeLikeInput($request->get('search'));
             $query->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");

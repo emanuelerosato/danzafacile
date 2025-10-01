@@ -39,8 +39,9 @@ class AdminTicketController extends Controller
         }
 
         // Search functionality
+        // SECURITY: Sanitize LIKE input to prevent SQL wildcard injection
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = \App\Helpers\QueryHelper::sanitizeLikeInput($request->search);
             $query->where(function($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%")
