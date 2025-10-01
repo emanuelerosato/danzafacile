@@ -27,5 +27,25 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // SECURITY: Custom exception rendering to prevent information disclosure
+        $exceptions->render(function (\Throwable $e, $request) {
+            // In production, sanitize error messages to prevent information disclosure
+            if (config('app.env') === 'production' && !config('app.debug')) {
+                // For API requests, return generic JSON error
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Si è verificato un errore. Riprova più tardi.',
+                        'error_code' => 'INTERNAL_ERROR'
+                    ], 500);
+                }
+
+                // For web requests, return generic error view
+                // (Laravel's default 500.blade.php will be used)
+                return null; // Let Laravel handle it with default view
+            }
+
+            // In development, let Laravel show full error details
+            return null;
+        });
     })->create();
