@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Course;
 use App\Models\Event;
 use App\Models\Setting;
+use App\Helpers\QueryHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -30,28 +31,38 @@ class AdminPaymentController extends AdminBaseController
         // Apply filters
         $this->applyFilters($query, $request);
 
-        // Apply search
+        // Apply search - SECURE: sanitized LIKE input
         if ($request->filled('search')) {
-            $searchTerm = $request->get('search');
-            $query->where(function($q) use ($searchTerm) {
-                $q->whereHas('user', function($subq) use ($searchTerm) {
-                    $subq->where('name', 'like', "%{$searchTerm}%")
-                         ->orWhere('email', 'like', "%{$searchTerm}%")
-                         ->orWhere('first_name', 'like', "%{$searchTerm}%")
-                         ->orWhere('last_name', 'like', "%{$searchTerm}%");
-                })
-                ->orWhere('transaction_id', 'like', "%{$searchTerm}%")
-                ->orWhere('receipt_number', 'like', "%{$searchTerm}%")
-                ->orWhere('reference_number', 'like', "%{$searchTerm}%");
-            });
+            $searchTerm = QueryHelper::sanitizeLikeInput($request->get('search'));
+            if (!empty($searchTerm)) {
+                $query->where(function($q) use ($searchTerm) {
+                    $q->whereHas('user', function($subq) use ($searchTerm) {
+                        $subq->where('name', 'like', "%{$searchTerm}%")
+                             ->orWhere('email', 'like', "%{$searchTerm}%")
+                             ->orWhere('first_name', 'like', "%{$searchTerm}%")
+                             ->orWhere('last_name', 'like', "%{$searchTerm}%");
+                    })
+                    ->orWhere('transaction_id', 'like', "%{$searchTerm}%")
+                    ->orWhere('receipt_number', 'like', "%{$searchTerm}%")
+                    ->orWhere('reference_number', 'like', "%{$searchTerm}%");
+                });
+            }
         }
 
-        // Apply sorting
-        $sortField = $request->get('sort', 'payment_date');
-        $sortDirection = $request->get('direction', 'desc');
-        $query->orderBy($sortField, $sortDirection);
+        // Apply sorting - SECURE: validated against whitelist
+        $allowedSortFields = ['payment_date', 'amount', 'status', 'payment_method', 'created_at', 'updated_at'];
+        $query = QueryHelper::applySafeSort(
+            $query,
+            $request->get('sort'),
+            $request->get('direction'),
+            $allowedSortFields,
+            'payment_date',
+            'desc'
+        );
 
-        $payments = $query->paginate($request->get('per_page', 20));
+        // Pagination - SECURE: validated per_page
+        $perPage = QueryHelper::validatePerPage($request->get('per_page'), 20, 100);
+        $payments = $query->paginate($perPage);
 
         // Calculate statistics
         $stats = $this->calculatePaymentStats($request);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Models\User;
+use App\Helpers\QueryHelper;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -17,7 +18,9 @@ class AdminEventController extends AdminBaseController
     {
         $query = $this->school->events()->with(['registrations.user']);
 
-        $events = $this->getFilteredResults($query, $request, 15);
+        // SECURE: allowed sort fields for events
+        $allowedSortFields = ['title', 'start_date', 'end_date', 'max_participants', 'created_at', 'updated_at'];
+        $events = $this->getFilteredResults($query, $request, 15, $allowedSortFields);
 
         // Get filter options
         $eventTypes = [

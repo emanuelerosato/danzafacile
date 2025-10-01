@@ -6,6 +6,7 @@ use App\Models\Attendance;
 use App\Models\Course;
 use App\Models\Event;
 use App\Models\User;
+use App\Helpers\QueryHelper;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Carbon\Carbon;
@@ -19,7 +20,9 @@ class AdminAttendanceController extends AdminBaseController
     {
         $query = $this->school->attendanceRecords()->with(['user', 'course', 'event', 'markedByUser']);
 
-        $attendances = $this->getFilteredResults($query, $request, 20);
+        // SECURE: allowed sort fields for attendance
+        $allowedSortFields = ['attendance_date', 'status', 'created_at', 'updated_at'];
+        $attendances = $this->getFilteredResults($query, $request, 20, $allowedSortFields);
 
         // Get filter options for dropdowns
         $courses = $this->school->courses()->active()->orderBy('name')->get();
@@ -335,8 +338,10 @@ class AdminAttendanceController extends AdminBaseController
     {
         $query = $this->school->attendanceRecords()->with(['user', 'course', 'event', 'markedByUser']);
 
-        // Apply same filters as index
-        $attendances = $this->getFilteredResults($query, $request, null);
+        // SECURE: allowed sort fields for attendance export
+        $allowedSortFields = ['attendance_date', 'status', 'created_at', 'updated_at'];
+        // Apply same filters as index (null = get all, no pagination)
+        $attendances = $this->getFilteredResults($query, $request, null, $allowedSortFields);
 
         return $this->exportAttendancesToCSV($attendances);
     }

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\CourseEnrollment;
 use App\Models\Payment;
 use App\Models\Document;
+use App\Helpers\QueryHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -21,7 +22,9 @@ class AdminStudentController extends AdminBaseController
 
         $query = $this->school->users()->where('role', 'user');
 
-        $students = $this->getFilteredResults($query, $request, 15);
+        // SECURE: allowed sort fields for students
+        $allowedSortFields = ['name', 'first_name', 'last_name', 'email', 'created_at', 'updated_at'];
+        $students = $this->getFilteredResults($query, $request, 15, $allowedSortFields);
 
         // Get filter options
         $enrollmentStatuses = ['active', 'completed', 'cancelled', 'pending'];

@@ -8,6 +8,7 @@ use App\Models\Course;
 use App\Models\CourseEnrollment;
 use App\Models\Payment;
 use App\Models\User;
+use App\Helpers\QueryHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -24,7 +25,9 @@ class AdminCourseController extends AdminBaseController
 
         $query = $this->school->courses()->with(['instructor', 'enrollments']);
 
-        $courses = $this->getFilteredResults($query, $request, 15);
+        // SECURE: allowed sort fields for courses
+        $allowedSortFields = ['name', 'start_date', 'end_date', 'max_students', 'created_at', 'updated_at'];
+        $courses = $this->getFilteredResults($query, $request, 15, $allowedSortFields);
 
         // Get filter options
         $instructors = $this->school->users()
