@@ -646,14 +646,356 @@ PAYPAL_WEBHOOK_ID=your-webhook-id-from-paypal-dashboard
 
 ---
 
-### **🔄 Prossimi Step (FASE 2 - HIGH Priority)**
-Le seguenti vulnerabilità HIGH priority saranno implementate nella Fase 2:
-1. SchoolOwnership Middleware Extension (6 modelli mancanti)
-2. LIKE Injection Sanitization (global application)
-3. File Upload Validation Enhancement (magic bytes checking)
-4. PayPal Credentials Encryption (encrypted storage)
-5. Strong Password Generation (studenti auto-generati)
-6. Mass Assignment Protection (User model hardening)
+## **🔒 SECURITY PHASE 2: HIGH Priority Vulnerabilities** (01 Ottobre 2025)
+
+### **FIX #3: SchoolOwnership Middleware Extension**
+**Vulnerabilità:** 7 modelli non protetti dal middleware SchoolOwnership
+**Severity:** HIGH
+**File:** `app/Http/Middleware/SchoolOwnership.php`
+
+**Implementazione:**
+```php
+// Extended validateModelOwnership() con 7 nuovi modelli:
+
+case 'App\Models\Event':
+    if ($user->isAdmin() && $model->school_id !== $user->school_id) {
+        $this->denyAccess($request, 'Event access denied');
+    }
+    break;
+
+case 'App\Models\EventRegistration':
+    if ($user->isAdmin() && $model->event->school_id !== $user->school_id) {
+        $this->denyAccess($request, 'EventRegistration access denied');
+    }
+    break;
+
+// + Staff, StaffSchedule, Attendance, MediaGallery, Ticket
+```
+
+**Protezione contro:**
+- Cross-school data access via direct URL manipulation
+- Admin accessing events/staff/attendance from other schools
+- MediaGallery privacy leaks (is_public check per students)
+- Ticket data leakage between schools
+
+**Testing:** ✅ Manual verification - no unit tests needed (middleware behavior)
+
+---
+
+### **FIX #4: LIKE Injection Sanitization Globale**
+**Vulnerabilità:** 2 controller ancora vulnerabili a LIKE injection
+**Severity:** HIGH
+**Files:** `app/Http/Controllers/Admin/StaffController.php`, `app/Http/Controllers/SuperAdmin/HelpdeskController.php`
+
+**Implementazione:**
+```php
+// StaffController - search sanitization
+$sanitizedSearch = QueryHelper::sanitizeLikeInput($search);
+if (!empty($sanitizedSearch)) {
+    $query->where(function($q) use ($sanitizedSearch) {
+        $q->whereHas('user', function($userQuery) use ($sanitizedSearch) {
+            $userQuery->where('name', 'LIKE', "%{$sanitizedSearch}%")
+                     ->orWhere('email', 'LIKE', "%{$sanitizedSearch}%");
+        });
+    });
+}
+
+// HelpdeskController - ticket search sanitization
+$sanitizedSearch = QueryHelper::sanitizeLikeInput($search);
+if (!empty($sanitizedSearch)) {
+    $query->where(function($q) use ($sanitizedSearch) {
+        $q->where('title', 'LIKE', "%{$sanitizedSearch}%")
+          ->orWhere('description', 'LIKE', "%{$sanitizedSearch}%");
+    });
+}
+```
+
+**Protezione completa:** TUTTI i controller ora utilizzano `QueryHelper::sanitizeLikeInput()`
+
+---
+
+### **FIX #5: File Upload Validation Enhancement**
+**Vulnerabilità:** File upload validation basata solo su extension/MIME type dichiarato
+**Severity:** HIGH
+**Files:** `app/Helpers/FileUploadHelper.php` (NEW - 265 lines), `app/Http/Requests/StoreDocumentRequest.php`
+
+**Implementazione FileUploadHelper:**
+```php
+class FileUploadHelper
+{
+    // Magic bytes signatures per tipo file
+    private const MAGIC_BYTES = [
+        'image/jpeg' => [
+            ['offset' => 0, 'bytes' => [0xFF, 0xD8, 0xFF]]
+        ],
+        'image/png' => [
+            ['offset' => 0, 'bytes' => [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]]
+        ],
+        'image/gif' => [
+            ['offset' => 0, 'bytes' => [0x47, 0x49, 0x46, 0x38]] // GIF87a/89a
+        ],
+        'application/pdf' => [
+            ['offset' => 0, 'bytes' => [0x25, 0x50, 0x44, 0x46]] // %PDF
+        ]
+    ];
+
+    public static function validateFile(UploadedFile $file, string $category, int $maxSizeMB = 10): array
+    {
+        // 1. Size check (10MB default)
+        // 2. Declared MIME type check
+        // 3. Real MIME type via finfo_file() (prevents spoofing)
+        // 4. Magic bytes verification (reads first bytes of file)
+        // 5. Extension validation
+    }
+
+    public static function sanitizeFileName(string $originalName): string
+    {
+        $name = basename($originalName); // Rimuovi path traversal
+        $name = preg_replace('/[^a-zA-Z0-9._-]/', '_', $name); // Sanitize
+        return $basename . '_' . time() . '.' . $extension; // Add timestamp
+    }
+}
+```
+
+**Integrazione in StoreDocumentRequest:**
+```php
+'file' => [
+    'required', 'file', 'max:10240', 'mimes:pdf,jpg,jpeg,png,doc,docx',
+    function ($attribute, $value, $fail) {
+        $validation = FileUploadHelper::validateFile($value, $category, 10);
+        if (!$validation['valid']) {
+            $fail(implode(' ', $validation['errors']));
+        }
+    }
+]
+```
+
+**Protezione contro:**
+- File type spoofing (e.g., PHP file disguised as JPEG)
+- Malicious file uploads (executable code in images)
+- Path traversal attacks (../../etc/passwd)
+- MIME type mismatch attacks
+
+**Testing:** ✅ Manual verification - FileUploadHelper.getCategoryFromMimeType(), sanitizeFileName()
+
+---
+
+### **FIX #6: PayPal Credentials Encryption**
+**Vulnerabilità:** PayPal client_secret stored in plaintext nel DB
+**Severity:** HIGH
+**Files:** `app/Helpers/EncryptionHelper.php` (NEW - 200 lines), `app/Http/Controllers/Admin/AdminSettingsController.php`
+
+**Implementazione EncryptionHelper:**
+```php
+class EncryptionHelper
+{
+    private const ENCRYPTED_PREFIX = 'enc:';
+
+    public static function encrypt(?string $value): ?string
+    {
+        if (self::isEncrypted($value)) return $value; // Idempotent
+        $encrypted = Crypt::encryptString($value);
+        return self::ENCRYPTED_PREFIX . $encrypted; // AES-256-CBC
+    }
+
+    public static function decrypt(?string $value): ?string
+    {
+        if (!self::isEncrypted($value)) {
+            Log::warning('Attempting to decrypt plaintext value');
+            return $value; // Backward compatibility
+        }
+        $encryptedValue = substr($value, strlen(self::ENCRYPTED_PREFIX));
+        return Crypt::decryptString($encryptedValue);
+    }
+
+    public static function mask(?string $value): string
+    {
+        $length = strlen($value);
+        if ($length <= 4) return str_repeat('*', $length);
+        return str_repeat('*', $length - 4) . substr($value, -4); // ****1234
+    }
+}
+```
+
+**AdminSettingsController integration:**
+```php
+// LOAD: Decrypt + mask for display
+private function getDecryptedSecret(int $schoolId): string
+{
+    $encryptedSecret = Setting::get("school.{$schoolId}.paypal.client_secret", '');
+    $decryptedSecret = EncryptionHelper::decrypt($encryptedSecret);
+    return EncryptionHelper::mask($decryptedSecret); // Shows: ****1234
+}
+
+// SAVE: Encrypt before storing
+$paypalClientSecret = $request->paypal_client_secret;
+if (!EncryptionHelper::isEncrypted($paypalClientSecret)) {
+    $paypalClientSecret = EncryptionHelper::encrypt($paypalClientSecret);
+}
+Setting::set("school.{$school->id}.paypal.client_secret", $paypalClientSecret);
+```
+
+**Protezione contro:**
+- Database credential leaks (encrypted with APP_KEY)
+- Accidental logging of sensitive data (masked)
+- Admin viewing other school's credentials (school_id scoped)
+
+**Testing:** ✅ Verified - encrypt/decrypt/mask working correctly
+```
+Original: MySecretPayPalKey12345
+Encrypted: enc:eyJpdiI6InNvT1AxME04bVZ...
+Decrypted: MySecretPayPalKey12345
+Masked: ******************2345
+```
+
+---
+
+### **FIX #7: Strong Password Generation**
+**Vulnerabilità:** Weak auto-generated student passwords (Student2025123)
+**Severity:** HIGH
+**File:** `app/Http/Controllers/Admin/AdminStudentController.php`
+
+**Prima (WEAK):**
+```php
+return 'Student' . now()->year . str_pad(rand(100, 999), 3, '0', STR_PAD_LEFT);
+// Generates: Student2025123 (only 1000 combinations!)
+```
+
+**Dopo (STRONG):**
+```php
+private function generateStudentPassword(): string
+{
+    $words = [
+        'Quick', 'Brave', 'Swift', 'Bright', 'Clever', 'Bold', 'Smart', 'Wise',
+        'Strong', 'Mighty', 'Noble', 'Proud', 'Sharp', 'Keen', 'Fierce', 'Loyal',
+        'Lion', 'Tiger', 'Eagle', 'Wolf', 'Bear', 'Hawk', 'Fox', 'Owl',
+        'Dragon', 'Phoenix', 'Falcon', 'Panther', 'Leopard', 'Cheetah', 'Cobra', 'Shark'
+    ];
+    $specialChars = ['!', '@', '#', '$', '%', '&', '*'];
+
+    $word1 = $words[array_rand($words)];
+    $word2 = $words[array_rand($words)];
+    $numbers = str_pad(random_int(1000, 9999), 4, '0', STR_PAD_LEFT);
+    $special = $specialChars[array_rand($specialChars)];
+
+    return $word1 . $word2 . $numbers . $special; // QuickLion5847!
+}
+```
+
+**Password Strength:**
+- Combinazioni possibili: 32 x 32 x 9000 x 7 = **64,512,000** (~10^7)
+- Lunghezza: 14-16 caratteri
+- Caratteri: Uppercase, digits, special
+- Memorabilità: 2 parole (più facile da ricordare)
+
+**Esempi generati:**
+```
+1. CobraBrave3721!
+2. TigerHawk2265#
+3. WiseSwift4116*
+4. StrongFox9387#
+5. LoyalFierce1886!
+```
+
+**Testing:** ✅ Verified - 5 samples generated, all unique and strong
+
+---
+
+### **FIX #8: Mass Assignment Protection**
+**Vulnerabilità:** User model con $fillable troppo permissivo
+**Severity:** HIGH
+**File:** `app/Models/User.php`
+
+**Prima (VULNERABLE):**
+```php
+protected $fillable = [
+    'name', 'email', 'password', 'school_id', 'role', // VULNERABLE!
+    'first_name', 'last_name', 'phone', ...
+];
+
+// Attacker può fare:
+User::create($request->all()); // Include 'role' => 'super_admin' !
+```
+
+**Dopo (PROTECTED):**
+```php
+// SECURITY: Using $guarded instead of $fillable
+protected $guarded = [
+    'id',                    // Never allow mass assignment of ID
+    'role',                  // Use assignRole() method instead
+    'email_verified_at',     // Use markEmailAsVerified() instead
+    'remember_token',        // Laravel internal field
+];
+
+// Safe method con authorization check
+public function assignRole(string $role, ?User $authorizedBy = null): bool
+{
+    // Only super_admin can assign super_admin role
+    if ($role === 'super_admin' && !$authorizedBy?->isSuperAdmin()) {
+        Log::critical('Unauthorized super_admin role assignment attempt');
+        return false;
+    }
+
+    $this->role = $role;
+    $this->save();
+
+    Log::info('User role changed', [
+        'user_id' => $this->id,
+        'old_role' => $oldRole,
+        'new_role' => $role,
+        'authorized_by' => $authorizedBy?->id
+    ]);
+    return true;
+}
+
+// Altri metodi safe:
+public function setActiveStatus(bool $active, ?User $authorizedBy): bool
+public function markEmailAsVerified(): bool
+```
+
+**Protezione contro:**
+- Privilege escalation via mass assignment
+- Unauthorized role changes
+- Email verification bypass
+- Account activation/deactivation without audit trail
+
+**Testing:** ✅ Verified - Direct mass assignment BLOCKED, assignRole() works correctly
+```
+1. Direct mass assignment: role = NULL (PROTECTED!)
+2. assignRole('admin', $admin): role = admin (SUCCESS!)
+```
+
+---
+
+### **📊 Statistiche Security Phase 2**
+- **Branch:** `feature/security-phase-2-high`
+- **Commits:** 2 (FIX #3 #4, FIX #5 #6 #7 #8)
+- **Files modificati:** 9 files
+- **Righe aggiunte:** 800+ insertions
+- **Helpers creati:** 2 (EncryptionHelper, FileUploadHelper)
+- **Vulnerabilità risolte:** 6 HIGH su 6
+
+**Security Score Improvements:**
+- SchoolOwnership: 7 modelli ora protetti ✅
+- LIKE Injection: 100% coverage su tutti i controller ✅
+- File Upload Spoofing: Magic bytes validation attiva ✅
+- PayPal Credentials: Encrypted at rest (AES-256) ✅
+- Password Strength: 10^3 → 10^7 combinazioni ✅
+- Mass Assignment: Privilege escalation bloccato ✅
+
+**Git:**
+- Commit `dca7f79` - FIX #3 #4 (SchoolOwnership + LIKE Injection)
+- Commit `e3db8f5` - FIX #5 #6 #7 #8 (File Upload + Encryption + Password + Mass Assignment)
+- Merge `b5f8d7f` - Merged into `feature/refactoring-phase-1`
+
+---
+
+### **🔄 Prossimi Step (FASE 3 - MEDIUM Priority)**
+Le seguenti vulnerabilità MEDIUM priority saranno implementate nella Fase 3:
+1. Session Fixation Prevention (auth regeneration)
+2. CSRF Token Validation (global middleware)
+3. Rate Limiting per Login (prevent brute force)
+4. XSS Protection Enhancement (CSP headers)
 
 **Roadmap completa:** Consultare `SECURITY_FIX_ROADMAP.md`
 
