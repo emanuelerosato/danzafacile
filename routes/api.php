@@ -12,6 +12,12 @@ use App\Http\Controllers\API\Student\ProfileController as StudentProfileControll
 use App\Http\Controllers\API\Student\CourseController as StudentCourseController;
 use App\Http\Controllers\API\Student\EnrollmentController;
 
+// NEW: Additional API Controllers for Flutter
+use App\Http\Controllers\API\TicketController;
+use App\Http\Controllers\API\DocumentController;
+use App\Http\Controllers\API\GalleryController;
+use App\Http\Controllers\API\RoomController;
+
 // Legacy Web Controllers (Step 1 - Maintained for compatibility)
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\SchoolController as SuperAdminSchoolController;
@@ -455,6 +461,70 @@ Route::prefix('mobile/v1')->group(function () {
             Route::get('/attendance', [App\Http\Controllers\Api\AnalyticsController::class, 'attendance']);
             Route::get('/revenue', [App\Http\Controllers\Api\AnalyticsController::class, 'revenue'])->middleware('role:admin');
             Route::get('/export', [App\Http\Controllers\Api\AnalyticsController::class, 'export'])->middleware('role:admin');
+        });
+
+        // TICKETS API - Available to Admin and Student
+        Route::prefix('tickets')->group(function () {
+            Route::get('/', [TicketController::class, 'index']);
+            Route::post('/', [TicketController::class, 'store']);
+            Route::get('/statistics', [TicketController::class, 'statistics']);
+            Route::get('/{id}', [TicketController::class, 'show']);
+            Route::put('/{id}', [TicketController::class, 'update'])->middleware('role:admin');
+            Route::post('/{id}/reply', [TicketController::class, 'reply']);
+            Route::post('/{id}/close', [TicketController::class, 'close']);
+            Route::post('/{id}/reopen', [TicketController::class, 'reopen']);
+        });
+
+        // DOCUMENTS API - Available to Admin and Student
+        Route::prefix('documents')->group(function () {
+            Route::get('/', [DocumentController::class, 'index']);
+            Route::post('/', [DocumentController::class, 'store']);
+            Route::get('/statistics', [DocumentController::class, 'statistics'])->middleware('role:admin');
+            Route::get('/{id}', [DocumentController::class, 'show']);
+            Route::put('/{id}', [DocumentController::class, 'update'])->middleware('role:admin');
+            Route::delete('/{id}', [DocumentController::class, 'destroy']);
+            Route::get('/{id}/download', [DocumentController::class, 'download']);
+
+            // Admin only actions - SECURITY: Rate limited to 5/min
+            Route::middleware(['role:admin', 'throttle:api-sensitive'])->group(function () {
+                Route::post('/{id}/approve', [DocumentController::class, 'approve']);
+                Route::post('/{id}/reject', [DocumentController::class, 'reject']);
+                Route::post('/bulk-action', [DocumentController::class, 'bulkAction']);
+            });
+        });
+
+        // GALLERIES API - Available to Admin and Student
+        Route::prefix('galleries')->group(function () {
+            Route::get('/', [GalleryController::class, 'index']);
+            Route::get('/{id}', [GalleryController::class, 'show']);
+            Route::get('/{id}/media', [GalleryController::class, 'getMedia']);
+
+            // Admin only routes
+            Route::middleware('role:admin')->group(function () {
+                Route::post('/', [GalleryController::class, 'store']);
+                Route::put('/{id}', [GalleryController::class, 'update']);
+                Route::delete('/{id}', [GalleryController::class, 'destroy']);
+                Route::get('/stats', [GalleryController::class, 'statistics']);
+
+                // Media management
+                Route::post('/{id}/upload', [GalleryController::class, 'uploadMedia']);
+                Route::post('/{id}/external-link', [GalleryController::class, 'addExternalLink']);
+                Route::put('/{galleryId}/media/{mediaId}', [GalleryController::class, 'updateMedia']);
+                Route::delete('/{galleryId}/media/{mediaId}', [GalleryController::class, 'deleteMedia']);
+                Route::post('/{id}/cover-image', [GalleryController::class, 'setCoverImage']);
+            });
+        });
+
+        // ROOMS API - Admin only
+        Route::middleware('role:admin')->prefix('rooms')->group(function () {
+            Route::get('/', [RoomController::class, 'index']);
+            Route::post('/', [RoomController::class, 'store']);
+            Route::get('/statistics', [RoomController::class, 'statistics']);
+            Route::get('/{id}', [RoomController::class, 'show']);
+            Route::put('/{id}', [RoomController::class, 'update']);
+            Route::delete('/{id}', [RoomController::class, 'destroy']);
+            Route::post('/{id}/toggle-status', [RoomController::class, 'toggleStatus']);
+            Route::get('/{id}/availability', [RoomController::class, 'availability']);
         });
     });
 });
