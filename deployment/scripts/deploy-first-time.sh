@@ -1,6 +1,7 @@
 #!/bin/bash
 ################################################################################
 # SCUOLA DI DANZA - First Time Deploy
+# Ubuntu 25.10 Compatible Version
 ################################################################################
 set -e
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
@@ -17,7 +18,15 @@ echo ""
 
 [[ $EUID -ne 0 ]] && { print_error "Esegui come root"; exit 1; }
 
-read -p "📝 Dominio (es: scuoladidanza.it): " DOMAIN
+# Rileva versione PHP
+if [ -f /tmp/php_version.txt ]; then
+    PHP_VERSION=$(cat /tmp/php_version.txt)
+else
+    PHP_VERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || echo "8.3")
+fi
+print_message "Uso PHP $PHP_VERSION"
+
+read -p "📝 Dominio (es: danzafacile.it): " DOMAIN
 [[ -z "$DOMAIN" ]] && { print_error "Dominio obbligatorio!"; exit 1; }
 
 read -p "📝 Nome database (default: scuoladidanza): " DB_NAME
@@ -30,7 +39,7 @@ read -sp "🔐 Password database: " DB_PASSWORD
 echo ""
 [[ -z "$DB_PASSWORD" ]] && { print_error "Password obbligatoria!"; exit 1; }
 
-read -p "📧 Email Aruba (es: admin@scuoladidanza.it): " ARUBA_EMAIL
+read -p "📧 Email Aruba (es: admin@danzafacile.it): " ARUBA_EMAIL
 [[ -z "$ARUBA_EMAIL" ]] && { print_error "Email obbligatoria!"; exit 1; }
 
 read -sp "🔐 Password email Aruba: " ARUBA_PASSWORD
@@ -137,7 +146,7 @@ server {
     }
     
     location ~ \.php$ {
-        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php${PHP_VERSION}-fpm.sock;
         fastcgi_param SCRIPT_FILENAME \$realpath_root\$fastcgi_script_name;
         include fastcgi_params;
     }
@@ -173,4 +182,10 @@ echo "║         🎉 DEPLOY COMPLETATO!                            ║"
 echo "╚═══════════════════════════════════════════════════════════╝"
 echo ""
 print_success "Sito online: https://$DOMAIN"
+echo ""
+echo "📋 Informazioni:"
+echo "   • Dominio: $DOMAIN"
+echo "   • Database: $DB_NAME"
+echo "   • Email: $ARUBA_EMAIL"
+echo "   • PHP: $PHP_VERSION"
 echo ""

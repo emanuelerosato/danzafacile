@@ -1,6 +1,6 @@
 #!/bin/bash
 ################################################################################
-# Deploy Aggiornamenti
+# Deploy Aggiornamenti - Ubuntu 25.10 Compatible
 ################################################################################
 set -e
 BLUE='\033[0;34m'; GREEN='\033[0;32m'; NC='\033[0m'
@@ -10,7 +10,10 @@ print_success() { echo -e "${GREEN}✓${NC} $1"; }
 APP_DIR="/var/www/scuoladidanza"
 BRANCH="${1:-main}"
 
-echo "🚀 Deploy da branch: $BRANCH"
+# Rileva versione PHP
+PHP_VERSION=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;' 2>/dev/null || echo "8.3")
+
+echo "🚀 Deploy da branch: $BRANCH (PHP $PHP_VERSION)"
 cd $APP_DIR
 
 print_message "Step 1/8: Modalità manutenzione..."
@@ -42,7 +45,7 @@ php artisan config:cache && php artisan route:cache && php artisan view:cache
 print_success "Ottimizzato"
 
 print_message "Step 8/8: Restart servizi..."
-systemctl reload php8.2-fpm nginx
+systemctl reload php${PHP_VERSION}-fpm nginx
 php artisan up
 print_success "Sito online!"
 
