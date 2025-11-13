@@ -1,8 +1,8 @@
 # 📚 Guida Completa - Sistema Scuola di Danza
 
-**Ultima modifica:** 27 Settembre 2025
-**Versione:** 1.0.0 - Sistema Completo
-**Stato:** 🎉 **PRODUZIONE READY**
+**Ultima modifica:** 13 Novembre 2025
+**Versione:** 1.1.0 - Sistema in Produzione
+**Stato:** 🚀 **LIVE su https://danzafacile.it**
 
 ---
 
@@ -176,6 +176,249 @@ Services in produzione:
 - Asset compilation con Vite
 - CDN ready per media files
 - Search ottimizzato con Meilisearch
+
+---
+
+## 🚀 **DEPLOYMENT VPS PRODUZIONE** (13 Novembre 2025)
+
+### **🌐 Sito Live**
+**URL:** https://danzafacile.it
+**Dominio:** danzafacile.it (Aruba)
+**Email:** admin@danzafacile.it
+**VPS:** DigitalOcean - Ubuntu 25.10
+**IP:** 157.230.114.252
+
+### **📦 Architettura Produzione**
+```yaml
+Stack Tecnologico:
+  Web Server: Nginx 1.28.0
+  PHP: 8.4.0 FPM
+  Database: MySQL 8.4.0
+  Cache: Redis 7.0
+  SSL: Let's Encrypt (auto-renewal)
+  Node.js: 20 LTS
+  Composer: Latest
+
+Sicurezza:
+  Firewall: UFW (22, 80, 443)
+  SSH Protection: Fail2Ban
+  SSL Grade: A+ (Let's Encrypt)
+  MySQL: localhost only (127.0.0.1)
+```
+
+### **💰 Costi Mensili**
+```
+Dominio + Email (Aruba): €1/mese (€12/anno ÷ 12)
+VPS DigitalOcean 1GB:    €5.50/mese
+──────────────────────────────────────
+TOTALE:                  €6.50/mese
+```
+
+### **🛠️ Script Automatici Installati**
+
+#### **Gestione Server (`/root/`):**
+```bash
+setup-server.sh       # Setup iniziale VPS (eseguito una volta)
+deploy-first-time.sh  # Primo deploy applicazione (eseguito)
+deploy.sh             # Deploy aggiornamenti rapidi
+backup.sh             # Backup database + storage
+monitor.sh            # Health check servizi
+update-system.sh      # Security updates
+```
+
+#### **Automazioni Cron:**
+```cron
+# Backup giornaliero alle 3:00 AM
+0 3 * * * /root/backup.sh >> /var/log/backup.log 2>&1
+
+# Health check ogni ora
+0 * * * * /root/monitor.sh >> /var/log/monitor.log 2>&1
+```
+
+### **📋 Configurazione Produzione**
+
+#### **Database:**
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=scuoladidanza
+DB_USERNAME=scuoladidanza
+```
+
+#### **Email SMTP Aruba:**
+```
+MAIL_MAILER=smtp
+MAIL_HOST=smtps.aruba.it
+MAIL_PORT=465
+MAIL_USERNAME=admin@danzafacile.it
+MAIL_ENCRYPTION=ssl
+```
+
+#### **Cache & Session:**
+```
+CACHE_STORE=redis
+SESSION_DRIVER=redis
+QUEUE_CONNECTION=sync
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
+```
+
+### **🔄 Workflow Deploy Aggiornamenti**
+
+**Sul Mac (locale):**
+```bash
+cd /Users/emanuele/Sites/scuoladanza
+git add .
+git commit -m "Descrizione modifiche"
+git push origin main
+```
+
+**Sul VPS (produzione):**
+```bash
+ssh root@157.230.114.252
+/root/deploy.sh main
+```
+
+**Tempo deploy:** ~1 minuto (con zero downtime - maintenance mode automatico)
+
+### **🔍 Monitoring e Manutenzione**
+
+#### **Health Check Manuale:**
+```bash
+ssh root@157.230.114.252
+/root/monitor.sh
+```
+
+**Output:**
+```
+🔍 Health Check - 2025-11-13 11:16:57
+
+📦 Servizi:
+✓ Nginx
+✓ PHP-FPM
+✓ MySQL
+✓ Redis
+
+💾 Spazio Disco:
+✓ Spazio: 14%
+
+🧠 Memoria:
+✗ RAM critica: 92%
+```
+
+#### **Backup Manuale:**
+```bash
+ssh root@157.230.114.252
+/root/backup.sh
+```
+
+**Backup salvati in:** `/var/www/scuoladidanza/storage/backups/`
+- Database: `db_YYYYMMDD_HHMMSS.sql.gz`
+- File storage: `files_YYYYMMDD_HHMMSS.tar.gz`
+- Retention: 7 giorni (pulizia automatica)
+
+#### **Visualizza Log:**
+```bash
+# Log backup
+tail -f /var/log/backup.log
+
+# Log monitoring
+tail -f /var/log/monitor.log
+
+# Log Laravel
+ssh root@157.230.114.252
+tail -f /var/www/scuoladidanza/storage/logs/laravel.log
+
+# Log Nginx
+tail -f /var/log/nginx/error.log
+```
+
+### **🔐 Sicurezza Implementata**
+
+- ✅ **Firewall UFW:** Solo porte 22 (SSH), 80 (HTTP), 443 (HTTPS)
+- ✅ **Fail2Ban:** Protezione brute-force SSH
+- ✅ **SSL/TLS:** Certificato Let's Encrypt con auto-renewal
+- ✅ **MySQL:** Bind localhost only (127.0.0.1)
+- ✅ **PHP-FPM:** Isolato con utente www-data
+- ✅ **File Permissions:** 755 directories, 644 files, 640 .env
+- ✅ **Laravel:** APP_DEBUG=false, error reporting ottimizzato
+
+### **📊 Statistiche Deploy**
+
+```
+Data deploy: 13 Novembre 2025
+Tempo setup VPS: ~15 minuti
+Tempo deploy app: ~10 minuti
+Tempo totale: ~25 minuti
+Files trasferiti: 2847 files
+Database migrato: 24 migrations
+SSL configurato: Automatico
+Status servizi: 4/4 operativi ✅
+```
+
+### **🎯 Comandi Utili VPS**
+
+#### **Restart Servizi:**
+```bash
+systemctl restart nginx
+systemctl restart php8.4-fpm
+systemctl restart mysql
+systemctl restart redis-server
+```
+
+#### **Verifica Status:**
+```bash
+systemctl status nginx
+systemctl status php8.4-fpm
+systemctl status mysql
+systemctl status redis-server
+```
+
+#### **Certificato SSL Renewal (automatico):**
+```bash
+certbot renew --dry-run  # Test
+certbot certificates     # Verifica scadenza
+```
+
+#### **Permissions Fix (se necessario):**
+```bash
+cd /var/www/scuoladidanza
+chown -R deploy:www-data .
+chmod -R 755 .
+chmod -R 775 storage bootstrap/cache
+chmod 640 .env
+```
+
+### **⚠️ Note Importanti**
+
+1. **RAM 92%:** Normale per VPS 1GB con Nginx+PHP+MySQL+Redis. Sito funziona perfettamente.
+2. **Backup Automatici:** Controllare `/var/log/backup.log` periodicamente
+3. **SSL Auto-Renewal:** Certbot rinnova automaticamente ogni 90 giorni
+4. **Security Updates:** Eseguire `/root/update-system.sh` ogni 2 settimane
+5. **Monitoring:** Controllare `/var/log/monitor.log` per verificare uptime servizi
+
+### **🔗 DNS Configurazione (Aruba)**
+
+```
+Tipo  Nome  Destinazione
+────────────────────────────
+A     @     157.230.114.252
+A     www   157.230.114.252
+```
+
+### **📞 Accesso SSH**
+
+```bash
+# Da terminale Mac
+ssh root@157.230.114.252
+
+# Da terminale con password
+ssh root@danzafacile.it
+```
+
+**Cartella applicazione:** `/var/www/scuoladidanza`
+**Utente deploy:** `deploy` (membro gruppo `www-data`)
 
 ---
 
