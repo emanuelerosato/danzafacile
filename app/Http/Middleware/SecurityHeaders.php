@@ -41,19 +41,19 @@ class SecurityHeaders
         // Script sources (different for dev/prod)
         if ($isDevelopment) {
             // Development: Allow Vite HMR and unpkg CDN
-            $csp[] = "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173 https://cdn.jsdelivr.net https://unpkg.com https://www.paypal.com https://www.paypalobjects.com";
+            $csp[] = "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173 https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com https://www.paypal.com https://www.paypalobjects.com";
         } else {
             // Production: Stricter policy
-            $csp[] = "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://www.paypal.com https://www.paypalobjects.com";
+            $csp[] = "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com https://www.paypal.com https://www.paypalobjects.com";
         }
 
         // Style sources (different for dev/prod)
         if ($isDevelopment) {
             // Development: Allow Vite HMR and fonts.bunny.net
-            $csp[] = "style-src 'self' 'unsafe-inline' http://localhost:5173 https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net";
+            $csp[] = "style-src 'self' 'unsafe-inline' http://localhost:5173 https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdn.tailwindcss.com";
         } else {
             // Production: Stricter policy
-            $csp[] = "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net";
+            $csp[] = "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdn.tailwindcss.com";
         }
 
         // Font sources
