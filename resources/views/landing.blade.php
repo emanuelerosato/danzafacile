@@ -282,7 +282,7 @@
                         <div class="relative">
                             <img src="{{ asset('images/daniela-crescenzio.jpeg') }}"
                                  alt="Daniela Crescenzio - Fondatrice DanzaFacile"
-                                 class="w-48 h-48 rounded-full object-cover shadow-2xl ring-4 ring-white">
+                                 class="w-48 h-48 rounded-full object-cover object-top shadow-2xl ring-4 ring-white">
                             <div class="absolute -bottom-2 -right-2 bg-yellow-400 rounded-full p-3 shadow-lg">
                                 <span class="text-2xl">💃</span>
                             </div>
