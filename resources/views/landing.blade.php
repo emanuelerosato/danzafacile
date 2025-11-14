@@ -277,15 +277,12 @@
 
             <div class="bg-gradient-to-br from-rose-50 to-purple-50 rounded-3xl p-8 md:p-12 shadow-xl">
                 <div class="grid md:grid-cols-3 gap-8 items-center">
-                    <!-- Foto Maestra (Placeholder) -->
+                    <!-- Foto Daniela Crescenzio -->
                     <div class="flex justify-center">
                         <div class="relative">
-                            <div class="w-48 h-48 rounded-full bg-gradient-to-br from-rose-400 to-purple-600 flex items-center justify-center shadow-2xl">
-                                <!-- Placeholder per foto - sostituire con <img src="/path/to/photo.jpg" class="w-48 h-48 rounded-full object-cover"> -->
-                                <svg class="w-24 h-24 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                </svg>
-                            </div>
+                            <img src="{{ asset('images/daniela-crescenzio.jpeg') }}"
+                                 alt="Daniela Crescenzio - Fondatrice DanzaFacile"
+                                 class="w-48 h-48 rounded-full object-cover shadow-2xl ring-4 ring-white">
                             <div class="absolute -bottom-2 -right-2 bg-yellow-400 rounded-full p-3 shadow-lg">
                                 <span class="text-2xl">💃</span>
                             </div>
