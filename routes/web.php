@@ -140,6 +140,8 @@ Route::middleware('auth')->group(function () {
         Route::get('schools/export', [SchoolController::class, 'exportAll'])->name('schools.export-all');
         Route::resource('schools', SchoolController::class);
         Route::patch('schools/{school}/toggle-active', [SchoolController::class, 'toggleActive'])->name('schools.toggle-active');
+        Route::patch('schools/{school}/suspend', [SchoolController::class, 'suspend'])->name('schools.suspend');
+        Route::patch('schools/{school}/activate', [SchoolController::class, 'activate'])->name('schools.activate');
         Route::post('schools/bulk-action', [SchoolController::class, 'bulkAction'])->name('schools.bulk-action');
         Route::get('schools/{school}/export', [SchoolController::class, 'export'])->name('schools.export');
         

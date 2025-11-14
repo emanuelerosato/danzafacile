@@ -402,4 +402,47 @@ class SchoolController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    /**
+     * Suspend a school
+     */
+    public function suspend(Request $request, School $school)
+    {
+        $request->validate([
+            'suspension_reason' => 'nullable|string|max:255',
+            'suspension_notes' => 'nullable|string|max:1000',
+        ]);
+
+        $school->update([
+            'active' => false,
+            'notes' => $request->suspension_notes
+                ? ($school->notes ? $school->notes . "\n\n[SOSPENSIONE " . now()->format('d/m/Y H:i') . "]\nMotivo: " . $request->suspension_reason . "\n" . $request->suspension_notes : "[SOSPENSIONE " . now()->format('d/m/Y H:i') . "]\nMotivo: " . $request->suspension_reason . "\n" . $request->suspension_notes)
+                : $school->notes
+        ]);
+
+        return redirect()
+            ->route('super-admin.schools.show', $school)
+            ->with('success', "La scuola \"{$school->name}\" è stata sospesa con successo.");
+    }
+
+    /**
+     * Activate a school
+     */
+    public function activate(Request $request, School $school)
+    {
+        $request->validate([
+            'activation_notes' => 'nullable|string|max:1000',
+        ]);
+
+        $school->update([
+            'active' => true,
+            'notes' => $request->activation_notes
+                ? ($school->notes ? $school->notes . "\n\n[RIATTIVAZIONE " . now()->format('d/m/Y H:i') . "]\n" . $request->activation_notes : "[RIATTIVAZIONE " . now()->format('d/m/Y H:i') . "]\n" . $request->activation_notes)
+                : $school->notes
+        ]);
+
+        return redirect()
+            ->route('super-admin.schools.show', $school)
+            ->with('success', "La scuola \"{$school->name}\" è stata riattivata con successo.");
+    }
 }
