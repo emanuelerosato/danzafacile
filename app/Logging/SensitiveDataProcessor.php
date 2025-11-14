@@ -2,9 +2,6 @@
 
 namespace App\Logging;
 
-use Monolog\LogRecord;
-use Monolog\Processor\ProcessorInterface;
-
 /**
  * Sensitive Data Processor for Logs
  *
@@ -14,8 +11,10 @@ use Monolog\Processor\ProcessorInterface;
  * - Credit card number logging
  * - Email addresses in plaintext
  * - Session tokens exposure
+ *
+ * Compatible with both Monolog v2 (Production) and v3 (Local)
  */
-class SensitiveDataProcessor implements ProcessorInterface
+class SensitiveDataProcessor
 {
     /**
      * Sensitive field patterns to redact
@@ -73,27 +72,40 @@ class SensitiveDataProcessor implements ProcessorInterface
 
     /**
      * Process log record to sanitize sensitive data
+     * Compatible with Monolog v2 (array) and v3 (LogRecord)
      *
-     * @param LogRecord $record
-     * @return LogRecord
+     * @param array|\Monolog\LogRecord $record
+     * @return array|\Monolog\LogRecord
      */
-    public function __invoke(LogRecord $record): LogRecord
+    public function __invoke($record)
     {
-        // Sanitize context array (common logging pattern)
-        $sanitizedContext = !empty($record->context) ? $this->sanitizeArray($record->context) : [];
+        // Monolog v3 compatibility (LogRecord object)
+        if (is_object($record) && method_exists($record, 'with')) {
+            $sanitizedContext = !empty($record->context) ? $this->sanitizeArray($record->context) : [];
+            $sanitizedExtra = !empty($record->extra) ? $this->sanitizeArray($record->extra) : [];
+            $sanitizedMessage = $this->sanitizeString($record->message);
 
-        // Sanitize extra data
-        $sanitizedExtra = !empty($record->extra) ? $this->sanitizeArray($record->extra) : [];
+            return $record->with(
+                message: $sanitizedMessage,
+                context: $sanitizedContext,
+                extra: $sanitizedExtra
+            );
+        }
 
-        // Sanitize message string
-        $sanitizedMessage = $this->sanitizeString($record->message);
+        // Monolog v2 compatibility (array)
+        if (isset($record['context']) && is_array($record['context'])) {
+            $record['context'] = $this->sanitizeArray($record['context']);
+        }
 
-        // Return new LogRecord with sanitized data (Monolog v3 uses readonly properties)
-        return $record->with(
-            message: $sanitizedMessage,
-            context: $sanitizedContext,
-            extra: $sanitizedExtra
-        );
+        if (isset($record['extra']) && is_array($record['extra'])) {
+            $record['extra'] = $this->sanitizeArray($record['extra']);
+        }
+
+        if (isset($record['message']) && is_string($record['message'])) {
+            $record['message'] = $this->sanitizeString($record['message']);
+        }
+
+        return $record;
     }
 
     /**
