@@ -57,8 +57,22 @@ Route::post('/demo-request', function (Illuminate\Http\Request $request) {
         'privacy' => 'required|accepted',
     ]);
 
+    // Salva il lead nel database
+    $lead = \App\Models\Lead::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'phone' => $validated['phone'],
+        'school_name' => $validated['school_name'] ?? null,
+        'students_count' => $validated['students_count'] ?? null,
+        'message' => $validated['message'] ?? null,
+        'status' => 'nuovo',
+        'ip_address' => $request->ip(),
+        'user_agent' => $request->userAgent(),
+    ]);
+
     // Log della richiesta
     \Illuminate\Support\Facades\Log::info('🎯 Nuova Richiesta Demo DanzaFacile', [
+        'lead_id' => $lead->id,
         'nome' => $validated['name'],
         'email' => $validated['email'],
         'telefono' => $validated['phone'],
@@ -133,6 +147,9 @@ Route::middleware('auth')->group(function () {
         Route::get('users/export', [SuperAdminUserController::class, 'export'])->name('users.export');
         Route::resource('users', SuperAdminUserController::class);
         Route::patch('users/{user}/toggle-active', [SuperAdminUserController::class, 'toggleActive'])->name('users.toggle-active');
+
+        // Leads CRM management
+        Route::resource('leads', \App\Http\Controllers\SuperAdmin\LeadController::class)->only(['index', 'show', 'update', 'destroy']);
         Route::post('users/bulk-action', [SuperAdminUserController::class, 'bulkAction'])->name('users.bulk-action');
         Route::post('users/{user}/impersonate', [SuperAdminUserController::class, 'impersonate'])->name('users.impersonate');
         

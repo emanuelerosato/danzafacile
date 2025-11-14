@@ -37,6 +37,15 @@
                 <x-nav-item href="{{ route('super-admin.users.index') }}" :active="request()->routeIs('super-admin.users.*')" icon="users">
                     Utenti
                 </x-nav-item>
+                <x-nav-item href="{{ route('super-admin.leads.index') }}" :active="request()->routeIs('super-admin.leads.*')" icon="users">
+                    Lead CRM
+                    @php
+                        $newLeads = \App\Models\Lead::where('status', 'nuovo')->count();
+                    @endphp
+                    @if($newLeads > 0)
+                    <span class="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full">{{ $newLeads }}</span>
+                    @endif
+                </x-nav-item>
             </x-nav-group>
             
             <x-nav-group title="Sistema & Monitoring" icon="shield-check">
