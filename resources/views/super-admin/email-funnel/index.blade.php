@@ -94,7 +94,7 @@
                             </p>
                             <ul class="text-sm text-blue-800 space-y-1 ml-4">
                                 <li>• Ogni email ha un <strong>delay_days</strong> che determina quando verrà inviata</li>
-                                <li>• I placeholder <code class="bg-blue-100 px-1 rounded">{{'{{'}}Nome{{'}}'}}</code>, <code class="bg-blue-100 px-1 rounded">{{'{{'}}Email{{'}}'}}</code>, <code class="bg-blue-100 px-1 rounded">{{'{{'}}Telefono{{'}}'}}</code> vengono sostituiti automaticamente</li>
+                                <li>• I placeholder <code class="bg-blue-100 px-1 rounded">@{{ '{{' }}Nome@{{ '}}' }}</code>, <code class="bg-blue-100 px-1 rounded">@{{ '{{' }}Email@{{ '}}' }}</code>, <code class="bg-blue-100 px-1 rounded">@{{ '{{' }}Telefono@{{ '}}' }}</code> vengono sostituiti automaticamente</li>
                                 <li>• Il sistema invia le email ogni ora tramite scheduler Laravel</li>
                             </ul>
                         </div>
