@@ -57,7 +57,7 @@ Route::post('/demo-request', function (Illuminate\Http\Request $request) {
         'privacy' => 'required|accepted',
     ]);
 
-    // Log della richiesta (le email verranno configurate dopo)
+    // Log della richiesta
     \Illuminate\Support\Facades\Log::info('🎯 Nuova Richiesta Demo DanzaFacile', [
         'nome' => $validated['name'],
         'email' => $validated['email'],
@@ -68,8 +68,13 @@ Route::post('/demo-request', function (Illuminate\Http\Request $request) {
         'timestamp' => now()->toDateTimeString(),
     ]);
 
-    // TODO: Inviare email quando SMTP sarà configurato
-    // Mail::to('info@danzafacile.it')->send(new DemoRequestMail($validated));
+    // Invia email notifica
+    try {
+        \Illuminate\Support\Facades\Mail::to('emanuelerosato.com@gmail.com')
+            ->send(new \App\Mail\DemoRequestMail($validated));
+    } catch (\Exception $e) {
+        \Illuminate\Support\Facades\Log::error('Errore invio email demo: ' . $e->getMessage());
+    }
 
     // Reindirizza alla pagina di ringraziamento
     return redirect()->route('thank-you');
