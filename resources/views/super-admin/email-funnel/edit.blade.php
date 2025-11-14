@@ -156,20 +156,20 @@
                                     Placeholder Disponibili
                                 </h3>
                                 <div class="space-y-2 text-xs">
-                                    <div class="p-2 bg-purple-50 rounded cursor-pointer hover:bg-purple-100" onclick="copyToClipboard('{{'{{'}}Nome{{'}}'}}')">
-                                        <code class="text-purple-700 font-mono">{{'{{'}}Nome{{'}}'}}</code>
+                                    <div class="p-2 bg-purple-50 rounded cursor-pointer hover:bg-purple-100" onclick="copyToClipboard('@{{ '{{' }}Nome@{{ '}}' }}')">
+                                        <code class="text-purple-700 font-mono">@{{ '{{' }}Nome@{{ '}}' }}</code>
                                         <p class="text-gray-600 mt-0.5">Nome del lead</p>
                                     </div>
-                                    <div class="p-2 bg-purple-50 rounded cursor-pointer hover:bg-purple-100" onclick="copyToClipboard('{{'{{'}}Email{{'}}'}}')">
-                                        <code class="text-purple-700 font-mono">{{'{{'}}Email{{'}}'}}</code>
+                                    <div class="p-2 bg-purple-50 rounded cursor-pointer hover:bg-purple-100" onclick="copyToClipboard('@{{ '{{' }}Email@{{ '}}' }}')">
+                                        <code class="text-purple-700 font-mono">@{{ '{{' }}Email@{{ '}}' }}</code>
                                         <p class="text-gray-600 mt-0.5">Email del lead</p>
                                     </div>
-                                    <div class="p-2 bg-purple-50 rounded cursor-pointer hover:bg-purple-100" onclick="copyToClipboard('{{'{{'}}Telefono{{'}}'}}')">
-                                        <code class="text-purple-700 font-mono">{{'{{'}}Telefono{{'}}'}}</code>
+                                    <div class="p-2 bg-purple-50 rounded cursor-pointer hover:bg-purple-100" onclick="copyToClipboard('@{{ '{{' }}Telefono@{{ '}}' }}')">
+                                        <code class="text-purple-700 font-mono">@{{ '{{' }}Telefono@{{ '}}' }}</code>
                                         <p class="text-gray-600 mt-0.5">Telefono del lead</p>
                                     </div>
-                                    <div class="p-2 bg-purple-50 rounded cursor-pointer hover:bg-purple-100" onclick="copyToClipboard('{{'{{'}}Scuola{{'}}'}}')">
-                                        <code class="text-purple-700 font-mono">{{'{{'}}Scuola{{'}}'}}</code>
+                                    <div class="p-2 bg-purple-50 rounded cursor-pointer hover:bg-purple-100" onclick="copyToClipboard('@{{ '{{' }}Scuola@{{ '}}' }}')">
+                                        <code class="text-purple-700 font-mono">@{{ '{{' }}Scuola@{{ '}}' }}</code>
                                         <p class="text-gray-600 mt-0.5">Nome scuola</p>
                                     </div>
                                 </div>
