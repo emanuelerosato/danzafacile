@@ -30,4 +30,10 @@ print_success "Files salvati"
 print_message "Pulizia backup vecchi..."
 find $BACKUP_DIR -type f -mtime +7 -delete
 print_success "Backup completato"
+
+# Upload su Google Drive
+print_message "Upload su Google Drive..."
+rclone copy $BACKUP_DIR gdrive:danzafacile-backups --progress
+print_success "Backup caricato su Google Drive"
+
 echo ""
