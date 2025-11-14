@@ -294,7 +294,7 @@
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-sm text-gray-600">Nuovi utenti</span>
-                                        <span class="text-sm font-medium">+12</span>
+                                        <span class="text-sm font-medium">+{{ $data['users']['new_this_period'] ?? 0 }}</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-sm text-gray-600">Ricavi periodo</span>
@@ -307,7 +307,7 @@
                                 <div class="space-y-2">
                                     <div class="flex justify-between">
                                         <span class="text-sm text-gray-600">Tasso attivazione scuole</span>
-                                        <span class="text-sm font-medium text-green-600">87%</span>
+                                        <span class="text-sm font-medium text-green-600">{{ $data['schools']['activation_rate'] ?? 0 }}%</span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-sm text-gray-600">Utenti attivi</span>
@@ -315,7 +315,7 @@
                                     </div>
                                     <div class="flex justify-between">
                                         <span class="text-sm text-gray-600">Ricavo medio/scuola</span>
-                                        <span class="text-sm font-medium">€1,250</span>
+                                        <span class="text-sm font-medium">€{{ number_format($data['payments']['avg_per_school'] ?? 0, 2) }}</span>
                                     </div>
                                 </div>
                             </div>

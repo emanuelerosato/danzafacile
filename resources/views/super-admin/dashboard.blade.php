@@ -37,55 +37,55 @@
     <div x-data="dashboard()" class="space-y-8">
         <!-- Key Statistics -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <x-stats-card 
+            <x-stats-card
                 title="Scuole Attive"
                 :value="number_format($stats['schools_active'])"
                 :subtitle="'su ' . number_format($stats['schools_total']) . ' totali'"
                 icon="office-building"
                 color="rose"
-                :change="15"
-                changeType="increase"
+                :change="$stats['schools_change']"
+                :changeType="$stats['schools_change'] >= 0 ? 'increase' : 'decrease'"
             />
-            
-            <x-stats-card 
+
+            <x-stats-card
                 title="Totale Utenti"
                 :value="number_format($stats['users_total'])"
                 :subtitle="number_format($stats['students_total']) . ' studenti, ' . number_format($stats['admins_total']) . ' admin'"
                 icon="users"
                 color="blue"
-                :change="8"
-                changeType="increase"
+                :change="abs($stats['users_change'])"
+                :changeType="$stats['users_change'] >= 0 ? 'increase' : 'decrease'"
             />
-            
-            <x-stats-card 
+
+            <x-stats-card
                 title="Corsi Attivi"
                 :value="number_format($stats['courses_active'])"
                 :subtitle="'su ' . number_format($stats['courses_total']) . ' totali'"
                 icon="academic-cap"
                 color="purple"
-                :change="3"
-                changeType="decrease"
+                :change="abs($stats['courses_change'])"
+                :changeType="$stats['courses_change'] >= 0 ? 'increase' : 'decrease'"
             />
-            
-            <x-stats-card 
+
+            <x-stats-card
                 title="Ricavi Totali"
                 :value="'€' . number_format($stats['payments_total'], 2)"
                 :subtitle="'€' . number_format($stats['payments_month'], 2) . ' questo mese'"
                 icon="currency-dollar"
                 color="green"
-                :change="22"
-                changeType="increase"
+                :change="abs($stats['payments_change'])"
+                :changeType="$stats['payments_change'] >= 0 ? 'increase' : 'decrease'"
             />
         </div>
 
         <!-- Charts Section -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <x-chart-card 
+            <x-chart-card
                 title="Andamento Registrazioni"
                 type="line"
                 :data="[
-                    'labels' => ['Gen', 'Feb', 'Mar', 'Apr', 'Mag', 'Giu'],
-                    'values' => [12, 19, 15, 25, 22, 30],
+                    'labels' => $chartData['labels'],
+                    'values' => $chartData['values'],
                     'label' => 'Nuovi Utenti'
                 ]"
             />

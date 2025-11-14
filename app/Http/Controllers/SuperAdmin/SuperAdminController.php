@@ -24,6 +24,7 @@ class SuperAdminController extends Controller
      */
     public function index()
     {
+        // Current period stats
         $stats = [
             'schools_total' => School::count(),
             'schools_active' => School::where('active', true)->count(),
@@ -32,16 +33,47 @@ class SuperAdminController extends Controller
             'students_total' => User::where('role', User::ROLE_STUDENT)->count(),
             'courses_total' => Course::count(),
             'courses_active' => Course::where('active', true)->count(),
-            'payments_total' => Payment::sum('amount'),
-            'payments_month' => Payment::whereMonth('payment_date', now()->month)->sum('amount'),
+            'payments_total' => Payment::sum('amount') ?? 0,
+            'payments_month' => Payment::whereMonth('payment_date', now()->month)->sum('amount') ?? 0,
             'documents_pending' => Document::where('status', 'pending')->count(),
         ];
+
+        // Previous period for comparison (last 30 days vs 30 days before)
+        $lastMonth = School::where('created_at', '>=', now()->subDays(30))->count();
+        $previousMonth = School::whereBetween('created_at', [now()->subDays(60), now()->subDays(30)])->count();
+        $stats['schools_change'] = $previousMonth > 0 ? round((($lastMonth - $previousMonth) / $previousMonth) * 100) : 0;
+
+        $usersLastMonth = User::where('created_at', '>=', now()->subDays(30))->count();
+        $usersPreviousMonth = User::whereBetween('created_at', [now()->subDays(60), now()->subDays(30)])->count();
+        $stats['users_change'] = $usersPreviousMonth > 0 ? round((($usersLastMonth - $usersPreviousMonth) / $usersPreviousMonth) * 100) : 0;
+
+        $coursesLastMonth = Course::where('created_at', '>=', now()->subDays(30))->count();
+        $coursesPreviousMonth = Course::whereBetween('created_at', [now()->subDays(60), now()->subDays(30)])->count();
+        $stats['courses_change'] = $coursesPreviousMonth > 0 ? round((($coursesLastMonth - $coursesPreviousMonth) / $coursesPreviousMonth) * 100) : ($coursesLastMonth > 0 ? 100 : 0);
+
+        $paymentsLastMonth = Payment::where('payment_date', '>=', now()->subDays(30))->sum('amount') ?? 0;
+        $paymentsPreviousMonth = Payment::whereBetween('payment_date', [now()->subDays(60), now()->subDays(30)])->sum('amount') ?? 0;
+        $stats['payments_change'] = $paymentsPreviousMonth > 0 ? round((($paymentsLastMonth - $paymentsPreviousMonth) / $paymentsPreviousMonth) * 100) : ($paymentsLastMonth > 0 ? 100 : 0);
+
+        // Chart data for registrations (last 6 months)
+        $chartData = [
+            'labels' => [],
+            'values' => []
+        ];
+
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $chartData['labels'][] = $month->locale('it')->isoFormat('MMM');
+            $chartData['values'][] = User::whereYear('created_at', $month->year)
+                                        ->whereMonth('created_at', $month->month)
+                                        ->count();
+        }
 
         $recent_schools = School::latest()->take(5)->get();
         $recent_users = User::latest()->take(10)->get();
         $pending_documents = Document::where('status', 'pending')->with('user')->latest()->take(5)->get();
 
-        return view('super-admin.dashboard', compact('stats', 'recent_schools', 'recent_users', 'pending_documents'));
+        return view('super-admin.dashboard', compact('stats', 'chartData', 'recent_schools', 'recent_users', 'pending_documents'));
     }
 
     /**
@@ -708,7 +740,7 @@ class SuperAdminController extends Controller
     private function getUsersReportFiltered($period, $customPeriod = null)
     {
         $query = User::query();
-        
+
         if ($customPeriod) {
             $query->whereBetween('created_at', [$customPeriod['from'], $customPeriod['to']]);
         } elseif ($period !== 'all') {
@@ -728,6 +760,7 @@ class SuperAdminController extends Controller
             'instructors' => (clone $query)->where('role', User::ROLE_INSTRUCTOR)->count(),
             'students' => (clone $query)->where('role', User::ROLE_STUDENT)->count(),
             'active' => (clone $query)->where('active', true)->count(),
+            'new_this_period' => $query->count(),
         ];
     }
 
@@ -785,11 +818,30 @@ class SuperAdminController extends Controller
 
     private function getOverviewReportFiltered($period, $customPeriod = null)
     {
+        $schools = $this->getSchoolsReportFiltered($period, $customPeriod);
+        $users = $this->getUsersReportFiltered($period, $customPeriod);
+        $payments = $this->getPaymentsReportFiltered($period, $customPeriod);
+        $courses = $this->getCoursesReportFiltered($period, $customPeriod);
+
+        // Calculate activation rate for schools
+        $activationRate = $schools['total'] > 0
+            ? round(($schools['active'] / $schools['total']) * 100)
+            : 0;
+
+        // Calculate average revenue per school
+        $avgPerSchool = School::count() > 0
+            ? round($payments['total_amount'] / School::count(), 2)
+            : 0;
+
         return [
-            'schools' => $this->getSchoolsReportFiltered($period, $customPeriod),
-            'users' => $this->getUsersReportFiltered($period, $customPeriod),
-            'payments' => $this->getPaymentsReportFiltered($period, $customPeriod),
-            'courses' => $this->getCoursesReportFiltered($period, $customPeriod),
+            'schools' => array_merge($schools, [
+                'activation_rate' => $activationRate
+            ]),
+            'users' => $users,
+            'payments' => array_merge($payments, [
+                'avg_per_school' => $avgPerSchool
+            ]),
+            'courses' => $courses,
         ];
     }
 
