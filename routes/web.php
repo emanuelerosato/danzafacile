@@ -57,18 +57,19 @@ Route::post('/demo-request', function (Illuminate\Http\Request $request) {
         'privacy' => 'required|accepted',
     ]);
 
-    // Invia email notifica (opzionale - configurare SMTP prima)
-    try {
-        \Illuminate\Support\Facades\Mail::to('info@danzafacile.it')->send(
-            new \Illuminate\Mail\Message(function ($m) use ($validated) {
-                $m->subject('🎯 Nuova Richiesta Demo - DanzaFacile');
-                $m->from($validated['email'], $validated['name']);
-                $m->replyTo($validated['email']);
-            })
-        );
-    } catch (\Exception $e) {
-        \Log::info('Demo request:', $validated);
-    }
+    // Log della richiesta (le email verranno configurate dopo)
+    \Illuminate\Support\Facades\Log::info('🎯 Nuova Richiesta Demo DanzaFacile', [
+        'nome' => $validated['name'],
+        'email' => $validated['email'],
+        'telefono' => $validated['phone'],
+        'scuola' => $validated['school_name'] ?? 'Non specificata',
+        'studenti' => $validated['students_count'] ?? 'Non specificato',
+        'messaggio' => $validated['message'] ?? 'Nessun messaggio',
+        'timestamp' => now()->toDateTimeString(),
+    ]);
+
+    // TODO: Inviare email quando SMTP sarà configurato
+    // Mail::to('info@danzafacile.it')->send(new DemoRequestMail($validated));
 
     // Reindirizza con messaggio successo
     return back()->with('success', 'Grazie! Riceverai la demo entro 24 ore. Controlla la tua email.');
