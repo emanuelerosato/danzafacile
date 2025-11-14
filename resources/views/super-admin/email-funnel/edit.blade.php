@@ -85,7 +85,7 @@
                                         </label>
                                         <input type="text" name="subject" id="subject" value="{{ old('subject', $emailTemplate->subject) }}"
                                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
-                                               placeholder="Es: {{'{{'}}Nome{{'}}'}}, hai visto questa opportunità?"
+                                               placeholder="Es: @{{ '{{' }}Nome@{{ '}}' }}, hai visto questa opportunità?"
                                                required>
                                     </div>
 
