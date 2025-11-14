@@ -37,14 +37,20 @@
                 <x-nav-item href="{{ route('super-admin.users.index') }}" :active="request()->routeIs('super-admin.users.*')" icon="users">
                     Utenti
                 </x-nav-item>
+            </x-nav-group>
+
+            <x-nav-group title="CRM" icon="briefcase">
                 <x-nav-item href="{{ route('super-admin.leads.index') }}" :active="request()->routeIs('super-admin.leads.*')" icon="users">
-                    Lead CRM
+                    Lead
                     @php
                         $newLeads = \App\Models\Lead::where('status', 'nuovo')->count();
                     @endphp
                     @if($newLeads > 0)
                     <span class="ml-auto bg-blue-500 text-white text-xs px-2 py-1 rounded-full">{{ $newLeads }}</span>
                     @endif
+                </x-nav-item>
+                <x-nav-item href="{{ route('super-admin.email-funnel.index') }}" :active="request()->routeIs('super-admin.email-funnel.*')" icon="mail">
+                    Email Funnel
                 </x-nav-item>
             </x-nav-group>
             

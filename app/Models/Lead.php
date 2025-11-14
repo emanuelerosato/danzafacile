@@ -103,4 +103,44 @@ class Lead extends Model
     {
         return $query->where('status', 'chiuso_perso');
     }
+
+    /**
+     * Relazione con email logs (funnel)
+     */
+    public function emailLogs()
+    {
+        return $this->hasMany(LeadEmailLog::class)->orderBy('scheduled_at');
+    }
+
+    /**
+     * Ottieni la prossima email da inviare nel funnel
+     */
+    public function getNextEmailAttribute()
+    {
+        return $this->emailLogs()
+                    ->where('status', 'scheduled')
+                    ->orderBy('scheduled_at')
+                    ->first();
+    }
+
+    /**
+     * Ottieni il progresso nel funnel (%)
+     */
+    public function getFunnelProgressAttribute(): int
+    {
+        $total = EmailTemplate::active()->count();
+        if ($total === 0) return 0;
+
+        $sent = $this->emailLogs()->sent()->count();
+        return (int) (($sent / $total) * 100);
+    }
+
+    /**
+     * Ottieni lo step corrente nel funnel (1-5)
+     */
+    public function getCurrentFunnelStepAttribute(): int
+    {
+        $sent = $this->emailLogs()->sent()->count();
+        return min($sent + 1, 5); // Max 5 step
+    }
 }

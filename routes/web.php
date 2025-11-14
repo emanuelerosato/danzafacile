@@ -150,6 +150,14 @@ Route::middleware('auth')->group(function () {
 
         // Leads CRM management
         Route::resource('leads', \App\Http\Controllers\SuperAdmin\LeadController::class)->only(['index', 'show', 'update', 'destroy']);
+
+        // Email Funnel management
+        Route::prefix('email-funnel')->name('email-funnel.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\SuperAdmin\EmailFunnelController::class, 'index'])->name('index');
+            Route::get('/{emailTemplate}/edit', [\App\Http\Controllers\SuperAdmin\EmailFunnelController::class, 'edit'])->name('edit');
+            Route::put('/{emailTemplate}', [\App\Http\Controllers\SuperAdmin\EmailFunnelController::class, 'update'])->name('update');
+            Route::patch('/{emailTemplate}/toggle-active', [\App\Http\Controllers\SuperAdmin\EmailFunnelController::class, 'toggleActive'])->name('toggle-active');
+        });
         Route::post('users/bulk-action', [SuperAdminUserController::class, 'bulkAction'])->name('users.bulk-action');
         Route::post('users/{user}/impersonate', [SuperAdminUserController::class, 'impersonate'])->name('users.impersonate');
         
