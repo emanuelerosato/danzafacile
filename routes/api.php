@@ -423,15 +423,16 @@ Route::prefix('mobile/v1')->group(function () {
         });
 
         // EVENTS API - Available to all authenticated users
-        Route::prefix('events')->group(function () {
-            Route::get('/', [App\Http\Controllers\Api\EventController::class, 'index']);
-            Route::get('/categories', [App\Http\Controllers\Api\EventController::class, 'categories']);
-            Route::get('/{event}', [App\Http\Controllers\Api\EventController::class, 'show']);
-            Route::post('/{event}/register', [App\Http\Controllers\Api\EventController::class, 'register']);
-            Route::delete('/{event}/cancel', [App\Http\Controllers\Api\EventController::class, 'cancelRegistration']);
-        });
+        // TODO: Creare EventController quando necessario
+        // Route::prefix('events')->group(function () {
+        //     Route::get('/', [App\Http\Controllers\Api\EventController::class, 'index']);
+        //     Route::get('/categories', [App\Http\Controllers\Api\EventController::class, 'categories']);
+        //     Route::get('/{event}', [App\Http\Controllers\Api\EventController::class, 'show']);
+        //     Route::post('/{event}/register', [App\Http\Controllers\Api\EventController::class, 'register']);
+        //     Route::delete('/{event}/cancel', [App\Http\Controllers\Api\EventController::class, 'cancelRegistration']);
+        // });
 
-        Route::get('/my-events', [App\Http\Controllers\Api\EventController::class, 'myEvents']);
+        // Route::get('/my-events', [App\Http\Controllers\Api\EventController::class, 'myEvents']);
 
         // ATTENDANCE API - Available to all authenticated users
         Route::prefix('attendance')->group(function () {
