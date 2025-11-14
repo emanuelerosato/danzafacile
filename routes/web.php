@@ -71,9 +71,14 @@ Route::post('/demo-request', function (Illuminate\Http\Request $request) {
     // TODO: Inviare email quando SMTP sarà configurato
     // Mail::to('info@danzafacile.it')->send(new DemoRequestMail($validated));
 
-    // Reindirizza con messaggio successo
-    return back()->with('success', 'Grazie! Riceverai la demo entro 24 ore. Controlla la tua email.');
+    // Reindirizza alla pagina di ringraziamento
+    return redirect()->route('thank-you');
 })->name('landing.demo');
+
+// Thank You page (conversione Google Ads)
+Route::get('/grazie', function () {
+    return view('thank-you');
+})->name('thank-you');
 
 // Authentication routes
 require __DIR__.'/auth.php';
