@@ -39,10 +39,40 @@ use App\Http\Controllers\Student\TicketController;
 use App\Http\Controllers\Student\StudentDocumentController;
 use App\Http\Controllers\Shared\MediaItemController;
 
-// Home page
+// Landing page pubblica
 Route::get('/', function () {
-    return view('welcome');
+    return view('landing');
 })->name('home');
+
+// Route per gestione form demo
+Route::post('/demo-request', function (Illuminate\Http\Request $request) {
+    // Validazione
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|max:255',
+        'phone' => 'required|string|max:20',
+        'school_name' => 'nullable|string|max:255',
+        'students_count' => 'nullable|string',
+        'message' => 'nullable|string|max:1000',
+        'privacy' => 'required|accepted',
+    ]);
+
+    // Invia email notifica (opzionale - configurare SMTP prima)
+    try {
+        \Illuminate\Support\Facades\Mail::to('info@danzafacile.it')->send(
+            new \Illuminate\Mail\Message(function ($m) use ($validated) {
+                $m->subject('🎯 Nuova Richiesta Demo - DanzaFacile');
+                $m->from($validated['email'], $validated['name']);
+                $m->replyTo($validated['email']);
+            })
+        );
+    } catch (\Exception $e) {
+        \Log::info('Demo request:', $validated);
+    }
+
+    // Reindirizza con messaggio successo
+    return back()->with('success', 'Grazie! Riceverai la demo entro 24 ore. Controlla la tua email.');
+})->name('landing.demo');
 
 // Authentication routes
 require __DIR__.'/auth.php';
