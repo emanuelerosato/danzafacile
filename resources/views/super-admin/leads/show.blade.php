@@ -214,6 +214,127 @@
                             </div>
                         </div>
 
+                        {{-- Email Funnel Progress --}}
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                Email Funnel Marketing
+                            </h3>
+
+                            {{-- Progress Bar --}}
+                            <div class="mb-6">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-gray-700">
+                                        Step {{ $lead->current_funnel_step }} di 5
+                                    </span>
+                                    <span class="text-sm font-bold text-purple-600">
+                                        {{ $lead->funnel_progress }}%
+                                    </span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div class="bg-gradient-to-r from-purple-500 to-pink-600 h-3 rounded-full transition-all duration-500"
+                                         style="width: {{ $lead->funnel_progress }}%"></div>
+                                </div>
+                            </div>
+
+                            {{-- Email Timeline --}}
+                            <div class="space-y-3">
+                                @forelse($lead->emailLogs as $log)
+                                <div class="flex items-start p-3 rounded-lg
+                                    @if($log->status === 'sent') bg-green-50
+                                    @elseif($log->status === 'scheduled') bg-blue-50
+                                    @elseif($log->status === 'failed') bg-red-50
+                                    @else bg-gray-50
+                                    @endif">
+                                    <div class="flex-shrink-0">
+                                        @if($log->status === 'sent')
+                                        <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </div>
+                                        @elseif($log->status === 'scheduled')
+                                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </div>
+                                        @elseif($log->status === 'failed')
+                                        <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        </div>
+                                        @else
+                                        <div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </div>
+                                        @endif
+                                    </div>
+
+                                    <div class="ml-3 flex-1">
+                                        <p class="text-sm font-medium text-gray-900">
+                                            {{ $log->emailTemplate->name }}
+                                        </p>
+                                        <p class="text-xs text-gray-600 mt-0.5">
+                                            {{ Str::limit($log->subject, 50) }}
+                                        </p>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium
+                                                @if($log->status_color === 'green') bg-green-100 text-green-800
+                                                @elseif($log->status_color === 'blue') bg-blue-100 text-blue-800
+                                                @elseif($log->status_color === 'red') bg-red-100 text-red-800
+                                                @elseif($log->status_color === 'purple') bg-purple-100 text-purple-800
+                                                @else bg-gray-100 text-gray-800
+                                                @endif">
+                                                {{ $log->status_label }}
+                                            </span>
+                                            @if($log->sent_at)
+                                            <span class="text-xs text-gray-500">
+                                                {{ $log->sent_at->format('d/m H:i') }}
+                                            </span>
+                                            @elseif($log->scheduled_at)
+                                            <span class="text-xs text-gray-500">
+                                                📅 {{ $log->scheduled_at->format('d/m H:i') }}
+                                            </span>
+                                            @endif
+                                        </div>
+                                        @if($log->error_message)
+                                        <p class="text-xs text-red-600 mt-1">
+                                            ❌ {{ $log->error_message }}
+                                        </p>
+                                        @endif
+                                    </div>
+                                </div>
+                                @empty
+                                <div class="text-center py-6">
+                                    <svg class="w-12 h-12 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                    <p class="text-sm text-gray-600">Nessuna email funnel configurata</p>
+                                    <p class="text-xs text-gray-500 mt-1">Le email verranno schedulate automaticamente</p>
+                                </div>
+                                @endforelse
+                            </div>
+
+                            @if($lead->next_email)
+                            <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <p class="text-sm font-medium text-blue-900">📬 Prossima Email</p>
+                                <p class="text-xs text-blue-700 mt-1">
+                                    {{ $lead->next_email->emailTemplate->name }}
+                                </p>
+                                <p class="text-xs text-blue-600 mt-0.5">
+                                    Programmata per: {{ $lead->next_email->scheduled_at->format('d/m/Y H:i') }}
+                                    ({{ $lead->next_email->scheduled_at->diffForHumans() }})
+                                </p>
+                            </div>
+                            @endif
+                        </div>
+
                     </div>
 
                     {{-- Colonna Destra - Gestione Status & Note --}}

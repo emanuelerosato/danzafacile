@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Lead;
+use App\Observers\LeadObserver;
 use App\View\Composers\AppSettingsComposer;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -28,5 +30,8 @@ class AppServiceProvider extends ServiceProvider
             'layouts.app',
             'layouts.guest'
         ], AppSettingsComposer::class);
+
+        // Register Lead Observer for email funnel automation
+        Lead::observe(LeadObserver::class);
     }
 }
