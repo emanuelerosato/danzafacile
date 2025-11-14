@@ -53,7 +53,7 @@ class SuperAdminController extends Controller
         $currentSettings = [
             'app_name' => \App\Models\Setting::get('app_name', config('app.name')),
             'app_description' => \App\Models\Setting::get('app_description', 'Sistema di gestione per scuole di danza'),
-            'contact_email' => \App\Models\Setting::get('contact_email', 'info@scuoladanza.it'),
+            'contact_email' => \App\Models\Setting::get('contact_email', 'info@danzafacile.it'),
             'contact_phone' => \App\Models\Setting::get('contact_phone', '+39 123 456 7890'),
             'timezone' => \App\Models\Setting::get('timezone', 'Europe/Rome'),
             'default_language' => \App\Models\Setting::get('default_language', 'it'),
@@ -67,7 +67,7 @@ class SuperAdminController extends Controller
             'smtp_username' => \App\Models\Setting::get('smtp_username', ''),
             'smtp_encryption' => \App\Models\Setting::get('smtp_encryption', 'tls'),
             'mail_from_name' => \App\Models\Setting::get('mail_from_name', 'Scuola di Danza'),
-            'mail_from_address' => \App\Models\Setting::get('mail_from_address', 'noreply@scuoladanza.it'),
+            'mail_from_address' => \App\Models\Setting::get('mail_from_address', 'noreply@danzafacile.it'),
             
             // Security settings
             'session_timeout' => \App\Models\Setting::get('session_timeout', 120),

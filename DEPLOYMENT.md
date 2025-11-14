@@ -113,9 +113,9 @@ sudo firewall-cmd --reload
 ### **4. Creare Directory di Deploy**
 ```bash
 # Creare struttura directory
-sudo mkdir -p /opt/scuoladanza-production
-sudo chown $USER:$USER /opt/scuoladanza-production
-cd /opt/scuoladanza-production
+sudo mkdir -p /opt/danzafacile-production
+sudo chown $USER:$USER /opt/danzafacile-production
+cd /opt/danzafacile-production
 
 # Creare directory per i dati
 mkdir -p {storage,backups,logs,ssl}
@@ -127,8 +127,8 @@ mkdir -p {storage,backups,logs,ssl}
 
 ### **1. Clone Repository**
 ```bash
-cd /opt/scuoladanza-production
-git clone https://github.com/emanuelerosato/scuoladanza.git .
+cd /opt/danzafacile-production
+git clone https://github.com/emanuelerosato/danzafacile.git .
 git checkout main
 ```
 
@@ -159,8 +159,8 @@ SANCTUM_STATEFUL_DOMAINS=your-domain.com
 DB_CONNECTION=mysql
 DB_HOST=mysql
 DB_PORT=3306
-DB_DATABASE=scuoladanza_production
-DB_USERNAME=scuoladanza_user
+DB_DATABASE=danzafacile_production
+DB_USERNAME=danzafacile_user
 DB_PASSWORD=STRONG_PASSWORD_HERE
 DB_ROOT_PASSWORD=ROOT_PASSWORD_HERE
 
@@ -185,7 +185,7 @@ LETSENCRYPT_EMAIL=admin@your-domain.com
 # Backup
 AWS_ACCESS_KEY_ID=your_aws_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret
-AWS_BUCKET=scuoladanza-backups
+AWS_BUCKET=danzafacile-backups
 BACKUP_NOTIFICATION_MAIL=admin@your-domain.com
 
 # Health Check
@@ -201,7 +201,7 @@ GRAFANA_ADMIN_PASSWORD=strong_grafana_password
 
 ### **1. Build & Deploy**
 ```bash
-cd /opt/scuoladanza-production
+cd /opt/danzafacile-production
 
 # Avviare servizi base
 docker-compose -f docker-compose.prod.yml up -d mysql redis
@@ -258,7 +258,7 @@ curl "http://localhost/health/detailed?secret=your-health-check-secret"
 
 ### **1. Avviare Proxy e SSL**
 ```bash
-cd /opt/scuoladanza-production
+cd /opt/danzafacile-production
 
 # Configurare domain nell'app
 docker-compose -f docker-compose.prod.yml exec app bash
@@ -293,15 +293,15 @@ curl -I https://your-domain.com
 crontab -e
 
 # Aggiungere: Backup ogni notte alle 2:00
-0 2 * * * cd /opt/scuoladanza-production && docker-compose -f docker-compose.prod.yml run --rm backup
+0 2 * * * cd /opt/danzafacile-production && docker-compose -f docker-compose.prod.yml run --rm backup
 
 # Backup settimanale completo ogni domenica alle 3:00
-0 3 * * 0 cd /opt/scuoladanza-production && docker-compose -f docker-compose.prod.yml run --rm backup
+0 3 * * 0 cd /opt/danzafacile-production && docker-compose -f docker-compose.prod.yml run --rm backup
 ```
 
 ### **2. Avviare Monitoring (Opzionale)**
 ```bash
-cd /opt/scuoladanza-production
+cd /opt/danzafacile-production
 
 # Avviare Prometheus e Grafana
 docker-compose -f docker-compose.prod.yml --profile monitoring up -d
@@ -314,10 +314,10 @@ docker-compose -f docker-compose.prod.yml --profile monitoring up -d
 
 ### **3. Configurare Log Rotation**
 ```bash
-sudo nano /etc/logrotate.d/scuoladanza
+sudo nano /etc/logrotate.d/danzafacile
 
 # Contenuto:
-/opt/scuoladanza-production/logs/*.log {
+/opt/danzafacile-production/logs/*.log {
     daily
     missingok
     rotate 30
@@ -326,7 +326,7 @@ sudo nano /etc/logrotate.d/scuoladanza
     notifempty
     create 644 www-data www-data
     postrotate
-        docker-compose -f /opt/scuoladanza-production/docker-compose.prod.yml restart app
+        docker-compose -f /opt/danzafacile-production/docker-compose.prod.yml restart app
     endscript
 }
 ```
@@ -337,7 +337,7 @@ sudo nano /etc/logrotate.d/scuoladanza
 
 ### **1. Update Applicazione**
 ```bash
-cd /opt/scuoladanza-production
+cd /opt/danzafacile-production
 
 # Backup before update
 docker-compose -f docker-compose.prod.yml run --rm backup
@@ -385,10 +385,10 @@ docker-compose -f docker-compose.prod.yml exec app php artisan security:audit --
 docker-compose -f docker-compose.prod.yml exec app php artisan optimize:for-production
 
 # Clear old logs (older than 30 days)
-find /opt/scuoladanza-production/logs -name "*.log" -mtime +30 -delete
+find /opt/danzafacile-production/logs -name "*.log" -mtime +30 -delete
 
 # Clear old backups (older than 30 days)
-find /opt/scuoladanza-production/backups -name "*.sql*" -mtime +30 -delete
+find /opt/danzafacile-production/backups -name "*.sql*" -mtime +30 -delete
 ```
 
 ---
@@ -420,7 +420,7 @@ docker-compose -f docker-compose.prod.yml exec mysql mysql -u root -p
 
 # Reset database container
 docker-compose -f docker-compose.prod.yml down mysql
-docker volume rm scuoladanza_mysql_data
+docker volume rm danzafacile_mysql_data
 docker-compose -f docker-compose.prod.yml up -d mysql
 ```
 
@@ -465,7 +465,7 @@ docker-compose -f docker-compose.prod.yml exec app php artisan up
 docker-compose -f docker-compose.prod.yml stop app
 
 # Restore database
-docker-compose -f docker-compose.prod.yml exec mysql mysql -u root -p scuoladanza_production < /var/backups/backup_YYYYMMDD_HHMMSS.sql
+docker-compose -f docker-compose.prod.yml exec mysql mysql -u root -p danzafacile_production < /var/backups/backup_YYYYMMDD_HHMMSS.sql
 
 # Start application
 docker-compose -f docker-compose.prod.yml start app
@@ -475,15 +475,15 @@ docker-compose -f docker-compose.prod.yml start app
 
 ## 📞 **SUPPORTO**
 
-**Repository:** https://github.com/emanuelerosato/scuoladanza  
-**Issues:** https://github.com/emanuelerosato/scuoladanza/issues  
+**Repository:** https://github.com/emanuelerosato/danzafacile  
+**Issues:** https://github.com/emanuelerosato/danzafacile/issues  
 **Documentazione:** `/docs/` directory  
 
 ### **Log Files Locations**
-- **Application:** `/opt/scuoladanza-production/logs/laravel.log`
+- **Application:** `/opt/danzafacile-production/logs/laravel.log`
 - **Nginx:** `/var/log/nginx/access.log`, `/var/log/nginx/error.log`
 - **MySQL:** `/var/log/mysql/error.log`, `/var/log/mysql/slow-query.log`
-- **Redis:** `docker logs scuoladanza_redis`
+- **Redis:** `docker logs danzafacile_redis`
 
 ### **Health Check URLs**
 - **Simple:** `https://your-domain.com/health/simple`

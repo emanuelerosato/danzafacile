@@ -76,20 +76,20 @@ deployment/
 
 ```bash
 # Setup VPS (15 min)
-wget https://raw.githubusercontent.com/emanuelerosato/scuoladidanza/deploy/vps-setup/deployment/scripts/setup-server.sh
+wget https://raw.githubusercontent.com/emanuelerosato/danzafacile/deploy/vps-setup/deployment/scripts/setup-server.sh
 chmod +x setup-server.sh
 ./setup-server.sh
 
 # Configura database
 mysql -u root
-CREATE DATABASE scuoladidanza;
-CREATE USER 'scuoladidanza'@'localhost' IDENTIFIED BY 'PASSWORD_FORTE';
-GRANT ALL ON scuoladidanza.* TO 'scuoladidanza'@'localhost';
+CREATE DATABASE danzafacile;
+CREATE USER 'danzafacile'@'localhost' IDENTIFIED BY 'PASSWORD_FORTE';
+GRANT ALL ON danzafacile.* TO 'danzafacile'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
 
 # Deploy app (10 min)
-wget https://raw.githubusercontent.com/emanuelerosato/scuoladidanza/deploy/vps-setup/deployment/scripts/deploy-first-time.sh
+wget https://raw.githubusercontent.com/emanuelerosato/danzafacile/deploy/vps-setup/deployment/scripts/deploy-first-time.sh
 chmod +x deploy-first-time.sh
 ./deploy-first-time.sh
 ```

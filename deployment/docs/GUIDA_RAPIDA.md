@@ -37,15 +37,15 @@ Aspetta 1-2 ore per propagazione.
 ssh root@IP_VPS
 
 # Download e esegui setup (15 min)
-wget https://raw.githubusercontent.com/emanuelerosato/scuoladidanza/deploy/vps-setup/deployment/scripts/setup-server.sh
+wget https://raw.githubusercontent.com/emanuelerosato/danzafacile/deploy/vps-setup/deployment/scripts/setup-server.sh
 chmod +x setup-server.sh
 ./setup-server.sh
 
 # Configura database MySQL
 mysql -u root
-CREATE DATABASE scuoladidanza;
-CREATE USER 'scuoladidanza'@'localhost' IDENTIFIED BY 'PASSWORD_FORTE';
-GRANT ALL ON scuoladidanza.* TO 'scuoladidanza'@'localhost';
+CREATE DATABASE danzafacile;
+CREATE USER 'danzafacile'@'localhost' IDENTIFIED BY 'PASSWORD_FORTE';
+GRANT ALL ON danzafacile.* TO 'danzafacile'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
 ```
@@ -54,7 +54,7 @@ EXIT;
 
 ```bash
 # Download e esegui deploy (10 min)
-wget https://raw.githubusercontent.com/emanuelerosato/scuoladidanza/deploy/vps-setup/deployment/scripts/deploy-first-time.sh
+wget https://raw.githubusercontent.com/emanuelerosato/danzafacile/deploy/vps-setup/deployment/scripts/deploy-first-time.sh
 chmod +x deploy-first-time.sh
 ./deploy-first-time.sh
 ```
@@ -76,7 +76,7 @@ git push origin main
 
 # Sul VPS
 ssh root@IP_VPS
-cd /var/www/scuoladidanza/deployment/scripts
+cd /var/www/danzafacile/deployment/scripts
 ./deploy.sh
 ```
 
@@ -100,7 +100,7 @@ systemctl restart nginx php8.2-fpm
 
 **Errore 500:**
 ```bash
-tail -50 /var/www/scuoladidanza/storage/logs/laravel.log
+tail -50 /var/www/danzafacile/storage/logs/laravel.log
 ```
 
 **Email non partono:**

@@ -7,7 +7,7 @@ BLUE='\033[0;34m'; GREEN='\033[0;32m'; NC='\033[0m'
 print_message() { echo -e "${BLUE}==>${NC} $1"; }
 print_success() { echo -e "${GREEN}✓${NC} $1"; }
 
-APP_DIR="/var/www/scuoladidanza"
+APP_DIR="/var/www/danzafacile"
 BRANCH="${1:-main}"
 
 # Rileva versione PHP

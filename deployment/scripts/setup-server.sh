@@ -98,7 +98,7 @@ print_success "Fail2Ban attivo"
 
 print_message "Creazione utente deploy..."
 id "deploy" &>/dev/null || useradd -m -s /bin/bash -G www-data deploy
-mkdir -p /var/www/scuoladidanza && chown -R deploy:www-data /var/www/scuoladidanza
+mkdir -p /var/www/danzafacile && chown -R deploy:www-data /var/www/danzafacile
 print_success "Utente deploy creato"
 
 apt-get autoremove -y -qq && apt-get autoclean -y -qq
@@ -123,9 +123,9 @@ echo ""
 echo "🎯 Prossimi passi:"
 echo "   1. Configura database MySQL:"
 echo "      mysql -u root"
-echo "      CREATE DATABASE scuoladidanza;"
-echo "      CREATE USER 'scuoladidanza'@'localhost' IDENTIFIED BY 'PASSWORD';"
-echo "      GRANT ALL ON scuoladidanza.* TO 'scuoladidanza'@'localhost';"
+echo "      CREATE DATABASE danzafacile;"
+echo "      CREATE USER 'danzafacile'@'localhost' IDENTIFIED BY 'PASSWORD';"
+echo "      GRANT ALL ON danzafacile.* TO 'danzafacile'@'localhost';"
 echo "      FLUSH PRIVILEGES;"
 echo ""
 echo "   2. Esegui deploy-first-time.sh"

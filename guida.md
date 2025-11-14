@@ -149,7 +149,7 @@ Duration: 6.82s
 
 ### **🔑 Credenziali Test**
 ```
-Super Admin: superadmin@scuoladanza.it / password
+Super Admin: superadmin@danzafacile.it / password
 Admin Scuola: admin@1.scuola.it / password
 Studente: studente1@1.test.it / password
 ```
@@ -242,8 +242,8 @@ update-system.sh      # Security updates
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=scuoladidanza
-DB_USERNAME=scuoladidanza
+DB_DATABASE=danzafacile
+DB_USERNAME=danzafacile
 ```
 
 #### **Email SMTP Aruba:**
@@ -268,7 +268,7 @@ REDIS_PORT=6379
 
 **Sul Mac (locale):**
 ```bash
-cd /Users/emanuele/Sites/scuoladanza
+cd /Users/emanuele/Sites/danzafacile
 git add .
 git commit -m "Descrizione modifiche"
 git push origin main
@@ -313,7 +313,7 @@ ssh root@157.230.114.252
 /root/backup.sh
 ```
 
-**Backup salvati in:** `/var/www/scuoladidanza/storage/backups/`
+**Backup salvati in:** `/var/www/danzafacile/storage/backups/`
 - Database: `db_YYYYMMDD_HHMMSS.sql.gz`
 - File storage: `files_YYYYMMDD_HHMMSS.tar.gz`
 - Retention: 7 giorni (pulizia automatica)
@@ -328,7 +328,7 @@ tail -f /var/log/monitor.log
 
 # Log Laravel
 ssh root@157.230.114.252
-tail -f /var/www/scuoladidanza/storage/logs/laravel.log
+tail -f /var/www/danzafacile/storage/logs/laravel.log
 
 # Log Nginx
 tail -f /var/log/nginx/error.log
@@ -383,7 +383,7 @@ certbot certificates     # Verifica scadenza
 
 #### **Permissions Fix (se necessario):**
 ```bash
-cd /var/www/scuoladidanza
+cd /var/www/danzafacile
 chown -R deploy:www-data .
 chmod -R 755 .
 chmod -R 775 storage bootstrap/cache
@@ -417,7 +417,7 @@ ssh root@157.230.114.252
 ssh root@danzafacile.it
 ```
 
-**Cartella applicazione:** `/var/www/scuoladidanza`
+**Cartella applicazione:** `/var/www/danzafacile`
 **Utente deploy:** `deploy` (membro gruppo `www-data`)
 
 ---

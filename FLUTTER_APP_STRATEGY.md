@@ -380,7 +380,7 @@ dev_dependencies:
 ### **OPZIONE 1: Mono-Repository** 🟡
 **Struttura:**
 ```
-scuoladanza/
+danzafacile/
 ├── backend/              # Laravel backend (esistente)
 ├── flutter_app/          # Flutter app studenti
 ├── admin_web/            # Admin dashboard (esistente)
@@ -402,8 +402,8 @@ scuoladanza/
 ### **OPZIONE 2: Repository Separato** 🟢 **RACCOMANDATO**
 **Struttura:**
 ```
-Repo 1: scuoladidanza (backend Laravel)
-Repo 2: scuoladidanza-app (Flutter app)
+Repo 1: danzafacile (backend Laravel)
+Repo 2: danzafacile-app (Flutter app)
 ```
 
 **Vantaggi:**
@@ -431,7 +431,7 @@ main              # Production (store releases)
 ### **OPZIONE 3: Mono-Repo con Git Submodules** ⚠️
 **Struttura:**
 ```
-scuoladanza/
+danzafacile/
 ├── backend/              # Git submodule
 └── flutter_app/          # Git submodule
 ```
@@ -492,12 +492,12 @@ TextTheme(
 
 ### **Android:**
 1. Google Play Console account (€25 one-time)
-2. Bundle ID: `com.scuoladanza.app`
+2. Bundle ID: `com.danzafacile.app`
 3. Release: Internal Testing → Beta → Production
 
 ### **iOS:**
 1. Apple Developer account ($99/year)
-2. Bundle ID: `com.scuoladanza.app`
+2. Bundle ID: `com.danzafacile.app`
 3. TestFlight → App Store
 
 ### **CI/CD:**
@@ -531,7 +531,7 @@ TextTheme(
 - [x] **Repository separato (RACCOMANDATO)**
 - [ ] Submodules
 
-**Decisione:** Creare `scuoladidanza-app` repository separato
+**Decisione:** Creare `danzafacile-app` repository separato
 
 ---
 
@@ -551,7 +551,7 @@ TextTheme(
 - [ ] "MyDanza"
 - [ ] Altro: _______________
 
-**Bundle ID:** `com.scuoladanza.app`
+**Bundle ID:** `com.danzafacile.app`
 
 ---
 
@@ -573,22 +573,22 @@ TextTheme(
 ### **Step 1: Creare Repository GitHub** 🔴
 ```bash
 # Opzione A: Nuovo repo separato
-gh repo create scuoladidanza-app --public
+gh repo create danzafacile-app --public
 cd ../
-flutter create scuoladidanza_app
-cd scuoladidanza_app
+flutter create danzafacile_app
+cd danzafacile_app
 git init
-git remote add origin https://github.com/emanuelerosato/scuoladidanza-app.git
+git remote add origin https://github.com/emanuelerosato/danzafacile-app.git
 
 # Opzione B: Cartella nel repo esistente
-cd /Users/emanuele/Sites/scuoladanza
+cd /Users/emanuele/Sites/danzafacile
 flutter create flutter_app
 ```
 
 ### **Step 2: Configurare Progetto Flutter**
 ```bash
-flutter create --org com.scuoladanza scuoladidanza_app
-cd scuoladidanza_app
+flutter create --org com.danzafacile danzafacile_app
+cd danzafacile_app
 
 # Aggiungere dependencies base
 flutter pub add dio flutter_riverpod go_router shared_preferences

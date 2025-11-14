@@ -263,7 +263,7 @@
                                 <input type="text" 
                                        name="smtp_username"
                                        value="{{ old('smtp_username', $currentSettings['smtp_username']) }}"
-                                       placeholder="noreply@scuoladanza.it"
+                                       placeholder="noreply@danzafacile.it"
                                        class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 bg-white/50">
                             </div>
 
@@ -292,7 +292,7 @@
                                 <input type="email" 
                                        name="mail_from_address"
                                        value="{{ old('mail_from_address', $currentSettings['mail_from_address']) }}"
-                                       placeholder="noreply@scuoladanza.it"
+                                       placeholder="noreply@danzafacile.it"
                                        class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-green-500 focus:border-green-500 bg-white/50">
                             </div>
                         </div>

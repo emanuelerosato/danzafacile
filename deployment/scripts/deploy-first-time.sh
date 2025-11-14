@@ -29,11 +29,11 @@ print_message "Uso PHP $PHP_VERSION"
 read -p "📝 Dominio (es: danzafacile.it): " DOMAIN
 [[ -z "$DOMAIN" ]] && { print_error "Dominio obbligatorio!"; exit 1; }
 
-read -p "📝 Nome database (default: scuoladidanza): " DB_NAME
-DB_NAME=${DB_NAME:-scuoladidanza}
+read -p "📝 Nome database (default: danzafacile): " DB_NAME
+DB_NAME=${DB_NAME:-danzafacile}
 
-read -p "📝 Username database (default: scuoladidanza): " DB_USER
-DB_USER=${DB_USER:-scuoladidanza}
+read -p "📝 Username database (default: danzafacile): " DB_USER
+DB_USER=${DB_USER:-danzafacile}
 
 read -sp "🔐 Password database: " DB_PASSWORD
 echo ""
@@ -46,13 +46,13 @@ read -sp "🔐 Password email Aruba: " ARUBA_PASSWORD
 echo ""
 [[ -z "$ARUBA_PASSWORD" ]] && { print_error "Password email obbligatoria!"; exit 1; }
 
-read -p "📦 Repository GitHub (default: emanuelerosato/scuoladidanza): " GITHUB_REPO
-GITHUB_REPO=${GITHUB_REPO:-emanuelerosato/scuoladidanza}
+read -p "📦 Repository GitHub (default: emanuelerosato/danzafacile): " GITHUB_REPO
+GITHUB_REPO=${GITHUB_REPO:-emanuelerosato/danzafacile}
 
 read -p "🌿 Branch (default: main): " BRANCH
 BRANCH=${BRANCH:-main}
 
-APP_DIR="/var/www/scuoladidanza"
+APP_DIR="/var/www/danzafacile"
 
 print_message "Step 1/9: Verifica database..."
 if ! mysql -u root -e "USE $DB_NAME" 2>/dev/null; then
@@ -134,7 +134,7 @@ chmod -R 775 $APP_DIR/storage $APP_DIR/bootstrap/cache
 print_success "Laravel configurato"
 
 print_message "Step 7/9: Configurazione Nginx..."
-cat > /etc/nginx/sites-available/scuoladidanza <<NGEOF
+cat > /etc/nginx/sites-available/danzafacile <<NGEOF
 server {
     listen 80;
     server_name $DOMAIN www.$DOMAIN;
@@ -158,7 +158,7 @@ server {
     client_max_body_size 50M;
 }
 NGEOF
-ln -sf /etc/nginx/sites-available/scuoladidanza /etc/nginx/sites-enabled/
+ln -sf /etc/nginx/sites-available/danzafacile /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl reload nginx
 print_success "Nginx configurato"
@@ -173,7 +173,7 @@ else
 fi
 
 print_message "Step 9/9: Setup Cron..."
-(crontab -l 2>/dev/null | grep -v "scuoladidanza"; echo "* * * * * cd $APP_DIR && php artisan schedule:run >> /dev/null 2>&1") | crontab -
+(crontab -l 2>/dev/null | grep -v "danzafacile"; echo "* * * * * cd $APP_DIR && php artisan schedule:run >> /dev/null 2>&1") | crontab -
 print_success "Cron configurato"
 
 echo ""

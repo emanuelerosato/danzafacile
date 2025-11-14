@@ -1509,8 +1509,8 @@ Dopo il fixing delle vulnerabilità CRITICAL e HIGH, l'applicazione raggiungerà
 ## APPENDIX B - CONTACT & SUPPORT
 
 Per domande su questo audit report:
-- **Security Team:** security@scuoladidanza.it
-- **DevOps Team:** devops@scuoladidanza.it
+- **Security Team:** security@danzafacile.it
+- **DevOps Team:** devops@danzafacile.it
 - **Emergency Contact:** +39 XXX XXX XXXX
 
 **CONFIDENTIAL - NOT FOR DISTRIBUTION**

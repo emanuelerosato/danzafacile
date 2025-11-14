@@ -2,7 +2,7 @@
 
 **Progetto:** Sistema di Gestione per Scuole di Danza  
 **Framework:** Laravel 12 + Docker Sail + MySQL + Blade + Flutter API  
-**Repository:** https://github.com/emanuelerosato/scuoladanza
+**Repository:** https://github.com/emanuelerosato/danzafacile
 
 **🏗️ ARCHITETTURA HYBRID:**
 - **Super Admin:** Laravel Dashboard (Blade) 
@@ -175,7 +175,7 @@
 - **Audit Logging** - Login/logout activity tracking
 
 **Account di test configurati:**
-- **Super Admin:** superadmin@scuoladanza.it / password (global access)
+- **Super Admin:** superadmin@danzafacile.it / password (global access)
 - **Admin:** admin@eleganza.it / password (school-scoped)
 - **Students:** studente1-5@example.com / password (personal access)
 
@@ -797,7 +797,7 @@ resources/views/super-admin/
 **Test Credentials Implementate:**
 ```php
 // Super Admin
-Email: superadmin@scuoladanza.it
+Email: superadmin@danzafacile.it
 Password: SuperAdmin2024!
 Role: super_admin
 
@@ -840,7 +840,7 @@ Role: student
 
 **Super Admin Web Test:**
 1. `http://localhost:8089/login`
-2. Login: `superadmin@scuoladanza.it / SuperAdmin2024!`
+2. Login: `superadmin@danzafacile.it / SuperAdmin2024!`
 3. Redirect: `http://localhost:8089/super-admin/dashboard`
 4. Verify: Dashboard metrics, Schools CRUD, User management
 

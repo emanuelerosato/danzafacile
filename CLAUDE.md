@@ -6,7 +6,7 @@ Questo file fornisce indicazioni a Claude Code (claude.ai/code) su come lavorare
 
 ## Panoramica del progetto
 
-Si tratta di un’applicazione Laravel 12 (**scuoladidanza** – scuola di danza) basata su **PHP 8.2** con **Vite** per la compilazione degli asset frontend.  
+Si tratta di un’applicazione Laravel 12 (**danzafacile** – scuola di danza) basata su **PHP 8.2** con **Vite** per la compilazione degli asset frontend.  
 Il progetto utilizza **Docker via Laravel Sail** per gestire l’ambiente di sviluppo e include i seguenti servizi:
 
 - **MySQL** – Database (porta `3307` locale)
@@ -144,7 +144,7 @@ git pull origin main          # Sincronizza da GitHub
 
 ## Gestione Git e GitHub
 
-**Repository:** https://github.com/emanuelerosato/scuoladidanza
+**Repository:** https://github.com/emanuelerosato/danzafacile
 
 ### Workflow Git obbligatorio:
 1. **Prima di iniziare:** `git pull origin main` per sincronizzare

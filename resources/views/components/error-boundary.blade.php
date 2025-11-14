@@ -223,7 +223,7 @@ Dettagli tecnici:
 ${this.errorDetails}
             `);
 
-            const mailtoLink = `mailto:support@scuoladidanza.com?subject=${subject}&body=${body}`;
+            const mailtoLink = `mailto:support@danzafacile.com?subject=${subject}&body=${body}`;
             window.open(mailtoLink);
         }
     }

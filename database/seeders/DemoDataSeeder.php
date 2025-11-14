@@ -118,7 +118,7 @@ class DemoDataSeeder extends Seeder
             'name' => 'Super Amministratore',
             'first_name' => 'Mario',
             'last_name' => 'Rossi',
-            'email' => 'superadmin@scuoladanza.it',
+            'email' => 'superadmin@danzafacile.it',
             'password' => Hash::make('password'),
             'role' => 'super_admin',
             'phone' => '+39 333 1234567',
@@ -521,7 +521,7 @@ class DemoDataSeeder extends Seeder
         $this->command->info('=====================================');
         $this->command->info('');
         $this->command->info('🔑 CREDENZIALI DEMO:');
-        $this->command->info('Super Admin: superadmin@scuoladanza.it / password');
+        $this->command->info('Super Admin: superadmin@danzafacile.it / password');
         $this->command->info('Admin Scuola 1: admin@1.scuola.it / password');
         $this->command->info('Admin Scuola 2: admin@2.scuola.it / password');
         $this->command->info('Admin Scuola 3: admin@3.scuola.it / password');

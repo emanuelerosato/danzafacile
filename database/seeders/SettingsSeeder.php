@@ -36,7 +36,7 @@ class SettingsSeeder extends Seeder
             // Contact Information
             [
                 'key' => 'contact_email',
-                'value' => 'info@scuoladanza.it',
+                'value' => 'info@danzafacile.it',
                 'type' => 'string',
                 'description' => 'Email di contatto principale'
             ],

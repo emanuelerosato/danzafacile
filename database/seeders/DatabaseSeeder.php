@@ -79,7 +79,7 @@ class DatabaseSeeder extends Seeder
             'name' => 'Super Amministratore',
             'first_name' => 'Super',
             'last_name' => 'Amministratore',
-            'email' => 'superadmin@scuoladanza.it',
+            'email' => 'superadmin@danzafacile.it',
             'password' => Hash::make('password'),
             'role' => 'super_admin',
             'phone' => '+39 333 0000000',
@@ -342,7 +342,7 @@ class DatabaseSeeder extends Seeder
         
         $this->command->line('');
         $this->command->info('🔑 <fg=cyan>TEST CREDENTIALS:</fg=cyan>');
-        $this->command->line('   Super Admin: <fg=white>superadmin@scuoladanza.it</fg=white> / <fg=white>password</fg=white>');
+        $this->command->line('   Super Admin: <fg=white>superadmin@danzafacile.it</fg=white> / <fg=white>password</fg=white>');
         $this->command->line('   School Admins:');
         foreach ($createdSchools as $school) {
             $adminEmail = str_replace('@', "+admin@", $school->email);

@@ -1,8 +1,8 @@
 # Scuola di Danza - Flutter App
 ## Documentazione Iniziale Progetto Mobile
 
-**Repository App:** https://github.com/emanuelerosato/scuoladidanza-app
-**Repository Backend:** https://github.com/emanuelerosato/scuoladanza
+**Repository App:** https://github.com/emanuelerosato/danzafacile-app
+**Repository Backend:** https://github.com/emanuelerosato/danzafacile
 
 **Data Creazione:** 2025-10-02
 **Versione:** 1.0.0 (Development)
@@ -30,7 +30,7 @@
 ### **Clean Architecture + Feature-First**
 
 ```
-scuoladidanza_app/
+danzafacile_app/
 ├── lib/
 │   ├── core/
 │   │   ├── constants/
@@ -278,8 +278,8 @@ TextTheme(
 
 #### **1. Clone Repository**
 ```bash
-git clone https://github.com/emanuelerosato/scuoladidanza-app.git
-cd scuoladidanza-app
+git clone https://github.com/emanuelerosato/danzafacile-app.git
+cd danzafacile-app
 ```
 
 #### **2. Install Dependencies**
@@ -302,7 +302,7 @@ class ApiConstants {
   static const String baseUrlDev = 'http://localhost:8089/api/mobile/v1';
 
   // Production
-  static const String baseUrlProd = 'https://api.scuoladanza.com/api/mobile/v1';
+  static const String baseUrlProd = 'https://api.danzafacile.com/api/mobile/v1';
 
   // Current environment
   static const String baseUrl = baseUrlDev; // Change in production
@@ -737,7 +737,7 @@ pod install
 ### **Backend API**
 - [API Documentation](/API_ENDPOINTS.md)
 - [API Coverage Report](/API_COVERAGE_REPORT.md)
-- Backend Repository: https://github.com/emanuelerosato/scuoladanza
+- Backend Repository: https://github.com/emanuelerosato/danzafacile
 
 ### **Design**
 - [Flutter App Strategy](/FLUTTER_APP_STRATEGY.md)
@@ -747,8 +747,8 @@ pod install
 
 ## 📞 SUPPORT
 
-**Issues:** https://github.com/emanuelerosato/scuoladidanza-app/issues
-**Backend Issues:** https://github.com/emanuelerosato/scuoladanza/issues
+**Issues:** https://github.com/emanuelerosato/danzafacile-app/issues
+**Backend Issues:** https://github.com/emanuelerosato/danzafacile/issues
 
 ---
 

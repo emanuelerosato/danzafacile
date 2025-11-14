@@ -76,7 +76,7 @@ class DatabaseBackup extends Command
     private function setupBackupDetails(): void
     {
         $timestamp = Carbon::now()->format('Y-m-d_H-i-s');
-        $this->fileName = "scuoladanza_backup_{$timestamp}.sql";
+        $this->fileName = "danzafacile_backup_{$timestamp}.sql";
         $this->backupPath = storage_path('app/backups');
         
         if (!file_exists($this->backupPath)) {
@@ -178,7 +178,7 @@ class DatabaseBackup extends Command
             $cutoffDate = Carbon::now()->subDays($retentionDays);
 
             // Clean local backups
-            $files = glob($this->backupPath . '/scuoladanza_backup_*');
+            $files = glob($this->backupPath . '/danzafacile_backup_*');
             foreach ($files as $file) {
                 $fileTime = Carbon::createFromTimestamp(filemtime($file));
                 if ($fileTime->lt($cutoffDate)) {

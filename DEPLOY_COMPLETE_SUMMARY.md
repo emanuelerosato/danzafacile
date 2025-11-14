@@ -74,12 +74,12 @@ Sul VPS Ubuntu 22.04:
 
 ```bash
 # Setup VPS (15 min)
-wget https://raw.githubusercontent.com/emanuelerosato/scuoladidanza/deploy/vps-setup/deployment/scripts/setup-server.sh
+wget https://raw.githubusercontent.com/emanuelerosato/danzafacile/deploy/vps-setup/deployment/scripts/setup-server.sh
 chmod +x setup-server.sh
 sudo ./setup-server.sh
 
 # Deploy App (10 min)
-wget https://raw.githubusercontent.com/emanuelerosato/scuoladidanza/deploy/vps-setup/deployment/scripts/deploy-first-time.sh
+wget https://raw.githubusercontent.com/emanuelerosato/danzafacile/deploy/vps-setup/deployment/scripts/deploy-first-time.sh
 chmod +x deploy-first-time.sh
 sudo ./deploy-first-time.sh
 ```
@@ -87,8 +87,8 @@ sudo ./deploy-first-time.sh
 ### **Opzione 2: Via Git Clone**
 
 ```bash
-git clone -b deploy/vps-setup https://github.com/emanuelerosato/scuoladidanza.git
-cd scuoladidanza/deployment/scripts
+git clone -b deploy/vps-setup https://github.com/emanuelerosato/danzafacile.git
+cd danzafacile/deployment/scripts
 sudo ./setup-server.sh
 sudo ./deploy-first-time.sh
 ```
@@ -195,7 +195,7 @@ git push origin main
 
 ## 📞 Link Utili
 
-- **Repository:** https://github.com/emanuelerosato/scuoladidanza
+- **Repository:** https://github.com/emanuelerosato/danzafacile
 - **Branch:** deploy/vps-setup
 - **Scripts:** deployment/scripts/
 - **Docs:** deployment/docs/

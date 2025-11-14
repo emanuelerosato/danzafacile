@@ -7,8 +7,8 @@ BLUE='\033[0;34m'; GREEN='\033[0;32m'; NC='\033[0m'
 print_message() { echo -e "${BLUE}==>${NC} $1"; }
 print_success() { echo -e "${GREEN}✓${NC} $1"; }
 
-APP_DIR="/var/www/scuoladidanza"
-BACKUP_DIR="/var/backups/scuoladidanza"
+APP_DIR="/var/www/danzafacile"
+BACKUP_DIR="/var/backups/danzafacile"
 DATE=$(date +%Y%m%d_%H%M%S)
 
 mkdir -p $BACKUP_DIR
