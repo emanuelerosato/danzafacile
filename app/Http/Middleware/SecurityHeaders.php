@@ -124,7 +124,9 @@ class SecurityHeaders
         $response->headers->remove('X-Powered-By');
 
         // SECURITY HEADER #9-11: Cross-Origin Policies
-        // Only apply in production (too restrictive for dev with Vite + external fonts)
+        // DISABLED: Too restrictive for landing page with external CDN resources (Tailwind CSS)
+        // Re-enable only if not using external CDN resources
+        /*
         if (!$isDevelopment) {
             // SECURITY HEADER #9: Cross-Origin-Resource-Policy
             // Prevents cross-origin resource loading
@@ -138,6 +140,7 @@ class SecurityHeaders
             // Isolates browsing context
             $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
         }
+        */
 
         return $response;
     }
