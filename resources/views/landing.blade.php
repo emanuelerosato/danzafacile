@@ -176,7 +176,7 @@
                     <ul class="space-y-3 text-gray-700">
                         <li class="flex items-start space-x-2">
                             <span class="text-green-600 font-bold">✓</span>
-                            <span>Solleciti automatici via email/SMS</span>
+                            <span>Solleciti automatici via email e notifiche app</span>
                         </li>
                         <li class="flex items-start space-x-2">
                             <span class="text-green-600 font-bold">✓</span>
@@ -234,27 +234,81 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-bold mb-4">Area Genitori Self-Service</h3>
+                    <h3 class="text-2xl font-bold mb-4">App Mobile per Studenti e Genitori</h3>
                     <ul class="space-y-3 text-gray-700">
                         <li class="flex items-start space-x-2">
                             <span class="text-green-600 font-bold">✓</span>
-                            <span>Genitori vedono TUTTO: presenze, pagamenti, documenti</span>
+                            <span><strong>App dedicata iOS/Android:</strong> Studenti e genitori vedono tutto dal cellulare</span>
                         </li>
                         <li class="flex items-start space-x-2">
                             <span class="text-green-600 font-bold">✓</span>
-                            <span>Upload documenti (certificati medici, autorizzazioni)</span>
+                            <span>Presenze, pagamenti, documenti sempre disponibili</span>
                         </li>
                         <li class="flex items-start space-x-2">
                             <span class="text-green-600 font-bold">✓</span>
-                            <span>Calendario eventi e saggi</span>
+                            <span>Notifiche push per eventi, saggi e comunicazioni</span>
                         </li>
                         <li class="flex items-start space-x-2">
                             <span class="text-green-600 font-bold">✓</span>
-                            <span>Galleria foto/video privata</span>
+                            <span>Upload certificati medici e autorizzazioni direttamente dall'app</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-green-600 font-bold">✓</span>
+                            <span>Galleria foto/video privata condivisa con le famiglie</span>
                         </li>
                     </ul>
                     <div class="mt-6 pt-6 border-t border-gray-200">
                         <p class="text-sm font-bold text-emerald-600">ROI: Zero domande WhatsApp, genitori felici</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CHI HA CREATO DANZAFACILE -->
+    <section class="py-20 bg-white">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-black text-gray-900 mb-4">
+                    Creato da Chi Vive la Danza Ogni Giorno
+                </h2>
+                <p class="text-xl text-gray-600">Non da programmatori in giacca e cravatta, ma da una professionista della danza</p>
+            </div>
+
+            <div class="bg-gradient-to-br from-rose-50 to-purple-50 rounded-3xl p-8 md:p-12 shadow-xl">
+                <div class="grid md:grid-cols-3 gap-8 items-center">
+                    <!-- Foto Maestra (Placeholder) -->
+                    <div class="flex justify-center">
+                        <div class="relative">
+                            <div class="w-48 h-48 rounded-full bg-gradient-to-br from-rose-400 to-purple-600 flex items-center justify-center shadow-2xl">
+                                <!-- Placeholder per foto - sostituire con <img src="/path/to/photo.jpg" class="w-48 h-48 rounded-full object-cover"> -->
+                                <svg class="w-24 h-24 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                </svg>
+                            </div>
+                            <div class="absolute -bottom-2 -right-2 bg-yellow-400 rounded-full p-3 shadow-lg">
+                                <span class="text-2xl">💃</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Testo -->
+                    <div class="md:col-span-2 space-y-4 text-gray-700">
+                        <p class="text-lg leading-relaxed">
+                            <strong class="text-rose-600 text-xl">Ho creato DanzaFacile</strong> perché ero stanca di perdere ore con Excel, WhatsApp e telefonate per gestire la mia scuola di danza.
+                        </p>
+                        <p class="text-lg leading-relaxed">
+                            Come titolare e insegnante, <strong>conosco esattamente i tuoi problemi:</strong> genitori che chiedono le stesse cose 10 volte, pagamenti da rincorrere, presenze da segnare a mano, documenti sparsi ovunque.
+                        </p>
+                        <p class="text-lg leading-relaxed">
+                            DanzaFacile <strong>non è un software generico adattato alla danza.</strong> È nato NELLA danza, PER la danza. Ogni funzione è pensata per rispondere a un problema reale che vivo ogni giorno.
+                        </p>
+                        <div class="pt-4 flex items-center space-x-2 text-rose-600 font-bold">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                            <span>15+ anni di esperienza nella gestione di scuole di danza</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -659,13 +713,14 @@
                     <h4 class="text-white font-bold mb-4">Contatti</h4>
                     <ul class="space-y-2 text-sm">
                         <li>📧 info@danzafacile.it</li>
-                        <li>📱 +39 333 123 4567</li>
+                        <li>📱 +39 340 929 5364</li>
                         <li>🏢 Made with ❤️ in Italia</li>
                     </ul>
                 </div>
             </div>
             <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-                <p>&copy; {{ date('Y') }} DanzaFacile. Tutti i diritti riservati. | <a href="#" class="hover:text-white">Privacy Policy</a> | <a href="#" class="hover:text-white">Termini di Servizio</a></p>
+                <p>&copy; {{ date('Y') }} DanzaFacile. Tutti i diritti riservati. | P.IVA 03003220732</p>
+                <p class="mt-2"><a href="#" class="hover:text-white">Privacy Policy</a> | <a href="#" class="hover:text-white">Termini di Servizio</a></p>
             </div>
         </div>
     </footer>
