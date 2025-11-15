@@ -27,14 +27,11 @@ class TestSchoolSeeder extends Seeder
             'name' => '[TEST] Scuola Push Notifications',
             'email' => 'test@pushnotif.local',
             'phone' => '+39 000 0000000',
-            'address' => 'Via Test 123',
+            'address' => 'Via Test 123, TestCity',
             'city' => 'TestCity',
-            'province' => 'TC',
             'postal_code' => '00000',
-            'country' => 'IT',
-            'is_active' => true,
-            'subscription_status' => 'active',
-            'subscription_plan' => 'premium',
+            'active' => true,
+            'description' => 'Scuola test per sistema push notifications',
         ]);
 
         $this->command->info("✅ Scuola test creata: {$testSchool->name} (ID: {$testSchool->id})");
@@ -46,7 +43,7 @@ class TestSchoolSeeder extends Seeder
             'email' => 'admin@test.pushnotif.local',
             'password' => Hash::make('password'),
             'role' => 'admin',
-            'is_active' => true,
+            'active' => true,
         ]);
 
         $this->command->info("✅ Admin test creato: {$adminTest->email}");
@@ -60,7 +57,7 @@ class TestSchoolSeeder extends Seeder
                 'email' => "studente{$i}@test.pushnotif.local",
                 'password' => Hash::make('password'),
                 'role' => 'student',
-                'is_active' => true,
+                'active' => true,
             ]);
             $students[] = $student;
 
@@ -87,7 +84,7 @@ class TestSchoolSeeder extends Seeder
                 'email' => "istruttore{$i}@test.pushnotif.local",
                 'password' => Hash::make('password'),
                 'role' => 'staff',
-                'is_active' => true,
+                'active' => true,
             ]);
             $instructors[] = $instructor;
         }
@@ -121,7 +118,7 @@ class TestSchoolSeeder extends Seeder
                 'schedule' => 'Lunedì e Giovedì 19:00-20:30',
                 'start_date' => Carbon::now()->startOfMonth(),
                 'end_date' => Carbon::now()->addMonths(3)->endOfMonth(),
-                'is_active' => true,
+                'active' => true,
             ]);
             $courses[] = $course;
 
