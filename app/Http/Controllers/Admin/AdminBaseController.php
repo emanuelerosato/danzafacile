@@ -99,8 +99,8 @@ abstract class AdminBaseController extends Controller
 
         return Cache::remember($cacheKey, 300, function () { // 5 minutes cache
             return [
-                'total_students' => $this->school->users()->where('role', 'user')->count(),
-                'active_students' => $this->school->users()->where('role', 'user')->where('active', true)->count(),
+                'total_students' => $this->school->users()->where('role', 'student')->count(),
+                'active_students' => $this->school->users()->where('role', 'student')->where('active', true)->count(),
                 'total_courses' => $this->school->courses()->count(),
                 'active_courses' => $this->school->courses()->where('active', true)->count(),
                 'total_events' => $this->school->events()->count(),

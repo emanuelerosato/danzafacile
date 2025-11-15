@@ -904,7 +904,7 @@ class AdminHelpController extends Controller
     {
         try {
             return [
-                'total_students' => $school->users()->where('role', 'user')->count(),
+                'total_students' => $school->users()->where('role', 'student')->count(),
                 'active_courses' => $school->courses()->where('active', true)->count(),
                 'pending_payments' => \App\Models\Payment::whereHas('user', function($q) use ($school) {
                     $q->where('school_id', $school->id);

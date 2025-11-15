@@ -24,7 +24,7 @@ class SchoolUserController extends Controller
 
         // Query base per gli studenti della scuola
         $query = User::where('school_id', $school->id)
-                    ->where('role', 'user') // Solo studenti
+                    ->where('role', 'student') // Solo studenti
                     ->with(['courseEnrollments.course', 'payments', 'documents']);
 
         // Filtri di ricerca
@@ -51,10 +51,10 @@ class SchoolUserController extends Controller
 
         // Statistiche rapide
         $stats = [
-            'total' => User::where('school_id', $school->id)->where('role', 'user')->count(),
-            'active' => User::where('school_id', $school->id)->where('role', 'user')->where('active', true)->count(),
+            'total' => User::where('school_id', $school->id)->where('role', 'student')->count(),
+            'active' => User::where('school_id', $school->id)->where('role', 'student')->where('active', true)->count(),
             'enrolled' => User::where('school_id', $school->id)
-                             ->where('role', 'user')
+                             ->where('role', 'student')
                              ->whereHas('courseEnrollments', function($q) {
                                  $q->where('status', 'active');
                              })->count(),
@@ -168,7 +168,7 @@ class SchoolUserController extends Controller
         // Verifica che tutti gli studenti appartengano alla scuola
         $students = User::whereIn('id', $studentIds)
                        ->where('school_id', $school->id)
-                       ->where('role', 'user')
+                       ->where('role', 'student')
                        ->get();
 
         if ($students->count() !== count($studentIds)) {
@@ -204,7 +204,7 @@ class SchoolUserController extends Controller
         $school = auth()->user()->school;
         
         $students = User::where('school_id', $school->id)
-                       ->where('role', 'user')
+                       ->where('role', 'student')
                        ->with(['courseEnrollments.course'])
                        ->get();
 

@@ -90,7 +90,7 @@ class AdminPaymentController extends AdminBaseController
     public function create(Request $request): View
     {
         $students = User::where('school_id', $this->school->id)
-            ->where('role', 'user')
+            ->where('role', 'student')
             ->where('active', true)
             ->orderBy('first_name')
             ->orderBy('last_name')
@@ -251,7 +251,7 @@ class AdminPaymentController extends AdminBaseController
         $this->authorizePayment($payment);
 
         $students = User::where('school_id', $this->school->id)
-            ->where('role', 'user')
+            ->where('role', 'student')
             ->where('active', true)
             ->orderBy('first_name')
             ->orderBy('last_name')

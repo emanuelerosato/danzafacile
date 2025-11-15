@@ -23,7 +23,7 @@ class AdminTicketController extends Controller
             // Tickets from students of this school
             $q->whereHas('user', function($userQuery) use ($school) {
                 $userQuery->where('school_id', $school->id)
-                         ->where('role', 'user'); // Students only
+                         ->where('role', 'student'); // Students only
             })
             // OR tickets created by admins of this school (sent to SuperAdmin)
             ->orWhereHas('user', function($adminQuery) use ($school) {
@@ -57,7 +57,7 @@ class AdminTicketController extends Controller
             } elseif ($request->direction === 'received') {
                 // Show only tickets created by students (received from students)
                 $query->whereHas('user', function($q) {
-                    $q->where('role', 'user');
+                    $q->where('role', 'student');
                 });
             }
         }

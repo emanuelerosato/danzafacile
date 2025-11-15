@@ -95,7 +95,7 @@ class EventRegistrationController extends AdminBaseController
         if ($request->ajax()) {
             // Get all users in the school
             $allUsers = User::where('school_id', $this->school->id)
-                ->where('role', 'user')
+                ->where('role', 'student')
                 ->select('id', 'name', 'email')
                 ->orderBy('name')
                 ->get();

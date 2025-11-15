@@ -82,7 +82,7 @@ class AdminDocumentController extends AdminBaseController
     {
         // Get all students from the current school for dropdown
         $students = auth()->user()->school->users()
-            ->where('role', 'user')
+            ->where('role', 'student')
             ->where('active', true)
             ->orderBy('first_name')
             ->orderBy('last_name')
