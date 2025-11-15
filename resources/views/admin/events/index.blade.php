@@ -22,9 +22,28 @@
         <li class="text-gray-900 font-medium">Eventi</li>
     </x-slot>
 
+    {{-- Define eventsManager stub BEFORE Alpine initializes --}}
+    <script>
+        window.eventsManager = window.eventsManager || function() {
+            return {
+                selectedItems: [],
+                bulkActionModal: false,
+                filters: {
+                    search: '',
+                    type: '',
+                    status: ''
+                },
+                allSelected: false,
+                init() {
+                    // Will be replaced by full eventsManager when loaded
+                }
+            };
+        };
+    </script>
+
     <div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="space-y-6" x-data x-init="$nextTick(() => { if (typeof eventsManager === 'function') { Object.assign($data, eventsManager()); } })">
+            <div class="space-y-6" x-data="eventsManager">
     <!-- Header -->
     <div class="flex items-center justify-between">
         <div>
