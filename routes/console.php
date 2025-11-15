@@ -10,3 +10,9 @@ Artisan::command('inspire', function () {
 
 // Schedule email funnel processing every hour
 Schedule::command('emails:process-scheduled')->hourly();
+
+// Schedule lesson reminder notifications every 15 minutes
+Schedule::command('notifications:send-lesson-reminders')
+    ->everyFifteenMinutes()
+    ->withoutOverlapping()
+    ->runInBackground();
