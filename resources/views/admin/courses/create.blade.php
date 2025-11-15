@@ -111,14 +111,14 @@
                 <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
                     Descrizione *
                 </label>
-                <x-secure-input
-                    type="textarea"
+                <textarea
                     name="description"
-                    :value="old('description')"
+                    id="description"
                     placeholder="Descrivi il corso, obiettivi e contenuti..."
-                    :required="true"
-                    :max-length="1000"
-                    class="h-24 resize-none" />
+                    required
+                    maxlength="1000"
+                    rows="4"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent resize-none">{{ old('description') }}</textarea>
                 @error('description')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
