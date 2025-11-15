@@ -111,6 +111,7 @@ class TestSchoolSeeder extends Seeder
         foreach ($courseNames as $idx => $courseName) {
             $course = Course::create([
                 'school_id' => $testSchool->id,
+                'instructor_id' => $instructors[$idx]->id,
                 'name' => $courseName,
                 'description' => "Corso test per sistema push notifications",
                 'price' => 50.00,
