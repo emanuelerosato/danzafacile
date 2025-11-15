@@ -1,11 +1,235 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 💃 DanzaFacile - Sistema Gestione Scuola di Danza
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Backend Laravel 12 per gestione completa scuola di danza con sistema push notifications integrato.
+
+## 🚀 Features
+
+- ✅ **Gestione Scuola Multi-Tenant**: Super Admin, Admin, Studenti
+- ✅ **Corsi & Iscrizioni**: Sistema completo gestione corsi e iscrizioni studenti
+- ✅ **Pagamenti Online**: Integrazione PayPal per pagamenti
+- ✅ **Media & Documenti**: Gestione gallerie e documenti studenti
+- ✅ **Push Notifications**: Sistema completo notifiche lezioni (Firebase Cloud Messaging)
+- ✅ **API REST**: 8+ endpoints per mobile app Flutter
+- ✅ **Ticketing System**: Sistema supporto interno
+
+## 📱 Push Notifications System
+
+Sistema completo per promemoria lezioni automatici:
+
+### Backend Features
+- 🔔 **Firebase Admin SDK**: Invio push notifications via FCM
+- ⏰ **Cron Job Automatico**: Check ogni 15 minuti per lezioni upcoming
+- 🎯 **Preferenze Personalizzate**: Ogni utente sceglie timing promemoria (15min, 30min, 1h, 2h, 24h)
+- 📊 **Notification Logs**: Tracking completo notifiche inviate
+- 🔒 **Multi-Device Support**: Supporto multipli dispositivi per utente
+- ♻️ **Auto Cleanup**: Rimozione automatica token invalidi
+
+### API Endpoints
+- `GET /api/mobile/v1/student/lessons/upcoming` - Lezioni upcoming
+- `GET /api/mobile/v1/student/lessons/{id}` - Dettaglio singola lezione
+- `GET /api/mobile/v1/student/lessons/by-date/{date}` - Lezioni per data
+- `GET /api/mobile/v1/notifications/preferences` - Preferenze utente
+- `PUT /api/mobile/v1/notifications/preferences` - Aggiorna preferenze
+- `POST /api/mobile/v1/notifications/fcm-token` - Registra dispositivo
+- `DELETE /api/mobile/v1/notifications/fcm-token` - Rimuovi dispositivo
+
+📚 **[API Documentation](docs/API_ENDPOINTS_REFERENCE.md)**
+
+## 🛠️ Tech Stack
+
+- **Framework**: Laravel 12
+- **PHP**: 8.2+
+- **Database**: MySQL 8.0
+- **Cache**: Redis 7.0
+- **Search**: Meilisearch
+- **Email**: Mailpit (dev), SMTP Aruba (prod)
+- **Push**: Firebase Cloud Messaging
+- **Frontend Build**: Vite + Tailwind CSS v4
+- **Dev Environment**: Docker via Laravel Sail
+
+## 📦 Installation
+
+### Prerequisites
+- Docker & Docker Compose
+- PHP 8.2+
+- Composer 2.x
+- Node.js 18+
+
+### Quick Start
+
+```bash
+# Clone repository
+git clone https://github.com/emanuelerosato/danzafacile.git
+cd danzafacile
+
+# Install dependencies
+composer install
+npm install
+
+# Setup environment
+cp .env.example .env
+php artisan key:generate
+
+# Start Docker services
+./vendor/bin/sail up -d
+
+# Run migrations
+./vendor/bin/sail artisan migrate
+
+# Build frontend assets
+npm run dev
+```
+
+### Firebase Setup (Push Notifications)
+
+1. Download Firebase credentials da [Firebase Console](https://console.firebase.google.com/)
+2. Upload `firebase-credentials.json`:
+   ```bash
+   scp firebase-credentials.json root@YOUR_SERVER:/var/www/danzafacile/storage/app/firebase/
+   ```
+3. Configure `.env`:
+   ```env
+   FIREBASE_CREDENTIALS=storage/app/firebase/firebase-credentials.json
+   FIREBASE_DATABASE_URL=https://YOUR_PROJECT-default-rtdb.firebaseio.com
+   ```
+
+📚 **[Firebase Setup Guide Completa](docs/FIREBASE_SETUP_GUIDE.md)**
+
+## 🧪 Testing
+
+### Test School Data
+
+Per testing è disponibile una scuola isolata con dati di test:
+
+**Login Test:**
+- Email: `studente1@test.pushnotif.local`
+- Password: `password`
+- Scuola: `[TEST] Scuola Push Notifications` (ID: 4)
+
+**Dati disponibili:**
+- 3 Studenti test
+- 2 Corsi (Danza Classica, Hip Hop)
+- 18 Lezioni (prossimi 30 giorni)
+- Notification preferences configurate
+
+### Run Tests
+
+```bash
+# API Testing
+curl -X POST https://www.danzafacile.it/api/mobile/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"studente1@test.pushnotif.local","password":"password"}'
+
+# Firebase Connection Test
+./vendor/bin/sail artisan tinker
+> $service = new App\Services\FirebasePushService();
+> $service->testConnection(); // true = OK
+
+# Cron Job Test
+./vendor/bin/sail artisan notifications:send-lesson-reminders
+```
+
+## 📚 Documentation
+
+- **[API Endpoints Reference](docs/API_ENDPOINTS_REFERENCE.md)** - Quick reference tutti endpoints
+- **[Firebase Setup Guide](docs/FIREBASE_SETUP_GUIDE.md)** - Setup completo Firebase
+- **[Push Notifications Progress](docs/PUSH_NOTIFICATIONS_PROGRESS.md)** - Status implementazione
+- **[Implementation Plan](docs/PUSH_NOTIFICATIONS_IMPLEMENTATION_PLAN.md)** - Piano dettagliato 3 settimane
+- **[CLAUDE.md](CLAUDE.md)** - Istruzioni per Claude Code
+
+## 🔧 Development
+
+### Workflow
+```bash
+# Start development environment
+composer run dev
+
+# Or with Docker
+./vendor/bin/sail up -d
+./vendor/bin/sail npm run dev
+```
+
+### Code Quality
+```bash
+# Format code
+./vendor/bin/pint
+
+# Clear caches
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+```
+
+### Database
+```bash
+# Fresh migration + seed
+php artisan migrate:fresh --seed
+
+# Specific seeder
+php artisan db:seed --class=TestSchoolSeeder
+```
+
+## 🚀 Deployment
+
+### Production Server
+- **Host**: 157.230.114.252
+- **Stack**: Nginx + PHP 8.2-FPM + MySQL 8.0 + Redis
+- **Cron**: Laravel scheduler running ogni minuto
+- **Branch**: `main` (produzione), `feature/*` (development)
+
+### Deploy Process
+```bash
+# SSH to server
+ssh root@157.230.114.252
+
+# Pull latest
+cd /var/www/danzafacile
+git pull origin main
+
+# Update dependencies
+composer install --no-dev --optimize-autoloader
+
+# Run migrations
+php artisan migrate --force
+
+# Clear caches
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# Restart services
+systemctl restart php8.2-fpm
+systemctl reload nginx
+```
+
+## 📊 Project Status
+
+**Version**: 1.0.0
+**Status**: Production Ready ✅
+
+**Backend:**
+- Database: ✅ 100%
+- API Endpoints: ✅ 100%
+- Push Notifications: ✅ 100%
+- Firebase Integration: ✅ 100%
+- Testing: ✅ 100%
+- Documentation: ✅ 100%
+
+**Flutter App:** 🚧 In Development (Week 2)
+
+## 🤝 Contributing
+
+Questo è un progetto privato per DanzaFacile. Per contribuire:
+1. Crea feature branch da `main`
+2. Commit con conventional commits (`feat:`, `fix:`, `docs:`)
+3. Pull request con description dettagliata
+4. Review richiesta prima del merge
+
+## 📄 License
+
+Proprietary - © 2025 DanzaFacile
+
+---
 
 ## About Laravel
 
