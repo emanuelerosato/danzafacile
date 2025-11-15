@@ -98,22 +98,41 @@ crontab -e
 
 ## 📧 Configurazione Email
 
-### SMTP Configurato
+### SMTP Configurato: SendGrid
 
-Le email sono inviate tramite **mail** (mailutils) usando la configurazione locale.
+Le email sono inviate tramite **SendGrid SMTP** (stesso servizio usato da Laravel).
 
-**Destinatario**: `admin@danzafacile.it`
+**Configurazione Postfix**:
+- **SMTP Server**: `smtp.sendgrid.net:2525`
+- **Username**: `apikey`
+- **Password**: SendGrid API Key (condivisa con Laravel)
+- **Mittente**: `info@danzafacile.it` (Sender Identity verificato)
+- **Destinatario**: `admin@danzafacile.it`
 
-### Personalizzare Email
+**Files configurazione**:
+- `/etc/postfix/sasl_passwd` - Credenziali SMTP SendGrid
+- `/etc/postfix/generic` - Sender rewriting (root → info@danzafacile.it)
+- `/etc/postfix/main.cf` - Configurazione Postfix principale
+
+### Come Funziona
+
+1. Script bash inviano email tramite comando `mail`
+2. Postfix intercetta email e le reindirizza a SendGrid
+3. SendGrid valida mittente (`info@danzafacile.it`) e invia
+4. Email arriva a `admin@danzafacile.it`
+
+### Personalizzare Email Destinataria
 
 Per cambiare l'email destinataria, modifica negli script:
 
 ```bash
 # In /root/backup.sh
-ADMIN_EMAIL="tua-email@example.com"
+ADMIN_EMAIL="nuova-email@example.com"
 
 # In /root/monitor.sh
-ADMIN_EMAIL="tua-email@example.com"
+ADMIN_EMAIL="nuova-email@example.com"
+
+# Nessuna modifica Postfix necessaria!
 ```
 
 ### Test Invio Email
@@ -121,6 +140,52 @@ ADMIN_EMAIL="tua-email@example.com"
 ```bash
 # Test manuale invio email
 echo "Test email" | mail -s "Test Subject" admin@danzafacile.it
+
+# Verifica log email
+tail -f /var/log/mail.log
+
+# Cerca conferma invio:
+# "status=sent (250 Ok: queued as...)" = SUCCESSO
+# "status=bounced" = FALLITO
+```
+
+### Troubleshooting Email
+
+**Email non ricevute:**
+
+```bash
+# 1. Verifica Postfix attivo
+systemctl status postfix
+
+# 2. Controlla log errori
+tail -50 /var/log/mail.log | grep -i error
+
+# 3. Test SendGrid
+echo "Test" | mail -s "Test SendGrid" admin@danzafacile.it
+tail -20 /var/log/mail.log
+
+# 4. Verifica credenziali SendGrid
+cat /etc/postfix/sasl_passwd
+# Deve contenere: [smtp.sendgrid.net]:2525 apikey:SG.xxx
+
+# 5. Verifica sender rewriting
+cat /etc/postfix/generic
+# Deve contenere: root info@danzafacile.it
+```
+
+**Errore "550 Sender Identity":**
+
+Significa che il mittente non è verificato su SendGrid.
+
+```bash
+# Verifica che /etc/postfix/generic esista
+cat /etc/postfix/generic
+
+# Rigenera hash
+postmap /etc/postfix/generic
+
+# Riavvia Postfix
+systemctl restart postfix
 ```
 
 ---
