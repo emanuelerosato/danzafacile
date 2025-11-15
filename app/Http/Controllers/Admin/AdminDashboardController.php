@@ -36,8 +36,8 @@ class AdminDashboardController extends Controller
 
         // Statistics for the school
         $stats = [
-            'students_total' => $school->users()->where('role', 'user')->count(),
-            'students_active' => $school->users()->where('role', 'user')->where('active', true)->count(),
+            'students_total' => $school->users()->where('role', 'student')->count(),
+            'students_active' => $school->users()->where('role', 'student')->where('active', true)->count(),
             'instructors_total' => $school->users()->where('role', 'admin')->count(),
             'courses_total' => $school->courses()->count(),
             'courses_active' => $school->courses()->where('active', true)->count(),
@@ -173,7 +173,7 @@ class AdminDashboardController extends Controller
         ];
 
         // Calculate percentage changes compared to last month
-        $lastMonthStudents = $school->users()->where('role', 'user')
+        $lastMonthStudents = $school->users()->where('role', 'student')
             ->whereMonth('created_at', now()->subMonth()->month)->count();
         $lastMonthRevenue = Payment::whereHas('user', function($q) use ($school) {
             $q->where('school_id', $school->id);
@@ -247,7 +247,7 @@ class AdminDashboardController extends Controller
 
         $stats = [
             'new_students' => $school->users()
-                ->where('role', 'user')
+                ->where('role', 'student')
                 ->where('created_at', '>=', $dateFilter)
                 ->count(),
             
@@ -318,7 +318,7 @@ class AdminDashboardController extends Controller
             
             // Statistics
             fputcsv($file, ['Statistiche Generali']);
-            fputcsv($file, ['Studenti Totali', $school->users()->where('role', 'user')->count()]);
+            fputcsv($file, ['Studenti Totali', $school->users()->where('role', 'student')->count()]);
             fputcsv($file, ['Istruttori', $school->users()->where('role', 'admin')->count()]);
             fputcsv($file, ['Corsi Attivi', $school->courses()->where('active', true)->count()]);
             fputcsv($file, ['Iscrizioni Totali', CourseEnrollment::whereHas('course', function($q) use ($school) {
