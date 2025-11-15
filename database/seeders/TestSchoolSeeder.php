@@ -83,7 +83,7 @@ class TestSchoolSeeder extends Seeder
                 'name' => "Istruttore Test {$i}",
                 'email' => "istruttore{$i}@test.pushnotif.local",
                 'password' => Hash::make('password'),
-                'role' => 'staff',
+                'role' => 'user', // Instructor = user role (staff non esiste)
                 'active' => true,
             ]);
             $instructors[] = $instructor;
