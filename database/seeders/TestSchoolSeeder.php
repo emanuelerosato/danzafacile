@@ -73,7 +73,7 @@ class TestSchoolSeeder extends Seeder
             ]);
         }
 
-        $this->command->info("✅ {count($students)} studenti test creati con preferenze notifiche");
+        $this->command->info("✅ " . count($students) . " studenti test creati con preferenze notifiche");
 
         // 4. Crea 2 instructors
         $instructors = [];
@@ -89,7 +89,7 @@ class TestSchoolSeeder extends Seeder
             $instructors[] = $instructor;
         }
 
-        $this->command->info("✅ {count($instructors)} instructors creati");
+        $this->command->info("✅ " . count($instructors) . " instructors creati");
 
         // 5. Crea 2 rooms
         $rooms = [];
@@ -103,7 +103,7 @@ class TestSchoolSeeder extends Seeder
             $rooms[] = $room;
         }
 
-        $this->command->info("✅ {count($rooms)} sale create");
+        $this->command->info("✅ " . count($rooms) . " sale create");
 
         // 6. Crea 2 corsi
         $courses = [];
@@ -133,7 +133,7 @@ class TestSchoolSeeder extends Seeder
             }
         }
 
-        $this->command->info("✅ {count($courses)} corsi creati e studenti iscritti");
+        $this->command->info("✅ " . count($courses) . " corsi creati e studenti iscritti");
 
         // 7. Crea 30 giorni di lezioni (2 lezioni/settimana per corso: Lunedì e Giovedì)
         $lessonCount = 0;
