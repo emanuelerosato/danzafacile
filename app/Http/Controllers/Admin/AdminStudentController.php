@@ -20,7 +20,7 @@ class AdminStudentController extends AdminBaseController
     {
         $this->setupContext();
 
-        $query = $this->school->users()->where('role', 'user');
+        $query = $this->school->users()->where('role', 'student');
 
         // SECURE: allowed sort fields for students
         $allowedSortFields = ['name', 'first_name', 'last_name', 'email', 'created_at', 'updated_at'];
@@ -38,11 +38,11 @@ class AdminStudentController extends AdminBaseController
 
         // Quick stats for header cards
         $stats = [
-            'total_students' => $this->school->users()->where('role', 'user')->count(),
-            'active_students' => $this->school->users()->where('role', 'user')->where('active', true)->count(),
-            'new_this_month' => $this->school->users()->where('role', 'user')
+            'total_students' => $this->school->users()->where('role', 'student')->count(),
+            'active_students' => $this->school->users()->where('role', 'student')->where('active', true)->count(),
+            'new_this_month' => $this->school->users()->where('role', 'student')
                 ->whereMonth('created_at', now()->month)->count(),
-            'with_enrollments' => $this->school->users()->where('role', 'user')
+            'with_enrollments' => $this->school->users()->where('role', 'student')
                 ->whereHas('enrollments')->count()
         ];
 
@@ -101,7 +101,7 @@ class AdminStudentController extends AdminBaseController
         $password = $this->generateStudentPassword();
 
         $validated['password'] = Hash::make($password);
-        $validated['role'] = 'user';
+        $validated['role'] = 'student';
         $validated['school_id'] = $this->school->id;
         $validated['email_verified_at'] = now();
         $validated['active'] = $validated['active'] ?? true;
@@ -136,7 +136,7 @@ class AdminStudentController extends AdminBaseController
         $this->verifyResourceOwnership($student, 'Studente');
 
         // Ensure student belongs to current school
-        if ($student->school_id !== $this->school->id || $student->role !== 'user') {
+        if ($student->school_id !== $this->school->id || $student->role !== 'student') {
             abort(404, 'Studente non trovato.');
         }
 
@@ -176,7 +176,7 @@ class AdminStudentController extends AdminBaseController
         $this->verifyResourceOwnership($student, 'Studente');
 
         // Ensure student belongs to current school
-        if ($student->school_id !== $this->school->id || $student->role !== 'user') {
+        if ($student->school_id !== $this->school->id || $student->role !== 'student') {
             abort(404, 'Studente non trovato.');
         }
 
@@ -192,7 +192,7 @@ class AdminStudentController extends AdminBaseController
         $this->verifyResourceOwnership($student, 'Studente');
 
         // Ensure student belongs to current school
-        if ($student->school_id !== $this->school->id || $student->role !== 'user') {
+        if ($student->school_id !== $this->school->id || $student->role !== 'student') {
             abort(404, 'Studente non trovato.');
         }
 
@@ -245,7 +245,7 @@ class AdminStudentController extends AdminBaseController
     public function destroy(User $student)
     {
         // Ensure student belongs to current school
-        if ($student->school_id !== $this->school->id || $student->role !== 'user') {
+        if ($student->school_id !== $this->school->id || $student->role !== 'student') {
             abort(404, 'Studente non trovato.');
         }
 
@@ -278,7 +278,7 @@ class AdminStudentController extends AdminBaseController
     public function toggleActive(User $student)
     {
         // Ensure student belongs to current school
-        if ($student->school_id !== $this->school->id || $student->role !== 'user') {
+        if ($student->school_id !== $this->school->id || $student->role !== 'student') {
             abort(404, 'Studente non trovato.');
         }
 
@@ -312,7 +312,7 @@ class AdminStudentController extends AdminBaseController
 
         // Ensure all students belong to current school
         $students = $this->school->users()
-            ->where('role', 'user')
+            ->where('role', 'student')
             ->whereIn('id', $studentIds)
             ->get();
 
@@ -370,7 +370,7 @@ class AdminStudentController extends AdminBaseController
     public function export()
     {
         $students = $this->school->users()
-            ->where('role', 'user')
+            ->where('role', 'student')
             ->with(['enrollments.course', 'payments'])
             ->orderBy('name')
             ->get();
