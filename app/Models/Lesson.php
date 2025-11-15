@@ -50,7 +50,7 @@ class Lesson extends Model
 
     public function room(): BelongsTo
     {
-        return $this->belongsTo(Room::class);
+        return $this->belongsTo(SchoolRoom::class, 'room_id');
     }
 
     /**
