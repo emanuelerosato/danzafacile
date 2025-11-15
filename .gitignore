@@ -22,3 +22,7 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+# Firebase credentials (NEVER commit)
+firebase-credentials.json
+GoogleService-Info.plist
+google-services.json

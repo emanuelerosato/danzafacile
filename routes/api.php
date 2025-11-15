@@ -18,6 +18,11 @@ use App\Http\Controllers\API\DocumentController;
 use App\Http\Controllers\API\GalleryController;
 use App\Http\Controllers\API\RoomController;
 
+// Push Notifications Controllers
+use App\Http\Controllers\Api\StudentLessonController;
+use App\Http\Controllers\Api\NotificationPreferenceController;
+use App\Http\Controllers\Api\FcmTokenController;
+
 // Legacy Web Controllers (Step 1 - Maintained for compatibility)
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\SchoolController as SuperAdminSchoolController;
@@ -357,6 +362,14 @@ Route::prefix('mobile/v1')->group(function () {
             Route::post('/payments/{payment}/paypal', [\App\Http\Controllers\API\Student\PaymentController::class, 'createPayPalPayment'])->name('api.mobile.student.payments.paypal.create');
             Route::get('/payments/{payment}/paypal/success', [\App\Http\Controllers\API\Student\PaymentController::class, 'paypalSuccess'])->name('api.mobile.student.payments.paypal.success');
             Route::get('/payments/{payment}/paypal/cancel', [\App\Http\Controllers\API\Student\PaymentController::class, 'paypalCancel'])->name('api.mobile.student.payments.paypal.cancel');
+
+            // Lessons API (Push Notifications System)
+            Route::prefix('lessons')->group(function () {
+                Route::get('/upcoming', [StudentLessonController::class, 'upcoming'])->name('api.mobile.student.lessons.upcoming');
+                Route::get('/', [StudentLessonController::class, 'index'])->name('api.mobile.student.lessons.index');
+                Route::get('/{id}', [StudentLessonController::class, 'show'])->name('api.mobile.student.lessons.show');
+                Route::get('/by-date/{date}', [StudentLessonController::class, 'byDate'])->name('api.mobile.student.lessons.by-date');
+            });
         });
         
         // Quick mobile dashboard for any authenticated user
@@ -526,6 +539,17 @@ Route::prefix('mobile/v1')->group(function () {
             Route::delete('/{id}', [RoomController::class, 'destroy']);
             Route::post('/{id}/toggle-status', [RoomController::class, 'toggleStatus']);
             Route::get('/{id}/availability', [RoomController::class, 'availability']);
+        });
+
+        // PUSH NOTIFICATIONS API - Available to all authenticated users
+        Route::prefix('notifications')->group(function () {
+            // Notification Preferences
+            Route::get('/preferences', [NotificationPreferenceController::class, 'show'])->name('api.mobile.notifications.preferences.show');
+            Route::put('/preferences', [NotificationPreferenceController::class, 'update'])->name('api.mobile.notifications.preferences.update');
+
+            // FCM Token Management
+            Route::post('/fcm-token', [FcmTokenController::class, 'store'])->name('api.mobile.notifications.fcm-token.store');
+            Route::delete('/fcm-token', [FcmTokenController::class, 'destroy'])->name('api.mobile.notifications.fcm-token.destroy');
         });
     });
 });
