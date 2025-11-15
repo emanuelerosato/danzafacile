@@ -17,12 +17,20 @@ class FirebasePushService
     public function __construct()
     {
         try {
-            // Get credentials path from env (relative to base_path)
-            $credentialsPath = config('firebase.credentials');
+            // Get credentials path from env
+            $credentialsPath = env('FIREBASE_CREDENTIALS');
+
+            if (!$credentialsPath) {
+                throw new \Exception('FIREBASE_CREDENTIALS not set in .env');
+            }
 
             // If path is relative, make it absolute from base_path
             if (!str_starts_with($credentialsPath, '/')) {
                 $credentialsPath = base_path($credentialsPath);
+            }
+
+            if (!file_exists($credentialsPath)) {
+                throw new \Exception("Firebase credentials file not found: {$credentialsPath}");
             }
 
             $factory = (new Factory)->withServiceAccount($credentialsPath);
