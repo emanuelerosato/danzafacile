@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <title>@yield('title', config('app.name', 'Scuola di Danza'))</title>
+    <title>@yield('title', config('app.name', 'Danza Facile'))</title>
     <meta name="description" content="@yield('description', 'Accedi al sistema di gestione per scuole di danza')">
     
     <!-- Fonts -->
@@ -32,7 +32,7 @@
             <!-- Content -->
             <div class="relative z-10 flex flex-col justify-center items-start p-12 text-white">
                 <div class="mb-8">
-                    <h1 class="text-4xl font-bold mb-4">Benvenuti nella Scuola di Danza</h1>
+                    <h1 class="text-4xl font-bold mb-4">Benvenuti in Danza Facile</h1>
                     <p class="text-xl text-white/90 leading-relaxed">
                         Un sistema completo per la gestione di corsi, iscrizioni e tutto quello che serve per la tua scuola di danza.
                     </p>
@@ -74,10 +74,10 @@
                 <div class="text-center mb-8">
                     <a href="/" class="inline-flex items-center">
                         <div class="w-12 h-12 bg-gradient-to-r from-rose-400 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold text-xl mr-3">
-                            SD
+                            DF
                         </div>
                         <div class="text-left">
-                            <h2 class="text-2xl font-bold text-gray-900">Scuola di Danza</h2>
+                            <h2 class="text-2xl font-bold text-gray-900">Danza Facile</h2>
                             <p class="text-sm text-gray-600">Gestione e Amministrazione</p>
                         </div>
                     </a>
@@ -91,7 +91,7 @@
                 <!-- Footer -->
                 <div class="mt-8 text-center">
                     <p class="text-sm text-gray-600">
-                        &copy; {{ date('Y') }} Scuola di Danza. Tutti i diritti riservati.
+                        &copy; {{ date('Y') }} Danza Facile. Tutti i diritti riservati.
                     </p>
                 </div>
             </div>
