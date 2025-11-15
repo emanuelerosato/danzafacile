@@ -58,12 +58,12 @@ class Lesson extends Model
      */
     public function getStartDatetimeAttribute(): Carbon
     {
-        return Carbon::parse($this->lesson_date->format('Y-m-d') . ' ' . $this->start_time);
+        return Carbon::parse($this->lesson_date->format('Y-m-d') . ' ' . $this->start_time->format('H:i:s'));
     }
 
     public function getEndDatetimeAttribute(): Carbon
     {
-        return Carbon::parse($this->lesson_date->format('Y-m-d') . ' ' . $this->end_time);
+        return Carbon::parse($this->lesson_date->format('Y-m-d') . ' ' . $this->end_time->format('H:i:s'));
     }
 
     public function getIsUpcomingAttribute(): bool
