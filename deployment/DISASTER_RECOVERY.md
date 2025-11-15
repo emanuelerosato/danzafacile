@@ -65,9 +65,47 @@ Google Drive → danzafacile-backups/
 
 ## 🔄 Procedura Disaster Recovery
 
+### 🚀 Metodo 1: AUTOMATICO (Consigliato)
+
+**⏱️ Tempo**: 10-15 minuti
+**🎯 Difficoltà**: Facile
+**📋 Guida**: Vedi `RESTORE_RAPIDO.md`
+
+```bash
+# 1. Scarica script
+wget https://raw.githubusercontent.com/emanuelerosato/danzafacile/main/deployment/scripts/restore-automatic.sh
+chmod +x restore-automatic.sh
+
+# 2. Esegui ripristino automatico
+./restore-automatic.sh
+
+# 3. Segui le istruzioni interattive
+# - Scegli fonte backup (locale o Google Drive)
+# - Conferma backup da ripristinare
+# - Inserisci password root MySQL
+# - FATTO! Lo script fa tutto il resto
+```
+
+**Lo script ripristina automaticamente:**
+- ✅ Database MySQL completo
+- ✅ Files utenti uploaded
+- ✅ Codice Laravel + dipendenze
+- ✅ Configurazione .env
+- ✅ Nginx configuration
+- ✅ SSL certificates
+- ✅ Permessi e cache
+
+---
+
+### 🛠️ Metodo 2: MANUALE (Avanzato)
+
+**⏱️ Tempo**: 25-35 minuti
+**🎯 Difficoltà**: Media
+**📋 Solo se script automatico non disponibile**
+
 ### Scenario: Server Completamente Distrutto
 
-**Tempo necessario**: 15-30 minuti
+**Tempo necessario**: 25-35 minuti
 **Prerequisiti**: Nuovo server Ubuntu 22.04/24.04, accesso root
 
 ### Step 1: Setup Nuovo Server (5 minuti)
