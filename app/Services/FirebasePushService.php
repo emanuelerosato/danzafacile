@@ -17,7 +17,15 @@ class FirebasePushService
     public function __construct()
     {
         try {
-            $factory = (new Factory)->withServiceAccount(storage_path(config('firebase.credentials.file')));
+            // Get credentials path from env (relative to base_path)
+            $credentialsPath = config('firebase.credentials');
+
+            // If path is relative, make it absolute from base_path
+            if (!str_starts_with($credentialsPath, '/')) {
+                $credentialsPath = base_path($credentialsPath);
+            }
+
+            $factory = (new Factory)->withServiceAccount($credentialsPath);
             $this->messaging = $factory->createMessaging();
         } catch (\Exception $e) {
             Log::error('Firebase initialization failed: ' . $e->getMessage());
