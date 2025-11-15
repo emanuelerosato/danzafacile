@@ -71,13 +71,15 @@
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
                         Nome Corso *
                     </label>
-                    <x-secure-input
+                    <input
                         type="text"
                         name="name"
-                        :value="old('name')"
+                        id="name"
+                        value="{{ old('name') }}"
                         placeholder="Es. Danza Classica Livello Base"
-                        :required="true"
-                        :max-length="255" />
+                        required
+                        maxlength="255"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent" />
                     @error('name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
