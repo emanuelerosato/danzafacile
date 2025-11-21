@@ -120,10 +120,10 @@ class DocumentController extends BaseApiController
         $file = $request->file('file');
 
         // Validate file with FileUploadHelper
-        $validation = \App\Helpers\FileUploadHelper::validateFile($file, ['pdf', 'jpg', 'jpeg', 'png'], 10240);
+        $validation = \App\Helpers\FileUploadHelper::validateFile($file, 'documents', 10);
 
         if (!$validation['valid']) {
-            return $this->errorResponse($validation['error'], 422);
+            return $this->errorResponse($validation['errors'], 422);
         }
 
         // Store file
@@ -138,15 +138,13 @@ class DocumentController extends BaseApiController
         $document = Document::create([
             'user_id' => $targetUserId,
             'school_id' => $user->school_id,
-            'uploaded_by' => $user->id,
-            'title' => $validated['title'],
-            'description' => $validated['description'] ?? null,
-            'type' => $validated['type'],
+            'category' => 'medical',
             'file_path' => $path,
-            'file_name' => $file->getClientOriginalName(),
+            'name' => $file->getClientOriginalName(),
             'file_size' => $file->getSize(),
-            'mime_type' => $file->getMimeType(),
+            'file_type' => $file->extension(),
             'status' => 'pending',
+            'uploaded_at' => now(),
         ]);
 
         $document->load(['user', 'uploadedBy']);

@@ -72,12 +72,32 @@ class SensitiveDataProcessor
 
     /**
      * Process log record to sanitize sensitive data
-     * Compatible with Monolog v2 (array) and v3 (LogRecord)
+     * Compatible with Monolog v2 (array), v3 (LogRecord) and Laravel 11 (Logger)
+     *
+     * @param array|\Monolog\LogRecord|\Illuminate\Log\Logger $record
+     * @return array|\Monolog\LogRecord|void
+     */
+    public function __invoke($record)
+    {
+        // Laravel 11: Logger object from tap - push processor to handler
+        if ($record instanceof \Illuminate\Log\Logger) {
+            $record->pushProcessor(function ($logRecord) {
+                return $this->processRecord($logRecord);
+            });
+            return;
+        }
+
+        // Direct processor call (Monolog v2/v3)
+        return $this->processRecord($record);
+    }
+
+    /**
+     * Process individual log record
      *
      * @param array|\Monolog\LogRecord $record
      * @return array|\Monolog\LogRecord
      */
-    public function __invoke($record)
+    private function processRecord($record)
     {
         // Monolog v3 compatibility (LogRecord object)
         if (is_object($record) && method_exists($record, 'with')) {
