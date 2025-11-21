@@ -460,4 +460,72 @@ class AttendanceController extends BaseApiController
             'upcoming_sessions' => array_slice($upcomingSessions, 0, 10), // Limit to next 10
         ], 'Upcoming sessions retrieved successfully');
     }
+
+    /**
+     * Student QR check-in (student scans lesson QR code)
+     * 
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function studentQrCheckIn(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            "qr_code" => "required|string",
+        ]);
+
+        if ($validator->fails()) {
+            return $this->validationErrorResponse($validator);
+        }
+
+        $currentUser = $this->getAuthenticatedUser();
+        $qrCode = $request->get("qr_code");
+
+        // Parse QR code format: LESSON_{lesson_id}_{date}
+        $parts = explode("_", $qrCode);
+        
+        if (count($parts) !== 3 || $parts[0] !== "LESSON") {
+            return $this->errorResponse("QR code non valido. Formato atteso: LESSON_ID_DATE", 400);
+        }
+
+        $lessonId = $parts[1];
+        $lessonDate = $parts[2];
+
+        try {
+            $attendanceDate = \Carbon\Carbon::createFromFormat("Ymd", $lessonDate)->format("Y-m-d");
+        } catch (\Exception $e) {
+            return $this->errorResponse("Formato data QR non valido", 400);
+        }
+
+        $existingAttendance = Attendance::where("user_id", $currentUser->id)
+            ->where("attendable_type", "App\\Models\\Course")
+            ->where("attendable_id", $lessonId)
+            ->whereDate("date", $attendanceDate)
+            ->first();
+
+        if ($existingAttendance) {
+            return $this->errorResponse("Check-in già effettuato per questa lezione", 400);
+        }
+
+        $attendance = Attendance::create([
+            "user_id" => $currentUser->id,
+            "school_id" => $currentUser->school_id,
+            "attendable_type" => "App\\Models\\Course",
+            "attendable_id" => $lessonId,
+            "date" => $attendanceDate,
+            "check_in_time" => now()->format("H:i:s"),
+            "status" => "present",
+            "marked_by" => $currentUser->id,
+            "notes" => "Self check-in via QR code scan",
+        ]);
+
+        return $this->successResponse([
+            "attendance" => [
+                "id" => $attendance->id,
+                "date" => $attendance->date,
+                "check_in_time" => $attendance->check_in_time,
+                "status" => $attendance->status,
+            ],
+            "message" => "Check-in completato con successo!",
+        ], "Check-in successful", 201);
+    }
 }

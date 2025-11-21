@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\Student;
+namespace App\Http\Controllers\Api\Student;
 
 use App\Helpers\QueryHelper;
 use App\Http\Controllers\API\BaseApiController;

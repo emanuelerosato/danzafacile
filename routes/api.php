@@ -4,19 +4,19 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Mobile API Controllers (Step 2 - Flutter Integration)
-use App\Http\Controllers\API\AuthController;
-use App\Http\Controllers\API\Admin\AdminController;
-use App\Http\Controllers\API\Admin\CourseController as AdminCourseController;
-use App\Http\Controllers\API\Admin\StudentController as AdminStudentController;
-use App\Http\Controllers\API\Student\ProfileController as StudentProfileController;
-use App\Http\Controllers\API\Student\CourseController as StudentCourseController;
-use App\Http\Controllers\API\Student\EnrollmentController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\Admin\AdminController;
+use App\Http\Controllers\Api\Admin\CourseController as AdminCourseController;
+use App\Http\Controllers\Api\Admin\StudentController as AdminStudentController;
+use App\Http\Controllers\Api\Student\ProfileController as StudentProfileController;
+use App\Http\Controllers\Api\Student\CourseController as StudentCourseController;
+use App\Http\Controllers\Api\Student\EnrollmentController;
 
 // NEW: Additional API Controllers for Flutter
-use App\Http\Controllers\API\TicketController;
-use App\Http\Controllers\API\DocumentController;
-use App\Http\Controllers\API\GalleryController;
-use App\Http\Controllers\API\RoomController;
+use App\Http\Controllers\Api\TicketController;
+use App\Http\Controllers\Api\DocumentController;
+use App\Http\Controllers\Api\GalleryController;
+use App\Http\Controllers\Api\RoomController;
 
 // Push Notifications Controllers
 use App\Http\Controllers\Api\StudentLessonController;
@@ -354,14 +354,14 @@ Route::prefix('mobile/v1')->group(function () {
             Route::get('/enrollments/history', [EnrollmentController::class, 'history'])->name('api.mobile.student.enrollments.history');
 
             // Payment Management
-            Route::get('/payments', [\App\Http\Controllers\API\Student\PaymentController::class, 'index'])->name('api.mobile.student.payments.index');
-            Route::get('/payments/statistics', [\App\Http\Controllers\API\Student\PaymentController::class, 'statistics'])->name('api.mobile.student.payments.statistics');
-            Route::get('/payments/upcoming', [\App\Http\Controllers\API\Student\PaymentController::class, 'upcoming'])->name('api.mobile.student.payments.upcoming');
-            Route::get('/payments/{payment}', [\App\Http\Controllers\API\Student\PaymentController::class, 'show'])->name('api.mobile.student.payments.show');
-            Route::get('/payments/{payment}/status', [\App\Http\Controllers\API\Student\PaymentController::class, 'getPaymentStatus'])->name('api.mobile.student.payments.status');
-            Route::post('/payments/{payment}/paypal', [\App\Http\Controllers\API\Student\PaymentController::class, 'createPayPalPayment'])->name('api.mobile.student.payments.paypal.create');
-            Route::get('/payments/{payment}/paypal/success', [\App\Http\Controllers\API\Student\PaymentController::class, 'paypalSuccess'])->name('api.mobile.student.payments.paypal.success');
-            Route::get('/payments/{payment}/paypal/cancel', [\App\Http\Controllers\API\Student\PaymentController::class, 'paypalCancel'])->name('api.mobile.student.payments.paypal.cancel');
+            Route::get('/payments', [\App\Http\Controllers\Api\Student\PaymentController::class, 'index'])->name('api.mobile.student.payments.index');
+            Route::get('/payments/statistics', [\App\Http\Controllers\Api\Student\PaymentController::class, 'statistics'])->name('api.mobile.student.payments.statistics');
+            Route::get('/payments/upcoming', [\App\Http\Controllers\Api\Student\PaymentController::class, 'upcoming'])->name('api.mobile.student.payments.upcoming');
+            Route::get('/payments/{payment}', [\App\Http\Controllers\Api\Student\PaymentController::class, 'show'])->name('api.mobile.student.payments.show');
+            Route::get('/payments/{payment}/status', [\App\Http\Controllers\Api\Student\PaymentController::class, 'getPaymentStatus'])->name('api.mobile.student.payments.status');
+            Route::post('/payments/{payment}/paypal', [\App\Http\Controllers\Api\Student\PaymentController::class, 'createPayPalPayment'])->name('api.mobile.student.payments.paypal.create');
+            Route::get('/payments/{payment}/paypal/success', [\App\Http\Controllers\Api\Student\PaymentController::class, 'paypalSuccess'])->name('api.mobile.student.payments.paypal.success');
+            Route::get('/payments/{payment}/paypal/cancel', [\App\Http\Controllers\Api\Student\PaymentController::class, 'paypalCancel'])->name('api.mobile.student.payments.paypal.cancel');
 
             // Lessons API (Push Notifications System)
             Route::prefix('lessons')->group(function () {
@@ -455,6 +455,7 @@ Route::prefix('mobile/v1')->group(function () {
             Route::post('/check-in', [App\Http\Controllers\Api\AttendanceController::class, 'checkIn']);
             Route::post('/qr-code', [App\Http\Controllers\Api\AttendanceController::class, 'generateQrCode']);
             Route::post('/qr-check-in', [App\Http\Controllers\Api\AttendanceController::class, 'qrCheckIn'])->middleware('role:admin');
+            Route::post('/qr-checkin', [App\Http\Controllers\Api\AttendanceController::class, 'studentQrCheckIn']);
         });
 
         // STAFF API - Admin only

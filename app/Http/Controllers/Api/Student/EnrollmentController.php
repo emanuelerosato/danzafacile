@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API\Student;
+namespace App\Http\Controllers\Api\Student;
 
 use App\Http\Controllers\API\BaseApiController;
 use App\Models\Course;
