@@ -12,23 +12,23 @@
 ### Overall Risk Level: **HIGH** 🟠 (was CRITICAL 🔴)
 
 **Findings Summary**:
-- **CRITICAL**: ~~3~~ **1 vulnerabilities** (2 FIXED ✅)
-- **HIGH**: 4 vulnerabilities
+- **CRITICAL**: ~~3~~ **1 vulnerability** (2 FIXED ✅)
+- **HIGH**: ~~4~~ **3 vulnerabilities** (1 FIXED ✅)
 - **MEDIUM**: 5 vulnerabilities
 - **LOW**: 3 vulnerabilities
 - **INFO**: 4 observations
 
-**Fixed Issues**: 2/21 (9.5% remediation)
+**Fixed Issues**: 3/21 (14.3% remediation)
 
 ### 🚨 Top 5 Critical Issues
 
 1. ~~**[CRITICAL]** Exposed SendGrid API Key in .env~~ ✅ **FIXED** (2025-11-22 23:35)
 2. ~~**[CRITICAL]** Database Password Mismatch~~ ✅ **FIXED** (2025-11-22 23:25)
-3. **[CRITICAL]** Hardcoded Default Password in Source Code (REMAINING)
-4. **[HIGH]** Content Security Policy with Unsafe Directives
-5. **[HIGH]** Symfony CVE-2025-64500 Authorization Bypass
+3. ~~**[HIGH]** Symfony CVE-2025-64500 Authorization Bypass~~ ✅ **FIXED** (2025-11-23 00:50)
+4. **[CRITICAL]** Hardcoded Default Password in Source Code (REMAINING)
+5. **[HIGH]** Content Security Policy with Unsafe Directives
 
-### ✅ Recent Fixes (2025-11-22)
+### ✅ Recent Fixes (2025-11-22/23)
 
 **VULN-001**: SendGrid API Key Protection
 - Multi-layer security: File permissions 600 + Git ignore + System env backup
@@ -38,6 +38,12 @@
 - New password: `DanzaFacile2025_Sec96d9caff`
 - MySQL + Laravel synchronized
 - Status: ✅ RESOLVED
+
+**VULN-003**: CVE-2025-64500 Symfony HTTP Foundation
+- Updated: symfony/http-foundation v7.3.3 → v7.3.7
+- Composer audit: No vulnerabilities
+- All API endpoints tested: 12/12 working
+- Status: ✅ FIXED
 
 ---
 
@@ -607,30 +613,55 @@ Due to token limitations, the following were NOT completed:
 
 ## 🔴 ADDITIONAL CRITICAL FINDINGS
 
-### VULN-011: Symfony HTTP Foundation CVE-2025-64500
+### VULN-011: Symfony HTTP Foundation CVE-2025-64500 ✅ FIXED
 
-**Severity**: HIGH  
-**CVSS Score**: 7.5  
-**Category**: CVE-2025-64500  
+**Severity**: HIGH
+**CVSS Score**: 7.3
+**Category**: CVE-2025-64500
 **Discovered By**: composer audit
+
+**Status**: ✅ **FIXED** (2025-11-23 00:50 UTC)
 
 **Description**:
 Vulnerability in `symfony/http-foundation` package allowing authorization bypass via PATH_INFO manipulation.
 
-**Affected Version**: (detected in current installation)
+**Original Issue**:
+The Request class improperly interpreted some PATH_INFO values in a way that led to representing some URLs with a path that doesn't start with a `/`. This could allow bypassing access control rules built with the `/`-prefix assumption.
+
+**Affected Version**: v7.3.3 (vulnerabile)
+**Fixed Version**: v7.3.7
 
 **Risk**:
 - Authorization bypass on certain routes
 - Potential access to admin endpoints without proper authentication
+- Path normalization bypass
 
-**Remediation**:
+**✅ Remediation Applied**:
 
-**IMMEDIATE** - Update Symfony:
-```bash
-composer update symfony/http-foundation
-```
+1. **Updated Symfony HTTP Foundation**:
+   ```bash
+   composer require symfony/http-foundation:^7.3.7 --with-all-dependencies
+   ```
 
-**Priority**: ⏰ HIGH (within 48 hours)
+2. **Verifica Completata**:
+   - ✅ Symfony v7.3.3 → v7.3.7
+   - ✅ `composer audit`: No security vulnerabilities
+   - ✅ Laravel cache: cleared & regenerated
+   - ✅ Opcache: reset
+   - ✅ Servizi riavviati: PHP-FPM + Nginx
+   - ✅ API: 12/12 endpoints tested (HTTP 200)
+
+3. **Files Modified**:
+   - `composer.json`: Added constraint `symfony/http-foundation: ^7.3.7`
+   - `composer.lock`: Updated to v7.3.7
+
+4. **Documentation**: Vedi `SECURITY_FIX_CVE-2025-64500.md` per dettagli completi
+
+**References**:
+- https://symfony.com/blog/cve-2025-64500
+- https://nvd.nist.gov/vuln/detail/cve-2025-64500
+
+**Priority**: ✅ COMPLETATO
 
 ---
 
