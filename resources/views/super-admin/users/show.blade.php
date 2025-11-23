@@ -432,7 +432,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
     function userDetails() {
         return {
             userActive: {{ $user->active ? 'true' : 'false' }},

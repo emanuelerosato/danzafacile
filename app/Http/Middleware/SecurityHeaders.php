@@ -26,10 +26,15 @@ class SecurityHeaders
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Generate CSP nonce for this request
+        $nonce = base64_encode(random_bytes(16));
+        $request->attributes->set('csp_nonce', $nonce);
+
         $response = $next($request);
 
         // SECURITY HEADER #1: Content Security Policy (CSP)
         // Prevents XSS by controlling which resources can be loaded
+        // Uses nonce-based approach to eliminate unsafe-inline and unsafe-eval
 
         $isDevelopment = config('app.env') !== 'production';
 
@@ -40,20 +45,20 @@ class SecurityHeaders
 
         // Script sources (different for dev/prod)
         if ($isDevelopment) {
-            // Development: Allow Vite HMR and unpkg CDN
-            $csp[] = "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://localhost:5173 https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com https://www.paypal.com https://www.paypalobjects.com";
+            // Development: Allow Vite HMR (requires unsafe-eval for hot reload)
+            $csp[] = "script-src 'self' 'nonce-{$nonce}' 'unsafe-eval' http://localhost:5173 https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com https://www.paypal.com https://www.paypalobjects.com";
         } else {
-            // Production: Stricter policy
-            $csp[] = "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com https://www.paypal.com https://www.paypalobjects.com";
+            // Production: Nonce-based only (NO unsafe-inline, NO unsafe-eval)
+            $csp[] = "script-src 'self' 'nonce-{$nonce}' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com https://www.paypal.com https://www.paypalobjects.com";
         }
 
         // Style sources (different for dev/prod)
         if ($isDevelopment) {
-            // Development: Allow Vite HMR and fonts.bunny.net
-            $csp[] = "style-src 'self' 'unsafe-inline' http://localhost:5173 https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdn.tailwindcss.com";
+            // Development: Allow Vite HMR
+            $csp[] = "style-src 'self' 'nonce-{$nonce}' 'unsafe-inline' http://localhost:5173 https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdn.tailwindcss.com";
         } else {
-            // Production: Stricter policy
-            $csp[] = "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdn.tailwindcss.com";
+            // Production: Nonce-based only (NO unsafe-inline)
+            $csp[] = "style-src 'self' 'nonce-{$nonce}' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdn.tailwindcss.com";
         }
 
         // Font sources

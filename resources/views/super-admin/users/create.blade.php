@@ -321,7 +321,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
     function userForm() {
         return {
             selectedRole: '{{ old('role') }}',

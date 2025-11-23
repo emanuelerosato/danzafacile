@@ -267,7 +267,7 @@
     @vite('resources/js/admin/enrollments/enrollment-manager.js')
 
     {{-- Dati per JavaScript --}}
-    <script>
+    <script nonce="@cspNonce">
         // Expose enrollment data to JavaScript
         window.enrollmentsData = [@json($enrollment)];
         console.log('📄 Enrollment show page loaded with data:', window.enrollmentsData);

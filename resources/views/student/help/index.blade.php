@@ -163,7 +163,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
     // Simple search functionality
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('search');

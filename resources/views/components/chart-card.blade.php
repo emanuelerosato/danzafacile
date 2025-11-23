@@ -26,7 +26,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="@cspNonce">
 function chartComponent(type, data) {
     return {
         chart: null,

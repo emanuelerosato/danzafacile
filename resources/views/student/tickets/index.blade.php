@@ -162,7 +162,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
     document.addEventListener('DOMContentLoaded', function() {
         // Auto-submit form when filters change
         const statusSelect = document.getElementById('status');

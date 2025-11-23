@@ -566,7 +566,7 @@
     </x-modal>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
         function deleteDocument(documentId) {
             if (confirm('Sei sicuro di voler eliminare questo documento? Questa azione non può essere annullata.')) {
                 const form = document.createElement('form');

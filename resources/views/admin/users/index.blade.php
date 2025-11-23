@@ -493,7 +493,7 @@
 </x-app-layout>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
         function openBulkActionsModal() {
             document.getElementById('bulk-actions-modal').classList.remove('hidden');
         }

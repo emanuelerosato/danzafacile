@@ -362,7 +362,7 @@
 </div>
 
 @push('scripts')
-<script>
+<script nonce="@cspNonce">
 function showRejectModal(documentId, documentTitle) {
     const modal = document.getElementById('rejectModal');
     if (modal) {

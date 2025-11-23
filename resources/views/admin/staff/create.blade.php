@@ -554,7 +554,7 @@
 
 @push('scripts')
 @vite('resources/js/admin/staff/staff-manager.js')
-<script>
+<script nonce="@cspNonce">
     // Mark this as a staff page for the JavaScript system
     document.addEventListener('DOMContentLoaded', function() {
         document.body.setAttribute('data-page', 'staff');
@@ -564,7 +564,7 @@
 @endpush
 
 @push('styles')
-<style>
+<style nonce="@cspNonce">
 .availability-day {
     transition: all 0.2s ease;
 }

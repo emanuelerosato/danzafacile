@@ -213,7 +213,7 @@
 @include('admin.documents.partials.modals')
 
 @push('scripts')
-<script>
+<script nonce="@cspNonce">
 function documentsFilters() {
     return {
         filters: {

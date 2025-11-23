@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <style>
+    <style nonce="@cspNonce">
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }

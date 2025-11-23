@@ -288,7 +288,7 @@
 </div>
 
 @push('scripts')
-<script>
+<script nonce="@cspNonce">
 function documentEdit() {
     return {
         selectedFile: null,

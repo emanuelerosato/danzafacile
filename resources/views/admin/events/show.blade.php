@@ -405,7 +405,7 @@
 </div>
 @endif
 
-<script>
+<script nonce="@cspNonce">
 function openRegisterModal() {
     // Load users for selection
     fetch('{{ route("admin.users.index") }}?format=json')

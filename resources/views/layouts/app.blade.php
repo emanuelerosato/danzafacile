@@ -42,10 +42,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <!-- Alpine.js -->
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
+    <script defer nonce="@cspNonce" src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" nonce="@cspNonce"></script>
     
     @stack('styles')
 </head>
@@ -180,9 +180,9 @@
     </div>
     
     @stack('scripts')
-    
+
     <!-- Simplified CSRF Setup -->
-    <script>
+    <script nonce="@cspNonce">
         // Standard Laravel CSRF token setup
         window.Laravel = {
             csrfToken: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -315,8 +315,8 @@
     
     <!-- Toast Notifications System -->
     <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
-    
-    <script>
+
+    <script nonce="@cspNonce">
         // Enhanced Toast Notification System
         window.Toast = {
             // Create and show a toast notification

@@ -531,7 +531,7 @@
 {{-- Include Refund Modal --}}
 @include('admin.payments.modals.refund')
 
-<script>
+<script nonce="@cspNonce">
 // Funzioni JavaScript per altre azioni
 function sendReceipt(paymentId) {
     console.log('Sending receipt for payment:', paymentId);

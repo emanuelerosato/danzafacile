@@ -192,7 +192,7 @@
 
 @vite('resources/js/admin/rooms/room-manager.js')
 
-<script>
+<script nonce="@cspNonce">
 document.addEventListener('DOMContentLoaded', function() {
     // Dati delle sale dal backend (preservato identico)
     const roomsData = @json($rooms);

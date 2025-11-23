@@ -206,7 +206,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="@cspNonce">
 function eventAttendance() {
     return {
         currentDate: '{{ $date }}',

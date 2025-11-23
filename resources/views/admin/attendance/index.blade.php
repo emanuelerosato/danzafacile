@@ -279,7 +279,7 @@
 
 @vite('resources/js/admin/attendance/attendance-manager.js')
 
-<script>
+<script nonce="@cspNonce">
 // Preparazione dati per il modulo JavaScript moderno
 window.attendanceData = {
     attendances: @json($attendances->items()),

@@ -195,7 +195,7 @@
     </div>
 @endif
 
-<script>
+<script nonce="@cspNonce">
     // Add delete function to global scope for table actions
     window.deleteStudent = async function(studentId) {
         try {

@@ -644,7 +644,7 @@
     @endpush
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
     function reportsManager() {
         return {
             selectedReportType: 'overview',

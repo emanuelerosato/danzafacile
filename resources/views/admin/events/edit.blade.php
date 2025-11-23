@@ -284,7 +284,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="@cspNonce">
 document.addEventListener('DOMContentLoaded', function() {
     // Auto-update end date when start date changes (only if end date is empty or before start date)
     const startDateInput = document.getElementById('start_date');

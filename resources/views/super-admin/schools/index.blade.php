@@ -373,7 +373,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="@cspNonce">
     function schoolsDataTable() {
         return {
             items: @json($schools->items()),

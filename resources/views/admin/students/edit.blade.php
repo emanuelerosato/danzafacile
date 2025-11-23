@@ -391,7 +391,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="@cspNonce">
 document.addEventListener('alpine:init', () => {
     Alpine.data('studentEditForm', () => ({
         loading: false,

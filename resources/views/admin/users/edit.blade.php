@@ -382,7 +382,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
         function userEditForm() {
             return {
                 saving: false,

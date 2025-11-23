@@ -265,7 +265,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
     function dashboard() {
         return {
             refreshing: false,

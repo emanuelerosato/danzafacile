@@ -430,7 +430,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
     function userEditForm() {
         return {
             selectedRole: '{{ old('role', $user->role) }}',

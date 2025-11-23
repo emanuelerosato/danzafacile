@@ -6,7 +6,7 @@
     <title>Grazie! - DanzaFacile</title>
     <meta name="description" content="Richiesta demo ricevuta con successo">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
+    <style nonce="@cspNonce">
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
     </style>
@@ -97,7 +97,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="@cspNonce">
         // Simulazione posti rimanenti
         const spotsLeftEl = document.getElementById('spots-left');
         let spotsLeft = localStorage.getItem('spotsLeft') || 17;

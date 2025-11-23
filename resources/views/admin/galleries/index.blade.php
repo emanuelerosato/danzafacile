@@ -326,7 +326,7 @@
 </div>
 
 @push('styles')
-<style>
+<style nonce="@cspNonce">
 .line-clamp-1 {
     display: -webkit-box;
     -webkit-line-clamp: 1;

@@ -7,6 +7,7 @@ use App\Observers\LeadObserver;
 use App\View\Composers\AppSettingsComposer;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -48,5 +49,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Register Lead Observer for email funnel automation
         Lead::observe(LeadObserver::class);
+
+        // SECURITY: Register Blade directive for CSP nonce
+        Blade::directive('cspNonce', function () {
+            return "<?php echo request()->attributes->get('csp_nonce', ''); ?>";
+        });
     }
 }

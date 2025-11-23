@@ -234,7 +234,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="@cspNonce">
 function editSchedule(courseId) {
     const row = document.querySelector(`tr[data-course-id="${courseId}"]`);
     const courseName = row.querySelector('.text-sm.font-medium').textContent;

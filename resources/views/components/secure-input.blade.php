@@ -72,7 +72,7 @@ $inputAttributes['data-allow-html'] = $allowHtml ? 'true' : 'false';
     @paste="handlePaste($event)">
 @endif
 
-<script>
+<script nonce="@cspNonce">
 function secureInput() {
     return {
         init() {

@@ -448,7 +448,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
     function ticketDetail() {
         return {
             showCloseModal: false,

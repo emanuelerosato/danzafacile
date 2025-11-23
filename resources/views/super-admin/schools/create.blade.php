@@ -357,7 +357,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
         // Auto-generate slug from name
         document.querySelector('input[name="name"]').addEventListener('input', function(e) {
             const name = e.target.value;

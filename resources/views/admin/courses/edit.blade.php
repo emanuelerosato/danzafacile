@@ -737,7 +737,7 @@
 
     @push('scripts')
         @vite('resources/js/admin/courses/course-edit.js')
-        <script>
+        <script nonce="@cspNonce">
             // Alpine.js data for course edit form
             window.courseEditData = {
                 activeTab: 'basic',

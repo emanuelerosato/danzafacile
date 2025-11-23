@@ -350,7 +350,7 @@
 </div>
 
 @push('scripts')
-<script>
+<script nonce="@cspNonce">
 // Initialize dual-layer validation when page loads
 document.addEventListener('DOMContentLoaded', function() {
     FormValidator.init('#courseForm');

@@ -77,7 +77,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="@cspNonce">
     function dataTable() {
         return {
             search: '',

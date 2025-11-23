@@ -255,7 +255,7 @@
 </div>
 
 @push('scripts')
-<script>
+<script nonce="@cspNonce">
 function documentUpload() {
     return {
         selectedFile: null,

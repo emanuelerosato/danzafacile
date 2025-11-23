@@ -222,7 +222,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text).then(() => {
                 // Visual feedback

@@ -199,7 +199,7 @@
     </div>
 @endif
 
-<script>
+<script nonce="@cspNonce">
 function editAttendance(attendanceId) {
     // Open edit modal or redirect to edit page
     // For now, we'll use a simple prompt

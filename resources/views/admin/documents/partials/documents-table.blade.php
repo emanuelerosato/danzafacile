@@ -216,7 +216,7 @@
     </div>
 @endif
 
-<script>
+<script nonce="@cspNonce">
 document.addEventListener('DOMContentLoaded', function() {
     // Select all functionality
     const selectAllCheckbox = document.getElementById('select-all');

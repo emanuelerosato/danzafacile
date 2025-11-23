@@ -77,7 +77,7 @@ foreach ($rules as $field => $ruleString) {
 }
 @endphp
 
-<script>
+<script nonce="@cspNonce">
 // Enhanced Form Validation System
 window.FormValidator = {
     rules: @json($clientRules),

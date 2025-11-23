@@ -23,7 +23,7 @@
     </x-slot>
 
     {{-- Define eventsManager stub BEFORE Alpine initializes --}}
-    <script>
+    <script nonce="@cspNonce">
         window.eventsManager = window.eventsManager || function() {
             return {
                 selectedItems: [],

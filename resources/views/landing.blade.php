@@ -6,7 +6,7 @@
     <title>DanzaFacile - Il Software per Scuole di Danza Creato da Chi Vive la Danza</title>
     <meta name="description" content="Il PRIMO software 100% italiano per scuole di danza. Creato da una professionista della danza. Setup gratuito + primo mese gratis per i primi 30 titolari.">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
+    <style nonce="@cspNonce">
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
         .gradient-text { background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
@@ -722,7 +722,7 @@
         </div>
     </footer>
 
-    <script>
+    <script nonce="@cspNonce">
         // Countdown per deadline offerta (7 giorni da oggi)
         const deadline = new Date();
         deadline.setDate(deadline.getDate() + 7);

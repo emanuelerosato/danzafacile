@@ -197,7 +197,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="@cspNonce">
 function courseAttendance() {
     return {
         currentDate: '{{ $date }}',

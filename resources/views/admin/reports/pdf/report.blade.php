@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>Report Analytics - {{ ucfirst($period) }}</title>
-    <style>
+    <style nonce="@cspNonce">
         body {
             font-family: 'DejaVu Sans', sans-serif;
             font-size: 12px;

@@ -347,7 +347,7 @@
 {{-- JavaScript per funzionalità moderne (non-intrusivo) --}}
 @vite('resources/js/admin/enrollments/enrollment-manager.js')
 
-<script>
+<script nonce="@cspNonce">
 // Expose data to JavaScript (preserva funzionalità esistenti)
 window.enrollmentsData = @json($enrollments->items() ?? []);
 console.log('📋 Enrollment index loaded with', (window.enrollmentsData || []).length, 'enrollments');

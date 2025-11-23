@@ -175,7 +175,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
     document.addEventListener('DOMContentLoaded', function() {
         // Character count for reply
         const messageTextarea = document.getElementById('message');

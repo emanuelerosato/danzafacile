@@ -26,7 +26,7 @@
 
 
 @push('styles')
-<style>
+<style nonce="@cspNonce">
     .metric-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         transition: all 0.3s ease;
@@ -329,7 +329,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 
-<script>
+<script nonce="@cspNonce">
 let currentChart = null;
 let currentChartType = 'overview';
 let currentPeriod = '{{ $period }}';

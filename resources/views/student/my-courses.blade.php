@@ -598,7 +598,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="@cspNonce">
         // PayPal payment function
         async function payWithPayPal(paymentId) {
             const button = event.target;

@@ -456,7 +456,7 @@
 </div>
 
 @push('scripts')
-<script>
+<script nonce="@cspNonce">
 // Upload functionality
 function openUploadModal() {
     document.getElementById('uploadModal').classList.remove('hidden');
@@ -740,7 +740,7 @@ document.addEventListener('keydown', function(e) {
 @endpush
 
 @push('styles')
-<style>
+<style nonce="@cspNonce">
 .line-clamp-1 {
     display: -webkit-box;
     -webkit-line-clamp: 1;

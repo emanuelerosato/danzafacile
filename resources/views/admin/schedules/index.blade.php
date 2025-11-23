@@ -212,7 +212,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="@cspNonce">
 let currentWeek = '{{ $weekStart->format('Y-m-d') }}';
 
 function previousWeek() {

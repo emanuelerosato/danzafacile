@@ -231,7 +231,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
     function helpSystem() {
         return {
             searchQuery: '',

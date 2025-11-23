@@ -233,7 +233,7 @@
         </div>
     </div>
 
-    <script>
+    <script nonce="@cspNonce">
         document.addEventListener('DOMContentLoaded', function() {
             const paymentTypeSelect = document.getElementById('payment_type');
             const courseSection = document.getElementById('course_section');

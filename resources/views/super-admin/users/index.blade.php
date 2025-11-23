@@ -296,7 +296,7 @@
 </div>
 
 <!-- Alpine.js Users Management -->
-<script>
+<script nonce="@cspNonce">
 function usersManagement() {
     return {
         selectedUsers: [],

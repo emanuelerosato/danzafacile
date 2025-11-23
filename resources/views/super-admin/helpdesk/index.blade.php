@@ -286,7 +286,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
     function helpdeskManager() {
         return {
             refreshing: false,

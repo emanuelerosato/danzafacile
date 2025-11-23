@@ -265,7 +265,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="@cspNonce">
     let currentCourseId = null;
 
     // Show delete modal with course information

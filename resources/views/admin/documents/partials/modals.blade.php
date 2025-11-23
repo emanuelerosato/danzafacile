@@ -101,7 +101,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="@cspNonce">
 function closeRejectModal() {
     const modal = document.getElementById('rejectModal');
     const form = document.getElementById('rejectForm');

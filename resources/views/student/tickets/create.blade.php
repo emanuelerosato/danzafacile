@@ -169,7 +169,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
     document.addEventListener('DOMContentLoaded', function() {
         // Character count for description
         const descriptionTextarea = document.getElementById('description');

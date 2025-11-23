@@ -89,7 +89,7 @@
     </div>
 </div>
 
-<script>
+<script nonce="@cspNonce">
 function errorBoundary() {
     return {
         hasError: false,

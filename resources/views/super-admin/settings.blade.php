@@ -592,7 +592,7 @@
     </div>
 
     @push('scripts')
-    <script>
+    <script nonce="@cspNonce">
     function settingsManager() {
         return {
             activeTab: 'system'

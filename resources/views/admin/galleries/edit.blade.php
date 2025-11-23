@@ -324,7 +324,7 @@
 </div>
 
 @push('scripts')
-<script>
+<script nonce="@cspNonce">
 document.addEventListener('DOMContentLoaded', function() {
     const typeSelect = document.getElementById('type');
     const typeInfo = document.getElementById('typeInfo');
