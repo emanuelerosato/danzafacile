@@ -93,7 +93,7 @@ npm run dev
    FIREBASE_DATABASE_URL=https://YOUR_PROJECT-default-rtdb.firebaseio.com
    ```
 
-📚 **[Firebase Setup Guide Completa](docs/FIREBASE_SETUP_GUIDE.md)**
+📚 **[Firebase Setup Guide Completa](docs/FIREBASE_SETUP_GUIDE.md)** | **[Push Notifications Guide](docs/PUSH_NOTIFICATIONS_GUIDE.md)**
 
 ## 🧪 Testing
 
@@ -131,11 +131,14 @@ curl -X POST https://www.danzafacile.it/api/mobile/v1/auth/login \
 
 ## 📚 Documentation
 
+**📖 [Complete Documentation Index](docs/README.md)** - Documentazione completa organizzata
+
+**Quick Links:**
 - **[API Endpoints Reference](docs/API_ENDPOINTS_REFERENCE.md)** - Quick reference tutti endpoints
-- **[Firebase Setup Guide](docs/FIREBASE_SETUP_GUIDE.md)** - Setup completo Firebase
-- **[Push Notifications Progress](docs/PUSH_NOTIFICATIONS_PROGRESS.md)** - Status implementazione
-- **[Implementation Plan](docs/PUSH_NOTIFICATIONS_IMPLEMENTATION_PLAN.md)** - Piano dettagliato 3 settimane
-- **[CLAUDE.md](CLAUDE.md)** - Istruzioni per Claude Code
+- **[Push Notifications Guide](docs/PUSH_NOTIFICATIONS_GUIDE.md)** - Guida completa push notifications
+- **[Deployment Guide](docs/deployment/DEPLOYMENT.md)** - Deploy su VPS
+- **[Security Audit Report](docs/security/SECURITY_AUDIT_REPORT_2025-11-22.md)** - Security audit completo
+- **[CLAUDE.md](CLAUDE.md)** - Istruzioni per Claude Code AI
 
 ## 🔧 Development
 
