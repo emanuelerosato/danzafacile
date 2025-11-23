@@ -51,8 +51,9 @@ class AppServiceProvider extends ServiceProvider
         Lead::observe(LeadObserver::class);
 
         // SECURITY: Register Blade directive for CSP nonce
+        // Note: $cspNonce variable is shared in SecurityHeaders middleware via View::share()
         Blade::directive('cspNonce', function () {
-            return "<?php echo request()->attributes->get('csp_nonce', ''); ?>";
+            return "<?php echo \$cspNonce ?? ''; ?>";
         });
     }
 }

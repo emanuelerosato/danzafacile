@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -30,6 +31,9 @@ class SecurityHeaders
         $nonce = base64_encode(random_bytes(16));
         $request->attributes->set('csp_nonce', $nonce);
 
+        // SECURITY: Share nonce with all views BEFORE rendering
+        View::share('cspNonce', $nonce);
+
         $response = $next($request);
 
         // SECURITY HEADER #1: Content Security Policy (CSP)
@@ -48,17 +52,19 @@ class SecurityHeaders
             // Development: Allow Vite HMR (requires unsafe-eval for hot reload)
             $csp[] = "script-src 'self' 'nonce-{$nonce}' 'unsafe-eval' http://localhost:5173 https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com https://www.paypal.com https://www.paypalobjects.com";
         } else {
-            // Production: Nonce-based only (NO unsafe-inline, NO unsafe-eval)
-            $csp[] = "script-src 'self' 'nonce-{$nonce}' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com https://www.paypal.com https://www.paypalobjects.com";
+            // Production: Nonce-based + unsafe-eval (required for Alpine.js)
+            // Note: Alpine.js requires 'unsafe-eval' to evaluate expressions like x-data="{ open: false }"
+            $csp[] = "script-src 'self' 'nonce-{$nonce}' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com https://www.paypal.com https://www.paypalobjects.com";
         }
 
         // Style sources (different for dev/prod)
         if ($isDevelopment) {
             // Development: Allow Vite HMR
-            $csp[] = "style-src 'self' 'nonce-{$nonce}' 'unsafe-inline' http://localhost:5173 https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdn.tailwindcss.com";
+            $csp[] = "style-src 'self' 'unsafe-inline' http://localhost:5173 https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdn.tailwindcss.com";
         } else {
-            // Production: Nonce-based only (NO unsafe-inline)
-            $csp[] = "style-src 'self' 'nonce-{$nonce}' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdn.tailwindcss.com";
+            // Production: unsafe-inline only (nonce would block inline styles in Alpine.js and Chart.js)
+            // Note: When a nonce is present, 'unsafe-inline' is ignored by browsers
+            $csp[] = "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://cdn.tailwindcss.com";
         }
 
         // Font sources

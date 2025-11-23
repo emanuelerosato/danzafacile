@@ -9,10 +9,10 @@
                     Panoramica generale del sistema
                 </p>
             </div>
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-4" x-data="{ refreshing: false }">
                 <span class="text-sm text-gray-500">Aggiornato: {{ now()->format('d/m/Y H:i') }}</span>
-                <button 
-                    @click="refreshData()"
+                <button
+                    @click="refreshing = true; setTimeout(() => refreshing = false, 1000); location.reload()"
                     class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white/80 border border-gray-300 rounded-lg hover:bg-white hover:shadow-sm transition-all duration-200"
                 >
                     <svg class="w-4 h-4 mr-2" :class="{ 'animate-spin': refreshing }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
