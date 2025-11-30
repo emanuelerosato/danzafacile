@@ -41,7 +41,7 @@
         </div>
 
         <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
-            <form action="{{ route('admin.events.store') }}" method="POST" id="createEventForm" class="p-6">
+            <form action="{{ route('admin.events.store') }}" method="POST" id="createEventForm" class="p-6" enctype="multipart/form-data">
                 @csrf
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -216,6 +216,75 @@
                     </div>
                 </div>
 
+                <!-- Media e Collegamenti -->
+                <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Locandina Evento -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 border-b pb-2 mb-4">Locandina Evento</h3>
+                        <div>
+                            <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-image mr-1 text-rose-500"></i>
+                                Carica Immagine Locandina
+                            </label>
+                            <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('image') border-red-500 @enderror"
+                                   onchange="previewImage(event)">
+                            <p class="mt-1 text-xs text-gray-500">
+                                Formati supportati: JPG, PNG, GIF, WEBP. Max 5MB
+                            </p>
+                            @error('image')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+
+                            <!-- Image Preview -->
+                            <div id="imagePreview" class="mt-3 hidden">
+                                <img id="imagePreviewImg" src="" alt="Preview" class="max-w-full h-48 object-cover rounded-lg border border-gray-300">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Collegamenti -->
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 border-b pb-2 mb-4">Collegamenti Esterni</h3>
+
+                        <!-- Link Sito Esterno -->
+                        <div class="mb-4">
+                            <label for="external_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-link mr-1 text-blue-500"></i>
+                                Link Sito Esterno
+                            </label>
+                            <input type="url" id="external_link" name="external_link"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('external_link') border-red-500 @enderror"
+                                   value="{{ old('external_link') }}"
+                                   placeholder="https://esempio.com">
+                            <p class="mt-1 text-xs text-gray-500">
+                                Link a sito web esterno relativo all'evento
+                            </p>
+                            @error('external_link')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- Link Pagina Social -->
+                        <div>
+                            <label for="social_link" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-share-alt mr-1 text-purple-500"></i>
+                                Link Pagina Social
+                            </label>
+                            <input type="url" id="social_link" name="social_link"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('social_link') border-red-500 @enderror"
+                                   value="{{ old('social_link') }}"
+                                   placeholder="https://facebook.com/evento">
+                            <p class="mt-1 text-xs text-gray-500">
+                                Link a evento/pagina su Facebook, Instagram, etc.
+                            </p>
+                            @error('social_link')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Impostazioni Visibilità -->
                 <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="flex items-center">
@@ -281,5 +350,24 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Image preview function
+function previewImage(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('imagePreviewImg');
+
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    } else {
+        preview.classList.add('hidden');
+        previewImg.src = '';
+    }
+}
 </script>
 </x-app-layout>

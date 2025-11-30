@@ -25,6 +25,8 @@ class Event extends Model
         'registration_deadline',
         'requirements',
         'image_path',
+        'external_link',
+        'social_link',
         'active',
         'is_public'
     ];

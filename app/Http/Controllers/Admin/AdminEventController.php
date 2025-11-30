@@ -6,8 +6,10 @@ use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Models\User;
 use App\Helpers\QueryHelper;
+use App\Helpers\FileUploadHelper;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class AdminEventController extends AdminBaseController
 {
@@ -85,6 +87,22 @@ class AdminEventController extends AdminBaseController
             'registration_deadline' => 'nullable|date|before:start_date',
             'requirements' => 'nullable|array',
             'requirements.*' => 'string|max:255',
+            'external_link' => 'nullable|url|max:500',
+            'social_link' => 'nullable|url|max:500',
+            'image' => [
+                'nullable',
+                'file',
+                'max:5120', // 5MB
+                'mimes:jpg,jpeg,png,gif,webp',
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        $validation = FileUploadHelper::validateFile($value, 'image', 5);
+                        if (!$validation['valid']) {
+                            $fail(implode(' ', $validation['errors']));
+                        }
+                    }
+                }
+            ],
             'is_public' => 'boolean',
             'active' => 'boolean'
         ]);
@@ -94,6 +112,22 @@ class AdminEventController extends AdminBaseController
         $validated['is_public'] = $validated['is_public'] ?? true;
         $validated['active'] = $validated['active'] ?? true;
         $validated['price'] = $validated['price'] ?? 0.00;
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $result = FileUploadHelper::uploadFile(
+                $request->file('image'),
+                'events',
+                'image',
+                5
+            );
+
+            if ($result['success']) {
+                $validated['image_path'] = $result['path'];
+            } else {
+                return back()->withErrors(['image' => implode(' ', $result['errors'])])->withInput();
+            }
+        }
 
         $event = Event::create($validated);
 
@@ -184,11 +218,49 @@ class AdminEventController extends AdminBaseController
             'registration_deadline' => 'nullable|date|before:start_date',
             'requirements' => 'nullable|array',
             'requirements.*' => 'string|max:255',
+            'external_link' => 'nullable|url|max:500',
+            'social_link' => 'nullable|url|max:500',
+            'image' => [
+                'nullable',
+                'file',
+                'max:5120', // 5MB
+                'mimes:jpg,jpeg,png,gif,webp',
+                function ($attribute, $value, $fail) {
+                    if ($value) {
+                        $validation = FileUploadHelper::validateFile($value, 'image', 5);
+                        if (!$validation['valid']) {
+                            $fail(implode(' ', $validation['errors']));
+                        }
+                    }
+                }
+            ],
             'is_public' => 'boolean',
             'active' => 'boolean'
         ]);
 
         $validated['price'] = $validated['price'] ?? 0.00;
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($event->image_path && Storage::disk('public')->exists($event->image_path)) {
+                Storage::disk('public')->delete($event->image_path);
+            }
+
+            $result = FileUploadHelper::uploadFile(
+                $request->file('image'),
+                'events',
+                'image',
+                5
+            );
+
+            if ($result['success']) {
+                $validated['image_path'] = $result['path'];
+            } else {
+                return back()->withErrors(['image' => implode(' ', $result['errors'])])->withInput();
+            }
+        }
+
         $event->update($validated);
         $this->clearSchoolCache();
 
