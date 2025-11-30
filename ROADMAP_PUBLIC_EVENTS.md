@@ -47,12 +47,12 @@ Implementare sistema completo di gestione eventi pubblici con:
 - [x] 0.1 Audit Privacy Policy & GDPR
 - [x] 0.2 Setup Environment & Tools
 
-### Fase 1: Database (Settimana 1-2)
-- [ ] 1.1 Migration: Guest fields in users table
-- [ ] 1.2 Migration: Dual pricing in events table
-- [ ] 1.3 Migration: Event payments table
-- [ ] 1.4 Migration: GDPR consents table
-- [ ] 1.5 Migration: QR code in registrations
+### Fase 1: Database (Settimana 1-2) ✅ COMPLETATA
+- [x] 1.1 Migration: Guest fields in users table
+- [x] 1.2 Migration: Dual pricing in events table
+- [x] 1.3 Migration: Event payments table
+- [x] 1.4 Migration: GDPR consents table
+- [x] 1.5 Migration: QR code in registrations
 
 ### Fase 2: Backend Core (Settimana 2-3)
 - [ ] 2.1 Model: User - Guest methods
