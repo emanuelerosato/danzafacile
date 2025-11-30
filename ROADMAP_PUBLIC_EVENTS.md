@@ -43,9 +43,9 @@ Implementare sistema completo di gestione eventi pubblici con:
 
 ## 📊 Progress Tracker
 
-### Fase 0: Preparazione (Settimana 1)
-- [ ] 0.1 Audit Privacy Policy & GDPR
-- [ ] 0.2 Setup Environment & Tools
+### Fase 0: Preparazione (Settimana 1) ✅ COMPLETATA
+- [x] 0.1 Audit Privacy Policy & GDPR
+- [x] 0.2 Setup Environment & Tools
 
 ### Fase 1: Database (Settimana 1-2)
 - [ ] 1.1 Migration: Guest fields in users table

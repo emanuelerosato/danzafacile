@@ -44,6 +44,15 @@ Route::get('/', function () {
     return view('landing');
 })->name('home');
 
+// Privacy & Cookie Policy (Pubbliche)
+Route::get('/privacy-policy', function () {
+    return view('privacy-policy');
+})->name('privacy-policy');
+
+Route::get('/cookie-policy', function () {
+    return view('cookie-policy');
+})->name('cookie-policy');
+
 // Route per gestione form demo
 Route::post('/demo-request', function (Illuminate\Http\Request $request) {
     // Validazione
