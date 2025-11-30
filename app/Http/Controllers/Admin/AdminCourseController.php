@@ -99,7 +99,9 @@ class AdminCourseController extends AdminBaseController
 
         $levels = ['Principiante', 'Intermedio', 'Avanzato', 'Professionale'];
 
-        return view('admin.courses.create', compact('instructors', 'levels'));
+        $rooms = $this->school->rooms()->active()->orderBy("name")->get();
+
+        return view("admin.courses.create", compact("instructors", "levels", "rooms"));
     }
 
     /**

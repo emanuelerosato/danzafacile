@@ -47,8 +47,8 @@
 
     <!-- Form Card -->
     <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-lg p-6">
-        <!-- Dual-Layer Validation Component -->
-        <x-form-validation :rules="[
+        <!-- Dual-Layer Validation Component - DISABLED: All fields are now optional -->
+        {{-- <x-form-validation :rules="[
             'name' => 'required|string|max:255',
             'description' => 'required|string|min:10',
             'instructor_id' => 'nullable|exists:users,id',
@@ -60,7 +60,7 @@
             'location' => 'nullable|string|max:255',
             'duration_weeks' => 'nullable|integer|min:1|max:52',
             'schedule' => 'nullable|string|max:255'
-        ]" />
+        ]" /> --}}
 
         <form id="courseForm" action="{{ route('admin.courses.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
@@ -77,7 +77,6 @@
                         id="name"
                         value="{{ old('name') }}"
                         placeholder="Es. Danza Classica Livello Base"
-                        required
                         maxlength="255"
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent" />
                     @error('name')
@@ -115,7 +114,7 @@
                     name="description"
                     id="description"
                     placeholder="Descrivi il corso, obiettivi e contenuti..."
-                    required
+                   
                     maxlength="1000"
                     rows="4"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent resize-none">{{ old('description') }}</textarea>
@@ -130,7 +129,7 @@
                     <label for="level" class="block text-sm font-medium text-gray-700 mb-2">
                         Livello *
                     </label>
-                    <select name="level" id="level" required
+                    <select name="level" id="level"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         <option value="">Seleziona livello</option>
                         <option value="beginner" {{ old('level') == 'beginner' ? 'selected' : '' }}>Principiante</option>
@@ -146,7 +145,7 @@
                     <label for="price" class="block text-sm font-medium text-gray-700 mb-2">
                         Prezzo Mensile (€) *
                     </label>
-                    <input type="number" name="price" id="price" step="0.01" min="0" required
+                    <input type="number" name="price" id="price" step="0.01" min="0"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                            placeholder="0.00"
                            value="{{ old('price') }}">
@@ -175,7 +174,7 @@
                     <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">
                         Data Inizio *
                     </label>
-                    <input type="date" name="start_date" id="start_date" required
+                    <input type="date" name="start_date" id="start_date"
                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                            value="{{ old('start_date') }}">
                     @error('start_date')
@@ -202,10 +201,15 @@
                     <label for="location" class="block text-sm font-medium text-gray-700 mb-2">
                         Ubicazione
                     </label>
-                    <input type="text" name="location" id="location"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                           placeholder="Es. Sala A, Studio 1"
-                           value="{{ old('location') }}">
+                    <select name="location" id="location"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Seleziona sala</option>
+                        @foreach($rooms as $room)
+                            <option value="{{ $room->name }}" {{ old('location') == $room->name ? 'selected' : '' }}>
+                                {{ $room->name }}{{ $room->capacity ? ' (Cap: ' . $room->capacity . ')' : '' }}
+                            </option>
+                        @endforeach
+                    </select>
                     @error('location')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
@@ -242,7 +246,7 @@
                         <label class="block text-sm font-medium text-gray-700">
                             Orari delle Lezioni
                         </label>
-                        <button type="button" onclick="addScheduleSlotCreate()"
+                        <button type="button" id="addScheduleBtn"
                                 class="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
                             <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
@@ -256,7 +260,7 @@
                         <div class="schedule-slot bg-gray-50 rounded-lg p-4 border border-gray-200">
                             <div class="flex items-center justify-between mb-3">
                                 <h4 class="font-medium text-gray-900">Orario 1</h4>
-                                <button type="button" onclick="removeScheduleSlotCreate(this)" class="text-red-600 hover:text-red-800 text-sm" style="display: none;">
+                                <button type="button" class="remove-slot-btn text-red-600 hover:text-red-800 text-sm" style="display: none;">
                                     Rimuovi
                                 </button>
                             </div>
@@ -264,8 +268,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">Giorno della settimana *</label>
-                                    <select name="schedule_slots[0][day]" required onchange="updateSlotNumbersCreate()"
-                                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                                    <select name="schedule_slots[0][day]" class="day-select w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                                         <option value="">Seleziona giorno</option>
                                         <option value="Lunedì">Lunedì</option>
                                         <option value="Martedì">Martedì</option>
@@ -282,15 +285,11 @@
                                     <select name="schedule_slots[0][location]"
                                             class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                                         <option value="">Seleziona sala</option>
-                                        <option value="Sala A">Sala A</option>
-                                        <option value="Sala B">Sala B</option>
-                                        <option value="Sala C">Sala C</option>
-                                        <option value="Sala Principale">Sala Principale</option>
-                                        <option value="Studio 1">Studio 1</option>
-                                        <option value="Studio 2">Studio 2</option>
-                                        <option value="Palestra">Palestra</option>
-                                        <option value="Aula Magna">Aula Magna</option>
-                                        <option value="Altro">Altro</option>
+                                        @foreach($rooms as $room)
+                                            <option value="{{ $room->name }}">
+                                                {{ $room->name }}{{ $room->capacity ? ' (Cap: ' . $room->capacity . ')' : '' }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
@@ -298,13 +297,13 @@
                             <div class="grid grid-cols-2 gap-4 mt-4">
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">Orario Inizio *</label>
-                                    <input type="time" name="schedule_slots[0][start_time]" required
+                                    <input type="time" name="schedule_slots[0][start_time]"
                                            onchange="calculateDurationCreate(this)"
                                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">Orario Fine *</label>
-                                    <input type="time" name="schedule_slots[0][end_time]" required
+                                    <input type="time" name="schedule_slots[0][end_time]"
                                            onchange="calculateDurationCreate(this)"
                                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                                 </div>
@@ -351,13 +350,50 @@
 
 @push('scripts')
 <script nonce="@cspNonce">
-// Initialize dual-layer validation when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    FormValidator.init('#courseForm');
-});
+// Initialize dual-layer validation when page loads - DISABLED: All fields are now optional
+// document.addEventListener('DOMContentLoaded', function() {
+//     FormValidator.init('#courseForm');
+// });
 
 // Schedule management functions for create page
 let scheduleSlotIndexCreate = 1;
+
+// Available rooms from database
+const availableRooms = @json($rooms->map(function($room) {
+    return [
+        'name' => $room->name,
+        'capacity' => $room->capacity
+    ];
+}));
+
+// Initialize event listeners when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Add schedule slot button
+    const addBtn = document.getElementById('addScheduleBtn');
+    if (addBtn) {
+        addBtn.addEventListener('click', addScheduleSlotCreate);
+    }
+
+    // Event delegation for remove buttons and day selects
+    const container = document.getElementById('schedule-container-create');
+    if (container) {
+        container.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-slot-btn') || e.target.closest('.remove-slot-btn')) {
+                const btn = e.target.classList.contains('remove-slot-btn') ? e.target : e.target.closest('.remove-slot-btn');
+                removeScheduleSlotCreate(btn);
+            }
+        });
+
+        container.addEventListener('change', function(e) {
+            if (e.target.classList.contains('day-select')) {
+                updateSlotNumbersCreate();
+            }
+            if (e.target.name && e.target.name.includes('start_time') || e.target.name && e.target.name.includes('end_time')) {
+                calculateDurationCreate(e.target);
+            }
+        });
+    }
+});
 
 function addScheduleSlotCreate() {
     const container = document.getElementById('schedule-container-create');
@@ -365,8 +401,7 @@ function addScheduleSlotCreate() {
         <div class="schedule-slot bg-gray-50 rounded-lg p-4 border border-gray-200">
             <div class="flex items-center justify-between mb-3">
                 <h4 class="font-medium text-gray-900">Orario ${scheduleSlotIndexCreate + 1}</h4>
-                <button type="button" onclick="removeScheduleSlotCreate(this)"
-                        class="text-red-600 hover:text-red-800 text-sm">
+                <button type="button" class="remove-slot-btn text-red-600 hover:text-red-800 text-sm">
                     Rimuovi
                 </button>
             </div>
@@ -374,8 +409,7 @@ function addScheduleSlotCreate() {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Giorno della settimana *</label>
-                    <select name="schedule_slots[${scheduleSlotIndexCreate}][day]" required onchange="updateSlotNumbersCreate()"
-                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    <select name="schedule_slots[${scheduleSlotIndexCreate}][day]" class="day-select w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                         <option value="">Seleziona giorno</option>
                         <option value="Lunedì">Lunedì</option>
                         <option value="Martedì">Martedì</option>
@@ -392,15 +426,11 @@ function addScheduleSlotCreate() {
                     <select name="schedule_slots[${scheduleSlotIndexCreate}][location]"
                             class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                         <option value="">Seleziona sala</option>
-                        <option value="Sala A">Sala A</option>
-                        <option value="Sala B">Sala B</option>
-                        <option value="Sala C">Sala C</option>
-                        <option value="Sala Principale">Sala Principale</option>
-                        <option value="Studio 1">Studio 1</option>
-                        <option value="Studio 2">Studio 2</option>
-                        <option value="Palestra">Palestra</option>
-                        <option value="Aula Magna">Aula Magna</option>
-                        <option value="Altro">Altro</option>
+                        ' + availableRooms.map(room =>
+                            '<option value="' + room.name + '">' +
+                            room.name + (room.capacity ? ' (Cap: ' + room.capacity + ')' : '') +
+                            '</option>'
+                        ).join('') + '
                     </select>
                 </div>
             </div>
@@ -408,14 +438,12 @@ function addScheduleSlotCreate() {
             <div class="grid grid-cols-2 gap-4 mt-4">
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Orario Inizio *</label>
-                    <input type="time" name="schedule_slots[${scheduleSlotIndexCreate}][start_time]" required
-                           onchange="calculateDurationCreate(this)"
+                    <input type="time" name="schedule_slots[${scheduleSlotIndexCreate}][start_time]"
                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-gray-600 mb-1">Orario Fine *</label>
-                    <input type="time" name="schedule_slots[${scheduleSlotIndexCreate}][end_time]" required
-                           onchange="calculateDurationCreate(this)"
+                    <input type="time" name="schedule_slots[${scheduleSlotIndexCreate}][end_time]"
                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                 </div>
             </div>
