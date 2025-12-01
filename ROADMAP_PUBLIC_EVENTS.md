@@ -78,12 +78,12 @@ Implementare sistema completo di gestione eventi pubblici con:
 - [x] 4.5 Admin: gestione prezzi evento
 - [x] 4.6 Admin: QR scanner check-in
 
-### Fase 5: Email System (Settimana 5)
-- [ ] 5.1 Email: Conferma registrazione
-- [ ] 5.2 Email: Reminder 1 giorno prima
-- [ ] 5.3 Email: Thank you post evento
-- [ ] 5.4 Email: Richiesta feedback
-- [ ] 5.5 Email: Notifica admin nuova iscrizione
+### Fase 5: Email System (Settimana 5) ✅ COMPLETATA
+- [x] 5.1 Email: Magic Link (passwordless login)
+- [x] 5.2 Email: Conferma registrazione
+- [x] 5.3 Email: Conferma pagamento
+- [x] 5.4 Email: Reminder 3 giorni prima
+- [x] 5.5 Email: Thank you post evento
 
 ### Fase 6: Pagamenti PayPal (Settimana 5-6)
 - [ ] 6.1 Setup PayPal SDK
