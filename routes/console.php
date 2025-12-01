@@ -16,3 +16,14 @@ Schedule::command('notifications:send-lesson-reminders')
     ->everyFifteenMinutes()
     ->withoutOverlapping()
     ->runInBackground();
+
+// Schedule cleanup guest scaduti (GDPR) - ogni giorno alle 2:00
+Schedule::command('guests:cleanup --days=180')
+    ->dailyAt('02:00')
+    ->timezone('Europe/Rome');
+
+// Schedule processing eventi email (reminder + thank you) - ogni ora
+Schedule::command('events:process-email-scheduler')
+    ->hourly()
+    ->withoutOverlapping()
+    ->runInBackground();

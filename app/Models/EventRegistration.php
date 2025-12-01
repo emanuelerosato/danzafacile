@@ -22,13 +22,17 @@ class EventRegistration extends Model
         'additional_info',
         'qr_code_token',
         'checked_in_at',
-        'checked_in_by'
+        'checked_in_by',
+        'reminder_sent_at',
+        'thank_you_sent_at'
     ];
 
     protected $casts = [
         'registration_date' => 'datetime',
         'confirmed_at' => 'datetime',
         'checked_in_at' => 'datetime',
+        'reminder_sent_at' => 'datetime',
+        'thank_you_sent_at' => 'datetime',
         'additional_info' => 'array'
     ];
 
