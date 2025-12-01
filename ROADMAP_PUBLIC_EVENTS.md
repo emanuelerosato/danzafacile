@@ -100,12 +100,12 @@ Implementare sistema completo di gestione eventi pubblici con:
 - [x] 7.5 Migration: Email tracking (reminder_sent_at, thank_you_sent_at)
 - [x] 7.6 Scheduler: Configurato in routes/console.php
 
-### Fase 8: Admin Features (Settimana 6-7)
-- [ ] 8.1 Dashboard eventi pubblici
-- [ ] 8.2 Landing page customization
-- [ ] 8.3 QR code scanner UI
-- [ ] 8.4 Report iscrizioni guest
-- [ ] 8.5 Export data guest
+### Fase 8: Admin Features (Settimana 6-7) ✅ COMPLETATA
+- [x] 8.1 Dashboard eventi pubblici
+- [x] 8.2 Landing page customization
+- [x] 8.3 QR code scanner UI (già implementato Fase 4)
+- [x] 8.4 Report iscrizioni guest
+- [x] 8.5 Export data guest
 
 ### Fase 9: Testing & Deploy (Settimana 7-8)
 - [ ] 9.1 Unit tests
