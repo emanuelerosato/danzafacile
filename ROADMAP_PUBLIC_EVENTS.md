@@ -85,12 +85,12 @@ Implementare sistema completo di gestione eventi pubblici con:
 - [x] 5.4 Email: Reminder 3 giorni prima
 - [x] 5.5 Email: Thank you post evento
 
-### Fase 6: Pagamenti PayPal (Settimana 5-6)
-- [ ] 6.1 Setup PayPal SDK
-- [ ] 6.2 Payment flow integration
-- [ ] 6.3 Webhook listener
-- [ ] 6.4 Refund system
-- [ ] 6.5 Testing sandbox
+### Fase 6: Pagamenti PayPal (Settimana 5-6) ✅ COMPLETATA
+- [x] 6.1 Setup PayPal SDK
+- [x] 6.2 Payment flow integration
+- [x] 6.3 Webhook listener
+- [x] 6.4 Refund system
+- [x] 6.5 Testing sandbox
 
 ### Fase 7: Automazioni (Settimana 6)
 - [ ] 7.1 Command: Cleanup guest automatico
