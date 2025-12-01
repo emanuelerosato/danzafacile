@@ -3,6 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 
+// Controllers Public Events
+use App\Http\Controllers\PublicEventController;
+use App\Http\Controllers\GuestDashboardController;
+use App\Http\Controllers\PaymentController;
+
 // Controllers Super Admin
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\SuperAdmin\SchoolController;
@@ -29,6 +34,7 @@ use App\Http\Controllers\Admin\StaffScheduleController;
 use App\Http\Controllers\Admin\AdminSettingsController;
 use App\Http\Controllers\Admin\AdminTicketController;
 use App\Http\Controllers\Admin\AdminHelpController;
+use App\Http\Controllers\Admin\QRCheckinController;
 
 // Controllers Student
 use App\Http\Controllers\Student\StudentDashboardController;
@@ -52,6 +58,63 @@ Route::get('/privacy-policy', function () {
 Route::get('/cookie-policy', function () {
     return view('cookie-policy');
 })->name('cookie-policy');
+
+// ============================================================================
+// PUBLIC EVENTS ROUTES (No authentication required)
+// ============================================================================
+
+Route::prefix('eventi')->name('public.events.')->group(function () {
+
+    // Public events listing
+    Route::get('/', [PublicEventController::class, 'index'])->name('index');
+
+    // Single event landing page
+    Route::get('/{slug}', [PublicEventController::class, 'show'])->name('show');
+
+    // Guest registration form submission
+    Route::post('/{slug}/iscrizione', [PublicEventController::class, 'register'])->name('register');
+
+    // Payment page
+    Route::get('/{slug}/pagamento/{registration}', [PublicEventController::class, 'payment'])->name('payment');
+
+    // Registration success page
+    Route::get('/{slug}/successo/{registration}', [PublicEventController::class, 'registrationSuccess'])->name('registration.success');
+});
+
+// ============================================================================
+// GUEST DASHBOARD ROUTES (Magic link authentication)
+// ============================================================================
+
+Route::prefix('ospite')->name('guest.')->group(function () {
+
+    // Magic link login
+    Route::get('/accedi', [GuestDashboardController::class, 'login'])->name('login');
+
+    // Guest dashboard (requires auth)
+    Route::middleware('auth')->group(function () {
+        Route::get('/dashboard', [GuestDashboardController::class, 'dashboard'])->name('dashboard');
+        Route::get('/qr-code/{registration}', [GuestDashboardController::class, 'showQRCode'])->name('qrcode');
+        Route::post('/logout', [GuestDashboardController::class, 'logout'])->name('logout');
+    });
+});
+
+// ============================================================================
+// PAYMENT ROUTES (PayPal callbacks)
+// ============================================================================
+
+Route::prefix('pagamenti')->name('payments.')->group(function () {
+
+    // PayPal webhook (no CSRF verification needed - handled by PayPal signature)
+    Route::post('/webhook/paypal', [PaymentController::class, 'webhook'])
+        ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
+        ->name('webhook.paypal');
+
+    // PayPal success callback
+    Route::get('/successo', [PaymentController::class, 'success'])->name('success');
+
+    // PayPal cancel callback
+    Route::get('/annullato', [PaymentController::class, 'cancel'])->name('cancel');
+});
 
 // Route per gestione form demo
 Route::post('/demo-request', function (Illuminate\Http\Request $request) {
@@ -376,6 +439,22 @@ Route::middleware('auth')->group(function () {
 
         // Help/Guide system
         Route::get('/help', [AdminHelpController::class, 'index'])->name('help');
+
+        // ============================================================================
+        // QR CHECK-IN ROUTES (Requires admin/staff auth)
+        // ============================================================================
+
+        // QR code scanner interface
+        Route::get('/eventi/{event}/qr-scanner', [QRCheckinController::class, 'scanner'])->name('events.qr-scanner');
+
+        // QR check-in AJAX endpoint
+        Route::post('/eventi/checkin', [QRCheckinController::class, 'checkin'])->name('events.checkin');
+
+        // Manual check-in (backup)
+        Route::post('/eventi/{event}/checkin-manuale/{registration}', [QRCheckinController::class, 'manualCheckin'])->name('events.manual-checkin');
+
+        // Undo check-in
+        Route::post('/eventi/{event}/annulla-checkin/{registration}', [QRCheckinController::class, 'undoCheckin'])->name('events.undo-checkin');
     });
     
     // STUDENT ROUTES

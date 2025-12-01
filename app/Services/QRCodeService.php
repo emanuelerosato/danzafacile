@@ -50,9 +50,11 @@ class QRCodeService
      */
     protected function getQRData(EventRegistration $registration): string
     {
-        return route('admin.events.checkin', [
-            'event' => $registration->event_id,
+        // Return JSON data that will be sent via AJAX to checkin endpoint
+        return json_encode([
+            'event_id' => $registration->event_id,
             'token' => $registration->qr_code_token,
+            'registration_id' => $registration->id,
         ]);
     }
 

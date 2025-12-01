@@ -63,12 +63,12 @@ Implementare sistema completo di gestione eventi pubblici con:
 - [x] 2.6 Service: PaymentService
 - [x] 2.7 Service: QRCodeService
 
-### Fase 3: Controllers & Routes (Settimana 3-4)
-- [ ] 3.1 Controller: PublicEventController
-- [ ] 3.2 Controller: GuestDashboardController
-- [ ] 3.3 Controller: PaymentController
-- [ ] 3.4 Controller: QRCheckinController
-- [ ] 3.5 Routes: Public + Guest
+### Fase 3: Controllers & Routes (Settimana 3-4) ✅ COMPLETATA
+- [x] 3.1 Controller: PublicEventController
+- [x] 3.2 Controller: GuestDashboardController
+- [x] 3.3 Controller: PaymentController
+- [x] 3.4 Controller: QRCheckinController
+- [x] 3.5 Routes: Public + Guest
 
 ### Fase 4: Frontend Views (Settimana 4-5)
 - [ ] 4.1 Landing page evento pubblico
