@@ -508,4 +508,262 @@ class AdminEventController extends AdminBaseController
 
         return $this->exportToCsv($data, $headers, $filename);
     }
+
+    /**
+     * Dashboard dedicata agli eventi pubblici con stats e KPI
+     */
+    public function publicDashboard()
+    {
+        $school = $this->school;
+
+        // Eventi pubblici attivi
+        $publicEvents = $school->events()
+            ->where('is_public', true)
+            ->where('active', true)
+            ->with(['registrations', 'payments'])
+            ->orderBy('start_date', 'desc')
+            ->get();
+
+        // Calcola stats
+        $stats = [
+            'total_public_events' => $publicEvents->count(),
+            'upcoming_events' => $publicEvents->where('start_date', '>', now())->count(),
+            'past_events' => $publicEvents->where('start_date', '<', now())->count(),
+            'total_registrations' => $publicEvents->sum(fn($e) => $e->registrations->count()),
+            'guest_registrations' => EventRegistration::whereIn('event_id', $publicEvents->pluck('id'))
+                ->whereHas('user', fn($q) => $q->where('is_guest', true))
+                ->count(),
+            'total_revenue' => $publicEvents->sum(fn($e) =>
+                $e->payments()->where('status', 'completed')->sum('amount')
+            ),
+            'pending_payments' => $publicEvents->sum(fn($e) =>
+                $e->payments()->where('status', 'pending')->count()
+            ),
+        ];
+
+        // Ultimi 5 eventi pubblici
+        $recentEvents = $publicEvents->take(5);
+
+        return view('admin.events.public-dashboard', compact('stats', 'recentEvents'));
+    }
+
+    /**
+     * Mostra form per personalizzare landing page evento
+     */
+    public function customizeLanding(Event $event)
+    {
+        // Ensure event belongs to current school
+        if ($event->school_id !== $this->school->id) {
+            abort(404, 'Evento non trovato.');
+        }
+
+        // Verifica che sia evento pubblico
+        if (!$event->is_public) {
+            abort(403, 'Solo eventi pubblici possono avere landing page personalizzate.');
+        }
+
+        return view('admin.events.customize-landing', compact('event'));
+    }
+
+    /**
+     * Salva personalizzazioni landing page
+     */
+    public function updateLanding(Request $request, Event $event)
+    {
+        // Ensure event belongs to current school
+        if ($event->school_id !== $this->school->id) {
+            abort(404, 'Evento non trovato.');
+        }
+
+        $validated = $request->validate([
+            'custom_description' => 'nullable|string|max:5000',
+            'custom_image_url' => 'nullable|url|max:500',
+            'show_location_map' => 'boolean',
+            'show_instructors' => 'boolean',
+            'custom_cta_text' => 'nullable|string|max:100',
+            'meta_title' => 'nullable|string|max:200',
+            'meta_description' => 'nullable|string|max:300',
+        ]);
+
+        // Salva in additional_info JSON
+        $additionalInfo = $event->additional_info ?? [];
+        $additionalInfo['landing_customization'] = $validated;
+
+        $event->update([
+            'additional_info' => $additionalInfo,
+        ]);
+
+        $this->clearSchoolCache();
+
+        return redirect()->route('admin.events.show', $event)
+            ->with('success', 'Landing page personalizzata aggiornata con successo!');
+    }
+
+    /**
+     * Report dettagliato iscrizioni guest per eventi pubblici
+     */
+    public function guestRegistrationsReport(Request $request)
+    {
+        $school = $this->school;
+
+        // Filtri
+        $eventId = $request->get('event_id');
+        $status = $request->get('status');
+        $dateFrom = $request->get('date_from');
+        $dateTo = $request->get('date_to');
+
+        // Query base
+        $query = EventRegistration::whereHas('event', function($q) use ($school) {
+                $q->where('school_id', $school->id)
+                  ->where('is_public', true);
+            })
+            ->whereHas('user', function($q) {
+                $q->where('is_guest', true);
+            })
+            ->with(['event', 'user', 'eventPayment']);
+
+        // Applica filtri
+        if ($eventId) {
+            $query->where('event_id', $eventId);
+        }
+        if ($status) {
+            $query->where('status', $status);
+        }
+        if ($dateFrom) {
+            $query->where('registration_date', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->where('registration_date', '<=', $dateTo);
+        }
+
+        $registrations = $query->orderBy('registration_date', 'desc')
+            ->paginate(25);
+
+        // Eventi pubblici per select filtro
+        $publicEvents = $school->events()
+            ->where('is_public', true)
+            ->orderBy('name')
+            ->get();
+
+        // Stats
+        $stats = [
+            'total' => $query->count(),
+            'confirmed' => (clone $query)->where('status', 'confirmed')->count(),
+            'pending' => (clone $query)->where('status', 'pending_payment')->count(),
+            'cancelled' => (clone $query)->where('status', 'cancelled')->count(),
+            'checked_in' => (clone $query)->whereNotNull('checked_in_at')->count(),
+        ];
+
+        return view('admin.events.guest-report', compact('registrations', 'publicEvents', 'stats'));
+    }
+
+    /**
+     * Export CSV guest registrations con filtri
+     */
+    public function exportGuestRegistrations(Request $request)
+    {
+        $school = $this->school;
+
+        // Stessi filtri del report
+        $eventId = $request->get('event_id');
+        $status = $request->get('status');
+        $dateFrom = $request->get('date_from');
+        $dateTo = $request->get('date_to');
+
+        $query = EventRegistration::whereHas('event', function($q) use ($school) {
+                $q->where('school_id', $school->id)
+                  ->where('is_public', true);
+            })
+            ->whereHas('user', function($q) {
+                $q->where('is_guest', true);
+            })
+            ->with(['event', 'user', 'eventPayment']);
+
+        // Applica filtri
+        if ($eventId) $query->where('event_id', $eventId);
+        if ($status) $query->where('status', $status);
+        if ($dateFrom) $query->where('registration_date', '>=', $dateFrom);
+        if ($dateTo) $query->where('registration_date', '<=', $dateTo);
+
+        $registrations = $query->orderBy('registration_date', 'desc')->get();
+
+        // Genera CSV
+        $csv = $this->generateGuestRegistrationsCSV($registrations);
+
+        $filename = 'guest-registrations-' . now()->format('Y-m-d-His') . '.csv';
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
+
+    /**
+     * Genera CSV guest registrations
+     */
+    private function generateGuestRegistrationsCSV($registrations)
+    {
+        $output = fopen('php://temp', 'r+');
+
+        // UTF-8 BOM per Excel
+        fwrite($output, "\xEF\xBB\xBF");
+
+        // Header
+        fputcsv($output, [
+            'ID Registrazione',
+            'Nome Guest',
+            'Email',
+            'Telefono',
+            'Evento',
+            'Data Evento',
+            'Data Registrazione',
+            'Status',
+            'Check-in',
+            'Importo',
+            'Metodo Pagamento',
+            'Privacy Consent',
+            'Marketing Consent',
+            'Newsletter Consent',
+        ]);
+
+        // Dati
+        foreach ($registrations as $reg) {
+            fputcsv($output, [
+                $reg->id,
+                $reg->user->name,
+                $reg->user->email,
+                $reg->user->guest_phone ?? 'N/A',
+                $reg->event->name,
+                $reg->event->start_date->format('d/m/Y H:i'),
+                $reg->registration_date->format('d/m/Y H:i'),
+                $reg->status,
+                $reg->checked_in_at ? $reg->checked_in_at->format('d/m/Y H:i') : 'No',
+                $reg->eventPayment ? '€' . number_format($reg->eventPayment->amount, 2) : '€0.00',
+                $reg->eventPayment->payment_method ?? 'N/A',
+                $this->getGdprConsent($reg->user, 'privacy'),
+                $this->getGdprConsent($reg->user, 'marketing'),
+                $this->getGdprConsent($reg->user, 'newsletter'),
+            ]);
+        }
+
+        rewind($output);
+        $csv = stream_get_contents($output);
+        fclose($output);
+
+        return $csv;
+    }
+
+    /**
+     * Helper per ottenere consent GDPR
+     */
+    private function getGdprConsent($user, $type)
+    {
+        $consent = \App\Models\GdprConsent::where('user_id', $user->id)
+            ->where('consent_type', $type)
+            ->where('consented', true)
+            ->latest('consented_at')
+            ->first();
+
+        return $consent ? 'Sì (' . $consent->consented_at->format('d/m/Y') . ')' : 'No';
+    }
 }

@@ -288,6 +288,13 @@ Route::middleware('auth')->group(function () {
         Route::get('events-export', [AdminEventController::class, 'export'])->name('events.export');
         Route::post('events/{event}/register-user', [AdminEventController::class, 'registerUser'])->name('events.register-user');
 
+        // Public Events Admin Features
+        Route::get('events-public-dashboard', [AdminEventController::class, 'publicDashboard'])->name('events.public-dashboard');
+        Route::get('events/{event}/customize-landing', [AdminEventController::class, 'customizeLanding'])->name('events.customize-landing');
+        Route::post('events/{event}/update-landing', [AdminEventController::class, 'updateLanding'])->name('events.update-landing');
+        Route::get('events-guest-report', [AdminEventController::class, 'guestRegistrationsReport'])->name('events.guest-report');
+        Route::get('events-export-guests', [AdminEventController::class, 'exportGuestRegistrations'])->name('events.export-guests');
+
         // Event Registrations management
         Route::prefix('event-registrations')->name('event-registrations.')->group(function () {
             Route::get('/', [EventRegistrationController::class, 'index'])->name('index');

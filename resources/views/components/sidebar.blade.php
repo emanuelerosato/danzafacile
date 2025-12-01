@@ -110,11 +110,17 @@
             </x-nav-group>
 
             <x-nav-group title="Eventi" icon="calendar">
-                <x-nav-item href="{{ route('admin.events.index') }}" :active="request()->routeIs('admin.events.*')" icon="calendar">
+                <x-nav-item href="{{ route('admin.events.index') }}" :active="request()->routeIs('admin.events.index')" icon="calendar">
                     Lista Eventi
+                </x-nav-item>
+                <x-nav-item href="{{ route('admin.events.public-dashboard') }}" :active="request()->routeIs('admin.events.public-dashboard')" icon="globe">
+                    Dashboard Eventi Pubblici
                 </x-nav-item>
                 <x-nav-item href="{{ route('admin.event-registrations.index') }}" :active="request()->routeIs('admin.event-registrations.*')" icon="user-plus">
                     Registrazioni
+                </x-nav-item>
+                <x-nav-item href="{{ route('admin.events.guest-report') }}" :active="request()->routeIs('admin.events.guest-report')" icon="document-text">
+                    Report Guest
                 </x-nav-item>
             </x-nav-group>
             
