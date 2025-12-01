@@ -1,8 +1,64 @@
 # 📚 Guida Completa - Sistema Scuola di Danza
 
-**Ultima modifica:** 13 Novembre 2025
-**Versione:** 1.1.0 - Sistema in Produzione
+**Ultima modifica:** 01 Dicembre 2025
+**Versione:** 1.2.0 - Fase 6 PayPal Completata
 **Stato:** 🚀 **LIVE su https://danzafacile.it**
+
+---
+
+## 🆕 **AGGIORNAMENTO 01/12/2025 - Fase 6 PayPal Integration Completata**
+
+### ✅ **INTEGRAZIONI PAYPAL IMPLEMENTATE:**
+
+#### **💳 PayPalService.php - Metodo Refund Aggiunto**
+- ✅ Metodo `refundPayment()` completo con integrazione PayPal API v2
+- ✅ Gestione rimborsi tramite endpoint `/v2/payments/captures/{id}/refund`
+- ✅ Logging completo operazioni rimborso
+- ✅ Gestione errori robusta con fallback
+
+#### **🔄 PaymentController.php - Webhook e API Completati**
+- ✅ Metodo `webhook()` con verifica signature PayPal reale
+- ✅ Estrazione dati scuola da payload custom
+- ✅ Gestione eventi `PAYMENT.SALE.COMPLETED` e `PAYMENT.CAPTURE.COMPLETED`
+- ✅ Metodo `success()` con `executePayment()` reale via PayPalService
+- ✅ Nuovo metodo `createPayPalOrder()` per PayPal Buttons SDK
+- ✅ Validazione importi e sicurezza transazioni
+
+#### **💰 PaymentService.php - Rimborsi PayPal Integrati**
+- ✅ Metodo `refundPayment()` integrato con PayPal API
+- ✅ Verifica transaction_id prima del rimborso
+- ✅ Aggiornamento stato registrazione a "cancelled"
+- ✅ Rollback automatico in caso di errore PayPal
+
+#### **🎨 payment.blade.php - PayPal Buttons Funzionanti**
+- ✅ Integrazione completa PayPal Buttons SDK
+- ✅ createOrder tramite fetch API al backend
+- ✅ onApprove con redirect a success handler
+- ✅ Gestione errori completa (onError, onCancel)
+- ✅ Styling personalizzato bottoni PayPal
+
+#### **🛣️ Routes - Nuovo Endpoint API**
+- ✅ Route POST `/pagamenti/paypal/create-order` aggiunta
+- ✅ Endpoint protetto con CSRF token
+- ✅ Integrazione con PaymentController::createPayPalOrder()
+
+### 📊 **File Modificati (Fase 6):**
+```
+✅ app/Services/PayPalService.php (+82 righe - metodo refundPayment)
+✅ app/Http/Controllers/PaymentController.php (+211 righe - webhook, createOrder, success)
+✅ app/Services/PaymentService.php (+67 righe - integrazione refund)
+✅ resources/views/public/events/payment.blade.php (+54 righe - PayPal Buttons)
+✅ routes/web.php (+4 righe - route API createOrder)
+
+TOTALE: +418 righe di codice funzionante
+```
+
+### 🔐 **Sicurezza PayPal Implementata:**
+- ✅ Verifica signature webhook tramite PayPal API
+- ✅ Validazione importi lato server
+- ✅ Protezione CSRF su tutti gli endpoint
+- ✅ Logging completo per audit trail
+- ✅ Gestione errori con fallback sicuri
 
 ---
 

@@ -446,4 +446,86 @@ class PayPalService
             return null;
         }
     }
+
+    /**
+     * Effettua un rimborso per un pagamento PayPal completato
+     *
+     * @param string $transactionId ID della transazione PayPal da rimborsare
+     * @param float $amount Importo da rimborsare
+     * @param string|null $note Nota opzionale per il rimborso
+     * @return array Risposta PayPal con dettagli rimborso
+     * @throws Exception Se il rimborso fallisce
+     */
+    public function refundPayment(string $transactionId, float $amount, ?string $note = null): array
+    {
+        try {
+            // Ottieni access token
+            $this->client->setAccessToken($this->client->getAccessToken());
+            $accessToken = $this->client->getAccessToken()['access_token'] ?? null;
+
+            if (!$accessToken) {
+                throw new Exception('Cannot get PayPal access token for refund');
+            }
+
+            // Determina l'endpoint API in base alla modalità
+            $apiUrl = $this->settings['mode'] === 'live'
+                ? "https://api-m.paypal.com/v2/payments/captures/{$transactionId}/refund"
+                : "https://api-m.sandbox.paypal.com/v2/payments/captures/{$transactionId}/refund";
+
+            // Prepara i dati del rimborso
+            $refundData = [
+                'amount' => [
+                    'value' => number_format($amount, 2, '.', ''),
+                    'currency_code' => $this->settings['currency']
+                ]
+            ];
+
+            if ($note) {
+                $refundData['note_to_payer'] = $note;
+            }
+
+            // Chiama l'endpoint di rimborso PayPal
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'Authorization' => "Bearer {$accessToken}"
+            ])->post($apiUrl, $refundData);
+
+            if (!$response->successful()) {
+                $errorBody = $response->json();
+                Log::error('PayPal refund API call failed', [
+                    'status' => $response->status(),
+                    'body' => $errorBody,
+                    'transaction_id' => $transactionId,
+                    'amount' => $amount,
+                    'school_id' => $this->school->id
+                ]);
+
+                throw new Exception(
+                    'Errore nel rimborso PayPal: ' .
+                    ($errorBody['message'] ?? $errorBody['error_description'] ?? 'Errore sconosciuto')
+                );
+            }
+
+            $result = $response->json();
+
+            Log::info('PayPal refund processed successfully', [
+                'refund_id' => $result['id'] ?? null,
+                'transaction_id' => $transactionId,
+                'amount' => $amount,
+                'status' => $result['status'] ?? null,
+                'school_id' => $this->school->id
+            ]);
+
+            return $result;
+
+        } catch (Exception $e) {
+            Log::error('PayPal refund exception:', [
+                'error' => $e->getMessage(),
+                'transaction_id' => $transactionId,
+                'amount' => $amount,
+                'school_id' => $this->school->id
+            ]);
+            throw $e;
+        }
+    }
 }

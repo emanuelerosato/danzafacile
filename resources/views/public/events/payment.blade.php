@@ -223,30 +223,58 @@
     @push('scripts')
     <script src="https://www.paypal.com/sdk/js?client-id={{ config('services.paypal.sandbox.client_id') }}&currency=EUR"></script>
     <script nonce="@cspNonce">
-        // TODO Phase 6: Implement full PayPal SDK integration
         paypal.Buttons({
             createOrder: function(data, actions) {
-                return actions.order.create({
-                    purchase_units: [{
-                        description: '{{ $event->name }} - Iscrizione',
-                        amount: {
-                            value: '{{ number_format($payment->amount, 2, '.', '') }}'
-                        }
-                    }]
+                // Chiama il nostro endpoint API per creare l'ordine PayPal
+                return fetch('{{ route('payments.paypal.create-order') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        payment_id: {{ $payment->id }},
+                        event_id: {{ $event->id }},
+                        amount: {{ number_format($payment->amount, 2, '.', '') }}
+                    })
+                })
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('Errore nella creazione dell\'ordine PayPal');
+                    }
+                    return response.json();
+                })
+                .then(function(data) {
+                    if (!data.order_id) {
+                        throw new Error('Order ID mancante nella risposta');
+                    }
+                    return data.order_id;
+                })
+                .catch(function(error) {
+                    console.error('Errore createOrder:', error);
+                    alert('Errore durante la creazione dell\'ordine PayPal. Riprova più tardi.');
+                    throw error;
                 });
             },
             onApprove: function(data, actions) {
-                return actions.order.capture().then(function(details) {
-                    // Redirect to success handler
-                    window.location.href = '{{ route('payments.success') }}?paymentId=' + data.orderID + '&PayerID=' + data.payerID + '&registration={{ $eventRegistration->id }}';
-                });
+                // Redirect al success handler che eseguirà il pagamento
+                window.location.href = '{{ route('payments.success') }}?paymentId=' + data.orderID + '&PayerID=' + data.payerID;
             },
             onCancel: function(data) {
-                window.location.href = '{{ route('payments.cancel') }}?registration={{ $eventRegistration->id }}';
+                // Redirect al cancel handler
+                window.location.href = '{{ route('payments.cancel') }}?token=' + (data.orderID || '');
             },
             onError: function(err) {
                 console.error('PayPal Error:', err);
                 alert('Si è verificato un errore durante il pagamento. Riprova più tardi.');
+            },
+            style: {
+                layout: 'vertical',
+                color: 'gold',
+                shape: 'rect',
+                label: 'paypal',
+                height: 45
             }
         }).render('#paypal-button-container');
     </script>

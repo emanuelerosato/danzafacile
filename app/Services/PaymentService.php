@@ -134,17 +134,14 @@ class PaymentService
     }
 
     /**
-     * Rimborsa un pagamento
-     * NOTA: L'integrazione completa con PayPal API sarà implementata in Phase 6
+     * Rimborsa un pagamento tramite PayPal API
      *
      * @param EventPayment $payment
+     * @param string|null $note Nota opzionale per il rimborso
      * @return bool
      */
-    public function refundPayment(EventPayment $payment): bool
+    public function refundPayment(EventPayment $payment, ?string $note = null): bool
     {
-        // TODO: Integrare con PayPal API in Phase 6 per rimborso reale
-        // Per ora segniamo solo il pagamento come rimborsato
-
         if (!$payment->isCompleted()) {
             Log::warning('Attempted to refund non-completed payment', [
                 'payment_id' => $payment->id,
@@ -153,22 +150,54 @@ class PaymentService
             return false;
         }
 
-        return DB::transaction(function () use ($payment) {
-            // Segna il pagamento come rimborsato
-            $payment->markAsRefunded();
-
-            // Aggiorna lo stato della registrazione a cancellato
-            $payment->eventRegistration->update([
-                'status' => 'cancelled',
-            ]);
-
-            Log::info('Payment refunded', [
+        // Verifica che ci sia un transaction_id valido
+        if (!$payment->transaction_id) {
+            Log::error('Cannot refund payment without transaction_id', [
                 'payment_id' => $payment->id,
-                'registration_id' => $payment->event_registration_id,
-                'amount' => $payment->amount,
             ]);
+            return false;
+        }
 
-            return true;
+        return DB::transaction(function () use ($payment, $note) {
+            try {
+                // Esegui rimborso tramite PayPal API
+                $school = $payment->event->school;
+                $paypalService = \App\Services\PayPalService::forSchool($school);
+
+                $refundResult = $paypalService->refundPayment(
+                    $payment->transaction_id,
+                    $payment->amount,
+                    $note ?? "Rimborso iscrizione evento: {$payment->event->name}"
+                );
+
+                // Segna il pagamento come rimborsato
+                $payment->markAsRefunded();
+
+                // Aggiorna lo stato della registrazione a cancellato
+                $payment->eventRegistration->update([
+                    'status' => 'cancelled',
+                ]);
+
+                Log::info('Payment refunded via PayPal', [
+                    'payment_id' => $payment->id,
+                    'registration_id' => $payment->event_registration_id,
+                    'amount' => $payment->amount,
+                    'refund_id' => $refundResult['id'] ?? null,
+                    'refund_status' => $refundResult['status'] ?? null,
+                ]);
+
+                return true;
+
+            } catch (\Exception $e) {
+                Log::error('PayPal refund failed', [
+                    'payment_id' => $payment->id,
+                    'transaction_id' => $payment->transaction_id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                // Non segniamo come rimborsato se il rimborso PayPal fallisce
+                return false;
+            }
         });
     }
 

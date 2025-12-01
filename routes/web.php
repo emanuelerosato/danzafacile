@@ -109,6 +109,10 @@ Route::prefix('pagamenti')->name('payments.')->group(function () {
         ->withoutMiddleware([\App\Http\Middleware\VerifyCsrfToken::class])
         ->name('webhook.paypal');
 
+    // PayPal API endpoint for creating order (from PayPal Buttons SDK)
+    Route::post('/paypal/create-order', [PaymentController::class, 'createPayPalOrder'])
+        ->name('paypal.create-order');
+
     // PayPal success callback
     Route::get('/successo', [PaymentController::class, 'success'])->name('success');
 
