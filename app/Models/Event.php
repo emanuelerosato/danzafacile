@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class Event extends Model
 {
@@ -21,6 +22,14 @@ class Event extends Model
         'location',
         'max_participants',
         'price',
+        'price_students',
+        'price_guests',
+        'requires_payment',
+        'payment_method',
+        'slug',
+        'landing_description',
+        'landing_cta_text',
+        'qr_checkin_enabled',
         'requires_registration',
         'registration_deadline',
         'requirements',
@@ -37,7 +46,11 @@ class Event extends Model
         'registration_deadline' => 'datetime',
         'requirements' => 'array',
         'price' => 'decimal:2',
+        'price_students' => 'decimal:2',
+        'price_guests' => 'decimal:2',
         'requires_registration' => 'boolean',
+        'requires_payment' => 'boolean',
+        'qr_checkin_enabled' => 'boolean',
         'active' => 'boolean',
         'is_public' => 'boolean'
     ];
@@ -57,6 +70,18 @@ class Event extends Model
             $user = Auth::user();
             if ($user && !$user->isSuperAdmin() && $user->school_id && !$event->school_id) {
                 $event->school_id = $user->school_id;
+            }
+
+            // Auto-generate slug if not provided
+            if (empty($event->slug) && !empty($event->name)) {
+                $event->slug = static::generateUniqueSlug($event->name);
+            }
+        });
+
+        // Update slug when name changes
+        static::updating(function (Event $event) {
+            if ($event->isDirty('name') && empty($event->slug)) {
+                $event->slug = static::generateUniqueSlug($event->name, $event->id);
             }
         });
     }
@@ -80,6 +105,11 @@ class Event extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class, 'event_id');
+    }
+
+    public function eventPayments()
+    {
+        return $this->hasMany(\App\Models\EventPayment::class);
     }
 
     public function attendanceRecords()
@@ -157,5 +187,128 @@ class Event extends Model
         }
 
         return 'open';
+    }
+
+    // PRICING METHODS
+
+    /**
+     * Ottiene il prezzo per un utente specifico
+     * Ritorna price_students se l'utente è uno studente della scuola, altrimenti price_guests
+     *
+     * @param User|null $user
+     * @return float
+     */
+    public function getPriceForUser(?User $user = null): float
+    {
+        // Se non c'è dual pricing, usa il prezzo standard
+        if ($this->price_students === null && $this->price_guests === null) {
+            return (float) ($this->price ?? 0);
+        }
+
+        // Se l'utente non è fornito o è guest, usa il prezzo guest
+        if (!$user || $user->isGuest()) {
+            return (float) ($this->price_guests ?? $this->price ?? 0);
+        }
+
+        // Se l'utente è uno studente della stessa scuola, usa il prezzo studenti
+        if ($user->school_id === $this->school_id) {
+            return (float) ($this->price_students ?? $this->price ?? 0);
+        }
+
+        // Altrimenti usa il prezzo guest
+        return (float) ($this->price_guests ?? $this->price ?? 0);
+    }
+
+    /**
+     * Verifica se l'evento richiede un pagamento
+     */
+    public function requiresPayment(): bool
+    {
+        return (bool) $this->requires_payment && $this->getPriceForUser() > 0;
+    }
+
+    /**
+     * Verifica se l'evento ha prezzi differenziati
+     */
+    public function hasGuestPricing(): bool
+    {
+        return $this->price_students !== null && $this->price_guests !== null;
+    }
+
+    /**
+     * Ottiene il prezzo formattato per un utente
+     *
+     * @param User|null $user
+     * @return string
+     */
+    public function getFormattedPrice(?User $user = null): string
+    {
+        $price = $this->getPriceForUser($user);
+        return '€' . number_format($price, 2, ',', '.');
+    }
+
+    /**
+     * Verifica se l'evento è pubblico (accessibile ai guest)
+     */
+    public function isPublic(): bool
+    {
+        return (bool) $this->is_public;
+    }
+
+    /**
+     * Ottiene l'URL della landing page pubblica
+     */
+    public function getLandingUrl(): string
+    {
+        return route('events.public.show', $this->slug);
+    }
+
+    /**
+     * Ottiene la valuta (default EUR)
+     */
+    public function getCurrencyAttribute(): string
+    {
+        return 'EUR';
+    }
+
+    // SLUG MANAGEMENT
+
+    /**
+     * Genera uno slug univoco per l'evento
+     *
+     * @param string $name
+     * @param int|null $ignoreId ID da ignorare per update
+     * @return string
+     */
+    protected static function generateUniqueSlug(string $name, ?int $ignoreId = null): string
+    {
+        $slug = Str::slug($name);
+        $originalSlug = $slug;
+        $counter = 1;
+
+        while (static::slugExists($slug, $ignoreId)) {
+            $slug = $originalSlug . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
+    /**
+     * Verifica se uno slug esiste già
+     *
+     * @param string $slug
+     * @param int|null $ignoreId
+     * @return bool
+     */
+    protected static function slugExists(string $slug, ?int $ignoreId = null): bool
+    {
+        $query = static::withoutGlobalScope('school')->where('slug', $slug);
+
+        if ($ignoreId) {
+            $query->where('id', '!=', $ignoreId);
+        }
+
+        return $query->exists();
     }
 }

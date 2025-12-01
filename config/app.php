@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Privacy Policy Version
+    |--------------------------------------------------------------------------
+    |
+    | Version of the current Privacy Policy and GDPR consent forms.
+    | This is used to track which version of the policy users consented to.
+    | Update this value whenever privacy policy or terms are updated.
+    |
+    */
+
+    'privacy_policy_version' => env('APP_PRIVACY_POLICY_VERSION', '1.0'),
+
 ];

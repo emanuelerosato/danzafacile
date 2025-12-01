@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -86,6 +87,10 @@ class User extends Authenticatable
             'password' => 'hashed',
             'date_of_birth' => 'date',
             'active' => 'boolean',
+            'is_guest' => 'boolean',
+            'guest_token_expires_at' => 'datetime',
+            'is_archived' => 'boolean',
+            'archived_at' => 'datetime',
         ];
     }
 
@@ -179,6 +184,22 @@ class User extends Authenticatable
         return $this->hasMany(Attendance::class, 'marked_by_user_id');
     }
 
+    /**
+     * Ottiene tutti i pagamenti eventi dell'utente
+     */
+    public function eventPayments(): HasMany
+    {
+        return $this->hasMany(\App\Models\EventPayment::class);
+    }
+
+    /**
+     * Ottiene tutti i consensi GDPR dell'utente
+     */
+    public function gdprConsents(): HasMany
+    {
+        return $this->hasMany(\App\Models\GdprConsent::class);
+    }
+
     // SCOPES
 
     /**
@@ -227,6 +248,23 @@ class User extends Authenticatable
     public function scopeStudents(Builder $query): Builder
     {
         return $query->where('role', self::ROLE_STUDENT);
+    }
+
+    /**
+     * Filtra solo gli utenti guest
+     */
+    public function scopeGuests(Builder $query): Builder
+    {
+        return $query->where('is_guest', true);
+    }
+
+    /**
+     * Filtra gli utenti guest con token scaduto
+     */
+    public function scopeExpiredGuests(Builder $query): Builder
+    {
+        return $query->where('is_guest', true)
+                    ->where('guest_token_expires_at', '<', now());
     }
 
     // ACCESSORS
@@ -422,5 +460,85 @@ class User extends Authenticatable
             'user' => 'Student',
             default => 'Student'
         };
+    }
+
+    // GUEST USER METHODS
+
+    /**
+     * Verifica se l'utente è un guest
+     */
+    public function isGuest(): bool
+    {
+        return (bool) $this->is_guest;
+    }
+
+    /**
+     * Genera un token per l'autenticazione guest (magic link)
+     *
+     * @param int $expirationDays Giorni di validità del token
+     * @return string Il token generato
+     */
+    public function generateGuestToken(int $expirationDays = 180): string
+    {
+        $this->guest_token = Str::random(64);
+        $this->guest_token_expires_at = now()->addDays($expirationDays);
+        $this->save();
+
+        \Log::info('Guest token generated', [
+            'user_id' => $this->id,
+            'expires_at' => $this->guest_token_expires_at,
+        ]);
+
+        return $this->guest_token;
+    }
+
+    /**
+     * Verifica se l'utente guest ha un token valido
+     */
+    public function hasValidGuestToken(): bool
+    {
+        return $this->is_guest
+            && !empty($this->guest_token)
+            && $this->guest_token_expires_at
+            && $this->guest_token_expires_at->isFuture();
+    }
+
+    /**
+     * Ottiene il link di login magico per l'utente guest
+     */
+    public function getMagicLoginLink(): string
+    {
+        if (!$this->hasValidGuestToken()) {
+            $this->generateGuestToken();
+        }
+
+        return route('guest.login', ['token' => $this->guest_token]);
+    }
+
+    /**
+     * Archivia un utente guest (per GDPR compliance)
+     *
+     * @param string $reason Motivo dell'archiviazione
+     * @return void
+     */
+    public function archiveGuest(string $reason = 'auto_cleanup'): void
+    {
+        if (!$this->is_guest) {
+            \Log::warning('Attempted to archive non-guest user', [
+                'user_id' => $this->id,
+            ]);
+            return;
+        }
+
+        $this->is_archived = true;
+        $this->archived_at = now();
+        $this->archive_reason = $reason;
+        $this->guest_token = null; // Invalida il token
+        $this->save();
+
+        \Log::info('Guest user archived', [
+            'user_id' => $this->id,
+            'reason' => $reason,
+        ]);
     }
 }

@@ -19,12 +19,16 @@ class EventRegistration extends Model
         'registration_date',
         'confirmed_at',
         'notes',
-        'additional_info'
+        'additional_info',
+        'qr_code_token',
+        'checked_in_at',
+        'checked_in_by'
     ];
 
     protected $casts = [
         'registration_date' => 'datetime',
         'confirmed_at' => 'datetime',
+        'checked_in_at' => 'datetime',
         'additional_info' => 'array'
     ];
 
@@ -61,6 +65,21 @@ class EventRegistration extends Model
     public function school()
     {
         return $this->belongsTo(School::class);
+    }
+
+    public function eventPayment()
+    {
+        return $this->hasOne(\App\Models\EventPayment::class);
+    }
+
+    public function gdprConsents()
+    {
+        return $this->hasMany(\App\Models\GdprConsent::class);
+    }
+
+    public function checkedInBy()
+    {
+        return $this->belongsTo(User::class, 'checked_in_by');
     }
 
     // Scopes

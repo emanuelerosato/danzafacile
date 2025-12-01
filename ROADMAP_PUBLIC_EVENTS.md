@@ -54,14 +54,14 @@ Implementare sistema completo di gestione eventi pubblici con:
 - [x] 1.4 Migration: GDPR consents table
 - [x] 1.5 Migration: QR code in registrations
 
-### Fase 2: Backend Core (Settimana 2-3)
-- [ ] 2.1 Model: User - Guest methods
-- [ ] 2.2 Model: Event - Pricing methods
-- [ ] 2.3 Model: EventPayment
-- [ ] 2.4 Model: GdprConsent
-- [ ] 2.5 Service: GuestRegistrationService
-- [ ] 2.6 Service: PaymentService
-- [ ] 2.7 Service: QRCodeService
+### Fase 2: Backend Core (Settimana 2-3) ✅ COMPLETATA
+- [x] 2.1 Model: User - Guest methods
+- [x] 2.2 Model: Event - Pricing methods
+- [x] 2.3 Model: EventPayment
+- [x] 2.4 Model: GdprConsent
+- [x] 2.5 Service: GuestRegistrationService
+- [x] 2.6 Service: PaymentService
+- [x] 2.7 Service: QRCodeService
 
 ### Fase 3: Controllers & Routes (Settimana 3-4)
 - [ ] 3.1 Controller: PublicEventController
