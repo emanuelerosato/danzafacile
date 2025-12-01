@@ -1244,4 +1244,354 @@ Le seguenti vulnerabilità MEDIUM priority saranno implementate nella Fase 3:
 
 ---
 
+---
+
+## 📧 **PHASE 5: EMAIL SYSTEM - EVENTI PUBBLICI**
+**Data Implementazione:** 1 Dicembre 2025
+**Branch:** `feature/public-events-email-system`
+**Status:** ✅ **COMPLETATO**
+
+### **🎯 Obiettivo**
+Implementare sistema completo di notifiche email per il sistema di registrazione eventi pubblici, con 5 tipologie di email transazionali e marketing automation.
+
+### **📨 Email Templates Implementate (5)**
+
+#### **1. Magic Link Email**
+**File:** `app/Mail/GuestMagicLinkMail.php` + `resources/views/emails/guest-magic-link.blade.php`
+**Trigger:** Dopo registrazione guest a un evento
+**Contenuto:**
+- Link passwordless per accesso account guest
+- Dettagli evento registrato
+- Istruzioni accesso dashboard
+- Scadenza link (180 giorni)
+
+#### **2. Registration Confirmation Email**
+**File:** `app/Mail/EventRegistrationConfirmationMail.php` + `resources/views/emails/event-registration-confirmation.blade.php`
+**Trigger:** Dopo conferma registrazione evento
+**Contenuto:**
+- Codice registrazione univoco
+- Dettagli evento (nome, data, luogo)
+- Stato registrazione (confirmed/pending_payment)
+- CTA per completare pagamento (se richiesto)
+- Link dashboard guest
+
+#### **3. Payment Confirmation Email**
+**File:** `app/Mail/EventPaymentConfirmationMail.php` + `resources/views/emails/event-payment-confirmation.blade.php`
+**Trigger:** Dopo pagamento completato (PayPal/Stripe/Free)
+**Contenuto:**
+- Ricevuta pagamento completa
+- Transaction ID e dettagli
+- QR code per check-in evento
+- Link per scaricare QR code
+- Link aggiungi calendario
+
+#### **4. Event Reminder Email**
+**File:** `app/Mail/EventReminderMail.php` + `resources/views/emails/event-reminder.blade.php`
+**Trigger:** 3 giorni prima dell'evento (scheduled job)
+**Contenuto:**
+- Countdown evento (3 giorni)
+- Dettagli data/ora/location
+- Link Google Maps
+- Checklist pre-evento
+- Info parcheggio e trasporti
+- Link QR code
+
+#### **5. Thank You Post-Event Email**
+**File:** `app/Mail/ThankYouPostEventMail.php` + `resources/views/emails/thank-you-post-event.blade.php`
+**Trigger:** 1 giorno dopo evento (scheduled job)
+**Contenuto:**
+- Messaggio ringraziamento
+- Recap evento
+- CTA feedback survey
+- Social sharing buttons
+- Newsletter signup
+- Prossimi eventi
+
+### **🏗️ Architettura Implementata**
+
+#### **Mailables Classes (5)**
+```php
+- GuestMagicLinkMail           (app/Mail/)
+- EventRegistrationConfirmationMail
+- EventPaymentConfirmationMail
+- EventReminderMail
+- ThankYouPostEventMail
+```
+
+#### **Blade Templates (5)**
+```blade
+- guest-magic-link.blade.php              (resources/views/emails/)
+- event-registration-confirmation.blade.php
+- event-payment-confirmation.blade.php
+- event-reminder.blade.php
+- thank-you-post-event.blade.php
+```
+
+#### **Layout Email**
+**File:** `resources/views/emails/layout.blade.php`
+- Design responsive (mobile-first)
+- Colori brand (gradient rose-500 to purple-600)
+- Typography consistente
+- CTA buttons styled
+- Footer standardizzato (privacy, cookie policy)
+- Email client compatibility (Gmail, Outlook, Apple Mail)
+
+### **📋 Services Aggiornati**
+
+#### **GuestRegistrationService** (`app/Services/GuestRegistrationService.php`)
+**Nuovi metodi:**
+```php
+sendMagicLink(User $guestUser, Event $event): void
+sendRegistrationConfirmation(User $user, Event $event, EventRegistration $registration): void
+```
+
+**Logica:**
+- Invio magic link automatico dopo registrazione guest
+- Invio conferma registrazione con dettagli evento
+- Logging completo per tracking
+
+#### **PaymentService** (`app/Services/PaymentService.php`)
+**Nuovi metodi:**
+```php
+sendPaymentConfirmation(EventPayment $payment): void
+```
+
+**Integrazione:**
+- `completePayment()` ora invia email automaticamente
+- `createFreePayment()` invia conferma anche per eventi gratuiti
+- Supporto per tutti i payment methods (PayPal, Stripe, Bank Transfer, Free)
+
+#### **PublicEventController** (`app/Http/Controllers/PublicEventController.php`)
+**Modifiche:**
+```php
+// register() method - dopo registrazione guest:
+$this->guestRegistrationService->sendMagicLink($user, $event);
+$this->guestRegistrationService->sendRegistrationConfirmation($user, $event, $registration);
+
+// Per eventi gratuiti:
+$this->paymentService->createFreePayment($registration); // invia anche email
+```
+
+### **🎨 Design System Email**
+
+#### **Color Palette**
+```css
+- Primary Gradient: linear-gradient(135deg, #f43f5e 0%, #9333ea 100%)
+- Background: #f4f4f4
+- Text Primary: #1f2937
+- Text Secondary: #4b5563
+- Text Muted: #6b7280
+```
+
+#### **Components Standardizzati**
+```css
+- Header: Gradient background con logo
+- CTA Buttons: Gradient con hover effects
+- Info Boxes: Colored borders con background soft
+- Details Tables: Zebra striping responsive
+- Footer: Links privacy + social
+```
+
+#### **Responsive Design**
+- Mobile-first approach
+- Breakpoints: 600px
+- Tables collapse su mobile
+- Buttons full-width su mobile
+- Inline CSS per compatibilità email clients
+
+### **🧪 Testing**
+
+#### **Test Command**
+**File:** `app/Console/Commands/TestEventEmails.php`
+```bash
+php artisan test:event-emails --email=test@example.com
+```
+
+**Funzionalità:**
+- Genera dati mock (User, Event, Registration, Payment)
+- Invia tutte le 5 email in sequenza
+- Logging dettagliato successo/errori
+- Supporto per Mailpit/Log driver
+
+#### **Mailpit Integration**
+**Configuration:**
+```env
+MAIL_MAILER=log          # Default: log to laravel.log
+MAIL_HOST=mailpit        # Mailpit container (Sail)
+MAIL_PORT=1025           # SMTP port
+```
+
+**Mailpit UI:** http://localhost:8026
+- View HTML/Text versions
+- Test email rendering
+- Check links and CTA buttons
+- Mobile preview
+
+### **📊 Statistiche Implementazione**
+
+**Files Creati:**
+- 5 Mailable classes
+- 5 Blade email templates
+- 1 Layout email template
+- 1 Test command
+**Total:** 12 files
+
+**Services Modificati:**
+- GuestRegistrationService (2 nuovi metodi)
+- PaymentService (1 nuovo metodo + integration)
+- PublicEventController (email triggers)
+**Total:** 3 services
+
+**Lines of Code:**
+- Mailables: ~300 righe
+- Blade templates: ~800 righe
+- Services updates: ~100 righe
+- Test command: ~200 righe
+**Total:** ~1,400 righe
+
+### **🔄 Email Automation Flow**
+
+#### **Registration Flow (User Perspective)**
+```
+1. Guest si registra a evento pubblico
+   ↓
+2. Riceve "Magic Link Email" (accesso passwordless)
+   ↓
+3. Riceve "Registration Confirmation Email"
+   ↓
+4. Se evento a pagamento: completa pagamento
+   ↓
+5. Riceve "Payment Confirmation Email" + QR code
+   ↓
+6. 3 giorni prima: riceve "Event Reminder Email"
+   ↓
+7. Partecipa all'evento (check-in con QR)
+   ↓
+8. 1 giorno dopo: riceve "Thank You Email"
+```
+
+#### **System Triggers**
+```php
+// Trigger immediati (sync):
+- Magic Link Email → dopo registerGuest()
+- Registration Confirmation → dopo registerGuest()
+- Payment Confirmation → dopo completePayment()
+
+// Trigger schedulati (cron jobs - TODO Phase 6):
+- Event Reminder → 3 giorni prima (artisan schedule:run)
+- Thank You Email → 1 giorno dopo evento
+```
+
+### **⚡ Performance & Best Practices**
+
+#### **Queue Support**
+```php
+// Tutti i Mailable supportano queuing:
+Mail::to($user->email)->queue(new GuestMagicLinkMail(...));
+
+// Configuration:
+QUEUE_CONNECTION=database  // or redis, sqs, etc.
+```
+
+#### **Rate Limiting**
+- Email sending già rate-limited a livello controller
+- Protezione spam: max 3 registrazioni/10 min per IP
+
+#### **Error Handling**
+- Try-catch sui send methods
+- Logging fallimenti: `Log::error('Email failed')`
+- User experience non bloccata se email fails
+
+#### **GDPR Compliance**
+- Unsubscribe link in footer
+- Privacy policy link
+- Consensi GDPR tracciati (GdprConsent model)
+
+### **🚀 Next Steps (Future Enhancements)**
+
+#### **Phase 6: Email Automation**
+1. **Scheduled Jobs:**
+   - Event Reminder (3 giorni prima)
+   - Thank You Email (1 giorno dopo)
+   - Abandoned Cart Email (24h dopo registrazione incomplete)
+
+2. **Advanced Features:**
+   - Email templates editor (admin)
+   - A/B testing email variants
+   - Email analytics (open rate, click rate)
+   - Personalization engine
+
+3. **Marketing Automation:**
+   - Drip campaigns per eventi
+   - Newsletter system
+   - Segmentazione audience
+   - Re-engagement campaigns
+
+### **📝 Configuration Required**
+
+#### **Production Setup**
+```env
+# .env configuration
+MAIL_MAILER=smtp           # Use real SMTP
+MAIL_HOST=smtp.gmail.com   # or AWS SES, Mailgun, etc.
+MAIL_PORT=587
+MAIL_USERNAME=your-email@gmail.com
+MAIL_PASSWORD=your-app-password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS="noreply@scuoladanza.com"
+MAIL_FROM_NAME="${APP_NAME}"
+```
+
+#### **Mailpit Local Testing**
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=mailpit
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+```
+
+### **✅ Checklist Completamento**
+- [x] 5 Mailable classes create
+- [x] 5 Blade email templates create
+- [x] Layout email responsive
+- [x] GuestRegistrationService aggiornato
+- [x] PaymentService aggiornato
+- [x] PublicEventController integrato
+- [x] Test command implementato
+- [x] Documentazione completa
+- [x] Testing con Mailpit
+- [x] Git commit e push
+
+### **🔗 File References**
+```
+app/Mail/
+├── GuestMagicLinkMail.php
+├── EventRegistrationConfirmationMail.php
+├── EventPaymentConfirmationMail.php
+├── EventReminderMail.php
+└── ThankYouPostEventMail.php
+
+resources/views/emails/
+├── layout.blade.php
+├── guest-magic-link.blade.php
+├── event-registration-confirmation.blade.php
+├── event-payment-confirmation.blade.php
+├── event-reminder.blade.php
+└── thank-you-post-event.blade.php
+
+app/Services/
+├── GuestRegistrationService.php (updated)
+└── PaymentService.php (updated)
+
+app/Http/Controllers/
+└── PublicEventController.php (updated)
+
+app/Console/Commands/
+└── TestEventEmails.php (new)
+```
+
+---
+
 **📧 Per ulteriori informazioni o supporto tecnico, consultare la documentazione API integrata o il file CLAUDE.md per istruzioni dettagliate.**

@@ -131,6 +131,12 @@ class PublicEventController extends Controller
                 'requires_payment' => $event->requiresPayment(),
             ]);
 
+            // Send magic link email
+            $this->guestRegistrationService->sendMagicLink($user, $event);
+
+            // Send registration confirmation email
+            $this->guestRegistrationService->sendRegistrationConfirmation($user, $event, $registration);
+
             // If event requires payment, redirect to payment
             if ($event->requiresPayment()) {
                 $payment = $this->paymentService->createPayment($registration, 'paypal');
@@ -138,11 +144,12 @@ class PublicEventController extends Controller
                 return redirect()->route('public.events.payment', [
                     'slug' => $slug,
                     'registration' => $registration->id,
-                ])->with('success', 'Registrazione completata! Procedi al pagamento per confermare.');
+                ])->with('success', 'Registrazione completata! Controlla la tua email per accedere.');
             }
 
-            // Free event - send magic link and redirect to success
-            // TODO Phase 5: Send email with magic link
+            // Free event - create free payment and send confirmation
+            $this->paymentService->createFreePayment($registration);
+
             return redirect()->route('public.events.registration.success', [
                 'slug' => $slug,
                 'registration' => $registration->id,

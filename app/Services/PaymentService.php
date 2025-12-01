@@ -6,8 +6,10 @@ use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Models\EventPayment;
 use App\Models\User;
+use App\Mail\EventPaymentConfirmationMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class PaymentService
 {
@@ -75,7 +77,34 @@ class PaymentService
                 'transaction_id' => $transactionId,
                 'registration_id' => $payment->event_registration_id,
             ]);
+
+            // Invia email di conferma pagamento
+            $this->sendPaymentConfirmation($payment);
         });
+    }
+
+    /**
+     * Invia email di conferma pagamento
+     *
+     * @param EventPayment $payment
+     * @return void
+     */
+    public function sendPaymentConfirmation(EventPayment $payment): void
+    {
+        $user = $payment->user;
+        $event = $payment->event;
+        $registration = $payment->eventRegistration;
+
+        Mail::to($user->email)->send(
+            new EventPaymentConfirmationMail($user, $event, $registration, $payment)
+        );
+
+        Log::info('Payment confirmation email sent', [
+            'payment_id' => $payment->id,
+            'user_id' => $user->id,
+            'amount' => $payment->amount,
+            'event_id' => $event->id,
+        ]);
     }
 
     /**
@@ -205,6 +234,9 @@ class PaymentService
             'payment_id' => $payment->id,
             'registration_id' => $registration->id,
         ]);
+
+        // Invia email di conferma (anche per eventi gratuiti)
+        $this->sendPaymentConfirmation($payment);
 
         return $payment;
     }

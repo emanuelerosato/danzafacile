@@ -6,10 +6,13 @@ use App\Models\User;
 use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Models\GdprConsent;
+use App\Mail\GuestMagicLinkMail;
+use App\Mail\EventRegistrationConfirmationMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class GuestRegistrationService
 {
@@ -150,19 +153,44 @@ class GuestRegistrationService
 
     /**
      * Invia il link di login magico all'utente guest
-     * NOTA: Implementazione completa in Phase 5 (Email System)
      *
      * @param User $guestUser
+     * @param Event $event
      * @return void
      */
-    public function sendMagicLink(User $guestUser): void
+    public function sendMagicLink(User $guestUser, Event $event): void
     {
-        // TODO: Implementare in Phase 5 (Email System)
-        // Per ora loggiamo solo l'azione
-        Log::info('Magic link ready to be sent (Email implementation pending)', [
+        $magicLink = $guestUser->getMagicLoginLink();
+
+        Mail::to($guestUser->email)->send(
+            new GuestMagicLinkMail($guestUser, $event, $magicLink)
+        );
+
+        Log::info('Magic link email sent', [
             'user_id' => $guestUser->id,
             'email' => $guestUser->email,
-            'magic_link' => $guestUser->getMagicLoginLink(),
+            'event_id' => $event->id,
+        ]);
+    }
+
+    /**
+     * Invia email di conferma registrazione
+     *
+     * @param User $user
+     * @param Event $event
+     * @param EventRegistration $registration
+     * @return void
+     */
+    public function sendRegistrationConfirmation(User $user, Event $event, EventRegistration $registration): void
+    {
+        Mail::to($user->email)->send(
+            new EventRegistrationConfirmationMail($user, $event, $registration)
+        );
+
+        Log::info('Registration confirmation email sent', [
+            'user_id' => $user->id,
+            'registration_id' => $registration->id,
+            'event_id' => $event->id,
         ]);
     }
 
