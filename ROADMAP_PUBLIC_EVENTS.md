@@ -70,13 +70,13 @@ Implementare sistema completo di gestione eventi pubblici con:
 - [x] 3.4 Controller: QRCheckinController
 - [x] 3.5 Routes: Public + Guest
 
-### Fase 4: Frontend Views (Settimana 4-5)
-- [ ] 4.1 Landing page evento pubblico
-- [ ] 4.2 Form registrazione guest
-- [ ] 4.3 Guest dashboard (magic link)
-- [ ] 4.4 Payment flow
-- [ ] 4.5 Admin: gestione prezzi evento
-- [ ] 4.6 Admin: QR scanner check-in
+### Fase 4: Frontend Views (Settimana 4-5) ✅ COMPLETATA
+- [x] 4.1 Landing page evento pubblico
+- [x] 4.2 Form registrazione guest
+- [x] 4.3 Guest dashboard (magic link)
+- [x] 4.4 Payment flow
+- [x] 4.5 Admin: gestione prezzi evento
+- [x] 4.6 Admin: QR scanner check-in
 
 ### Fase 5: Email System (Settimana 5)
 - [ ] 5.1 Email: Conferma registrazione
