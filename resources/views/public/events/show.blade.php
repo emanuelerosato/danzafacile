@@ -66,10 +66,18 @@
 
         /* Better gradient text with fallback */
         .gradient-text {
+            color: #f43f5e; /* Fallback color */
             background: linear-gradient(135deg, #f43f5e 0%, #a855f7 50%, #6366f1 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+        }
+
+        /* Fallback for browsers that don't support background-clip */
+        @supports not (background-clip: text) {
+            .gradient-text {
+                color: #f43f5e;
+            }
         }
 
         /* Smooth shadow transitions */
@@ -128,7 +136,7 @@
                     @endif
 
                     <!-- Meta Info -->
-                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-6 text-gray-700">
+                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-6">
                         <div class="flex items-center gap-2">
                             <div class="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center">
                                 <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +145,7 @@
                             </div>
                             <div class="text-left">
                                 <div class="text-xs text-gray-500 font-medium">Data</div>
-                                <div class="text-sm font-bold">{{ $event->start_date->format('d M Y') }}</div>
+                                <div class="text-sm font-bold text-gray-900">{{ $event->start_date->format('d M Y') }}</div>
                             </div>
                         </div>
 
@@ -149,7 +157,7 @@
                             </div>
                             <div class="text-left">
                                 <div class="text-xs text-gray-500 font-medium">Orario</div>
-                                <div class="text-sm font-bold">{{ $event->start_date->format('H:i') }}</div>
+                                <div class="text-sm font-bold text-gray-900">{{ $event->start_date->format('H:i') }}</div>
                             </div>
                         </div>
 
@@ -161,7 +169,7 @@
                             </div>
                             <div class="text-left">
                                 <div class="text-xs text-gray-500 font-medium">Luogo</div>
-                                <div class="text-sm font-bold">{{ Str::limit($event->location, 20) }}</div>
+                                <div class="text-sm font-bold text-gray-900">{{ Str::limit($event->location, 20) }}</div>
                             </div>
                         </div>
                     </div>
