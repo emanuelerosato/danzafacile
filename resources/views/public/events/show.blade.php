@@ -130,7 +130,7 @@
 
                     <!-- Subtitle -->
                     @if($event->short_description)
-                    <p class="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                    <p class="text-lg sm:text-xl text-gray-700 leading-relaxed max-w-2xl mx-auto lg:mx-0">
                         {{ $event->short_description }}
                     </p>
                     @endif
@@ -144,7 +144,7 @@
                                 </svg>
                             </div>
                             <div class="text-left">
-                                <div class="text-xs text-gray-500 font-medium">Data</div>
+                                <div class="text-xs text-gray-700 font-medium">Data</div>
                                 <div class="text-sm font-bold text-gray-900">{{ $event->start_date->format('d M Y') }}</div>
                             </div>
                         </div>
@@ -156,7 +156,7 @@
                                 </svg>
                             </div>
                             <div class="text-left">
-                                <div class="text-xs text-gray-500 font-medium">Orario</div>
+                                <div class="text-xs text-gray-700 font-medium">Orario</div>
                                 <div class="text-sm font-bold text-gray-900">{{ $event->start_date->format('H:i') }}</div>
                             </div>
                         </div>
@@ -168,7 +168,7 @@
                                 </svg>
                             </div>
                             <div class="text-left">
-                                <div class="text-xs text-gray-500 font-medium">Luogo</div>
+                                <div class="text-xs text-gray-700 font-medium">Luogo</div>
                                 <div class="text-sm font-bold text-gray-900">{{ Str::limit($event->location, 20) }}</div>
                             </div>
                         </div>
@@ -211,7 +211,7 @@
                 <div class="lg:order-last animate-slide-up" style="animation-delay: 0.2s;">
                     <div class="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
                         <div class="text-center mb-6">
-                            <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">L'evento inizia tra</p>
+                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">L'evento inizia tra</p>
                         </div>
 
                         <div class="grid grid-cols-4 gap-4">
@@ -219,25 +219,25 @@
                                 <div class="bg-gradient-to-br from-rose-600 to-rose-700 rounded-xl p-4 mb-2 shadow-lg">
                                     <div class="text-3xl font-extrabold text-white drop-shadow-sm" x-text="countdown.days">00</div>
                                 </div>
-                                <div class="text-xs font-semibold text-gray-700 uppercase">Giorni</div>
+                                <div class="text-xs font-semibold text-gray-900 uppercase">Giorni</div>
                             </div>
                             <div class="text-center">
                                 <div class="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-4 mb-2 shadow-lg">
                                     <div class="text-3xl font-extrabold text-white drop-shadow-sm" x-text="countdown.hours">00</div>
                                 </div>
-                                <div class="text-xs font-semibold text-gray-700 uppercase">Ore</div>
+                                <div class="text-xs font-semibold text-gray-900 uppercase">Ore</div>
                             </div>
                             <div class="text-center">
                                 <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-4 mb-2 shadow-lg">
                                     <div class="text-3xl font-extrabold text-white drop-shadow-sm" x-text="countdown.minutes">00</div>
                                 </div>
-                                <div class="text-xs font-semibold text-gray-700 uppercase">Minuti</div>
+                                <div class="text-xs font-semibold text-gray-900 uppercase">Minuti</div>
                             </div>
                             <div class="text-center">
                                 <div class="bg-gradient-to-br from-fuchsia-600 to-fuchsia-700 rounded-xl p-4 mb-2 shadow-lg">
                                     <div class="text-3xl font-extrabold text-white drop-shadow-sm" x-text="countdown.seconds">00</div>
                                 </div>
-                                <div class="text-xs font-semibold text-gray-700 uppercase">Secondi</div>
+                                <div class="text-xs font-semibold text-gray-900 uppercase">Secondi</div>
                             </div>
                         </div>
                     </div>
@@ -334,9 +334,9 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Data & Ora</p>
+                                    <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Data & Ora</p>
                                     <p class="text-lg font-bold text-gray-900">{{ $event->start_date->format('d M Y') }}</p>
-                                    <p class="text-sm text-gray-600">{{ $event->start_date->format('H:i') }}
+                                    <p class="text-sm text-gray-700">{{ $event->start_date->format('H:i') }}
                                         @if($event->end_date) - {{ $event->end_date->format('H:i') }}@endif
                                     </p>
                                 </div>
@@ -352,7 +352,7 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Dove</p>
+                                    <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Dove</p>
                                     <p class="text-lg font-bold text-gray-900">{{ $event->location }}</p>
                                 </div>
                             </div>
@@ -368,7 +368,7 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Durata</p>
+                                    <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Durata</p>
                                     <p class="text-lg font-bold text-gray-900">{{ $event->duration_minutes }} min</p>
                                 </div>
                             </div>
@@ -385,7 +385,7 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Posti Disponibili</p>
+                                    <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-1">Posti Disponibili</p>
                                     <p class="text-lg font-bold {{ $spotsRemaining > 0 ? 'text-green-600' : 'text-red-600' }}">
                                         {{ $spotsRemaining }} / {{ $event->max_participants }}
                                     </p>
@@ -405,12 +405,12 @@
                         <!-- Price Badge -->
                         <div class="text-center mb-8 pb-8 border-b border-gray-200">
                             @if($event->requiresPayment())
-                                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Quota iscrizione</p>
+                                <p class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">Quota iscrizione</p>
                                 <div class="text-5xl font-extrabold gradient-text mb-3">
                                     {{ $event->getFormattedPrice('guest') }}
                                 </div>
                                 @if($event->student_price && $event->student_price !== $event->guest_price)
-                                <p class="text-sm text-gray-600">
+                                <p class="text-sm text-gray-700">
                                     Studenti: <span class="font-bold text-purple-600">{{ $event->getFormattedPrice('student') }}</span>
                                 </p>
                                 @endif
