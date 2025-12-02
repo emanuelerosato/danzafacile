@@ -216,28 +216,28 @@
 
                         <div class="grid grid-cols-4 gap-4">
                             <div class="text-center">
-                                <div class="bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl p-4 mb-2">
-                                    <div class="text-3xl font-extrabold text-white" x-text="countdown.days">00</div>
+                                <div class="bg-gradient-to-br from-rose-600 to-rose-700 rounded-xl p-4 mb-2 shadow-lg">
+                                    <div class="text-3xl font-extrabold text-white drop-shadow-sm" x-text="countdown.days">00</div>
                                 </div>
-                                <div class="text-xs font-semibold text-gray-600 uppercase">Giorni</div>
+                                <div class="text-xs font-semibold text-gray-700 uppercase">Giorni</div>
                             </div>
                             <div class="text-center">
-                                <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-4 mb-2">
-                                    <div class="text-3xl font-extrabold text-white" x-text="countdown.hours">00</div>
+                                <div class="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-4 mb-2 shadow-lg">
+                                    <div class="text-3xl font-extrabold text-white drop-shadow-sm" x-text="countdown.hours">00</div>
                                 </div>
-                                <div class="text-xs font-semibold text-gray-600 uppercase">Ore</div>
+                                <div class="text-xs font-semibold text-gray-700 uppercase">Ore</div>
                             </div>
                             <div class="text-center">
-                                <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl p-4 mb-2">
-                                    <div class="text-3xl font-extrabold text-white" x-text="countdown.minutes">00</div>
+                                <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-4 mb-2 shadow-lg">
+                                    <div class="text-3xl font-extrabold text-white drop-shadow-sm" x-text="countdown.minutes">00</div>
                                 </div>
-                                <div class="text-xs font-semibold text-gray-600 uppercase">Minuti</div>
+                                <div class="text-xs font-semibold text-gray-700 uppercase">Minuti</div>
                             </div>
                             <div class="text-center">
-                                <div class="bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl p-4 mb-2">
-                                    <div class="text-3xl font-extrabold text-white" x-text="countdown.seconds">00</div>
+                                <div class="bg-gradient-to-br from-fuchsia-600 to-fuchsia-700 rounded-xl p-4 mb-2 shadow-lg">
+                                    <div class="text-3xl font-extrabold text-white drop-shadow-sm" x-text="countdown.seconds">00</div>
                                 </div>
-                                <div class="text-xs font-semibold text-gray-600 uppercase">Secondi</div>
+                                <div class="text-xs font-semibold text-gray-700 uppercase">Secondi</div>
                             </div>
                         </div>
                     </div>
