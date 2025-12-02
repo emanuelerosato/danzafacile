@@ -209,35 +209,48 @@
 
                 <!-- Right: Countdown Card -->
                 <div class="lg:order-last animate-slide-up" style="animation-delay: 0.2s;">
-                    <div class="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
-                        <div class="text-center mb-6">
-                            <p class="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">L'evento inizia tra</p>
+                    <div class="bg-white rounded-2xl shadow-2xl p-8 sm:p-10 border border-gray-100">
+                        <div class="text-center mb-8">
+                            <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-50 to-purple-50 rounded-full mb-3">
+                                <svg class="w-4 h-4 text-rose-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                </svg>
+                                <span class="text-sm font-bold text-gray-800">L'evento inizia tra</span>
+                            </div>
                         </div>
 
-                        <div class="grid grid-cols-4 gap-4">
+                        <!-- Countdown Grid - 2x2 su mobile, 4 colonne su desktop -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+                            <!-- Giorni -->
                             <div class="text-center">
-                                <div class="bg-gradient-to-br from-rose-600 to-rose-700 rounded-xl p-4 mb-2 shadow-lg">
-                                    <div class="text-3xl font-extrabold text-white drop-shadow-sm" x-text="countdown.days">00</div>
+                                <div class="bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl p-6 sm:p-5 mb-3 shadow-xl transform transition-transform hover:scale-105">
+                                    <div class="text-4xl sm:text-3xl font-black text-white drop-shadow-md tracking-tight" x-text="countdown.days">00</div>
                                 </div>
-                                <div class="text-xs font-semibold text-gray-900 uppercase">Giorni</div>
+                                <div class="text-xs sm:text-[11px] font-bold text-gray-700 uppercase tracking-wide">Giorni</div>
                             </div>
+
+                            <!-- Ore -->
                             <div class="text-center">
-                                <div class="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-4 mb-2 shadow-lg">
-                                    <div class="text-3xl font-extrabold text-white drop-shadow-sm" x-text="countdown.hours">00</div>
+                                <div class="bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl p-6 sm:p-5 mb-3 shadow-xl transform transition-transform hover:scale-105">
+                                    <div class="text-4xl sm:text-3xl font-black text-white drop-shadow-md tracking-tight" x-text="countdown.hours">00</div>
                                 </div>
-                                <div class="text-xs font-semibold text-gray-900 uppercase">Ore</div>
+                                <div class="text-xs sm:text-[11px] font-bold text-gray-700 uppercase tracking-wide">Ore</div>
                             </div>
+
+                            <!-- Minuti -->
                             <div class="text-center">
-                                <div class="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-4 mb-2 shadow-lg">
-                                    <div class="text-3xl font-extrabold text-white drop-shadow-sm" x-text="countdown.minutes">00</div>
+                                <div class="bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl p-6 sm:p-5 mb-3 shadow-xl transform transition-transform hover:scale-105">
+                                    <div class="text-4xl sm:text-3xl font-black text-white drop-shadow-md tracking-tight" x-text="countdown.minutes">00</div>
                                 </div>
-                                <div class="text-xs font-semibold text-gray-900 uppercase">Minuti</div>
+                                <div class="text-xs sm:text-[11px] font-bold text-gray-700 uppercase tracking-wide">Minuti</div>
                             </div>
+
+                            <!-- Secondi -->
                             <div class="text-center">
-                                <div class="bg-gradient-to-br from-fuchsia-600 to-fuchsia-700 rounded-xl p-4 mb-2 shadow-lg">
-                                    <div class="text-3xl font-extrabold text-white drop-shadow-sm" x-text="countdown.seconds">00</div>
+                                <div class="bg-gradient-to-br from-rose-500 to-rose-600 rounded-2xl p-6 sm:p-5 mb-3 shadow-xl transform transition-transform hover:scale-105">
+                                    <div class="text-4xl sm:text-3xl font-black text-white drop-shadow-md tracking-tight" x-text="countdown.seconds">00</div>
                                 </div>
-                                <div class="text-xs font-semibold text-gray-900 uppercase">Secondi</div>
+                                <div class="text-xs sm:text-[11px] font-bold text-gray-700 uppercase tracking-wide">Secondi</div>
                             </div>
                         </div>
                     </div>
