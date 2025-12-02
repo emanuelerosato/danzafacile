@@ -48,7 +48,7 @@ class PublicEventController extends Controller
             ->firstOrFail();
 
         $spotsRemaining = $event->max_participants > 0
-            ? $event->max_participants - $event->eventRegistrations()->whereIn('status', ['confirmed', 'pending_payment'])->count()
+            ? $event->max_participants - $event->registrations()->whereIn('status', ['confirmed', 'pending_payment'])->count()
             : null;
 
         return view('public.events.show', compact('event', 'spotsRemaining'));
@@ -97,7 +97,7 @@ class PublicEventController extends Controller
         try {
             // Check event capacity
             if ($event->max_participants > 0) {
-                $currentRegistrations = $event->eventRegistrations()
+                $currentRegistrations = $event->registrations()
                     ->whereIn('status', ['confirmed', 'pending_payment'])
                     ->count();
 
