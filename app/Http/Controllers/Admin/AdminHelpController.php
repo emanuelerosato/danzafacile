@@ -425,10 +425,195 @@ class AdminHelpController extends Controller
                 ]
             ],
 
+            'public_events' => [
+                'title' => '🌐 Eventi Pubblici',
+                'icon' => 'globe',
+                'priority' => 6,
+                'description' => 'Crea landing page pubbliche per eventi aperti a tutti con iscrizioni online.',
+                'content' => [
+                    'intro' => 'Gli Eventi Pubblici permettono di creare landing page pubbliche per eventi aperti a chiunque, non solo agli studenti iscritti. Sistema completo con iscrizioni guest, pagamenti PayPal e email marketing automatico.',
+                    'key_features' => [
+                        'Landing page pubblica accessibile senza login',
+                        'Iscrizioni guest con dati minimi (nome, email, telefono)',
+                        'Magic link per accesso sicuro senza password',
+                        'Pagamenti PayPal integrati con ricevute automatiche',
+                        'Email funnel automatico (conferma + reminder + thank you)',
+                        'Gestione GDPR completa con consensi privacy',
+                        'Dashboard admin per monitorare iscrizioni e incassi',
+                        'Statistiche real-time partecipanti e pagamenti'
+                    ],
+                    'operations' => [
+                        'create_public_event' => [
+                            'title' => '🎉 Creare un Evento Pubblico',
+                            'steps' => [
+                                'Vai su "Eventi" → "Lista Eventi" → "Nuovo Evento"',
+                                'Compila i campi standard (titolo, data, descrizione, locandina)',
+                                'IMPORTANTE: Attiva il toggle "Evento Pubblico" (è pubblico = ON)',
+                                'Imposta lo slug URL personalizzato (es. "stage-estate-2024")',
+                                'Configura prezzo (può essere gratuito o a pagamento)',
+                                'Definisci numero massimo partecipanti (opzionale)',
+                                'Scrivi descrizione accattivante per la landing page',
+                                'Carica immagine evento di alta qualità (min 1200x630px)',
+                                'Salva e pubblica evento',
+                                'Sistema genera automaticamente landing page su: www.tuascuola.it/eventi/[slug]'
+                            ],
+                            'tips' => 'Usa slug brevi e memorabili. La landing page è ottimizzata SEO per Google. Testa sempre il link prima di condividerlo.'
+                        ],
+                        'landing_page' => [
+                            'title' => '🌐 Landing Page Pubblica',
+                            'features' => [
+                                'URL pubblico senza login richiesto (SEO friendly)',
+                                'Design responsive mobile-first',
+                                'Countdown automatico alla data evento',
+                                'Form iscrizione semplificato (solo dati essenziali)',
+                                'Protezione reCAPTCHA anti-spam integrata',
+                                'Posti disponibili in tempo reale',
+                                'Pulsante "Iscriviti Ora" call-to-action prominente',
+                                'Social sharing buttons (Facebook, WhatsApp, Instagram)'
+                            ],
+                            'tips' => 'Condividi link su social e newsletter. Monitora analytics per vedere quante visite ricevi.'
+                        ],
+                        'guest_registration' => [
+                            'title' => '👤 Registrazioni Guest',
+                            'steps' => [
+                                'Guest compila form pubblico (nome, email, telefono)',
+                                'Accetta privacy policy (GDPR obbligatorio)',
+                                'Può opzionalmente accettare marketing/newsletter',
+                                'Sistema invia email con magic link sicuro',
+                                'Guest clicca magic link per accedere (no password)',
+                                'Se evento a pagamento → redirect a pagina PayPal',
+                                'Se evento gratuito → conferma iscrizione immediata',
+                                'Admin riceve notifica nuova registrazione'
+                            ],
+                            'features' => [
+                                'Account guest automatico (no registrazione complessa)',
+                                'Magic link valido 7 giorni per accesso sicuro',
+                                'Gestione consensi GDPR separati (privacy, marketing, newsletter)',
+                                'Rate limiting anti-spam (max 3 tentativi/10min per IP)',
+                                'Verifica email automatica',
+                                'Cleanup automatico guest inattivi dopo 180 giorni',
+                                'Lista partecipanti in admin dashboard'
+                            ],
+                            'tips' => 'Magic link evita password deboli. Guest possono iscriversi a più eventi con stessa email.'
+                        ],
+                        'payment_flow' => [
+                            'title' => '💰 Flusso Pagamenti',
+                            'steps' => [
+                                'Guest completa iscrizione → Sistema crea payment record',
+                                'Guest reindirizzato a pagina pagamento PayPal',
+                                'Guest completa pagamento su PayPal',
+                                'PayPal invia webhook conferma transazione',
+                                'Sistema marca pagamento come "Completato"',
+                                'Iscrizione passa da "pending_payment" a "confirmed"',
+                                'Email conferma pagamento inviata automaticamente',
+                                'Ricevuta PDF generata e allegata all\'email',
+                                'Admin può vedere incassi in dashboard eventi'
+                            ],
+                            'features' => [
+                                'Integrazione PayPal completa con webhook',
+                                'Ricevute automatiche PDF con logo scuola',
+                                'Gestione rimborsi tramite PayPal API',
+                                'Dashboard incassi per evento',
+                                'Report pagamenti esportabile in Excel',
+                                'Supporto eventi gratuiti (no pagamento richiesto)',
+                                'Transazioni sicure PCI-compliant'
+                            ],
+                            'tips' => 'Per eventi gratuiti imposta prezzo a €0. PayPal non viene chiamato e iscrizione è immediata.'
+                        ],
+                        'email_funnel' => [
+                            'title' => '📧 Email Marketing Automatico',
+                            'steps' => [
+                                'Email 1: Conferma Registrazione (immediata dopo iscrizione)',
+                                '  ↳ Contiene: Magic link, dettagli evento, link calendario (.ics)',
+                                'Email 2: Reminder 7 Giorni Prima (scheduled automatico)',
+                                '  ↳ Contiene: Countdown, indicazioni arrivo, cosa portare',
+                                'Email 3: Reminder 1 Giorno Prima (scheduled automatico)',
+                                '  ↳ Contiene: Last chance reminder, mappa location, contatti emergenza',
+                                'Email 4: Thank You Post-Evento (giorno dopo)',
+                                '  ↳ Contiene: Ringraziamento, survey feedback, prossimi eventi'
+                            ],
+                            'features' => [
+                                'Template email professionali responsive',
+                                'Scheduling automatico basato su data evento',
+                                'Personalizzazione con dati partecipante',
+                                'Link magic login per accesso rapido',
+                                'Allegato file .ics per Google Calendar/Outlook',
+                                'Tracking aperture email (analytics)',
+                                'Unsubscribe link GDPR compliant'
+                            ],
+                            'tips' => 'Le email reminder riducono no-show del 40%. Personalizza template in "Impostazioni" → "Email".'
+                        ],
+                        'admin_management' => [
+                            'title' => '⚙️ Gestione Admin',
+                            'steps' => [
+                                'Vai su "Eventi" → "Lista Eventi" → Seleziona evento pubblico',
+                                'Tab "Registrazioni" → Visualizza tutti gli iscritti',
+                                'Filtra per stato (confermato, in attesa pagamento, cancellato)',
+                                'Approva/rifiuta manualmente registrazioni se necessario',
+                                'Marca presenze il giorno dell\'evento',
+                                'Visualizza statistiche in tempo reale (iscritti, incassi, posti)',
+                                'Export lista partecipanti in PDF/Excel',
+                                'Invia email broadcast a tutti i partecipanti'
+                            ],
+                            'features' => [
+                                'Dashboard completa con KPI evento',
+                                'Lista partecipanti filtrabilecon ricerca',
+                                'Statistiche real-time (iscritti/max, incasso totale, % riempimento)',
+                                'Gestione waitlist quando sold-out',
+                                'Invio email massive ai partecipanti',
+                                'Export dati per analytics esterne',
+                                'Registro presenze digitale'
+                            ],
+                            'tips' => 'Monitora % riempimento quotidianamente. Se basso < 50% una settimana prima, intensifica marketing.'
+                        ]
+                    ],
+                    'best_practices' => [
+                        'Crea evento almeno 30 giorni prima per dare tempo iscrizioni',
+                        'Usa immagini professionali alta risoluzione per landing page',
+                        'Scrivi descrizione evento chiara con programma dettagliato',
+                        'Imposta numero max partecipanti per creare urgency',
+                        'Condividi link evento su social e newsletter scuola',
+                        'Monitora iscrizioni quotidianamente e adatta strategie',
+                        'Rispondi entro 24h a richieste info via email/ticket',
+                        'Fai follow-up post-evento per raccogliere feedback',
+                        'Analizza statistiche per migliorare eventi futuri',
+                        'Mantieni database guest aggiornato per future campagne'
+                    ],
+                    'security_tips' => [
+                        'Magic link scadono dopo 7 giorni per sicurezza',
+                        'reCAPTCHA protegge da bot spam automatici',
+                        'Rate limiting previene abusi iscrizioni multiple',
+                        'Tutti i consensi GDPR sono tracciati e archiviati',
+                        'Guest inattivi sono eliminati automaticamente dopo 180 giorni',
+                        'Transazioni PayPal usano protocollo HTTPS sicuro',
+                        'Webhook PayPal verificati con firma digitale',
+                        'Dati sensibili guest criptati in database'
+                    ],
+                    'gdpr_compliance' => [
+                        'Privacy Policy obbligatoria al momento iscrizione',
+                        'Consensi separati per marketing e newsletter (opt-in)',
+                        'Right to be forgotten: guest può richiedere cancellazione dati',
+                        'Data retention policy: 180 giorni inattività',
+                        'Email hanno sempre link unsubscribe',
+                        'Log audit completo per tutte le operazioni GDPR',
+                        'Dati personali accessibili solo ad admin autorizzati'
+                    ],
+                    'troubleshooting' => [
+                        'Evento non visibile pubblicamente → Verifica toggle "È Pubblico" attivo',
+                        'Magic link non funziona → Link scade dopo 7 giorni, genera nuovo',
+                        'Pagamento PayPal fallisce → Verifica config PayPal in Impostazioni',
+                        'Email non arrivano → Controlla spam, verifica SMTP configurato',
+                        'Posti esauriti troppo presto → Aumenta max partecipanti o crea replica evento',
+                        'Registrazioni spam → reCAPTCHA già attivo, aumenta difficoltà se necessario',
+                        'Guest duplicati → Sistema previene, ma controlla email diverse (typo)'
+                    ]
+                ]
+            ],
+
             'staff' => [
                 'title' => '👨‍🏫 Staff & Istruttori',
                 'icon' => 'user-group',
-                'priority' => 6,
+                'priority' => 7,
                 'description' => 'Gestione team, orari, turni e paghe collaboratori.',
                 'content' => [
                     'intro' => 'Organizza e coordina il team di istruttori e staff della scuola: gestisci profili, orari, sostituzioni e compensi.',
@@ -517,7 +702,7 @@ class AdminHelpController extends Controller
             'reports' => [
                 'title' => '📊 Reports & Analytics',
                 'icon' => 'chart-bar',
-                'priority' => 7,
+                'priority' => 8,
                 'description' => 'Analytics, KPI e report operativi della scuola.',
                 'content' => [
                     'intro' => 'Monitora le performance della scuola con report dettagliati e analytics in tempo reale per decisioni data-driven.',
@@ -603,7 +788,7 @@ class AdminHelpController extends Controller
             'tickets' => [
                 'title' => '🎫 Sistema Ticket',
                 'icon' => 'chat',
-                'priority' => 8,
+                'priority' => 9,
                 'description' => 'Gestisci richieste supporto e comunicazioni studenti.',
                 'content' => [
                     'intro' => 'Centralizza tutte le richieste di supporto degli studenti con sistema ticket professionale: traccia, rispondi e risolvi ogni richiesta efficacemente.',
@@ -694,7 +879,7 @@ class AdminHelpController extends Controller
             'settings' => [
                 'title' => '⚙️ Impostazioni',
                 'icon' => 'cog',
-                'priority' => 9,
+                'priority' => 10,
                 'description' => 'Configurazioni scuola, PayPal, ricevute e personalizzazioni.',
                 'content' => [
                     'intro' => 'Personalizza tutte le impostazioni della tua scuola: branding, pagamenti, ricevute e configurazioni operative.',
@@ -806,7 +991,7 @@ class AdminHelpController extends Controller
             'troubleshooting' => [
                 'title' => '🔧 Risoluzione Problemi',
                 'icon' => 'wrench',
-                'priority' => 10,
+                'priority' => 11,
                 'description' => 'Soluzioni ai problemi comuni e supporto tecnico.',
                 'content' => [
                     'intro' => 'Guida rapida per risolvere i problemi più comuni della piattaforma. Se non trovi soluzione qui, contatta il supporto tecnico.',
