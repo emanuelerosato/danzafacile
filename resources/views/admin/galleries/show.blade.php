@@ -111,14 +111,14 @@
                         </svg>
                         Modifica
                     </a>
-                    <button onclick="openUploadModal()"
+                    <button id="uploadButton"
                             class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                         </svg>
                         Carica File
                     </button>
-                    <button onclick="openLinkModal()"
+                    <button id="linkButton"
                             class="inline-flex items-center px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 text-sm font-medium rounded-lg transition-colors duration-200">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
@@ -279,14 +279,14 @@
                 <h3 class="text-xl font-medium text-gray-900 mb-2">Galleria vuota</h3>
                 <p class="text-gray-600 mb-8">Inizia aggiungendo foto, video o link esterni alla galleria.</p>
                 <div class="flex justify-center gap-4">
-                    <button onclick="openUploadModal()"
+                    <button id="uploadButtonEmpty"
                             class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                         </svg>
                         Carica File
                     </button>
-                    <button onclick="openLinkModal()"
+                    <button id="linkButtonEmpty"
                             class="inline-flex items-center px-6 py-3 bg-purple-50 hover:bg-purple-100 text-purple-700 text-sm font-medium rounded-lg transition-colors duration-200">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
@@ -479,6 +479,29 @@ function closeLinkModal() {
 
 // Wait for DOM to be ready before attaching event listeners
 document.addEventListener('DOMContentLoaded', function() {
+    // Attach click events to upload buttons
+    const uploadButton = document.getElementById('uploadButton');
+    const uploadButtonEmpty = document.getElementById('uploadButtonEmpty');
+
+    if (uploadButton) {
+        uploadButton.addEventListener('click', openUploadModal);
+    }
+    if (uploadButtonEmpty) {
+        uploadButtonEmpty.addEventListener('click', openUploadModal);
+    }
+
+    // Attach click events to link buttons
+    const linkButton = document.getElementById('linkButton');
+    const linkButtonEmpty = document.getElementById('linkButtonEmpty');
+
+    if (linkButton) {
+        linkButton.addEventListener('click', openLinkModal);
+    }
+    if (linkButtonEmpty) {
+        linkButtonEmpty.addEventListener('click', openLinkModal);
+    }
+
+    // Upload form submit handler
     const uploadForm = document.getElementById('uploadForm');
     if (!uploadForm) {
         console.error('uploadForm not found');
