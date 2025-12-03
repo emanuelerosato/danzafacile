@@ -16,6 +16,7 @@ class Event extends Model
         'school_id',
         'name',
         'description',
+        'short_description',
         'type',
         'start_date',
         'end_date',
@@ -37,7 +38,8 @@ class Event extends Model
         'external_link',
         'social_link',
         'active',
-        'is_public'
+        'is_public',
+        'additional_info'
     ];
 
     protected $casts = [
@@ -45,6 +47,7 @@ class Event extends Model
         'end_date' => 'datetime',
         'registration_deadline' => 'datetime',
         'requirements' => 'array',
+        'additional_info' => 'array',
         'price' => 'decimal:2',
         'price_students' => 'decimal:2',
         'price_guests' => 'decimal:2',
@@ -269,6 +272,22 @@ class Event extends Model
     public function getCurrencyAttribute(): string
     {
         return 'EUR';
+    }
+
+    /**
+     * Ottiene l'URL dell'immagine dell'evento
+     * Usa image_path se presente, altrimenti custom_image_url da additional_info
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        // Se c'è image_path (upload locale), usa quello
+        if ($this->image_path) {
+            return asset('storage/' . $this->image_path);
+        }
+
+        // Altrimenti usa custom_image_url da additional_info
+        $customization = $this->additional_info['landing_customization'] ?? [];
+        return $customization['custom_image_url'] ?? null;
     }
 
     // SLUG MANAGEMENT

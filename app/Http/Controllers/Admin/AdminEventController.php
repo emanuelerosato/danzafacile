@@ -576,18 +576,44 @@ class AdminEventController extends AdminBaseController
         }
 
         $validated = $request->validate([
-            'custom_description' => 'nullable|string|max:5000',
-            'custom_image_url' => 'nullable|url|max:500',
+            'short_description' => 'nullable|string|max:200',
+            'landing_description' => 'nullable|string|max:5000',
+            'landing_cta_text' => 'nullable|string|max:50',
+            'event_image' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
             'show_location_map' => 'boolean',
             'show_instructors' => 'boolean',
-            'custom_cta_text' => 'nullable|string|max:100',
             'meta_title' => 'nullable|string|max:200',
             'meta_description' => 'nullable|string|max:300',
         ]);
 
-        // Salva in additional_info JSON
+        // Gestione upload immagine
+        $imagePath = $event->image_path;
+        if ($request->hasFile('event_image')) {
+            // Elimina vecchia immagine se esiste
+            if ($event->image_path && \Storage::disk('public')->exists($event->image_path)) {
+                \Storage::disk('public')->delete($event->image_path);
+            }
+
+            // Salva nuova immagine
+            $imagePath = $request->file('event_image')->store('events', 'public');
+        }
+
+        // Aggiorna campi diretti dell'evento
+        $event->update([
+            'short_description' => $validated['short_description'],
+            'landing_description' => $validated['landing_description'],
+            'landing_cta_text' => $validated['landing_cta_text'] ?? 'Iscriviti Ora',
+            'image_path' => $imagePath,
+        ]);
+
+        // Salva opzioni avanzate in additional_info JSON
         $additionalInfo = $event->additional_info ?? [];
-        $additionalInfo['landing_customization'] = $validated;
+        $additionalInfo['landing_customization'] = [
+            'show_location_map' => $validated['show_location_map'] ?? false,
+            'show_instructors' => $validated['show_instructors'] ?? false,
+            'meta_title' => $validated['meta_title'],
+            'meta_description' => $validated['meta_description'],
+        ];
 
         $event->update([
             'additional_info' => $additionalInfo,

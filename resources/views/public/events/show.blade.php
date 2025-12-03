@@ -6,20 +6,25 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- SEO Meta Tags -->
-    <title>{{ $event->name }} - Iscriviti Ora</title>
-    <meta name="description" content="{{ Str::limit($event->landing_description ?? $event->description, 155) }}">
+    @php
+        $customization = $event->additional_info['landing_customization'] ?? [];
+        $metaTitle = $customization['meta_title'] ?? ($event->name . ' - Iscriviti Ora');
+        $metaDescription = $customization['meta_description'] ?? Str::limit($event->landing_description ?? $event->description, 155);
+    @endphp
+    <title>{{ $metaTitle }}</title>
+    <meta name="description" content="{{ $metaDescription }}">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="{{ $event->name }}">
-    <meta property="og:description" content="{{ Str::limit($event->landing_description ?? $event->description, 155) }}">
+    <meta property="og:title" content="{{ $metaTitle }}">
+    <meta property="og:description" content="{{ $metaDescription }}">
     <meta property="og:image" content="{{ $event->image_url ?? asset('images/og-image.jpg') }}">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="event">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $event->name }}">
-    <meta name="twitter:description" content="{{ Str::limit($event->landing_description ?? $event->description, 155) }}">
+    <meta name="twitter:title" content="{{ $metaTitle }}">
+    <meta name="twitter:description" content="{{ $metaDescription }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -182,7 +187,7 @@
                                 <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                                 </svg>
-                                Iscriviti Ora
+                                {{ $event->landing_cta_text ?? 'Iscriviti Ora' }}
                             </button>
                         @endif
 

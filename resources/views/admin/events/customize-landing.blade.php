@@ -52,7 +52,7 @@
                     $customization = $event->additional_info['landing_customization'] ?? [];
                 @endphp
 
-                <form method="POST" action="{{ route('admin.events.update-landing', $event) }}">
+                <form method="POST" action="{{ route('admin.events.update-landing', $event) }}" enctype="multipart/form-data">
                     @csrf
 
                     <!-- Contenuto Personalizzato -->
@@ -60,46 +60,74 @@
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Contenuto Personalizzato</h3>
 
                         <div class="space-y-6">
-                            <!-- Custom Description -->
+                            <!-- Short Description -->
                             <div>
-                                <label for="custom_description" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Descrizione Personalizzata
+                                <label for="short_description" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Sottotitolo Hero <span class="text-rose-500">*</span>
                                 </label>
-                                <textarea name="custom_description" id="custom_description" rows="6"
-                                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200"
-                                          placeholder="Inserisci una descrizione dettagliata per la landing page...">{{ old('custom_description', $customization['custom_description'] ?? '') }}</textarea>
-                                <p class="text-xs text-gray-500 mt-1">Se vuoto, verrà usata la descrizione standard dell'evento</p>
-                                @error('custom_description')
-                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <!-- Custom Image URL -->
-                            <div>
-                                <label for="custom_image_url" class="block text-sm font-medium text-gray-700 mb-2">
-                                    URL Immagine Personalizzata
-                                </label>
-                                <input type="url" name="custom_image_url" id="custom_image_url"
-                                       value="{{ old('custom_image_url', $customization['custom_image_url'] ?? '') }}"
+                                <input type="text" name="short_description" id="short_description" maxlength="200"
+                                       value="{{ old('short_description', $event->short_description) }}"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200"
-                                       placeholder="https://esempio.com/immagine.jpg">
-                                <p class="text-xs text-gray-500 mt-1">URL completo dell'immagine da mostrare nella landing page</p>
-                                @error('custom_image_url')
+                                       placeholder="Una frase breve e accattivante sotto il titolo...">
+                                <p class="text-xs text-gray-500 mt-1">Descrizione breve che appare sotto il titolo (max 200 caratteri)</p>
+                                @error('short_description')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
 
-                            <!-- Custom CTA Text -->
+                            <!-- Landing Description -->
                             <div>
-                                <label for="custom_cta_text" class="block text-sm font-medium text-gray-700 mb-2">
+                                <label for="landing_description" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Descrizione Completa Landing
+                                </label>
+                                <textarea name="landing_description" id="landing_description" rows="6"
+                                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200"
+                                          placeholder="Inserisci una descrizione dettagliata per la landing page...">{{ old('landing_description', $event->landing_description) }}</textarea>
+                                <p class="text-xs text-gray-500 mt-1">Se vuoto, verrà usata la descrizione standard dell'evento</p>
+                                @error('landing_description')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <!-- Event Image Upload -->
+                            <div>
+                                <label for="event_image" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Immagine Evento
+                                </label>
+
+                                @if($event->image_path || ($customization['custom_image_url'] ?? null))
+                                <div class="mb-4">
+                                    <img src="{{ $event->image_url }}" alt="Preview" class="w-full max-w-md h-48 object-cover rounded-lg border border-gray-300">
+                                    <p class="text-xs text-gray-500 mt-2">Immagine attuale</p>
+                                </div>
+                                @endif
+
+                                <input type="file" name="event_image" id="event_image" accept="image/*"
+                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200"
+                                       onchange="previewImage(event)">
+                                <p class="text-xs text-gray-500 mt-1">Carica un'immagine (JPG, PNG, max 2MB). Dimensioni raccomandate: 1200x630px</p>
+                                @error('event_image')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+
+                                <!-- Image Preview -->
+                                <div id="imagePreview" class="mt-4 hidden">
+                                    <p class="text-sm font-medium text-gray-700 mb-2">Anteprima:</p>
+                                    <img id="previewImg" src="" alt="Preview" class="w-full max-w-md h-48 object-cover rounded-lg border border-gray-300">
+                                </div>
+                            </div>
+
+                            <!-- CTA Text -->
+                            <div>
+                                <label for="landing_cta_text" class="block text-sm font-medium text-gray-700 mb-2">
                                     Testo Bottone Iscrizione
                                 </label>
-                                <input type="text" name="custom_cta_text" id="custom_cta_text"
-                                       value="{{ old('custom_cta_text', $customization['custom_cta_text'] ?? '') }}"
+                                <input type="text" name="landing_cta_text" id="landing_cta_text" maxlength="50"
+                                       value="{{ old('landing_cta_text', $event->landing_cta_text ?? 'Iscriviti Ora') }}"
                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200"
                                        placeholder="Iscriviti Ora">
-                                <p class="text-xs text-gray-500 mt-1">Testo personalizzato per il bottone di call-to-action</p>
-                                @error('custom_cta_text')
+                                <p class="text-xs text-gray-500 mt-1">Testo personalizzato per il bottone di call-to-action (max 50 caratteri)</p>
+                                @error('landing_cta_text')
                                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
@@ -213,4 +241,20 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script nonce="@cspNonce">
+        function previewImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+    @endpush
 </x-app-layout>
