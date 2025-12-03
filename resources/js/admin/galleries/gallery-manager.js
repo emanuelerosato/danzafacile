@@ -222,6 +222,13 @@ function handleUploadSubmit(e) {
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
 
+    // Verifica che ci siano file selezionati
+    const fileInput = form.querySelector('input[type="file"]');
+    if (!fileInput.files || fileInput.files.length === 0) {
+        alert('Seleziona almeno un file da caricare');
+        return;
+    }
+
     submitBtn.innerHTML = '<svg class="w-4 h-4 animate-spin inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Caricamento...';
     submitBtn.disabled = true;
 
@@ -236,18 +243,36 @@ function handleUploadSubmit(e) {
             'Accept': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => Promise.reject(err));
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             closeUploadModal();
             location.reload();
         } else {
-            alert('Errore: ' + data.message);
+            let errorMsg = data.message || 'Errore durante il caricamento';
+            if (data.errors) {
+                const errorList = Object.values(data.errors).flat().join('\n');
+                errorMsg += '\n\n' + errorList;
+            }
+            alert('Errore: ' + errorMsg);
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert('Errore durante il caricamento');
+        console.error('Upload error:', error);
+        let errorMsg = 'Errore durante il caricamento';
+        if (error.message) {
+            errorMsg += ': ' + error.message;
+        }
+        if (error.errors) {
+            const errorList = Object.values(error.errors).flat().join('\n');
+            errorMsg += '\n\n' + errorList;
+        }
+        alert(errorMsg);
     })
     .finally(() => {
         submitBtn.innerHTML = originalText;
@@ -262,6 +287,12 @@ function handleLinkSubmit(e) {
     const formData = new FormData(form);
     const submitBtn = form.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
+
+    // Log form data for debugging
+    console.log('Form data being sent:');
+    for (let [key, value] of formData.entries()) {
+        console.log(key + ':', value);
+    }
 
     submitBtn.innerHTML = '<svg class="w-4 h-4 animate-spin inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Aggiunta...';
     submitBtn.disabled = true;
@@ -288,7 +319,13 @@ function handleLinkSubmit(e) {
             closeLinkModal();
             location.reload();
         } else {
-            alert('Errore: ' + data.message);
+            // Mostra errori di validazione se presenti
+            let errorMsg = data.message || 'Errore sconosciuto';
+            if (data.errors) {
+                const errorList = Object.values(data.errors).flat().join('\n');
+                errorMsg += '\n\n' + errorList;
+            }
+            alert('Errore: ' + errorMsg);
         }
     })
     .catch(error => {
