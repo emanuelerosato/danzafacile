@@ -1,3 +1,5 @@
+@vite('resources/js/admin/galleries/gallery-manager.js')
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -145,11 +147,15 @@
                             <img src="{{ $media->thumbnail_url }}"
                                  alt="{{ $media->title }}"
                                  class="w-full h-32 object-cover cursor-pointer"
-                                 onclick="openLightbox('{{ $media->file_url }}', '{{ $media->title }}', 'image')">
+                                 data-media-url="{{ $media->file_url }}"
+                                 data-media-title="{{ $media->title }}"
+                                 data-media-type="image">
                         @elseif($media->is_video)
                             @if($media->type === 'youtube')
                                 <div class="w-full h-32 bg-black flex items-center justify-center cursor-pointer relative"
-                                     onclick="openLightbox('{{ $media->embed_url }}', '{{ $media->title }}', 'youtube')">
+                                     data-media-url="{{ $media->embed_url }}"
+                                     data-media-title="{{ $media->title }}"
+                                     data-media-type="youtube">
                                     <img src="{{ $media->thumbnail_url }}" class="w-full h-full object-cover">
                                     <div class="absolute inset-0 flex items-center justify-center">
                                         <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 24 24">
@@ -159,7 +165,9 @@
                                 </div>
                             @elseif($media->type === 'vimeo')
                                 <div class="w-full h-32 bg-black flex items-center justify-center cursor-pointer relative"
-                                     onclick="openLightbox('{{ $media->embed_url }}', '{{ $media->title }}', 'vimeo')">
+                                     data-media-url="{{ $media->embed_url }}"
+                                     data-media-title="{{ $media->title }}"
+                                     data-media-type="vimeo">
                                     @if($media->thumbnail_url)
                                         <img src="{{ $media->thumbnail_url }}" class="w-full h-full object-cover">
                                     @endif
@@ -171,13 +179,15 @@
                                 </div>
                             @else
                                 <video class="w-full h-32 object-cover cursor-pointer"
-                                       onclick="openLightbox('{{ $media->file_url }}', '{{ $media->title }}', 'video')">
+                                       data-media-url="{{ $media->file_url }}"
+                                       data-media-title="{{ $media->title }}"
+                                       data-media-type="video">
                                     <source src="{{ $media->file_url }}" type="{{ $media->file_type }}">
                                 </video>
                             @endif
                         @elseif($media->is_external)
                             <div class="w-full h-32 bg-black flex items-center justify-center cursor-pointer"
-                                 onclick="window.open('{{ $media->external_url }}', '_blank')">
+                                 data-external-url="{{ $media->external_url }}">
                                 @if($media->type === 'youtube')
                                     <div class="text-center">
                                         <svg class="w-8 h-8 text-red-500 mx-auto" fill="currentColor" viewBox="0 0 24 24">
@@ -217,13 +227,13 @@
                                         </svg>
                                     </span>
                                 @endif
-                                <button onclick="editMedia({{ $media->id }})" type="button"
+                                <button data-edit-media="{{ $media->id }}" type="button"
                                         class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded-full transition-colors duration-200 flex items-center shadow-lg cursor-pointer">
                                     <svg class="w-3 h-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                     </svg>
                                 </button>
-                                <button onclick="deleteMedia({{ $media->id }})" type="button"
+                                <button data-delete-media="{{ $media->id }}" type="button"
                                         class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded-full transition-colors duration-200 flex items-center shadow-lg cursor-pointer">
                                     <svg class="w-3 h-3 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -306,7 +316,7 @@
             <div class="px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900">Carica File</h3>
             </div>
-            <form id="uploadForm" class="p-6 space-y-4">
+            <form id="uploadForm" action="{{ route('admin.galleries.upload', $gallery) }}" class="p-6 space-y-4">
                 @csrf
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">File da caricare</label>
@@ -315,7 +325,7 @@
                     <p class="text-xs text-gray-500 mt-1">Seleziona immagini e video (max 10MB per file)</p>
                 </div>
                 <div class="flex justify-end gap-3">
-                    <button type="button" onclick="closeUploadModal()"
+                    <button type="button" id="closeUploadModal"
                             class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors duration-200">
                         Annulla
                     </button>
@@ -336,7 +346,7 @@
             <div class="px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900">Aggiungi Link Esterno</h3>
             </div>
-            <form id="linkForm" class="p-6 space-y-4">
+            <form id="linkForm" action="{{ route('admin.galleries.external-link', $gallery) }}" class="p-6 space-y-4">
                 @csrf
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">URL</label>
@@ -367,7 +377,7 @@
                               placeholder="Descrizione del contenuto"></textarea>
                 </div>
                 <div class="flex justify-end gap-3">
-                    <button type="button" onclick="closeLinkModal()"
+                    <button type="button" id="closeLinkModal"
                             class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors duration-200">
                         Annulla
                     </button>
@@ -426,7 +436,7 @@
                 </div>
 
                 <div class="flex justify-end gap-3 pt-4">
-                    <button type="button" onclick="closeEditModal()"
+                    <button type="button" id="closeEditModal"
                             class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg transition-colors duration-200">
                         Annulla
                     </button>
@@ -444,7 +454,7 @@
 <div id="lightbox" class="fixed inset-0 bg-black bg-opacity-90 hidden z-50">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="relative max-w-4xl max-h-full">
-            <button onclick="closeLightbox()"
+            <button id="closeLightbox"
                     class="absolute top-4 right-4 text-white hover:text-gray-300 text-2xl z-10">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -455,328 +465,6 @@
     </div>
 </div>
 
-@push('scripts')
-<script nonce="@cspNonce">
-// Upload functionality
-function openUploadModal() {
-    document.getElementById('uploadModal').classList.remove('hidden');
-}
-
-function closeUploadModal() {
-    document.getElementById('uploadModal').classList.add('hidden');
-    document.getElementById('uploadForm').reset();
-}
-
-// Link functionality
-function openLinkModal() {
-    document.getElementById('linkModal').classList.remove('hidden');
-}
-
-function closeLinkModal() {
-    document.getElementById('linkModal').classList.add('hidden');
-    document.getElementById('linkForm').reset();
-}
-
-// Wait for DOM to be ready before attaching event listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Attach click events to upload buttons
-    const uploadButton = document.getElementById('uploadButton');
-    const uploadButtonEmpty = document.getElementById('uploadButtonEmpty');
-
-    if (uploadButton) {
-        uploadButton.addEventListener('click', openUploadModal);
-    }
-    if (uploadButtonEmpty) {
-        uploadButtonEmpty.addEventListener('click', openUploadModal);
-    }
-
-    // Attach click events to link buttons
-    const linkButton = document.getElementById('linkButton');
-    const linkButtonEmpty = document.getElementById('linkButtonEmpty');
-
-    if (linkButton) {
-        linkButton.addEventListener('click', openLinkModal);
-    }
-    if (linkButtonEmpty) {
-        linkButtonEmpty.addEventListener('click', openLinkModal);
-    }
-
-    // Upload form submit handler
-    const uploadForm = document.getElementById('uploadForm');
-    if (!uploadForm) {
-        console.error('uploadForm not found');
-        return;
-    }
-
-    uploadForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const formData = new FormData(this);
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-
-    submitBtn.innerHTML = '<svg class="w-4 h-4 animate-spin inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Caricamento...';
-    submitBtn.disabled = true;
-
-    fetch('{{ route("admin.galleries.upload", $gallery) }}', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            closeUploadModal();
-            location.reload(); // Simple reload for now
-        } else {
-            alert('Errore: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Errore durante il caricamento');
-    })
-    .finally(() => {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    });
-    });
-
-    // Link form event listener
-    const linkForm = document.getElementById('linkForm');
-    if (!linkForm) {
-        console.error('linkForm not found');
-        return;
-    }
-
-    linkForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const formData = new FormData(this);
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-
-    submitBtn.innerHTML = '<svg class="w-4 h-4 animate-spin inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Aggiunta...';
-    submitBtn.disabled = true;
-
-    fetch('{{ route("admin.galleries.external-link", $gallery) }}', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            closeLinkModal();
-            location.reload(); // Simple reload for now
-        } else {
-            alert('Errore: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Full error:', error);
-        alert('Errore durante l\'aggiunta del link: ' + error.message);
-    })
-    .finally(() => {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    });
-    });
-}); // End DOMContentLoaded
-
-// Lightbox functionality
-function openLightbox(url, title, type) {
-    const lightbox = document.getElementById('lightbox');
-    const content = document.getElementById('lightboxContent');
-
-    if (type === 'image') {
-        content.innerHTML = `<img src="${url}" alt="${title}" class="max-w-full max-h-full object-contain">`;
-    } else if (type === 'youtube' || type === 'vimeo') {
-        content.innerHTML = `<iframe src="${url}" class="w-full h-96" frameborder="0" allowfullscreen></iframe>`;
-    } else if (type === 'video') {
-        content.innerHTML = `<video controls class="max-w-full max-h-full"><source src="${url}" type="video/mp4"></video>`;
-    }
-
-    lightbox.classList.remove('hidden');
-}
-
-function closeLightbox() {
-    document.getElementById('lightbox').classList.add('hidden');
-    document.getElementById('lightboxContent').innerHTML = '';
-}
-
-// Media management
-function editMedia(mediaId) {
-    // Fetch media data
-    fetch(`{{ route("admin.galleries.media.data", ["gallery" => $gallery, "mediaItem" => ":id"]) }}`.replace(':id', mediaId))
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const media = data.media;
-
-                // Populate form
-                document.getElementById('editMediaId').value = media.id;
-                document.getElementById('editMediaTitle').value = media.title || '';
-                document.getElementById('editMediaDescription').value = media.description || '';
-                document.getElementById('editMediaFeatured').checked = media.is_featured;
-
-                // Show modal
-                document.getElementById('editMediaModal').classList.remove('hidden');
-
-                // Setup cover button
-                setupCoverButton(media.id);
-            } else {
-                alert('Errore nel caricamento dei dati del media');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            // Fallback - use data attributes if available
-            const mediaElement = document.querySelector(`[data-id="${mediaId}"]`);
-            if (mediaElement) {
-                document.getElementById('editMediaId').value = mediaId;
-                document.getElementById('editMediaTitle').value = mediaElement.dataset.title || '';
-                document.getElementById('editMediaDescription').value = mediaElement.dataset.description || '';
-                document.getElementById('editMediaFeatured').checked = mediaElement.dataset.featured === 'true';
-
-                document.getElementById('editMediaModal').classList.remove('hidden');
-                setupCoverButton(mediaId);
-            } else {
-                alert('Errore nel caricamento dei dati del media');
-            }
-        });
-}
-
-function closeEditModal() {
-    document.getElementById('editMediaModal').classList.add('hidden');
-}
-
-function setupCoverButton(mediaId) {
-    const coverButton = document.getElementById('setCoverButton');
-    coverButton.onclick = function() {
-        setCoverImage(mediaId);
-    };
-}
-
-function setCoverImage(mediaId) {
-    fetch(`{{ route("admin.galleries.cover-image", $gallery) }}`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            media_item_id: mediaId
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert('Immagine di copertina impostata con successo!');
-            closeEditModal();
-            location.reload(); // Refresh to show changes
-        } else {
-            alert('Errore: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Errore durante l\'impostazione della copertina');
-    });
-}
-
-function deleteMedia(mediaId) {
-    if (confirm('Sei sicuro di voler eliminare questo media?')) {
-        fetch(`{{ route("admin.galleries.media.delete", ["gallery" => $gallery, "mediaItem" => ":id"]) }}`.replace(':id', mediaId), {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.querySelector(`[data-id="${mediaId}"]`).remove();
-            } else {
-                alert('Errore: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Errore durante l\'eliminazione');
-        });
-    }
-}
-
-// Edit Media Form Handler
-document.getElementById('editMediaForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
-    const mediaId = document.getElementById('editMediaId').value;
-
-    // Raccoglie i dati del form manualmente
-    const formData = {
-        title: document.getElementById('editMediaTitle').value,
-        description: document.getElementById('editMediaDescription').value,
-        is_featured: document.getElementById('editMediaFeatured').checked ? 1 : 0
-    };
-
-    console.log('Sending data:', formData);
-
-    submitBtn.innerHTML = '<svg class="w-4 h-4 animate-spin inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>Salvando...';
-    submitBtn.disabled = true;
-
-    fetch(`{{ route("admin.galleries.media.update", ["gallery" => $gallery, "mediaItem" => ":id"]) }}`.replace(':id', mediaId), {
-        method: 'PATCH',
-        body: JSON.stringify(formData),
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            closeEditModal();
-            location.reload(); // Refresh to show changes
-        } else {
-            alert('Errore: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Errore durante il salvataggio');
-    })
-    .finally(() => {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    });
-});
-
-// Close modals on Escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        closeUploadModal();
-        closeLinkModal();
-        closeEditModal();
-        closeLightbox();
-    }
-});
-</script>
-@endpush
 
 @push('styles')
 <style nonce="@cspNonce">
