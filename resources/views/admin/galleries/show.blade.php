@@ -467,7 +467,25 @@ function closeUploadModal() {
     document.getElementById('uploadForm').reset();
 }
 
-document.getElementById('uploadForm').addEventListener('submit', function(e) {
+// Link functionality
+function openLinkModal() {
+    document.getElementById('linkModal').classList.remove('hidden');
+}
+
+function closeLinkModal() {
+    document.getElementById('linkModal').classList.add('hidden');
+    document.getElementById('linkForm').reset();
+}
+
+// Wait for DOM to be ready before attaching event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadForm = document.getElementById('uploadForm');
+    if (!uploadForm) {
+        console.error('uploadForm not found');
+        return;
+    }
+
+    uploadForm.addEventListener('submit', function(e) {
     e.preventDefault();
 
     const formData = new FormData(this);
@@ -501,19 +519,16 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     });
-});
+    });
 
-// Link functionality
-function openLinkModal() {
-    document.getElementById('linkModal').classList.remove('hidden');
-}
+    // Link form event listener
+    const linkForm = document.getElementById('linkForm');
+    if (!linkForm) {
+        console.error('linkForm not found');
+        return;
+    }
 
-function closeLinkModal() {
-    document.getElementById('linkModal').classList.add('hidden');
-    document.getElementById('linkForm').reset();
-}
-
-document.getElementById('linkForm').addEventListener('submit', function(e) {
+    linkForm.addEventListener('submit', function(e) {
     e.preventDefault();
 
     const formData = new FormData(this);
@@ -552,7 +567,8 @@ document.getElementById('linkForm').addEventListener('submit', function(e) {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     });
-});
+    });
+}); // End DOMContentLoaded
 
 // Lightbox functionality
 function openLightbox(url, title, type) {
