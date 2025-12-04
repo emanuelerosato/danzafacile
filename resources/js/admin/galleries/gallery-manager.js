@@ -309,10 +309,13 @@ function handleLinkSubmit(e) {
         }
     })
     .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
+        // Parse JSON anche se response non è ok (per errori 422)
+        return response.json().then(data => {
+            if (!response.ok) {
+                return Promise.reject(data);
+            }
+            return data;
+        });
     })
     .then(data => {
         if (data.success) {
@@ -329,8 +332,14 @@ function handleLinkSubmit(e) {
         }
     })
     .catch(error => {
-        console.error('Full error:', error);
-        alert('Errore durante l\'aggiunta del link: ' + error.message);
+        console.error('Link error:', error);
+        // Error è ora l'oggetto JSON dal server
+        let errorMsg = error.message || 'Errore durante l\'aggiunta del link';
+        if (error.errors) {
+            const errorList = Object.values(error.errors).flat().join('\n');
+            errorMsg += '\n\n' + errorList;
+        }
+        alert('Errore: ' + errorMsg);
     })
     .finally(() => {
         submitBtn.innerHTML = originalText;
