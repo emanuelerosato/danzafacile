@@ -178,9 +178,18 @@ function openLightbox(url, title, type) {
 // ==================== MEDIA ACTIONS ====================
 
 function editMedia(id) {
-    // Implementa edit media
-    console.log('Edit media:', id);
-    // TODO: Open edit modal
+    // Get gallery ID
+    const mediaGrid = document.getElementById('mediaGrid');
+    const galleryId = mediaGrid ? mediaGrid.getAttribute('data-gallery-id') : null;
+
+    if (!galleryId) {
+        alert('Errore: impossibile identificare la galleria');
+        return;
+    }
+
+    console.log('Edit media:', id, 'in gallery:', galleryId);
+    // TODO: Implementare modal di edit
+    alert('Funzionalità di modifica in arrivo...');
 }
 
 function deleteMedia(id) {
@@ -188,27 +197,50 @@ function deleteMedia(id) {
         return;
     }
 
-    // Get CSRF token
+    // Get gallery ID and CSRF token
+    const mediaGrid = document.getElementById('mediaGrid');
+    const galleryId = mediaGrid ? mediaGrid.getAttribute('data-gallery-id') : null;
+
+    if (!galleryId) {
+        alert('Errore: impossibile identificare la galleria');
+        return;
+    }
+
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    fetch(`/admin/galleries/media/${id}`, {
+    fetch(`/admin/galleries/${galleryId}/media/${id}`, {
         method: 'DELETE',
         headers: {
             'X-CSRF-TOKEN': token,
             'Accept': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => Promise.reject(err));
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
-            location.reload();
+            // Rimuovi l'elemento dal DOM invece di reload
+            const mediaElement = document.querySelector(`[data-id="${id}"]`);
+            if (mediaElement) {
+                mediaElement.remove();
+            }
+            alert('Media eliminato con successo!');
         } else {
             alert('Errore: ' + data.message);
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        alert('Errore durante l\'eliminazione');
+        console.error('Delete error:', error);
+        let errorMsg = error.message || 'Errore durante l\'eliminazione';
+        if (error.errors) {
+            const errorList = Object.values(error.errors).flat().join('\n');
+            errorMsg += '\n\n' + errorList;
+        }
+        alert('Errore: ' + errorMsg);
     });
 }
 

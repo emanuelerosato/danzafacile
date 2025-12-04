@@ -134,7 +134,7 @@
 
     <!-- Media Grid -->
     @if($mediaItems->count() > 0)
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6" id="mediaGrid">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6" id="mediaGrid" data-gallery-id="{{ $gallery->id }}">
             @foreach($mediaItems as $media)
                 <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden group media-item hover:shadow-xl transition-all duration-200 transform hover:scale-105"
                      data-id="{{ $media->id }}"
