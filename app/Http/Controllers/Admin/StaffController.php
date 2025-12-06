@@ -219,7 +219,7 @@ class StaffController extends Controller
 
         // Corsi disponibili per l'assegnazione
         $availableCourses = \App\Models\Course::where('school_id', auth()->user()->school_id)
-            ->where('status', 'active')
+            ->where('active', 1)
             ->orderBy('name')
             ->get(['id', 'name', 'start_date', 'end_date']);
 
