@@ -30,7 +30,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-3xl font-bold text-gray-900">Modifica Staff</h1>
-                <p class="text-gray-600">{{ $staff->user->first_name }} {{ $staff->user->last_name }} ({{ $staff->employee_id }})</p>
+                <p class="text-gray-600">{{ $staff->user->name ?? 'N/A' }} ({{ $staff->employee_id }})</p>
             </div>
             <a href="{{ route('admin.staff.show', $staff) }}"
                class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors duration-200">
@@ -53,22 +53,12 @@
             <div class="p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="first_name" class="block text-sm font-medium text-gray-700">Nome *</label>
-                        <input type="text" name="first_name" id="first_name"
-                               value="{{ old('first_name', $staff->user->first_name) }}"
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('first_name') border-red-300 @enderror"
+                        <label for="name" class="block text-sm font-medium text-gray-700">Nome Completo *</label>
+                        <input type="text" name="name" id="name"
+                               value="{{ old('name', $staff->user->name) }}"
+                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('name') border-red-300 @enderror"
                                required>
-                        @error('first_name')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    <div>
-                        <label for="last_name" class="block text-sm font-medium text-gray-700">Cognome *</label>
-                        <input type="text" name="last_name" id="last_name"
-                               value="{{ old('last_name', $staff->user->last_name) }}"
-                               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 @error('last_name') border-red-300 @enderror"
-                               required>
-                        @error('last_name')
+                        @error('name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
