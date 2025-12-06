@@ -197,7 +197,7 @@ class StaffController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Staff $staff)
+    public function show(Request $request, Staff $staff)
     {
         $staff->load([
             'user:id,name,email,created_at',
@@ -216,6 +216,15 @@ class StaffController extends Controller
             'weekly_hours' => $staff->getCurrentWeeklyHours(),
             'weekly_earnings' => $staff->getEstimatedWeeklyEarnings(),
         ];
+
+        // Se richiesta AJAX, restituisci JSON
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'data' => $staff,
+                'stats' => $stats
+            ]);
+        }
 
         // Corsi disponibili per l'assegnazione
         $availableCourses = \App\Models\Course::where('school_id', auth()->user()->school_id)
@@ -292,6 +301,14 @@ class StaffController extends Controller
         ]);
 
         if ($validator->fails()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Errori di validazione',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
             return redirect()->back()
                            ->withErrors($validator)
                            ->withInput();
@@ -331,6 +348,18 @@ class StaffController extends Controller
             'can_substitute' => $request->boolean('can_substitute'),
             'notes' => $request->notes,
         ]);
+
+        // Ricarica relazioni per risposta completa
+        $staff->load('user:id,name,email', 'school:id,name');
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Staff member aggiornato con successo!',
+                'data' => $staff,
+                'redirect' => route('admin.staff.show', $staff)
+            ]);
+        }
 
         return redirect()->route('admin.staff.show', $staff)
                         ->with('success', 'Staff member aggiornato con successo!');
