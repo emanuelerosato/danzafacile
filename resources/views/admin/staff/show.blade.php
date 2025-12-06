@@ -36,7 +36,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <h1 class="text-2xl font-semibold text-gray-900">{{ $staff->user->name }}</h1>
-                            <p class="text-sm text-gray-600 mt-1">{{ $staff->employee_id }} • {{ \App\Models\Staff::getAvailableRoles()[$staff->role] }}</p>
+                            <p class="text-sm text-gray-600 mt-1">{{ $staff->employee_id }} • {{ \App\Models\Staff::getAvailableRoles()[$staff->role] ?? $staff->role ?? 'N/A' }}</p>
                         </div>
                         <div class="flex space-x-3">
                             <a href="{{ route('admin.staff.edit', $staff) }}"
@@ -191,10 +191,10 @@
                                         <h3 class="font-semibold text-gray-900">{{ $assignment->course->name }}</h3>
                                         <div class="flex items-center space-x-4 mt-2">
                                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $assignment->assignment_type_badge }}">
-                                                {{ $assignment->getAvailableAssignmentTypes()[$assignment->assignment_type] }}
+                                                {{ $assignment->getAvailableAssignmentTypes()[$assignment->assignment_type] ?? $assignment->assignment_type ?? 'N/A' }}
                                             </span>
                                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $assignment->status_badge }}">
-                                                {{ $assignment->getAvailableStatuses()[$assignment->status] }}
+                                                {{ $assignment->getAvailableStatuses()[$assignment->status] ?? $assignment->status ?? 'N/A' }}
                                             </span>
                                             @if($assignment->rate_override)
                                             <span class="text-sm text-green-600 font-medium">
@@ -297,7 +297,7 @@
                             ];
                         @endphp
                         @foreach($days as $day => $dayName)
-                            @if(isset($availability[$day]) && $availability[$day]['available'])
+                            @if(isset($availability[$day]) && is_array($availability[$day]) && !empty($availability[$day]['available']))
                             <div class="flex justify-between items-center">
                                 <span class="font-medium text-gray-900">{{ $dayName }}</span>
                                 <span class="text-sm text-gray-600">
