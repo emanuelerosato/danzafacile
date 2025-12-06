@@ -73,7 +73,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-500">Nome Completo</label>
-                            <p class="mt-1 text-gray-900">{{ $staff->title ? $staff->title . ' ' : '' }}{{ $staff->user->first_name }} {{ $staff->user->last_name }}</p>
+                            <p class="mt-1 text-gray-900">{{ $staff->title ? $staff->title . ' ' : '' }}{{ $staff->user->name }}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-500">Email</label>
