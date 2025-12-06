@@ -34,27 +34,34 @@ export class SelectionManager {
      * Registra event listeners
      */
     attachEventListeners() {
-        // Select All checkbox
-        const selectAllCheckbox = document.getElementById('select-all-staff');
-        if (selectAllCheckbox) {
-            selectAllCheckbox.addEventListener('change', this.handleSelectAll.bind(this));
-        }
+        // Select All checkbox - usa event delegation per supportare checkbox che potrebbero non esistere ancora
+        document.addEventListener('change', (event) => {
+            if (event.target.matches('#select-all-staff')) {
+                this.handleSelectAll(event);
+            }
+        });
 
         // Individual checkboxes
         this.attachIndividualCheckboxListeners();
 
         // Keyboard shortcuts
         document.addEventListener('keydown', this.handleKeyboardShortcuts.bind(this));
+
+        console.log('✅ Event listeners attached successfully');
     }
 
     /**
-     * Attacca listeners ai checkbox individuali
+     * Attacca listeners ai checkbox individuali usando event delegation
      */
     attachIndividualCheckboxListeners() {
-        const individualCheckboxes = document.querySelectorAll('.staff-checkbox');
-        individualCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', this.handleIndividualSelection.bind(this));
+        // Usa event delegation per gestire checkbox dinamiche
+        document.addEventListener('change', (event) => {
+            if (event.target.matches('.staff-checkbox')) {
+                this.handleIndividualSelection(event);
+            }
         });
+
+        console.log('✅ Individual checkbox listeners attached via event delegation');
     }
 
     /**
