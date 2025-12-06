@@ -188,7 +188,7 @@ export class FormManager {
      */
     handleSubmissionSuccess(response) {
         this.formState.isDirty = false;
-        this.clearAutoSave();
+        this.clearDraft();
 
         this.staffManager.notificationManager.showSuccess(
             response.message || 'Staff salvato con successo!'
