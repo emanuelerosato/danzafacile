@@ -28,7 +28,7 @@ export class FormManager {
             email: { required: true, email: true },
             phone: { pattern: /^[\+]?[1-9][\d]{0,15}$/ },
             role: { required: true },
-            hourlyRate: { min: 0, max: 1000, decimal: 2 }
+            hourly_rate: { min: 0, max: 1000, decimal: 2 }
         };
 
         this.autoSaveTimeout = null;
@@ -699,14 +699,14 @@ export class FormManager {
         // Aggiorna regole di validazione dinamiche
         if (role === 'teacher') {
             this.validationRules.hourly_rate = { required: true, min: 10, max: 200 };
-            this.validationRules.specialties = { required: true, minLength: 3 };
+            this.validationRules.specializations = { required: true, minLength: 3 };
         } else {
             delete this.validationRules.hourly_rate;
-            delete this.validationRules.specialties;
+            delete this.validationRules.specializations;
         }
 
         // Re-valida campi interessati
-        const affectedFields = document.querySelectorAll('[name="hourly_rate"], [name="specialties"]');
+        const affectedFields = document.querySelectorAll('[name="hourly_rate"], [name="specializations"]');
         affectedFields.forEach(field => this.validateField(field));
     }
 
