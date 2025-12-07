@@ -40,17 +40,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /**
  * Verifica se siamo in una pagina staff
+ * Usa solo pathname per evitare race conditions con DOM
  */
 function isStaffPage() {
-    const staffIndicators = [
-        document.querySelector('[data-page="staff"]'),
-        document.querySelector('#staff-form'),
-        document.querySelector('.staff-table'),
-        document.querySelector('.staff-container'),
-        window.location.pathname.includes('/staff')
-    ];
-
-    return staffIndicators.some(indicator => indicator);
+    // Check più affidabile basato solo su URL
+    const isStaff = window.location.pathname.includes('/admin/staff');
+    console.log('🔍 isStaffPage check:', {
+        pathname: window.location.pathname,
+        isStaff: isStaff
+    });
+    return isStaff;
 }
 
 /**

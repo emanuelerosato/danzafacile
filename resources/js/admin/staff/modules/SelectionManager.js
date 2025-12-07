@@ -116,8 +116,10 @@ export class SelectionManager {
      * Gestisce Select All/None
      */
     handleSelectAll(event) {
+        console.log('🔘 handleSelectAll called:', event.target.checked);
         const isChecked = event.target.checked;
         const individualCheckboxes = document.querySelectorAll('.staff-checkbox');
+        console.log('📋 Found', individualCheckboxes.length, 'staff checkboxes');
 
         // Visual feedback immediato
         this.showSelectionAnimation(event.target);
@@ -147,6 +149,7 @@ export class SelectionManager {
      * Gestisce selezione individuale
      */
     handleIndividualSelection(event) {
+        console.log('✅ handleIndividualSelection called for:', event.target.value);
         const checkbox = event.target;
         const isChecked = checkbox.checked;
         const staffId = checkbox.value;
