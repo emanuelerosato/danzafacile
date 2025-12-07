@@ -368,10 +368,17 @@ class StaffController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Staff $staff)
+    public function destroy(Request $request, Staff $staff)
     {
         // Verifica che non ci siano assegnazioni attive
         if ($staff->activeCourseAssignments()->count() > 0) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Impossibile eliminare: lo staff ha assegnazioni attive ai corsi.'
+                ], 422);
+            }
+
             return redirect()->back()
                            ->with('error', 'Impossibile eliminare: lo staff ha assegnazioni attive ai corsi.');
         }
@@ -380,6 +387,14 @@ class StaffController extends Controller
 
         // Elimina lo staff (soft delete)
         $staff->delete();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Staff member {$name} eliminato con successo.",
+                'deleted_id' => $staff->id
+            ]);
+        }
 
         return redirect()->route('admin.staff.index')
                         ->with('success', "Staff member {$name} eliminato con successo.");
