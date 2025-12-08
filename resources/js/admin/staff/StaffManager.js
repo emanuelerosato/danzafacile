@@ -350,30 +350,22 @@ class StaffManager {
             }
         });
 
-        // Aggiorna UI stats cards
-        const statsCards = [
-            { selector: '.bg-gray-50 .text-gray-600:contains("Staff Totale")', value: totalCount },
-            { selector: '.bg-gray-50 .text-gray-600:contains("Attivi")', value: activeCount }
-        ];
-
-        // Staff Totale
-        const totalElements = Array.from(document.querySelectorAll('.bg-gray-50 p.text-sm')).filter(el =>
-            el.textContent.includes('Staff Totale')
-        );
-        if (totalElements.length > 0) {
-            const totalCard = totalElements[0].closest('.bg-gray-50');
-            const totalNum = totalCard?.querySelector('.text-2xl');
-            if (totalNum) totalNum.textContent = totalCount;
+        // Aggiorna Staff Totale usando data attribute
+        const totalElement = document.querySelector('[data-stat-value="total"]');
+        if (totalElement) {
+            totalElement.textContent = totalCount;
+            console.log('✅ Updated Staff Totale:', totalCount);
+        } else {
+            console.warn('⚠️ Could not find [data-stat-value="total"]');
         }
 
-        // Attivi
-        const activeElements = Array.from(document.querySelectorAll('.bg-gray-50 p.text-sm')).filter(el =>
-            el.textContent.includes('Attivi')
-        );
-        if (activeElements.length > 0) {
-            const activeCard = activeElements[0].closest('.bg-gray-50');
-            const activeNum = activeCard?.querySelector('.text-2xl');
-            if (activeNum) activeNum.textContent = activeCount;
+        // Aggiorna Attivi usando data attribute
+        const activeElement = document.querySelector('[data-stat-value="active"]');
+        if (activeElement) {
+            activeElement.textContent = activeCount;
+            console.log('✅ Updated Attivi:', activeCount);
+        } else {
+            console.warn('⚠️ Could not find [data-stat-value="active"]');
         }
 
         console.log('📊 Stats updated:', { total: totalCount, active: activeCount });

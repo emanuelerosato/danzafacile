@@ -46,7 +46,7 @@
 
                     <!-- Stats Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="bg-gray-50 rounded-lg p-4" data-stat-card="total">
                             <div class="flex items-center">
                                 <div class="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
                                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,12 +55,12 @@
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm font-medium text-gray-600">Staff Totale</p>
-                                    <p class="text-2xl font-bold text-gray-900">{{ $stats['total'] }}</p>
+                                    <p class="text-2xl font-bold text-gray-900" data-stat-value="total">{{ $stats['total'] }}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="bg-gray-50 rounded-lg p-4" data-stat-card="active">
                             <div class="flex items-center">
                                 <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center">
                                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,7 +69,7 @@
                                 </div>
                                 <div class="ml-4">
                                     <p class="text-sm font-medium text-gray-600">Attivi</p>
-                                    <p class="text-2xl font-bold text-gray-900">{{ $stats['active'] }}</p>
+                                    <p class="text-2xl font-bold text-gray-900" data-stat-value="active">{{ $stats['active'] }}</p>
                                 </div>
                             </div>
                         </div>
