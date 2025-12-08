@@ -38,7 +38,43 @@ export class BulkActionManager {
      * Registra event listeners
      */
     attachEventListeners() {
-        // Event listener per azioni bulk dal menu
+        // Intercetta submit del form bulkActionForm
+        const bulkForm = document.getElementById('bulkActionForm');
+        if (bulkForm) {
+            bulkForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                console.log('🔨 Form submit intercepted');
+
+                // Ottieni azione selezionata
+                const actionSelect = bulkForm.querySelector('select[name="action"]');
+                const action = actionSelect ? actionSelect.value : '';
+
+                console.log('🔨 Action selected:', action);
+
+                if (!action) {
+                    this.staffManager.notificationManager.showWarning('Seleziona un\'azione da eseguire');
+                    return;
+                }
+
+                // Ottieni staff IDs selezionati
+                const selectedIds = this.staffManager.selectionManager.getSelectedItems();
+                console.log('🔨 Selected IDs:', selectedIds);
+
+                if (selectedIds.length === 0) {
+                    this.staffManager.notificationManager.showWarning('Seleziona almeno un membro dello staff');
+                    return;
+                }
+
+                // Esegui azione via JavaScript
+                this.performBulkAction(action, selectedIds);
+            });
+
+            console.log('✅ BulkActionForm submit listener attached');
+        } else {
+            console.warn('⚠️ BulkActionForm not found - bulk actions might not work');
+        }
+
+        // Event listener per azioni bulk dal menu (legacy)
         document.addEventListener('click', (event) => {
             if (event.target.matches('[data-bulk-action]')) {
                 event.preventDefault();
@@ -134,7 +170,9 @@ export class BulkActionManager {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ status: 'active' })
             });
@@ -159,7 +197,9 @@ export class BulkActionManager {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ status: 'inactive' })
             });
@@ -180,21 +220,31 @@ export class BulkActionManager {
      */
     async bulkDelete(staffIds) {
         return await this.processBatch('delete', staffIds, async (staffId) => {
+            console.log(`🗑️ Deleting staff ID ${staffId}...`);
+
             const response = await fetch(`/admin/staff/${staffId}`, {
                 method: 'DELETE',
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
                 }
             });
 
+            console.log(`📡 Delete response status: ${response.status}`);
+
             if (!response.ok) {
                 const data = await response.json();
+                console.error(`❌ Delete failed for staff ${staffId}:`, data);
                 throw new Error(data.message || 'Errore durante l\'eliminazione');
             }
 
+            const result = await response.json();
+            console.log(`✅ Delete successful for staff ${staffId}:`, result);
+
             // Rimuovi dalla UI
             this.staffManager.removeStaffFromUI(staffId);
-            return { deleted: true, id: staffId };
+            return result;
         });
     }
 
