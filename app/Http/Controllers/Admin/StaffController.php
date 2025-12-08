@@ -481,6 +481,45 @@ class StaffController extends Controller
     }
 
     /**
+     * Toggle staff active/inactive status (AJAX endpoint for bulk actions)
+     */
+    public function toggleActive(Request $request, Staff $staff)
+    {
+        // Valida status se fornito, altrimenti toggle
+        $newStatus = $request->input('status');
+
+        if ($newStatus && !in_array($newStatus, ['active', 'inactive'])) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Status non valido'
+                ], 422);
+            }
+            return redirect()->back()->with('error', 'Status non valido');
+        }
+
+        // Se status non fornito, toggle
+        if (!$newStatus) {
+            $newStatus = $staff->status === 'active' ? 'inactive' : 'active';
+        }
+
+        $staff->update(['status' => $newStatus]);
+        $statusLabel = Staff::getAvailableStatuses()[$newStatus] ?? $newStatus;
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Status aggiornato a: {$statusLabel}",
+                'staff_id' => $staff->id,
+                'new_status' => $newStatus
+            ]);
+        }
+
+        return redirect()->back()
+                        ->with('success', "Status aggiornato a: {$statusLabel}");
+    }
+
+    /**
      * Get available courses for assignment
      */
     public function getAvailableCourses(Staff $staff)
