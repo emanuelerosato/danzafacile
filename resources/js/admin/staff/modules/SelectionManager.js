@@ -241,86 +241,20 @@ export class SelectionManager {
 
     /**
      * Aggiorna counter selezione
+     * DISABLED: Duplicato rispetto al form bulk actions in alto + viola CSP con onclick inline
      */
     updateSelectionCounter() {
-        let counterElement = document.querySelector('.selection-counter');
-
-        if (this.selectedItems.length === 0) {
-            // Nascondi counter
-            if (counterElement) {
-                counterElement.classList.add('hide');
-                setTimeout(() => {
-                    counterElement.style.display = 'none';
-                }, 300);
-            }
-            return;
-        }
-
-        // Crea o aggiorna counter
-        if (!counterElement) {
-            counterElement = this.createSelectionCounter();
-        }
-
-        counterElement.style.display = 'flex';
-        counterElement.classList.remove('hide');
-        counterElement.classList.add('show');
-
-        const countText = counterElement.querySelector('.selection-count');
-        const actionButtons = counterElement.querySelector('.selection-actions');
-
-        if (countText) {
-            countText.textContent = `${this.selectedItems.length} staff selezionato${this.selectedItems.length > 1 ? 'i' : ''}`;
-        }
-
-        // Mostra/nascondi azioni basate sul numero selezionato
-        if (actionButtons) {
-            actionButtons.style.display = this.selectedItems.length > 0 ? 'flex' : 'none';
-        }
+        // Counter disabilitato - usa il form "Azioni multiple" in alto
+        return;
     }
 
     /**
      * Crea UI counter selezione
+     * DISABLED: Duplicato + viola CSP
      */
     createSelectionCounter() {
-        const counter = document.createElement('div');
-        counter.className = 'selection-counter fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white rounded-lg shadow-lg border border-gray-200 px-6 py-3 flex items-center space-x-4 z-50';
-        counter.style.display = 'none';
-
-        counter.innerHTML = `
-            <div class="flex items-center space-x-2">
-                <div class="w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center">
-                    <svg class="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                    </svg>
-                </div>
-                <span class="selection-count text-sm font-medium text-gray-900">0 staff selezionati</span>
-            </div>
-
-            <div class="selection-actions flex items-center space-x-2">
-                <button onclick="window.staffSelectionManager.clearSelection()"
-                        class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200">
-                    Deseleziona
-                </button>
-
-                <button onclick="window.staffManager.performBulkAction('activate')"
-                        class="px-3 py-1.5 text-sm text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors duration-200">
-                    Attiva
-                </button>
-
-                <button onclick="window.staffManager.performBulkAction('deactivate')"
-                        class="px-3 py-1.5 text-sm text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 rounded-lg transition-colors duration-200">
-                    Disattiva
-                </button>
-
-                <button onclick="window.staffManager.performBulkAction('delete')"
-                        class="px-3 py-1.5 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200">
-                    Elimina
-                </button>
-            </div>
-        `;
-
-        document.body.appendChild(counter);
-        return counter;
+        // Non più necessario - usa form bulk actions
+        return null;
     }
 
     /**

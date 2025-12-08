@@ -215,7 +215,7 @@
                                             </div>
                                         </div>
                                         <div class="flex gap-1">
-                                            <span class="text-xs px-2 py-1 rounded-full {{ $member->status_badge }}">
+                                            <span class="status-badge text-xs px-2 py-1 rounded-full {{ $member->status_badge }}">
                                                 {{ \App\Models\Staff::getAvailableStatuses()[$member->status] }}
                                             </span>
                                         </div>
