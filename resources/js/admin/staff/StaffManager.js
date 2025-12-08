@@ -329,13 +329,54 @@ class StaffManager {
      * Aggiorna statistiche dopo eliminazione
      */
     updateStatsAfterDelete() {
-        const totalStatsElement = document.querySelector('.total-staff-count');
-        if (totalStatsElement) {
-            const currentCount = parseInt(totalStatsElement.textContent);
-            totalStatsElement.textContent = Math.max(0, currentCount - 1);
+        this.updateStats();
+        this.checkEmptyState();
+    }
+
+    /**
+     * Aggiorna tutte le stats cards basandosi sugli elementi DOM attuali
+     */
+    updateStats() {
+        // Conta tutti gli staff visibili
+        const allStaffRows = document.querySelectorAll('[data-staff-id]');
+        const totalCount = allStaffRows.length;
+
+        // Conta staff attivi (badge verde)
+        let activeCount = 0;
+        allStaffRows.forEach(row => {
+            const badge = row.querySelector('.status-badge');
+            if (badge && (badge.classList.contains('bg-green-100') || badge.textContent.trim().toLowerCase() === 'attivo')) {
+                activeCount++;
+            }
+        });
+
+        // Aggiorna UI stats cards
+        const statsCards = [
+            { selector: '.bg-gray-50 .text-gray-600:contains("Staff Totale")', value: totalCount },
+            { selector: '.bg-gray-50 .text-gray-600:contains("Attivi")', value: activeCount }
+        ];
+
+        // Staff Totale
+        const totalElements = Array.from(document.querySelectorAll('.bg-gray-50 p.text-sm')).filter(el =>
+            el.textContent.includes('Staff Totale')
+        );
+        if (totalElements.length > 0) {
+            const totalCard = totalElements[0].closest('.bg-gray-50');
+            const totalNum = totalCard?.querySelector('.text-2xl');
+            if (totalNum) totalNum.textContent = totalCount;
         }
 
-        this.checkEmptyState();
+        // Attivi
+        const activeElements = Array.from(document.querySelectorAll('.bg-gray-50 p.text-sm')).filter(el =>
+            el.textContent.includes('Attivi')
+        );
+        if (activeElements.length > 0) {
+            const activeCard = activeElements[0].closest('.bg-gray-50');
+            const activeNum = activeCard?.querySelector('.text-2xl');
+            if (activeNum) activeNum.textContent = activeCount;
+        }
+
+        console.log('📊 Stats updated:', { total: totalCount, active: activeCount });
     }
 
     /**

@@ -149,6 +149,11 @@ export class BulkActionManager {
 
             this.showResultsSummary();
 
+            // Aggiorna stats cards dopo ogni bulk action
+            if (this.staffManager.updateStats) {
+                this.staffManager.updateStats();
+            }
+
         } catch (error) {
             console.error('❌ Bulk action error:', error);
             this.staffManager.notificationManager.showError(
