@@ -485,10 +485,19 @@ class StaffController extends Controller
      */
     public function toggleActive(Request $request, Staff $staff)
     {
+        \Log::info('toggleActive called', [
+            'staff_id' => $staff->id,
+            'current_status' => $staff->status,
+            'requested_status' => $request->input('status'),
+            'is_ajax' => $request->ajax(),
+            'wants_json' => $request->wantsJson()
+        ]);
+
         // Valida status se fornito, altrimenti toggle
         $newStatus = $request->input('status');
 
         if ($newStatus && !in_array($newStatus, ['active', 'inactive'])) {
+            \Log::warning('Invalid status requested', ['status' => $newStatus]);
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -503,7 +512,20 @@ class StaffController extends Controller
             $newStatus = $staff->status === 'active' ? 'inactive' : 'active';
         }
 
-        $staff->update(['status' => $newStatus]);
+        \Log::info('Updating staff status', [
+            'staff_id' => $staff->id,
+            'old_status' => $staff->status,
+            'new_status' => $newStatus
+        ]);
+
+        $updated = $staff->update(['status' => $newStatus]);
+
+        \Log::info('Staff status updated', [
+            'staff_id' => $staff->id,
+            'update_result' => $updated,
+            'current_status_after_update' => $staff->fresh()->status
+        ]);
+
         $statusLabel = Staff::getAvailableStatuses()[$newStatus] ?? $newStatus;
 
         if ($request->ajax() || $request->wantsJson()) {
