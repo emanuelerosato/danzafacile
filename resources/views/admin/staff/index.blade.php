@@ -369,14 +369,12 @@
         </div>
     </div>
 
+    <!-- Staff Manager JavaScript -->
+    @vite('resources/js/admin/staff/staff-manager.js')
+    <script nonce="@cspNonce">
+        // Mark this as a staff page for the JavaScript system
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.setAttribute('data-page', 'staff');
+        });
+    </script>
 </x-app-layout>
-
-@push('scripts')
-@vite('resources/js/admin/staff/staff-manager.js')
-<script nonce="@cspNonce">
-    // Mark this as a staff page for the JavaScript system
-    document.addEventListener('DOMContentLoaded', function() {
-        document.body.setAttribute('data-page', 'staff');
-    });
-</script>
-@endpush
