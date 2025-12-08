@@ -426,11 +426,9 @@ function addScheduleSlotCreate() {
                     <select name="schedule_slots[${scheduleSlotIndexCreate}][location]"
                             class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                         <option value="">Seleziona sala</option>
-                        ' + availableRooms.map(room =>
-                            '<option value="' + room.name + '">' +
-                            room.name + (room.capacity ? ' (Cap: ' + room.capacity + ')' : '') +
-                            '</option>'
-                        ).join('') + '
+                        ${availableRooms.map(room =>
+                            `<option value="${room.name}">${room.name}${room.capacity ? ' (Cap: ' + room.capacity + ')' : ''}</option>`
+                        ).join('')}
                     </select>
                 </div>
             </div>
