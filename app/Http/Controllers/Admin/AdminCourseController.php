@@ -31,8 +31,9 @@ class AdminCourseController extends AdminBaseController
 
         // Get filter options
         $instructors = $this->school->users()
-                          ->whereHas('staffRoles', function($q) {
-                              $q->where('active', true);
+                          ->whereHas('staff', function($q) {
+                              $q->where('role', \App\Models\Staff::ROLE_INSTRUCTOR)
+                                ->where('status', \App\Models\Staff::STATUS_ACTIVE);
                           })
                           ->where('active', true)
                           ->orderBy('name')
@@ -89,9 +90,11 @@ class AdminCourseController extends AdminBaseController
      */
     public function create()
     {
+        // Ottieni istruttori dalla tabella staff (nuova struttura)
         $instructors = $this->school->users()
-                          ->whereHas('staffRoles', function($q) {
-                              $q->where('active', true);
+                          ->whereHas('staff', function($q) {
+                              $q->where('role', \App\Models\Staff::ROLE_INSTRUCTOR)
+                                ->where('status', \App\Models\Staff::STATUS_ACTIVE);
                           })
                           ->where('active', true)
                           ->orderBy('name')
@@ -115,8 +118,9 @@ class AdminCourseController extends AdminBaseController
         if (!empty($validated['instructor_id'])) {
             $instructorExists = \App\Models\User::where('id', $validated['instructor_id'])
                 ->where('school_id', $this->school->id)
-                ->whereHas('staffRoles', function($q) {
-                    $q->where('active', true);
+                ->whereHas('staff', function($q) {
+                    $q->where('role', \App\Models\Staff::ROLE_INSTRUCTOR)
+                      ->where('status', \App\Models\Staff::STATUS_ACTIVE);
                 })
                 ->exists();
 
@@ -242,8 +246,9 @@ class AdminCourseController extends AdminBaseController
         }
 
         $instructors = $this->school->users()
-                          ->whereHas('staffRoles', function($q) {
-                              $q->where('active', true);
+                          ->whereHas('staff', function($q) {
+                              $q->where('role', \App\Models\Staff::ROLE_INSTRUCTOR)
+                                ->where('status', \App\Models\Staff::STATUS_ACTIVE);
                           })
                           ->where('active', true)
                           ->orderBy('name')
@@ -295,8 +300,9 @@ class AdminCourseController extends AdminBaseController
         if (!empty($validated['instructor_id'])) {
             $instructorExists = \App\Models\User::where('id', $validated['instructor_id'])
                 ->where('school_id', $this->school->id)
-                ->whereHas('staffRoles', function($q) {
-                    $q->where('active', true);
+                ->whereHas('staff', function($q) {
+                    $q->where('role', \App\Models\Staff::ROLE_INSTRUCTOR)
+                      ->where('status', \App\Models\Staff::STATUS_ACTIVE);
                 })
                 ->exists();
 

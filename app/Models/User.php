@@ -153,6 +153,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Ottiene il record staff dell'utente (nuova struttura)
+     */
+    public function staff(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Staff::class);
+    }
+
+    /**
      * Ottiene le presenze dell'utente
      */
     public function attendance(): HasMany
