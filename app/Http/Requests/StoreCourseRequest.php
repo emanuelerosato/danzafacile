@@ -23,10 +23,10 @@ class StoreCourseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
             'code' => 'nullable|string|max:50',
             'dance_type' => 'nullable|string|max:100',
-            'description' => 'nullable|string',
+            'description' => 'required|string|min:10',
             'short_description' => 'nullable|string|max:500',
             'image' => [
                 'nullable',
@@ -183,6 +183,11 @@ class StoreCourseRequest extends FormRequest
      */
     private function courseDatesOverlap($start1, $end1, $start2, $end2)
     {
+        // If either start date is null, we can't validate overlap - assume no overlap
+        if (!$start1 || !$start2) {
+            return false;
+        }
+
         $start1 = Carbon::parse($start1);
         $end1 = $end1 ? Carbon::parse($end1) : null;
         $start2 = Carbon::parse($start2);

@@ -112,7 +112,17 @@ class AdminCourseController extends AdminBaseController
      */
     public function store(StoreCourseRequest $request)
     {
+        \Log::info('📝 Course creation started', [
+            'user_id' => auth()->id(),
+            'school_id' => $this->school->id,
+            'request_data' => $request->except(['_token', 'image'])
+        ]);
+
         $validated = $request->validated();
+
+        \Log::info('✅ Validation passed', [
+            'validated_fields' => array_keys($validated)
+        ]);
 
         // Validate instructor_id separately if provided
         if (!empty($validated['instructor_id'])) {
@@ -181,6 +191,12 @@ class AdminCourseController extends AdminBaseController
         }
 
         $course = Course::create($validated);
+
+        \Log::info('✅ Course created successfully', [
+            'course_id' => $course->id,
+            'course_name' => $course->name,
+            'school_id' => $course->school_id
+        ]);
 
         $this->clearSchoolCache();
 

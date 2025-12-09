@@ -47,20 +47,22 @@
 
     <!-- Form Card -->
     <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-lg p-6">
-        <!-- Dual-Layer Validation Component - DISABLED: All fields are now optional -->
-        {{-- <x-form-validation :rules="[
-            'name' => 'required|string|max:255',
-            'description' => 'required|string|min:10',
-            'instructor_id' => 'nullable|exists:users,id',
-            'level' => 'required|in:beginner,intermediate,advanced',
-            'price' => 'required|numeric|min:0|max:999.99',
-            'max_students' => 'nullable|integer|min:1|max:100',
-            'start_date' => 'required|date|after:today',
-            'end_date' => 'nullable|date|after:start_date',
-            'location' => 'nullable|string|max:255',
-            'duration_weeks' => 'nullable|integer|min:1|max:52',
-            'schedule' => 'nullable|string|max:255'
-        ]" /> --}}
+        <!-- Validation Errors -->
+        @if ($errors->any())
+            <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+                <div class="flex items-center mb-2">
+                    <svg class="w-5 h-5 text-red-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    <h3 class="text-sm font-medium text-red-800">Ci sono alcuni errori da correggere:</h3>
+                </div>
+                <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
         <form id="courseForm" action="{{ route('admin.courses.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
