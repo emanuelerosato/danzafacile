@@ -298,13 +298,11 @@
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">Orario Inizio *</label>
                                     <input type="time" name="schedule_slots[0][start_time]"
-                                           onchange="calculateDurationCreate(this)"
                                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">Orario Fine *</label>
                                     <input type="time" name="schedule_slots[0][end_time]"
-                                           onchange="calculateDurationCreate(this)"
                                            class="w-full text-sm border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
                                 </div>
                             </div>
