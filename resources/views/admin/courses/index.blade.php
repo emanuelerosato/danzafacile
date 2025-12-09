@@ -130,7 +130,11 @@
                                             <p class="text-sm text-gray-600 mt-2 truncate">{{ $course->description }}</p>
                                         @endif
                                         <div class="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                                            <span>Inizio: {{ $course->start_date->format('d/m/Y') }}</span>
+                                            @if($course->start_date)
+                                                <span>Inizio: {{ $course->start_date->format('d/m/Y') }}</span>
+                                            @else
+                                                <span>Inizio: Da programmare</span>
+                                            @endif
                                             @if($course->end_date)
                                                 <span>Fine: {{ $course->end_date->format('d/m/Y') }}</span>
                                             @endif
