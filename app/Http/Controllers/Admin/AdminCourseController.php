@@ -410,13 +410,31 @@ class AdminCourseController extends AdminBaseController
      */
     public function destroy(Course $course)
     {
+        \Log::info('🗑️ Course deletion requested', [
+            'course_id' => $course->id,
+            'course_name' => $course->name,
+            'user_id' => auth()->id(),
+            'school_id' => $this->school->id,
+            'is_ajax' => request()->ajax()
+        ]);
+
         // Ensure course belongs to current school
         if ($course->school_id !== $this->school->id) {
+            \Log::warning('❌ Attempted to delete course from different school', [
+                'course_school_id' => $course->school_id,
+                'user_school_id' => $this->school->id
+            ]);
             abort(404, 'Corso non trovato.');
         }
 
         // Check if course has enrollments
         $enrollmentCount = $course->enrollments()->count();
+
+        \Log::info('✅ Enrollment check', [
+            'course_id' => $course->id,
+            'enrollment_count' => $enrollmentCount
+        ]);
+
         if ($enrollmentCount > 0) {
             \Log::warning('Attempted to delete course with enrollments', [
                 'course_id' => $course->id,

@@ -168,8 +168,10 @@
                                         Dettagli
                                     </a>
                                     <span class="text-gray-300">|</span>
-                                    <button onclick="showDeleteModal({{ $course->id }}, '{{ addslashes($course->name) }}', {{ $course->enrollments->count() }})"
-                                            class="text-red-600 hover:text-red-900 text-sm font-medium">
+                                    <button data-delete-course="{{ $course->id }}"
+                                            data-course-name="{{ addslashes($course->name) }}"
+                                            data-enrollment-count="{{ $course->enrollments->count() }}"
+                                            class="delete-course-btn text-red-600 hover:text-red-900 text-sm font-medium">
                                         Elimina
                                     </button>
                                 </div>
@@ -273,7 +275,8 @@
     let currentCourseId = null;
 
     // Show delete modal with course information
-    window.showDeleteModal = function(courseId, courseName, enrollmentCount) {
+    function showDeleteModal(courseId, courseName, enrollmentCount) {
+        console.log('📋 Opening delete modal for course:', courseId);
         currentCourseId = courseId;
 
         // Set course name
@@ -340,8 +343,13 @@
     }
 
     // Delete course function
-    window.deleteCourse = async function() {
-        if (!currentCourseId) return;
+    async function deleteCourse() {
+        if (!currentCourseId) {
+            console.error('❌ No course ID set for deletion');
+            return;
+        }
+
+        console.log('🗑️ Starting course deletion:', currentCourseId);
 
         const deleteButton = document.getElementById('confirmDelete');
         const deleteButtonText = document.getElementById('deleteButtonText');
@@ -357,6 +365,8 @@
             const formData = new FormData();
             formData.append('_method', 'DELETE');
             formData.append('_token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}');
+
+            console.log('📤 Sending DELETE request to:', `{{ url('/admin/courses') }}/${currentCourseId}`);
 
             const response = await fetch(`{{ url('/admin/courses') }}/${currentCourseId}`, {
                 method: 'POST',
@@ -432,6 +442,19 @@
 
     // Event listeners
     document.addEventListener('DOMContentLoaded', function() {
+        // Event delegation for delete buttons
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.delete-course-btn')) {
+                const button = e.target.closest('.delete-course-btn');
+                const courseId = button.dataset.deleteCourse;
+                const courseName = button.dataset.courseName;
+                const enrollmentCount = parseInt(button.dataset.enrollmentCount);
+
+                console.log('🗑️ Delete button clicked:', { courseId, courseName, enrollmentCount });
+                showDeleteModal(courseId, courseName, enrollmentCount);
+            }
+        });
+
         // Cancel delete
         document.getElementById('cancelDelete').addEventListener('click', hideDeleteModal);
 
