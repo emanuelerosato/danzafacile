@@ -2,8 +2,8 @@
 
 **Progetto:** DanzaFacile - Laravel 12 Dance School Management System
 **Data Creazione:** 2026-01-23
-**Ultima Modifica:** 2026-01-23 23:50 UTC
-**Status:** 1/11 completati (9%)
+**Ultima Modifica:** 2026-01-23 01:15 UTC
+**Status:** 2/11 completati (18%)
 
 ---
 
@@ -11,14 +11,14 @@
 
 | Priorità | Totale | Completati | In Progress | Pending |
 |----------|--------|------------|-------------|---------|
-| 🔴 CRITICAL | 3 | 1 | 0 | 2 |
+| 🔴 CRITICAL | 3 | 2 | 0 | 1 |
 | 🟡 HIGH | 3 | 0 | 0 | 3 |
 | 🟢 MEDIUM | 4 | 0 | 0 | 4 |
 | 🔵 LOW | 1 | 0 | 0 | 1 |
-| **TOTALE** | **11** | **1** | **0** | **10** |
+| **TOTALE** | **11** | **2** | **0** | **9** |
 
 **Tempo Stimato Totale:** 15-20 ore di sviluppo
-**Tempo Impiegato:** 0.75 ore
+**Tempo Impiegato:** 2.0 ore
 
 ---
 
@@ -140,49 +140,141 @@ dismissErrorAlert() { this.showErrorAlert = false; }
 
 ---
 
-### ❌ #2 - Studenti Nomi/Cognomi Non Visualizzati
+### ✅ #2 - Studenti Nomi/Cognomi Non Visualizzati
 
-**Status:** ⏸️ Pending
+**Status:** ✅ Completed (2026-01-23 01:15 UTC)
 **Priorità:** 🔴 CRITICAL
 **Complessità:** 🟡 Medium
 **Tempo Stimato:** 1-1.5 ore
+**Tempo Effettivo:** 1.25 ore
+**Commit:** `74ee866`
 
 #### Descrizione
-Nella pagina `/admin/students/150/edit` alcuni studenti non mostrano nome e cognome correttamente.
+Nella pagina `/admin/students/150/edit` alcuni studenti non mostravano nome e cognome correttamente. Avatar mostrava iniziali vuote.
 
 #### Comportamento Atteso
 - Tutti gli studenti mostrano nome e cognome completi
-- Nessun campo vuoto o null
-- Dati caricati correttamente da database
+- Avatar con iniziali corrette (e.g., "ER" per "Emanuele Rosato")
+- Fallback robusto a `full_name` accessor se first_name/last_name mancanti
 
-#### File Coinvolti
-- `app/Http/Controllers/Admin/StudentController.php` - metodo `edit()`
-- `app/Models/Student.php` - relationships e accessors
-- `resources/views/admin/students/edit.blade.php`
-- Database: `students` table
+#### Root Cause Identificato
+**Data Migration Incompleta:**
+- 13/122 studenti (10.7%) avevano `first_name` e `last_name` NULL
+- Solo campo `name` popolato dal vecchio schema
+- Views accedevano direttamente a `$student->first_name` senza null check
+- `substr(NULL, 0, 1)` ritorna stringa vuota → avatar senza iniziali
 
-#### Indagine Necessaria
-1. Query database per verificare dati raw studente ID 150
-2. Controllare eager loading nel controller (`->with()`)
-3. Verificare accessors/mutators in Student model
-4. Testare con più student_id per capire pattern
-5. Verificare se è problema N+1 query o dati mancanti
+**Verifica Production Data:**
+```sql
+-- Prima del fix:
+SELECT id, name, first_name, last_name FROM users WHERE id = 150;
+-- Result: id=150, name="emanuele rosato q", first_name=NULL, last_name=NULL
 
-#### Possibili Cause
-- **N+1 Query Problem:** Relazioni non eager loaded
-- **Data Corruption:** Alcuni studenti hanno campi NULL
-- **Multi-tenant Scope Issue:** Query filtra erroneamente studenti
+-- Dopo migration:
+-- Result: id=150, name="emanuele rosato q", first_name="emanuele", last_name="rosato q"
+```
 
-#### Note Tecniche
+#### Fix Applicato (Senior Multi-Layer Approach)
+
+**Layer 1: View Fix (Defensive Rendering) - 3 Files**
+
+Sostituito pattern buggy:
+```blade
+<!-- ❌ BEFORE (BUGGY): -->
+{{ strtoupper(substr($student->first_name, 0, 1) . substr($student->last_name, 0, 1)) }}
+
+<!-- ✅ AFTER (DEFENSIVE): -->
+@php
+    // SENIOR FIX: Defensive initials extraction with fallback
+    $initials = '';
+    if ($student->first_name && $student->last_name) {
+        // Best case: both fields populated
+        $initials = strtoupper(substr($student->first_name, 0, 1) . substr($student->last_name, 0, 1));
+    } elseif ($student->full_name) {
+        // Fallback: extract from full_name accessor
+        $nameParts = explode(' ', trim($student->full_name));
+        $initials = strtoupper(substr($nameParts[0] ?? '', 0, 1) . substr($nameParts[1] ?? $nameParts[0] ?? '', 0, 1));
+    } else {
+        // Last resort
+        $initials = '??';
+    }
+@endphp
+{{ $initials }}
+```
+
+**Layer 2: Data Migration (Corrective Fix)**
+
+Creata migration: `database/migrations/2026_01_23_220435_populate_first_last_names_from_name.php`
+
 ```php
-// Verificare nel controller:
-$student = Student::with(['school', 'user', 'enrollments'])->find($id);
+public function up(): void
+{
+    DB::transaction(function () {
+        // Get users with NULL first_name or last_name but valid name
+        $usersToFix = DB::table('users')
+            ->where(function($query) {
+                $query->whereNull('first_name')->orWhereNull('last_name');
+            })
+            ->whereNotNull('name')
+            ->where('name', '!=', '')
+            ->get();
 
-// Verificare nel model:
-protected $appends = ['full_name'];
-public function getFullNameAttribute() {
-    return $this->first_name . ' ' . $this->last_name;
+        foreach ($usersToFix as $user) {
+            $nameParts = explode(' ', trim($user->name));
+
+            if (count($nameParts) >= 2) {
+                // Standard case: "FirstName LastName" or "FirstName MiddleName LastName"
+                $firstName = $nameParts[0];
+                $lastName = implode(' ', array_slice($nameParts, 1));
+
+                DB::table('users')->where('id', $user->id)->update([
+                    'first_name' => $user->first_name ?? $firstName,
+                    'last_name' => $user->last_name ?? $lastName,
+                    'updated_at' => now(),
+                ]);
+                $fixed++;
+            } elseif (count($nameParts) === 1) {
+                // Edge case: Single word name (e.g., "Madonna")
+                $firstName = $nameParts[0];
+                DB::table('users')->where('id', $user->id)->update([
+                    'first_name' => $user->first_name ?? $firstName,
+                    'last_name' => $user->last_name ?? $firstName,
+                    'updated_at' => now(),
+                ]);
+                $fixed++;
+            }
+        }
+
+        \Log::info('Data migration: populated first_name/last_name from name', [
+            'total_found' => $usersToFix->count(),
+            'fixed' => $fixed,
+            'skipped' => $skipped,
+        ]);
+    });
 }
+```
+
+#### File Modificati
+- ✅ `resources/views/admin/students/edit.blade.php` (+15 lines, -2 lines)
+- ✅ `resources/views/admin/students/show.blade.php` (+14 lines, -2 lines)
+- ✅ `resources/views/admin/students/partials/table.blade.php` (+14 lines, -2 lines)
+- ✅ `database/migrations/2026_01_23_220435_populate_first_last_names_from_name.php` (+107 lines, NEW)
+
+#### Testing
+- ✅ Code review locale - pattern applicato consistentemente
+- ✅ Migration testata su VPS production (43.60ms execution)
+- ✅ Verifica student ID 150: first_name="emanuele", last_name="rosato q" ✅
+- ✅ Deploy completato (commit `74ee866`)
+- ✅ Cache cleared, PHP-FPM riavviato
+- ⏳ Test manuale UI da eseguire
+
+#### Note Tecniche Post-Fix
+- **Defensive pattern:** 3-level fallback assicura sempre un valore display
+- **Data integrity:** Migration usa `?? operator` per non sovrascrivere campi già popolati
+- **Transaction safety:** Tutto in `DB::transaction()` per atomicità
+- **Single word names:** Gestiti correttamente (first_name = last_name = nome unico)
+- **Rollback safety:** down() è NO-OP intenzionale per sicurezza dati
+- **Leverages accessor:** Pattern sfrutta `full_name` accessor esistente nel model `User.php`
 ```
 
 ---
