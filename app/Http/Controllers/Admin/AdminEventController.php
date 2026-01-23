@@ -21,7 +21,8 @@ class AdminEventController extends AdminBaseController
         $query = $this->school->events()->with(['registrations.user']);
 
         // SECURE: allowed sort fields for events
-        $allowedSortFields = ['title', 'start_date', 'end_date', 'max_participants', 'created_at', 'updated_at'];
+        // SENIOR FIX: Changed 'title' to 'name' (correct column name in events table)
+        $allowedSortFields = ['name', 'start_date', 'end_date', 'max_participants', 'created_at', 'updated_at'];
         $events = $this->getFilteredResults($query, $request, 15, $allowedSortFields);
 
         // Get filter options
