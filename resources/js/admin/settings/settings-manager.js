@@ -12,6 +12,7 @@ window.settingsManager = function() {
     return {
         // State
         showSuccessAlert: true,
+        showErrorAlert: true,
         isSubmitting: false,
         paypalEnabled: false,
 
@@ -30,6 +31,11 @@ window.settingsManager = function() {
         // Dismiss success alert
         dismissAlert() {
             this.showSuccessAlert = false;
+        },
+
+        // Dismiss error alert
+        dismissErrorAlert() {
+            this.showErrorAlert = false;
         },
 
         // Handle form submission
