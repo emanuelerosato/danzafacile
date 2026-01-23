@@ -262,4 +262,107 @@ class FileUploadHelper
         }
         return null;
     }
+
+    /**
+     * SENIOR FIX: Upload file sicuro con validazione avanzata
+     *
+     * Gestisce upload completo di:
+     * - Validazione file (magic bytes, MIME, size)
+     * - Creazione directory se non esiste
+     * - Nome file sanitizzato con timestamp
+     * - Storage su disco 'public'
+     *
+     * @param UploadedFile $file File da uploadare
+     * @param string $directory Directory di destinazione (es: 'events', 'documents')
+     * @param string $category Categoria per validazione ('image', 'documents', 'videos')
+     * @param int $maxSizeMB Dimensione massima in MB
+     * @return array ['success' => bool, 'path' => string|null, 'errors' => array]
+     */
+    public static function uploadFile(
+        UploadedFile $file,
+        string $directory,
+        string $category,
+        int $maxSizeMB = 10
+    ): array {
+        try {
+            // Map category to validation category
+            $validationCategory = match($category) {
+                'image' => 'images',
+                'document' => 'documents',
+                'video' => 'videos',
+                default => 'images'
+            };
+
+            // 1. Validate file
+            $validation = self::validateFile($file, $validationCategory, $maxSizeMB);
+
+            if (!$validation['valid']) {
+                return [
+                    'success' => false,
+                    'path' => null,
+                    'errors' => $validation['errors']
+                ];
+            }
+
+            // 2. Sanitize filename
+            $originalName = $file->getClientOriginalName();
+            $sanitizedName = self::sanitizeFileName($originalName);
+
+            // 3. Ensure directory exists (create if needed)
+            $fullPath = storage_path('app/public/' . $directory);
+            if (!file_exists($fullPath)) {
+                if (!mkdir($fullPath, 0755, true)) {
+                    Log::error('Failed to create upload directory', [
+                        'directory' => $fullPath
+                    ]);
+                    return [
+                        'success' => false,
+                        'path' => null,
+                        'errors' => ['Impossibile creare la directory di upload.']
+                    ];
+                }
+                Log::info('Created upload directory', ['directory' => $fullPath]);
+            }
+
+            // 4. Store file
+            $storedPath = $file->storeAs($directory, $sanitizedName, 'public');
+
+            if (!$storedPath) {
+                return [
+                    'success' => false,
+                    'path' => null,
+                    'errors' => ['Errore durante il salvataggio del file.']
+                ];
+            }
+
+            Log::info('File uploaded successfully', [
+                'original_name' => $originalName,
+                'stored_path' => $storedPath,
+                'size_mb' => $validation['size_mb'],
+                'mime_type' => $validation['mime_type']
+            ]);
+
+            return [
+                'success' => true,
+                'path' => $storedPath,
+                'errors' => [],
+                'filename' => $sanitizedName,
+                'size_mb' => $validation['size_mb'],
+                'mime_type' => $validation['mime_type']
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('File upload failed with exception', [
+                'error' => $e->getMessage(),
+                'file' => $file->getClientOriginalName(),
+                'directory' => $directory
+            ]);
+
+            return [
+                'success' => false,
+                'path' => null,
+                'errors' => ['Errore imprevisto durante l\'upload: ' . $e->getMessage()]
+            ];
+        }
+    }
 }
