@@ -39,12 +39,25 @@
                 <!-- Avatar -->
                 <div class="flex-shrink-0">
                     <div class="h-12 w-12 bg-gradient-to-r from-rose-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                        {{ strtoupper(substr($student->first_name, 0, 1) . substr($student->last_name, 0, 1)) }}
+                        @php
+                            // SENIOR FIX: Defensive initials extraction with fallback
+                            $initials = '';
+                            if ($student->first_name && $student->last_name) {
+                                $initials = strtoupper(substr($student->first_name, 0, 1) . substr($student->last_name, 0, 1));
+                            } elseif ($student->full_name) {
+                                // Fallback: extract initials from full_name
+                                $nameParts = explode(' ', trim($student->full_name));
+                                $initials = strtoupper(substr($nameParts[0] ?? '', 0, 1) . substr($nameParts[1] ?? $nameParts[0] ?? '', 0, 1));
+                            } else {
+                                $initials = '??';
+                            }
+                        @endphp
+                        {{ $initials }}
                     </div>
                 </div>
                 <div>
                     <h1 class="text-xl md:text-2xl font-bold text-gray-900">Modifica Studente</h1>
-                    <p class="text-gray-600">{{ $student->name }}</p>
+                    <p class="text-gray-600">{{ $student->full_name ?: $student->name }}</p>
                 </div>
             </div>
         </div>

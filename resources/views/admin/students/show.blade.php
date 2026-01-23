@@ -39,11 +39,23 @@
                 <!-- Avatar -->
                 <div class="flex-shrink-0">
                     <div class="h-16 w-16 bg-gradient-to-r from-rose-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                        {{ strtoupper(substr($student->first_name, 0, 1) . substr($student->last_name, 0, 1)) }}
+                        @php
+                            // SENIOR FIX: Defensive initials extraction with fallback
+                            $initials = '';
+                            if ($student->first_name && $student->last_name) {
+                                $initials = strtoupper(substr($student->first_name, 0, 1) . substr($student->last_name, 0, 1));
+                            } elseif ($student->full_name) {
+                                $nameParts = explode(' ', trim($student->full_name));
+                                $initials = strtoupper(substr($nameParts[0] ?? '', 0, 1) . substr($nameParts[1] ?? $nameParts[0] ?? '', 0, 1));
+                            } else {
+                                $initials = '??';
+                            }
+                        @endphp
+                        {{ $initials }}
                     </div>
                 </div>
                 <div>
-                    <h1 class="text-xl md:text-2xl font-bold text-gray-900">{{ $student->name }}</h1>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900">{{ $student->full_name ?: $student->name }}</h1>
                     <div class="flex items-center space-x-4 mt-1">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $student->active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                             <span class="w-2 h-2 mr-1.5 rounded-full {{ $student->active ? 'bg-green-400' : 'bg-red-400' }}"></span>
