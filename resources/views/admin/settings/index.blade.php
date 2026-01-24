@@ -145,7 +145,7 @@
                     />
                 </div>
 
-                <form action="{{ route('admin.settings.update') }}" method="POST" class="space-y-6" @submit="handleSubmit()">
+                <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data" class="space-y-6" @submit="handleSubmit()">
                     @csrf
 
                     <!-- Informazioni Generali -->
@@ -460,22 +460,61 @@
                         </div>
 
                         <div class="space-y-6">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label for="receipt_logo_url" class="block text-sm font-medium text-gray-700 mb-2">
-                                        URL Logo Ricevuta <span class="text-gray-500 font-normal">(opzionale)</span>
-                                    </label>
-                                    <p class="text-sm text-gray-600 mb-2">
-                                        Indirizzo web del logo da mostrare nelle ricevute. Lascia vuoto se non hai un logo online.
-                                    </p>
-                                    <input type="url" name="receipt_logo_url" id="receipt_logo_url" value="{{ old('receipt_logo_url', $settings['receipt_logo_url']) }}"
-                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200"
-                                           placeholder="https://www.tuascuola.it/logo.png">
-                                    @error('receipt_logo_url')
-                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
+                            <!-- Logo Upload & URL -->
+                            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                                <h4 class="text-sm font-semibold text-gray-900 mb-4">Logo Ricevuta</h4>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <!-- Upload Locale -->
+                                    <div>
+                                        <label for="receipt_logo" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Carica Logo <span class="text-gray-500 font-normal">(opzionale)</span>
+                                        </label>
+                                        <p class="text-sm text-gray-600 mb-2">
+                                            Carica un logo dal tuo computer (JPG, PNG max 2MB). Ha priorità sull'URL esterno.
+                                        </p>
+                                        <input type="file" name="receipt_logo" id="receipt_logo" accept="image/jpeg,image/png,image/jpg"
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200">
+                                        @error('receipt_logo')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+
+                                        @if(!empty($settings['receipt_logo_path']))
+                                            <div class="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                                <div class="flex items-center justify-between">
+                                                    <div class="flex items-center space-x-2">
+                                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                        </svg>
+                                                        <span class="text-sm text-green-800 font-medium">Logo caricato</span>
+                                                    </div>
+                                                    <a href="{{ asset('storage/' . $settings['receipt_logo_path']) }}" target="_blank"
+                                                       class="text-sm text-green-600 hover:text-green-800 underline">
+                                                        Visualizza
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <!-- URL Esterno (Fallback) -->
+                                    <div>
+                                        <label for="receipt_logo_url" class="block text-sm font-medium text-gray-700 mb-2">
+                                            URL Logo Esterno <span class="text-gray-500 font-normal">(opzionale)</span>
+                                        </label>
+                                        <p class="text-sm text-gray-600 mb-2">
+                                            In alternativa, inserisci l'URL di un logo già online. Usato solo se non carichi un file.
+                                        </p>
+                                        <input type="url" name="receipt_logo_url" id="receipt_logo_url" value="{{ old('receipt_logo_url', $settings['receipt_logo_url']) }}"
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200"
+                                               placeholder="https://www.tuascuola.it/logo.png">
+                                        @error('receipt_logo_url')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
                                 </div>
 
+                                <!-- Show Logo Checkbox -->
                                 <div class="flex items-center">
                                     <div class="flex items-center h-5">
                                         <input type="checkbox" name="receipt_show_logo" id="receipt_show_logo" value="1"

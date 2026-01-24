@@ -47,6 +47,7 @@ class AdminSettingsController extends Controller
             'receipt_header_text' => Setting::get("school.{$school->id}.receipt.header_text", ''),
             'receipt_footer_text' => Setting::get("school.{$school->id}.receipt.footer_text", ''),
             'receipt_logo_url' => Setting::get("school.{$school->id}.receipt.logo_url", ''),
+            'receipt_logo_path' => Setting::get("school.{$school->id}.receipt.logo_path", ''),
             'receipt_show_logo' => Setting::get("school.{$school->id}.receipt.show_logo", true),
 
             // Payment Terms
@@ -151,6 +152,7 @@ class AdminSettingsController extends Controller
             'receipt_header_text' => 'nullable|string|max:1000',
             'receipt_footer_text' => 'nullable|string|max:1000',
             'receipt_logo_url' => 'nullable|url|max:500',
+            'receipt_logo' => 'nullable|image|mimes:jpeg,jpg,png|max:2048', // 2MB max
             'receipt_show_logo' => 'nullable|boolean',
             'payment_terms' => 'nullable|string|max:500',
             'payment_bank_details' => 'nullable|string|max:1000',
@@ -208,6 +210,49 @@ class AdminSettingsController extends Controller
             }
         }
 
+        // Handle receipt logo upload (local file has priority over URL)
+        $receiptLogoPath = Setting::get("school.{$school->id}.receipt.logo_path");
+
+        if ($request->hasFile('receipt_logo')) {
+            try {
+                $file = $request->file('receipt_logo');
+
+                // Delete old logo if exists
+                if (!empty($receiptLogoPath) && \Storage::disk('public')->exists($receiptLogoPath)) {
+                    \Storage::disk('public')->delete($receiptLogoPath);
+                    \Log::info('Old receipt logo deleted', [
+                        'school_id' => $school->id,
+                        'old_path' => $receiptLogoPath
+                    ]);
+                }
+
+                // Store new logo in school-specific directory
+                $filename = 'receipt_logo_' . time() . '.' . $file->getClientOriginalExtension();
+                $receiptLogoPath = $file->storeAs(
+                    "receipts/logos/{$school->id}",
+                    $filename,
+                    'public'
+                );
+
+                \Log::info('Receipt logo uploaded successfully', [
+                    'school_id' => $school->id,
+                    'path' => $receiptLogoPath,
+                    'size' => $file->getSize()
+                ]);
+
+            } catch (\Exception $e) {
+                \Log::error('Failed to upload receipt logo', [
+                    'school_id' => $school->id,
+                    'error' => $e->getMessage()
+                ]);
+
+                return redirect()
+                    ->back()
+                    ->withInput()
+                    ->with('error', 'Errore durante il caricamento del logo. Riprova o usa un\'immagine più piccola.');
+            }
+        }
+
         // Save all settings with school-specific keys
         $settingsToSave = [
             // Company Information
@@ -230,6 +275,7 @@ class AdminSettingsController extends Controller
             "school.{$school->id}.receipt.header_text" => ['value' => $request->receipt_header_text, 'type' => 'string'],
             "school.{$school->id}.receipt.footer_text" => ['value' => $request->receipt_footer_text, 'type' => 'string'],
             "school.{$school->id}.receipt.logo_url" => ['value' => $request->receipt_logo_url, 'type' => 'string'],
+            "school.{$school->id}.receipt.logo_path" => ['value' => $receiptLogoPath, 'type' => 'string'],
             // SENIOR FIX: Use boolean() method for checkbox - handles unchecked state correctly
             "school.{$school->id}.receipt.show_logo" => ['value' => $request->boolean('receipt_show_logo'), 'type' => 'boolean'],
 
