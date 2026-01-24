@@ -522,6 +522,180 @@
             </div>
         </form>
     </div>
+
+    <!-- Corsi Iscritti Section -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Corsi Iscritti</h3>
+                    <p class="text-sm text-gray-600 mt-1">
+                        Lista dei corsi a cui lo studente è iscritto
+                    </p>
+                </div>
+                @if($student->enrollments->count() > 0)
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                        {{ $student->enrollments->count() }} {{ Str::plural('corso', $student->enrollments->count()) }}
+                    </span>
+                @endif
+            </div>
+        </div>
+
+        <div class="p-6">
+            @if($student->enrollments->isEmpty())
+                <!-- Empty State -->
+                <div class="text-center py-12">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">Nessun Corso</h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Lo studente non è iscritto a nessun corso al momento.
+                    </p>
+                    <div class="mt-6">
+                        <a href="{{ route('admin.enrollments.create', ['user_id' => $student->id]) }}"
+                           class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                            Aggiungi Corso
+                        </a>
+                    </div>
+                </div>
+            @else
+                <!-- Enrollments Table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Corso
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Data Iscrizione
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Pagamento
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Azioni
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach($student->enrollments as $enrollment)
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <!-- Corso -->
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-r from-rose-400 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
+                                                {{ strtoupper(substr($enrollment->course->name, 0, 2)) }}
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">
+                                                    {{ $enrollment->course->name }}
+                                                </div>
+                                                @if($enrollment->course->description)
+                                                    <div class="text-sm text-gray-500">
+                                                        {{ Str::limit($enrollment->course->description, 50) }}
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- Data Iscrizione -->
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">
+                                            {{ $enrollment->enrollment_date->format('d/m/Y') }}
+                                        </div>
+                                        <div class="text-xs text-gray-500">
+                                            {{ $enrollment->enrollment_date->diffForHumans() }}
+                                        </div>
+                                    </td>
+
+                                    <!-- Status Enrollment -->
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @php
+                                            $statusColors = [
+                                                'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                                                'active' => 'bg-green-100 text-green-800 border-green-200',
+                                                'cancelled' => 'bg-red-100 text-red-800 border-red-200',
+                                                'completed' => 'bg-blue-100 text-blue-800 border-blue-200',
+                                                'suspended' => 'bg-gray-100 text-gray-800 border-gray-200',
+                                            ];
+                                            $statusLabels = [
+                                                'pending' => 'In Attesa',
+                                                'active' => 'Attiva',
+                                                'cancelled' => 'Annullata',
+                                                'completed' => 'Completata',
+                                                'suspended' => 'Sospesa',
+                                            ];
+                                        @endphp
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $statusColors[$enrollment->status] ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
+                                            {{ $statusLabels[$enrollment->status] ?? ucfirst($enrollment->status) }}
+                                        </span>
+                                    </td>
+
+                                    <!-- Payment Status -->
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @php
+                                            $paymentColors = [
+                                                'pending' => 'bg-yellow-100 text-yellow-800',
+                                                'paid' => 'bg-green-100 text-green-800',
+                                                'refunded' => 'bg-gray-100 text-gray-800',
+                                            ];
+                                            $paymentLabels = [
+                                                'pending' => 'In Attesa',
+                                                'paid' => 'Pagato',
+                                                'refunded' => 'Rimborsato',
+                                            ];
+                                        @endphp
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $paymentColors[$enrollment->payment_status] ?? 'bg-gray-100 text-gray-800' }}">
+                                            {{ $paymentLabels[$enrollment->payment_status] ?? ucfirst($enrollment->payment_status) }}
+                                        </span>
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <a href="{{ route('admin.enrollments.show', $enrollment) }}"
+                                           class="text-rose-600 hover:text-rose-900 mr-3"
+                                           title="Visualizza dettagli">
+                                            <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                            </svg>
+                                        </a>
+                                        <a href="{{ route('admin.courses.show', $enrollment->course) }}"
+                                           class="text-blue-600 hover:text-blue-900"
+                                           title="Vai al corso">
+                                            <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                                            </svg>
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Action Button (if has enrollments) -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <a href="{{ route('admin.enrollments.create', ['user_id' => $student->id]) }}"
+                       class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Aggiungi Altro Corso
+                    </a>
+                </div>
+            @endif
+        </div>
+    </div>
 </div>
 
 <script nonce="@cspNonce">

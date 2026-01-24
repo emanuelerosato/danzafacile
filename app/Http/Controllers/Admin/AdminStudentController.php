@@ -212,6 +212,11 @@ class AdminStudentController extends AdminBaseController
             abort(404, 'Studente non trovato.');
         }
 
+        // Load enrollments with course relationship for display
+        $student->load(['enrollments' => function($query) {
+            $query->with('course')->latest('enrollment_date');
+        }]);
+
         return view('admin.students.edit', compact('student'));
     }
 

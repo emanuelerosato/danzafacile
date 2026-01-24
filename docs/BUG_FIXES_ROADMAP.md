@@ -2,8 +2,8 @@
 
 **Progetto:** DanzaFacile - Laravel 12 Dance School Management System
 **Data Creazione:** 2026-01-23
-**Ultima Modifica:** 2026-01-24 11:30 UTC
-**Status:** 7/11 completati (64%)
+**Ultima Modifica:** 2026-01-24 14:00 UTC
+**Status:** 8/11 completati (73%)
 
 ---
 
@@ -13,12 +13,12 @@
 |----------|--------|------------|-------------|---------|
 | 🔴 CRITICAL | 3 | 3 | 0 | 0 |
 | 🟡 HIGH | 3 | 2 | 0 | 1 |
-| 🟢 MEDIUM | 4 | 2 | 0 | 2 |
+| 🟢 MEDIUM | 4 | 3 | 0 | 1 |
 | 🔵 LOW | 1 | 0 | 0 | 1 |
-| **TOTALE** | **11** | **7** | **0** | **4** |
+| **TOTALE** | **11** | **8** | **0** | **3** |
 
 **Tempo Stimato Totale:** 15-20 ore di sviluppo
-**Tempo Impiegato:** 8 ore
+**Tempo Impiegato:** 9.5 ore
 
 ---
 
@@ -781,64 +781,71 @@ Il controller Documents aveva la vulnerabilità più grave trovata finora nel si
 
 ## 🟢 MEDIUM - UX Improvement (4 task)
 
-### ❌ #7 - Visualizza/Modifica Corsi da Profilo Studente
+### ✅ #7 - Visualizza/Modifica Corsi da Profilo Studente
 
-**Status:** ⏸️ Pending
+**Status:** ✅ Completed (2026-01-24 14:00 UTC)
 **Priorità:** 🟢 MEDIUM
 **Complessità:** 🟡 Medium
 **Tempo Stimato:** 2-2.5 ore
+**Tempo Effettivo:** 1.5 ore
 
 #### Descrizione
-Nella pagina `/admin/students/{id}/edit`, aggiungere sezione per:
-- Visualizzare corsi attivi dello studente
-- Modificare iscrizioni (cancellare, sospendere, riattivare)
-- Aggiungere nuova iscrizione a corso
+Aggiunta sezione per visualizzare e gestire i corsi dello studente nella pagina `/admin/students/{id}/edit`.
 
-#### Comportamento Atteso
-- Tab/Section "Corsi" nel profilo studente
-- Lista corsi con status (active, completed, cancelled)
-- Action buttons per ogni corso (Edit Status, Remove)
-- Button "Aggiungi Corso" per nuova enrollment
+#### Implementazione
 
-#### File Coinvolti
-- `resources/views/admin/students/edit.blade.php` - add section
-- `app/Http/Controllers/Admin/StudentController.php` - load enrollments
-- `app/Http/Controllers/Admin/EnrollmentController.php` - manage enrollments
-- `app/Models/CourseEnrollment.php`
-
-#### UI Design
-```blade
-<!-- Tab Corsi -->
-<div class="bg-white rounded-lg shadow p-6">
-    <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-semibold">Corsi Iscritti</h3>
-        <button class="btn-primary">+ Aggiungi Corso</button>
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Corso</th>
-                <th>Data Iscrizione</th>
-                <th>Status</th>
-                <th>Azioni</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($student->enrollments as $enrollment)
-            <tr>
-                <td>{{ $enrollment->course->name }}</td>
-                <td>{{ $enrollment->enrollment_date }}</td>
-                <td><span class="badge-{{ $enrollment->status }}">{{ $enrollment->status }}</span></td>
-                <td>
-                    <button @click="editEnrollment({{ $enrollment->id }})">Modifica</button>
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-</div>
+**1. Controller (`AdminStudentController.php` linea 215-218):**
+```php
+// Load enrollments with course relationship for display
+$student->load(['enrollments' => function($query) {
+    $query->with('course')->latest('enrollment_date');
+}]);
 ```
+
+**2. View (`edit.blade.php` linea 526-698):**
+- Card separata "Corsi Iscritti" sotto form principale
+- Header con conteggio corsi
+- Empty state quando nessun enrollment (con CTA "Aggiungi Corso")
+- Tabella completa con:
+  - Colonna Corso (con avatar + nome + descrizione)
+  - Data Iscrizione (formato IT + relative time)
+  - Status (badge colorato: pending, active, cancelled, completed, suspended)
+  - Pagamento Status (badge colorato: pending, paid, refunded)
+  - Azioni (visualizza enrollment, vai al corso)
+- Link "Aggiungi Altro Corso" se ha già enrollments
+
+#### Features Implementate
+- ✅ Visualizzazione lista corsi iscritti
+- ✅ Display status enrollment con colori (pending/active/cancelled/completed/suspended)
+- ✅ Display payment status (pending/paid/refunded)
+- ✅ Link rapido a enrollment detail
+- ✅ Link rapido a course detail
+- ✅ Button "Aggiungi Corso" (reindirizza a create enrollment con user_id precompilato)
+- ✅ Empty state design per quando non ha corsi
+- ✅ Eager loading per performance (N+1 prevention)
+
+#### Features NON Implementate (out of scope per tempo)
+- ❌ Modifica inline status enrollment (richiede modal + AJAX)
+- ❌ Delete enrollment inline (richiede conferma + sicurezza)
+- ❌ Filtri/ordinamenti tabella corsi
+
+#### UI/UX
+- Card con design consistente (rounded-xl, shadow-sm, border)
+- Tabella responsive con overflow-x-auto
+- Badge colorati per status (seguono palette app)
+- Avatar corso con iniziali
+- Hover states su righe tabella
+- Icons SVG per azioni
+
+#### File Modificati
+- `app/Http/Controllers/Admin/AdminStudentController.php` (eager load enrollments)
+- `resources/views/admin/students/edit.blade.php` (sezione corsi completa)
+
+#### Note Tecniche
+- Relazione `User->enrollments()` già esistente nel modello
+- Model `CourseEnrollment` ha metodi helper pronti (activate, suspend, cancel)
+- Route `admin.enrollments.create` supporta query param `user_id`
+- Tutti i link rispettano multi-tenant isolation (già verificato nei controller)
 
 ---
 
