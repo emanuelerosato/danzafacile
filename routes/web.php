@@ -250,7 +250,14 @@ Route::middleware('auth')->group(function () {
             Route::patch('/{ticket}/reopen', [HelpdeskController::class, 'reopen'])->name('reopen');
             Route::get('/export/{format}', [HelpdeskController::class, 'export'])->name('export');
         });
-        
+
+        // TASK #11: Storage Management per tutte le scuole
+        Route::prefix('schools/storage')->name('schools.storage.')->group(function () {
+            Route::get('/', [App\Http\Controllers\SuperAdmin\SuperAdminSchoolStorageController::class, 'index'])->name('index');
+            Route::post('/{school}/update', [App\Http\Controllers\SuperAdmin\SuperAdminSchoolStorageController::class, 'update'])->name('update');
+            Route::get('/{school}/audit-log', [App\Http\Controllers\SuperAdmin\SuperAdminSchoolStorageController::class, 'auditLog'])->name('audit-log');
+        });
+
         // Help/Guide system
         Route::get('/help', [SuperAdminHelpController::class, 'index'])->name('help');
     });
