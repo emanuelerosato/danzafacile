@@ -608,10 +608,11 @@ checkIfMinor() {
 
 ### ❌ #5 - Fattura per Bonifico in Payments
 
-**Status:** ⏸️ Pending
+**Status:** ⏸️ Pending (Piano Lavoro Definito)
 **Priorità:** 🟡 HIGH
 **Complessità:** 🟡 Medium
 **Tempo Stimato:** 2 ore
+**Data Piano:** 2026-01-24 15:45 UTC
 
 #### Descrizione
 Nella pagina `/admin/payments`, aggiungere possibilità di creare fattura per pagamenti ricevuti via bonifico bancario.
@@ -619,46 +620,698 @@ Nella pagina `/admin/payments`, aggiungere possibilità di creare fattura per pa
 #### Comportamento Atteso
 - Action button "Crea Fattura" per pagamenti in stato "completed" senza fattura
 - Modal/form per inserire dettagli bonifico (data, importo, causale)
-- Genera PDF fattura
-- Invia email con fattura allegata
+- Genera PDF fattura con dati scuola da Settings
+- Invia email con fattura allegata a studente/genitore
 - Salva fattura associata al payment
+- Scaricabile da admin panel
 
-#### File Coinvolti
-- `app/Http/Controllers/Admin/PaymentController.php` - nuovo metodo `generateInvoice()`
-- `app/Http/Controllers/Admin/InvoiceController.php` - metodo `createFromPayment()`
-- `app/Models/Payment.php` - relationship `invoice()`
-- `app/Models/Invoice.php`
-- `resources/views/admin/payments/index.blade.php` - add button
-- `resources/views/admin/invoices/pdf.blade.php` - template PDF
+---
 
-#### Flow
-1. Admin clicca "Crea Fattura" su payment
-2. Modal chiede conferma dettagli (importo, descrizione)
-3. Sistema genera invoice record
-4. PDF creato con library (DomPDF/Snappy)
-5. Email inviata a studente/genitore
-6. Fattura scaricabile da admin panel
+## 📋 PIANO DI LAVORO DETTAGLIATO
 
-#### Note Tecniche
+### FASE 1: ANALISI & SETUP (15-20 min)
+
+**Obiettivo:** Capire lo stato attuale del sistema e verificare dipendenze.
+
+**Step 1.1 - Verifica Database Schema**
+```bash
+# Verificare struttura tabelle esistenti
+- payments table: colonne, relationships
+- invoices table: esiste già? struttura?
+- Verificare se payment->invoice relationship già definito
+```
+
+**Step 1.2 - Verifica Package PDF**
+```bash
+# Controllare composer.json
+composer show | grep -i pdf
+# Cercare: barryvdh/laravel-dompdf, spatie/laravel-pdf, etc.
+```
+
+**Step 1.3 - Analisi Template Esistenti**
+```bash
+# Cercare template PDF/ricevute esistenti
+resources/views/admin/invoices/
+resources/views/pdfs/
+# Verificare se già esiste logica simile
+```
+
+**Output Atteso:**
+- ✅ Lista tabelle DB e colonne
+- ✅ Package PDF installato o da installare
+- ✅ Template PDF esistenti o da creare
+
+---
+
+### FASE 2: DATABASE & MODEL (20-30 min)
+
+**Obiettivo:** Creare/verificare struttura dati per invoices.
+
+**Step 2.1 - Migration (se invoices non esiste)**
 ```php
-// Route
-Route::post('/admin/payments/{payment}/generate-invoice', [PaymentController::class, 'generateInvoice'])
-     ->name('admin.payments.generate-invoice');
+// database/migrations/YYYY_MM_DD_create_invoices_table.php
+Schema::create('invoices', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('school_id')->constrained()->onDelete('cascade');
+    $table->foreignId('payment_id')->nullable()->constrained()->onDelete('set null');
+    $table->foreignId('user_id')->constrained()->onDelete('cascade'); // student
+    $table->string('invoice_number')->unique(); // AUTO-GENERATO: YYYY-NNN
+    $table->decimal('amount', 10, 2);
+    $table->date('invoice_date');
+    $table->text('description')->nullable();
 
-// Controller
-public function generateInvoice(Payment $payment) {
-    // Verificare payment belong to admin's school
-    // Verificare payment non ha già invoice
-    // Creare invoice
-    // Generare PDF
-    // Inviare email
+    // Billing info (snapshot al momento fattura)
+    $table->string('billing_name');
+    $table->string('billing_fiscal_code', 16)->nullable();
+    $table->string('billing_email');
+    $table->text('billing_address')->nullable();
+
+    // PDF storage
+    $table->string('pdf_path')->nullable();
+
+    // Metadata
+    $table->enum('status', ['draft', 'issued', 'sent', 'paid', 'cancelled'])->default('issued');
+    $table->timestamp('sent_at')->nullable();
+
+    $table->timestamps();
+    $table->softDeletes();
+
+    // Indexes
+    $table->index(['school_id', 'invoice_date']);
+    $table->index(['school_id', 'user_id']);
+    $table->index('invoice_number');
+});
+```
+
+**Step 2.2 - Model Invoice**
+```php
+// app/Models/Invoice.php
+class Invoice extends Model {
+    protected $fillable = [
+        'school_id', 'payment_id', 'user_id',
+        'invoice_number', 'amount', 'invoice_date', 'description',
+        'billing_name', 'billing_fiscal_code', 'billing_email', 'billing_address',
+        'pdf_path', 'status', 'sent_at'
+    ];
+
+    protected $casts = [
+        'invoice_date' => 'date',
+        'sent_at' => 'datetime',
+        'amount' => 'decimal:2'
+    ];
+
+    // Relationships
+    public function school() { return $this->belongsTo(School::class); }
+    public function payment() { return $this->belongsTo(Payment::class); }
+    public function student() { return $this->belongsTo(User::class, 'user_id'); }
+
+    // Auto-generate invoice number
+    protected static function boot() {
+        parent::boot();
+        static::creating(function ($invoice) {
+            if (empty($invoice->invoice_number)) {
+                $invoice->invoice_number = self::generateInvoiceNumber($invoice->school_id);
+            }
+        });
+    }
+
+    public static function generateInvoiceNumber(int $schoolId): string {
+        $year = now()->format('Y');
+        $lastInvoice = self::where('school_id', $schoolId)
+            ->where('invoice_number', 'like', "{$year}-%")
+            ->orderBy('invoice_number', 'desc')
+            ->first();
+
+        $sequence = $lastInvoice
+            ? intval(explode('-', $lastInvoice->invoice_number)[1]) + 1
+            : 1;
+
+        return sprintf('%s-%03d', $year, $sequence); // Es: 2026-001
+    }
 }
 ```
 
-#### Dipendenze
-- Verificare package PDF generation installato
-- Verificare template fattura esistente
-- Verificare email notification setup
+**Step 2.3 - Update Payment Model**
+```php
+// app/Models/Payment.php
+public function invoice() {
+    return $this->hasOne(Invoice::class);
+}
+
+public function hasInvoice(): bool {
+    return $this->invoice()->exists();
+}
+```
+
+**Output Atteso:**
+- ✅ Migration creata e testata locale
+- ✅ Model Invoice completo con relationships
+- ✅ Auto-generation invoice_number funzionante
+
+---
+
+### FASE 3: PDF GENERATION SERVICE (30-40 min)
+
+**Obiettivo:** Creare service per generare PDF fattura con branding scuola.
+
+**Step 3.1 - Install PDF Package (se mancante)**
+```bash
+composer require barryvdh/laravel-dompdf
+php artisan vendor:publish --provider="Barryvdh\DomPDF\ServiceProvider"
+```
+
+**Step 3.2 - Invoice Service Class**
+```php
+// app/Services/InvoiceService.php
+namespace App\Services;
+
+use App\Models\Invoice;
+use App\Models\Payment;
+use App\Models\Setting;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
+
+class InvoiceService
+{
+    /**
+     * Crea fattura da payment
+     */
+    public function createFromPayment(Payment $payment): Invoice
+    {
+        $student = $payment->user; // studente
+        $school = $payment->school;
+
+        // Usa billing info da gestione minori (Task #4)
+        $invoice = Invoice::create([
+            'school_id' => $school->id,
+            'payment_id' => $payment->id,
+            'user_id' => $student->id,
+            'amount' => $payment->amount,
+            'invoice_date' => now(),
+            'description' => "Pagamento per: {$payment->description}",
+
+            // Snapshot billing data (usa accessor da Task #4)
+            'billing_name' => $student->billing_name,
+            'billing_fiscal_code' => $student->billing_fiscal_code,
+            'billing_email' => $student->contact_email,
+            'billing_address' => $this->formatAddress($student),
+
+            'status' => 'issued'
+        ]);
+
+        return $invoice;
+    }
+
+    /**
+     * Genera PDF e salva su storage
+     */
+    public function generatePDF(Invoice $invoice): string
+    {
+        $school = $invoice->school;
+
+        // Carica settings ricevute (Task #8, #9)
+        $settings = [
+            'logo_path' => Setting::get("school.{$school->id}.receipt.logo_path"),
+            'logo_url' => Setting::get("school.{$school->id}.receipt.logo_url"),
+            'show_logo' => Setting::get("school.{$school->id}.receipt.show_logo", true),
+            'header_text' => Setting::get("school.{$school->id}.receipt.header_text"),
+            'footer_text' => Setting::get("school.{$school->id}.receipt.footer_text"),
+            'school_name' => Setting::get("school.{$school->id}.name", $school->name),
+            'school_address' => Setting::get("school.{$school->id}.address"),
+            'school_city' => Setting::get("school.{$school->id}.city"),
+            'school_postal_code' => Setting::get("school.{$school->id}.postal_code"),
+            'school_vat_number' => Setting::get("school.{$school->id}.vat_number"),
+            'school_tax_code' => Setting::get("school.{$school->id}.tax_code"),
+        ];
+
+        // Generate PDF
+        $pdf = Pdf::loadView('admin.invoices.pdf', [
+            'invoice' => $invoice,
+            'settings' => $settings
+        ]);
+
+        // Save to storage
+        $filename = "invoice_{$invoice->invoice_number}_{$invoice->id}.pdf";
+        $path = "invoices/{$school->id}/{$filename}";
+
+        Storage::disk('local')->put($path, $pdf->output());
+
+        // Update invoice with path
+        $invoice->update(['pdf_path' => $path]);
+
+        \Log::info('Invoice PDF generated', [
+            'invoice_id' => $invoice->id,
+            'invoice_number' => $invoice->invoice_number,
+            'path' => $path
+        ]);
+
+        return $path;
+    }
+
+    private function formatAddress($student): ?string
+    {
+        // Format indirizzo se disponibile
+        $parts = array_filter([
+            $student->address,
+            $student->city,
+            $student->postal_code
+        ]);
+
+        return !empty($parts) ? implode(', ', $parts) : null;
+    }
+}
+```
+
+**Step 3.3 - PDF Template Blade**
+```blade
+{{-- resources/views/admin/invoices/pdf.blade.php --}}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Fattura {{ $invoice->invoice_number }}</title>
+    <style>
+        body { font-family: 'DejaVu Sans', sans-serif; font-size: 12px; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .logo { max-width: 200px; max-height: 80px; }
+        .invoice-info { margin: 20px 0; }
+        .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .table th, .table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .table th { background-color: #f2f2f2; }
+        .footer { margin-top: 40px; font-size: 10px; text-align: center; color: #666; }
+    </style>
+</head>
+<body>
+    <!-- Header con Logo -->
+    <div class="header">
+        @if($settings['show_logo'] && ($settings['logo_path'] || $settings['logo_url']))
+            @if($settings['logo_path'])
+                <img src="{{ storage_path('app/public/' . $settings['logo_path']) }}" class="logo" alt="Logo">
+            @elseif($settings['logo_url'])
+                <img src="{{ $settings['logo_url'] }}" class="logo" alt="Logo">
+            @endif
+        @endif
+
+        @if($settings['header_text'])
+            <p>{{ $settings['header_text'] }}</p>
+        @endif
+
+        <h2>{{ $settings['school_name'] }}</h2>
+        <p>
+            {{ $settings['school_address'] }}<br>
+            {{ $settings['school_city'] }} {{ $settings['school_postal_code'] }}<br>
+            @if($settings['school_vat_number'])P.IVA: {{ $settings['school_vat_number'] }}<br>@endif
+            @if($settings['school_tax_code'])CF: {{ $settings['school_tax_code'] }}@endif
+        </p>
+    </div>
+
+    <!-- Invoice Info -->
+    <div class="invoice-info">
+        <h1>FATTURA N. {{ $invoice->invoice_number }}</h1>
+        <p><strong>Data:</strong> {{ $invoice->invoice_date->format('d/m/Y') }}</p>
+
+        <h3>Intestatario:</h3>
+        <p>
+            {{ $invoice->billing_name }}<br>
+            @if($invoice->billing_fiscal_code)CF: {{ $invoice->billing_fiscal_code }}<br>@endif
+            @if($invoice->billing_address){{ $invoice->billing_address }}<br>@endif
+            {{ $invoice->billing_email }}
+        </p>
+    </div>
+
+    <!-- Items Table -->
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Descrizione</th>
+                <th style="width: 150px; text-align: right;">Importo</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ $invoice->description }}</td>
+                <td style="text-align: right;">€ {{ number_format($invoice->amount, 2, ',', '.') }}</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th style="text-align: right;">TOTALE</th>
+                <th style="text-align: right;">€ {{ number_format($invoice->amount, 2, ',', '.') }}</th>
+            </tr>
+        </tfoot>
+    </table>
+
+    <!-- Footer -->
+    <div class="footer">
+        @if($settings['footer_text'])
+            <p>{{ $settings['footer_text'] }}</p>
+        @endif
+        <p>Documento generato il {{ now()->format('d/m/Y H:i') }}</p>
+    </div>
+</body>
+</html>
+```
+
+**Output Atteso:**
+- ✅ InvoiceService completo e testato
+- ✅ Template PDF con branding scuola
+- ✅ Integration con Settings (Task #8, #9)
+- ✅ Integration con gestione minori (Task #4)
+
+---
+
+### FASE 4: CONTROLLER & ROUTES (20-30 min)
+
+**Obiettivo:** Implementare endpoint per generare fattura con authorization.
+
+**Step 4.1 - Routes**
+```php
+// routes/web.php (admin group)
+Route::post('/admin/payments/{payment}/generate-invoice', [PaymentController::class, 'generateInvoice'])
+    ->name('admin.payments.generate-invoice');
+
+Route::get('/admin/invoices/{invoice}/download', [InvoiceController::class, 'download'])
+    ->name('admin.invoices.download');
+```
+
+**Step 4.2 - PaymentController Method**
+```php
+// app/Http/Controllers/Admin/PaymentController.php
+
+use App\Services\InvoiceService;
+
+public function generateInvoice(Payment $payment, InvoiceService $invoiceService)
+{
+    // Multi-tenant authorization
+    $this->setupContext();
+
+    if ($payment->school_id !== $this->schoolId) {
+        abort(403, 'Non autorizzato');
+    }
+
+    // Check payment già ha invoice
+    if ($payment->hasInvoice()) {
+        return redirect()
+            ->back()
+            ->with('error', 'Fattura già esistente per questo pagamento.');
+    }
+
+    // Check payment is completed
+    if ($payment->status !== 'completed') {
+        return redirect()
+            ->back()
+            ->with('error', 'Puoi creare fattura solo per pagamenti completati.');
+    }
+
+    try {
+        // Create invoice
+        $invoice = $invoiceService->createFromPayment($payment);
+
+        // Generate PDF
+        $pdfPath = $invoiceService->generatePDF($invoice);
+
+        // TODO: Send email (Fase 5)
+
+        \Log::info('Invoice created successfully', [
+            'invoice_id' => $invoice->id,
+            'payment_id' => $payment->id,
+            'school_id' => $this->schoolId
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('success', "Fattura {$invoice->invoice_number} creata con successo!");
+
+    } catch (\Exception $e) {
+        \Log::error('Failed to create invoice', [
+            'payment_id' => $payment->id,
+            'error' => $e->getMessage()
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('error', 'Errore durante la creazione della fattura. Riprova.');
+    }
+}
+```
+
+**Step 4.3 - InvoiceController (download)**
+```php
+// app/Http/Controllers/Admin/InvoiceController.php
+
+public function download(Invoice $invoice)
+{
+    $this->setupContext();
+
+    // Multi-tenant authorization
+    if ($invoice->school_id !== $this->schoolId) {
+        abort(403);
+    }
+
+    if (!$invoice->pdf_path || !Storage::disk('local')->exists($invoice->pdf_path)) {
+        abort(404, 'PDF non trovato');
+    }
+
+    return Storage::disk('local')->download(
+        $invoice->pdf_path,
+        "Fattura_{$invoice->invoice_number}.pdf"
+    );
+}
+```
+
+**Output Atteso:**
+- ✅ Routes definite
+- ✅ Controller methods con authorization
+- ✅ Multi-tenant isolation verificato
+- ✅ Error handling robusto
+
+---
+
+### FASE 5: VIEW & UX (15-20 min)
+
+**Obiettivo:** Aggiungere UI per creare fattura da payments index.
+
+**Step 5.1 - Button "Crea Fattura" in Payments Table**
+```blade
+{{-- resources/views/admin/payments/index.blade.php --}}
+{{-- Nella colonna Azioni della tabella --}}
+
+@if($payment->status === 'completed' && !$payment->hasInvoice())
+    <!-- Button Crea Fattura -->
+    <form action="{{ route('admin.payments.generate-invoice', $payment) }}"
+          method="POST"
+          class="inline-block"
+          onsubmit="return confirm('Confermi di voler creare la fattura per questo pagamento?')">
+        @csrf
+        <button type="submit"
+                class="inline-flex items-center px-3 py-1.5 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors">
+            <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Crea Fattura
+        </button>
+    </form>
+@elseif($payment->invoice)
+    <!-- Link Download Fattura Esistente -->
+    <a href="{{ route('admin.invoices.download', $payment->invoice) }}"
+       class="inline-flex items-center px-3 py-1.5 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors"
+       target="_blank">
+        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        Scarica ({{ $payment->invoice->invoice_number }})
+    </a>
+@endif
+```
+
+**Step 5.2 - Badge Invoice Status**
+```blade
+{{-- Colonna Status nella tabella payments --}}
+<div class="flex items-center gap-2">
+    <!-- Payment Status Badge -->
+    <span class="px-2 py-1 text-xs rounded-full {{ $payment->status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+        {{ ucfirst($payment->status) }}
+    </span>
+
+    <!-- Invoice Badge -->
+    @if($payment->invoice)
+        <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
+            📄 {{ $payment->invoice->invoice_number }}
+        </span>
+    @endif
+</div>
+```
+
+**Output Atteso:**
+- ✅ Button "Crea Fattura" appare solo se completed + no invoice
+- ✅ Confirmation dialog prima di creare
+- ✅ Download button se invoice esiste
+- ✅ Badge visuale invoice number
+
+---
+
+### FASE 6: EMAIL NOTIFICATION (Optional - 15-20 min)
+
+**Obiettivo:** Inviare email con fattura allegata.
+
+**Step 6.1 - Mailable Class**
+```php
+// app/Mail/InvoiceCreated.php
+namespace App\Mail;
+
+use App\Models\Invoice;
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Storage;
+
+class InvoiceCreated extends Mailable
+{
+    use Queueable, SerializesModels;
+
+    public Invoice $invoice;
+
+    public function __construct(Invoice $invoice)
+    {
+        $this->invoice = $invoice;
+    }
+
+    public function build()
+    {
+        $pdfPath = storage_path('app/' . $this->invoice->pdf_path);
+
+        return $this->subject("Fattura {$this->invoice->invoice_number}")
+                    ->view('emails.invoice-created')
+                    ->attach($pdfPath, [
+                        'as' => "Fattura_{$this->invoice->invoice_number}.pdf",
+                        'mime' => 'application/pdf',
+                    ]);
+    }
+}
+```
+
+**Step 6.2 - Email Template**
+```blade
+{{-- resources/views/emails/invoice-created.blade.php --}}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+</head>
+<body>
+    <h2>Nuova Fattura Disponibile</h2>
+
+    <p>Gentile {{ $invoice->billing_name }},</p>
+
+    <p>La fattura n. <strong>{{ $invoice->invoice_number }}</strong> è stata generata.</p>
+
+    <p><strong>Dettagli:</strong></p>
+    <ul>
+        <li>Data: {{ $invoice->invoice_date->format('d/m/Y') }}</li>
+        <li>Importo: € {{ number_format($invoice->amount, 2, ',', '.') }}</li>
+        <li>Descrizione: {{ $invoice->description }}</li>
+    </ul>
+
+    <p>Trovi il PDF allegato a questa email.</p>
+
+    <p>Cordiali saluti,<br>
+    {{ $invoice->school->name }}</p>
+</body>
+</html>
+```
+
+**Step 6.3 - Integrate in Controller**
+```php
+// In PaymentController::generateInvoice() dopo PDF generation:
+
+use App\Mail\InvoiceCreated;
+use Illuminate\Support\Facades\Mail;
+
+// Send email
+Mail::to($invoice->billing_email)->send(new InvoiceCreated($invoice));
+
+$invoice->update(['sent_at' => now(), 'status' => 'sent']);
+```
+
+**Output Atteso:**
+- ✅ Email inviata con PDF allegato
+- ✅ Template email professionale
+- ✅ Invoice status aggiornato a 'sent'
+
+---
+
+## ✅ CHECKLIST FINALE
+
+### Before Starting
+- [ ] Pull latest code: `git pull origin main`
+- [ ] Review Task #4 (gestione minori) per billing accessors
+- [ ] Review Task #8, #9 (settings ricevute) per branding
+
+### Durante Implementazione
+- [ ] FASE 1: Analisi completata
+- [ ] FASE 2: Database + Models creati e testati
+- [ ] FASE 3: PDF Service funzionante
+- [ ] FASE 4: Controller + Routes con authorization
+- [ ] FASE 5: View + UX implementata
+- [ ] FASE 6: Email notification (optional)
+
+### Testing
+- [ ] Test locale: crea invoice da payment completato
+- [ ] Test PDF generato correttamente
+- [ ] Test multi-tenant: admin non vede payments altre scuole
+- [ ] Test email inviata (se implementato)
+- [ ] Test download PDF
+
+### Deploy
+- [ ] Commit con messaggio descrittivo
+- [ ] Push su GitHub
+- [ ] Deploy VPS con migration
+- [ ] Test production con payment reale
+- [ ] Verifica logs
+
+---
+
+## 🔗 INTEGRATION POINTS
+
+**Usa dati da Task Precedenti:**
+1. **Task #4 (Gestione Minori):**
+   - `$student->billing_name` - Nome fatturazione
+   - `$student->billing_fiscal_code` - CF fatturazione
+   - `$student->contact_email` - Email destinatario
+
+2. **Task #8 (Settings Ricevute):**
+   - `receipt.header_text` - Intestazione
+   - `receipt.footer_text` - Piè di pagina
+
+3. **Task #9 (Upload Logo):**
+   - `receipt.logo_path` - Logo locale (priorità)
+   - `receipt.logo_url` - Logo URL fallback
+   - `receipt.show_logo` - Mostra/nascondi logo
+
+**Rispetta Sempre:**
+- Multi-tenant isolation: `school_id` su tutte le query
+- Design system da CLAUDE.md
+- Error handling + logging
+- Security: authorization prima di ogni azione
+
+---
+
+## ⚠️ RISK ASSESSMENT
+
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| Package PDF mancante | HIGH | Verificare in Fase 1, installare se necessario |
+| Invoice table non esiste | MEDIUM | Migration in Fase 2, testare locale |
+| Email non inviata | LOW | Optional, non blocca feature core |
+| PDF malformato | MEDIUM | Template testato in Fase 3 |
+| Performance PDF generation | LOW | Valutare queue job se lento |
+
+---
+
+**Piano Approvato:** 2026-01-24 15:45 UTC
+**Pronto per Implementazione:** ✅ SI
 
 ---
 
