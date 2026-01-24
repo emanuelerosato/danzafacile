@@ -408,6 +408,33 @@
                                                 <span class="font-medium">Invia Ricevuta</span>
                                             </a>
                                             @endif
+
+                                            <!-- TASK #5: Invoice actions -->
+                                            @if($payment->status === 'completed')
+                                                @if(!$payment->hasInvoice())
+                                                    <!-- Crea Fattura Button -->
+                                                    <form action="{{ route('admin.payments.generate-invoice', $payment) }}"
+                                                          method="POST"
+                                                          onsubmit="return confirm('Confermi di voler creare la fattura per questo pagamento?');">
+                                                        @csrf
+                                                        <button type="submit" class="w-full text-left group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-all duration-200">
+                                                            <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                            </svg>
+                                                            <span class="font-medium">Crea Fattura</span>
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <!-- Download Fattura Button -->
+                                                    <a href="{{ route('admin.invoices.download', $payment->invoice) }}" target="_blank" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200">
+                                                        <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                        </svg>
+                                                        <span class="font-medium">Scarica Fattura ({{ $payment->invoice->invoice_number }})</span>
+                                                    </a>
+                                                @endif
+                                            @endif
+
                                             <!-- Separatore per azioni pericolose -->
                                             <div class="border-t border-gray-100 my-1"></div>
                                             <!-- Azioni pericolose -->

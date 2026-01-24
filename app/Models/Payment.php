@@ -171,6 +171,26 @@ class Payment extends Model
         return $this->hasMany(Payment::class, 'parent_payment_id');
     }
 
+    /**
+     * Ottiene la fattura associata a questo pagamento
+     *
+     * SENIOR FIX: Relationship per Task #5 (Fattura Bonifico)
+     */
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class);
+    }
+
+    /**
+     * Verifica se il pagamento ha già una fattura
+     *
+     * SENIOR FIX: Helper method per Task #5 (Fattura Bonifico)
+     */
+    public function hasInvoice(): bool
+    {
+        return $this->invoice()->exists();
+    }
+
     // SCOPES
 
     /**

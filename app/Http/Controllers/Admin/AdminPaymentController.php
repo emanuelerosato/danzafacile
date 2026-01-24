@@ -789,6 +789,67 @@ class AdminPaymentController extends AdminBaseController
     }
 
     /**
+     * Generate invoice for payment
+     *
+     * TASK #5: Create invoice from completed payment
+     *
+     * @param Payment $payment
+     * @param \App\Services\InvoiceService $invoiceService
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function generateInvoice(Payment $payment, \App\Services\InvoiceService $invoiceService)
+    {
+        $this->setupContext();
+        $this->authorizePayment($payment);
+
+        // Check payment already has invoice
+        if ($payment->hasInvoice()) {
+            return redirect()
+                ->back()
+                ->with('error', 'Fattura già esistente per questo pagamento.');
+        }
+
+        // Check payment is completed
+        if ($payment->status !== 'completed') {
+            return redirect()
+                ->back()
+                ->with('error', 'Puoi creare fattura solo per pagamenti completati.');
+        }
+
+        try {
+            // Create invoice
+            $invoice = $invoiceService->createFromPayment($payment);
+
+            // Generate PDF
+            $pdfPath = $invoiceService->generatePDF($invoice);
+
+            \Log::info('Invoice created successfully', [
+                'invoice_id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'payment_id' => $payment->id,
+                'school_id' => $this->school->id,
+                'admin_id' => auth()->id()
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('success', "Fattura {$invoice->invoice_number} creata con successo!");
+
+        } catch (\Exception $e) {
+            \Log::error('Failed to create invoice', [
+                'payment_id' => $payment->id,
+                'school_id' => $this->school->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Errore durante la creazione della fattura. Riprova o contatta il supporto.');
+        }
+    }
+
+    /**
      * Authorize payment access
      */
     private function authorizePayment(Payment $payment): void

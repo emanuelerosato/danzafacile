@@ -345,6 +345,9 @@ Route::middleware('auth')->group(function () {
             Route::get('/{payment}/receipt', [AdminPaymentController::class, 'generateReceipt'])->name('receipt');
             Route::post('/{payment}/send-receipt', [AdminPaymentController::class, 'sendReceipt'])->name('send-receipt');
 
+            // TASK #5: Invoice generation
+            Route::post('/{payment}/generate-invoice', [AdminPaymentController::class, 'generateInvoice'])->name('generate-invoice');
+
             // Bulk operations
             Route::post('/bulk-action', [AdminPaymentController::class, 'bulkAction'])->name('bulk-action');
             Route::get('/export', [AdminPaymentController::class, 'export'])->name('export');
@@ -353,7 +356,12 @@ Route::middleware('auth')->group(function () {
             Route::get('/stats', [AdminPaymentController::class, 'getStats'])->name('stats');
             Route::get('/overdue', [AdminPaymentController::class, 'getOverdue'])->name('overdue');
         });
-        
+
+        // TASK #5: Invoices management
+        Route::prefix('invoices')->name('invoices.')->group(function () {
+            Route::get('/{invoice}/download', [App\Http\Controllers\Admin\AdminInvoiceController::class, 'download'])->name('download');
+        });
+
         // School Users management
         Route::resource('users', SchoolUserController::class)->except(['create', 'store']);
         Route::patch('users/{user}/toggle-active', [SchoolUserController::class, 'toggleActive'])->name('users.toggle-active');
