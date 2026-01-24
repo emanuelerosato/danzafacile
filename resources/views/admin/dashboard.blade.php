@@ -218,6 +218,113 @@
                     </div>
                 @endif
 
+                {{-- TASK #11: Storage Usage Widget --}}
+                @php
+                    $storageInfo = app(App\Services\StorageQuotaService::class)->getStorageInfo($currentSchool);
+                @endphp
+
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Spazio Gallerie</h3>
+
+                        @if($storageInfo['unlimited'])
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 2a1 1 0 011 1v1.323l3.954 1.582 1.599-.8a1 1 0 01.894 1.79l-1.233.616 1.738 5.42a1 1 0 01-.285 1.05A3.989 3.989 0 0115 15a3.989 3.989 0 01-2.667-1.019 1 1 0 01-.285-1.05l1.738-5.42-1.233-.617a1 1 0 01.894-1.788l1.599.799L11 4.323V3a1 1 0 011-1zm-5 8.274l-.818 2.552c-.25.78.74 1.43 1.403.926l.07-.07a1.99 1.99 0 012.83 0l.07.07c.662.504 1.652-.145 1.403-.926l-.818-2.552a1.99 1.99 0 00-1.13-1.13l-2.552-.818a1 1 0 00-.926 1.403l.07.07a1.99 1.99 0 000 2.83l-.07.07a1 1 0 00-.926 1.403z"/>
+                                </svg>
+                                Illimitato
+                            </span>
+                        @else
+                            @if($storageInfo['is_full'])
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Pieno
+                                </span>
+                            @elseif($storageInfo['is_warning'])
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Attenzione
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    OK
+                                </span>
+                            @endif
+                        @endif
+                    </div>
+
+                    @if($storageInfo['unlimited'])
+                        <p class="text-sm text-gray-600 mb-2">
+                            <span class="font-semibold text-gray-900">{{ $storageInfo['used_formatted'] }}</span> utilizzati
+                        </p>
+                        <p class="text-xs text-gray-500">Storage illimitato attivo</p>
+                    @else
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex items-center justify-between text-sm mb-1">
+                                    <span class="text-gray-600">Utilizzo:</span>
+                                    <span class="font-semibold text-gray-900">
+                                        {{ $storageInfo['used_formatted'] }} / {{ $storageInfo['quota_formatted'] }}
+                                    </span>
+                                </div>
+
+                                {{-- Progress bar --}}
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="h-2.5 rounded-full transition-all duration-300
+                                        @if($storageInfo['is_full']) bg-red-600
+                                        @elseif($storageInfo['is_warning']) bg-yellow-500
+                                        @else bg-green-500
+                                        @endif"
+                                         style="width: {{ min($storageInfo['usage_percent'], 100) }}%">
+                                    </div>
+                                </div>
+
+                                <p class="text-xs text-gray-500 mt-1">
+                                    {{ $storageInfo['usage_percent'] }}% utilizzato
+                                    @if($storageInfo['expires_at'])
+                                        • Scade il {{ $storageInfo['expires_at']->format('d/m/Y') }}
+                                    @endif
+                                </p>
+                            </div>
+
+                            @if($storageInfo['is_warning'] || $storageInfo['is_full'])
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
+                                    <div class="flex">
+                                        <div class="flex-shrink-0">
+                                            <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </div>
+                                        <div class="ml-3">
+                                            <p class="text-sm text-yellow-700">
+                                                @if($storageInfo['is_full'])
+                                                    Spazio esaurito! Non puoi caricare nuovi media.
+                                                @else
+                                                    Stai raggiungendo il limite. Considera di acquistare spazio aggiuntivo.
+                                                @endif
+                                            </p>
+                                            <a href="{{ route('admin.billing.storage') }}"
+                                               class="inline-flex items-center mt-2 text-sm font-medium text-yellow-700 hover:text-yellow-600">
+                                                Acquista Spazio
+                                                <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+
                 <!-- Recent Tickets Widget -->
                 <div class="bg-white rounded-lg shadow p-6">
                     <div class="flex items-center justify-between mb-4">

@@ -362,6 +362,12 @@ Route::middleware('auth')->group(function () {
             Route::get('/{invoice}/download', [App\Http\Controllers\Admin\AdminInvoiceController::class, 'download'])->name('download');
         });
 
+        // TASK #11: Billing & Storage management
+        Route::prefix('billing')->name('billing.')->group(function () {
+            Route::get('/storage', [App\Http\Controllers\Admin\BillingController::class, 'storage'])->name('storage');
+            Route::post('/purchase-storage', [App\Http\Controllers\Admin\BillingController::class, 'purchaseStorage'])->name('purchase-storage');
+        });
+
         // School Users management
         Route::resource('users', SchoolUserController::class)->except(['create', 'store']);
         Route::patch('users/{user}/toggle-active', [SchoolUserController::class, 'toggleActive'])->name('users.toggle-active');
