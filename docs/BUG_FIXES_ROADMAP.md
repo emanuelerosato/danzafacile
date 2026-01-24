@@ -2,8 +2,8 @@
 
 **Progetto:** DanzaFacile - Laravel 12 Dance School Management System
 **Data Creazione:** 2026-01-23
-**Ultima Modifica:** 2026-01-24 08:49 UTC
-**Status:** 4/11 completati (36%)
+**Ultima Modifica:** 2026-01-24 09:15 UTC
+**Status:** 5/11 completati (45%)
 
 ---
 
@@ -12,13 +12,13 @@
 | Priorità | Totale | Completati | In Progress | Pending |
 |----------|--------|------------|-------------|---------|
 | 🔴 CRITICAL | 3 | 3 | 0 | 0 |
-| 🟡 HIGH | 3 | 1 | 0 | 2 |
+| 🟡 HIGH | 3 | 2 | 0 | 1 |
 | 🟢 MEDIUM | 4 | 0 | 0 | 4 |
 | 🔵 LOW | 1 | 0 | 0 | 1 |
-| **TOTALE** | **11** | **4** | **0** | **7** |
+| **TOTALE** | **11** | **5** | **0** | **6** |
 
 **Tempo Stimato Totale:** 15-20 ore di sviluppo
-**Tempo Impiegato:** 6.5 ore
+**Tempo Impiegato:** 7.25 ore
 
 ---
 
@@ -662,56 +662,120 @@ public function generateInvoice(Payment $payment) {
 
 ---
 
-### ❌ #6 - Verifica Associazione Studente-Scuola in Documents
+### ✅ #6 - Multi-Tenant Isolation in Documents
 
-**Status:** ⏸️ Pending
-**Priorità:** 🟡 HIGH
+**Status:** ✅ Completed (2026-01-24 09:15 UTC)
+**Priorità:** 🟡 HIGH (Security)
 **Complessità:** 🟡 Medium
 **Tempo Stimato:** 1 ora
+**Tempo Effettivo:** 45 minuti
+**Commit:** `91ca7fa`
 
 #### Descrizione
-Nella pagina `/admin/documents/create`, verificare che l'associazione studente-scuola rispetti il multi-tenant isolation.
+Verifica e fix multi-tenant isolation nel modulo Documents per prevenire data leak cross-school.
 
-#### Security Issue
-Attualmente potrebbe essere possibile:
-- Caricare documento per studente di altra scuola
-- Vedere lista studenti di altre scuole nel dropdown
+#### 🚨 Security Issues Trovati e Fixati
 
-#### Comportamento Atteso
-- Dropdown studenti mostra SOLO studenti della scuola corrente (school_id match)
-- Validation lato backend verifica student_id belong to admin's school
-- 403 Forbidden se tentativo di associare studente di altra scuola
+**Issue #1: CRITICAL - index() leaked all schools' data**
 
-#### File Coinvolti
-- `app/Http/Controllers/Admin/DocumentController.php`
-- `resources/views/admin/documents/create.blade.php`
-- `app/Http/Requests/StoreDocumentRequest.php` (se esiste)
+**Vulnerability:**
+- Metodo `index()` non filtrava per `school_id`
+- Admin poteva vedere documenti, file, email di TUTTE le scuole
+- Statistiche calcolate su TUTTI i documenti del sistema (GDPR violation)
 
-#### Fix da Applicare
+**Impatto:** HIGH - Data breach, violazione GDPR, cross-tenant data exposure
+
+**Fix Applicato:**
 ```php
-// Nel controller create():
-$students = Student::where('school_id', auth()->user()->school_id)
-                   ->orderBy('last_name')
-                   ->get();
+// Before (VULNERABLE)
+$query = Document::with(['uploadedBy', 'approvedBy']);
+$statistics = ['total' => Document::count()]; // ALL schools!
 
-// Nel controller store():
-$validated = $request->validate([
-    'student_id' => [
-        'required',
-        'exists:students,id',
-        Rule::exists('students', 'id')->where(function ($query) {
-            $query->where('school_id', auth()->user()->school_id);
-        }),
-    ],
-    // ...
-]);
+// After (SECURE)
+$this->setupContext();
+$query = Document::with(['uploadedBy', 'approvedBy'])
+    ->where('school_id', $this->schoolId);
+$statistics = [
+    'total' => Document::where('school_id', $this->schoolId)->count(),
+    'pending' => Document::where('school_id', $this->schoolId)->pending()->count(),
+    // ... all statistics filtered by school_id
+];
 ```
 
-#### Testing
-1. Login come admin scuola A
-2. Tentare POST con student_id di scuola B
-3. Verificare 403/422 response
-4. Verificare log security event
+**Issue #2: Role validation inconsistency**
+
+**Vulnerability:**
+- `StoreDocumentRequest` validation controllava solo `role !== 'user'`
+- Studenti con `role = 'student'` venivano RIFIUTATI ❌
+- Inconsistenza tra controller (`->where('role', 'student')`) e FormRequest
+
+**Fix Applicato:**
+```php
+// Before (INCONSISTENT)
+if (!$user || $user->school_id !== auth()->user()->school_id || $user->role !== 'user') {
+
+// After (CONSISTENT)
+if (!$user || $user->school_id !== auth()->user()->school_id || !$user->isStudent()) {
+```
+
+**Issue #3: Hardcoded role in create()**
+
+**Inconsistency:** Controller usava `->where('role', 'student')` invece di scope
+
+**Fix Applicato:**
+```php
+// Before
+$students = auth()->user()->school->users()
+    ->where('role', 'student')  // hardcoded
+
+// After
+$students = auth()->user()->school->users()
+    ->students()  // uses scope, supports both 'student' and 'user'
+```
+
+#### File Modificati
+
+**1. `app/Http/Controllers/Admin/AdminDocumentController.php`**
+- `index()`: Aggiunto `setupContext()` e filtro `school_id` su query e statistiche
+- `create()`: Sostituito hardcoded role con scope `students()`
+
+**2. `app/Http/Requests/StoreDocumentRequest.php`**
+- `rules()`: Fixed user_id validation usando `isStudent()` method
+
+#### Comportamento Verificato ✅
+
+- ✅ `index()`: Query filtra per school_id → Admin vede solo documenti propri
+- ✅ `index()`: Statistiche filtrate per school_id → No data leak
+- ✅ `create()`: Dropdown mostra SOLO studenti della scuola corrente
+- ✅ `store()`: Validation rifiuta user_id di altre scuole (già OK, role fixed)
+- ✅ `show()`, `edit()`, `update()`, `destroy()`: Verificano school_id (già OK)
+
+#### Security Impact
+
+**Before:** 🚨 HIGH RISK
+- Admin Scuola A poteva vedere documenti di Scuola B, C, D...
+- Data leak: nomi, email, file paths, statistiche altre scuole
+- GDPR violation: dati personali esposti cross-tenant
+
+**After:** ✅ SECURE
+- Admin vede SOLO documenti della propria scuola
+- Multi-tenant isolation applicato a TUTTE le query
+- GDPR compliant: data minimization rispettato
+- Statistiche isolate per school
+
+#### Deployment Status
+
+✅ Codice committato: `91ca7fa`
+✅ Pushed su GitHub
+✅ Deployed su VPS production
+✅ Cache cleared + rebuilt
+✅ PHP-FPM restarted
+✅ Multi-tenant isolation verified
+
+#### Note
+
+Questo fix è **CRITICO per la security** - previene data leak tra scuole e garantisce GDPR compliance.
+Il controller Documents aveva la vulnerabilità più grave trovata finora nel sistema.
 
 ---
 
