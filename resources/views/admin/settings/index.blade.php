@@ -463,11 +463,14 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label for="receipt_logo_url" class="block text-sm font-medium text-gray-700 mb-2">
-                                        URL Logo
+                                        URL Logo Ricevuta <span class="text-gray-500 font-normal">(opzionale)</span>
                                     </label>
+                                    <p class="text-sm text-gray-600 mb-2">
+                                        Indirizzo web del logo da mostrare nelle ricevute. Lascia vuoto se non hai un logo online.
+                                    </p>
                                     <input type="url" name="receipt_logo_url" id="receipt_logo_url" value="{{ old('receipt_logo_url', $settings['receipt_logo_url']) }}"
                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200"
-                                           placeholder="https://www.example.com/logo.png">
+                                           placeholder="https://www.tuascuola.it/logo.png">
                                     @error('receipt_logo_url')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
@@ -490,11 +493,15 @@
 
                             <div>
                                 <label for="receipt_header_text" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Testo Header Ricevuta
+                                    Intestazione Ricevuta <span class="text-gray-500 font-normal">(opzionale)</span>
                                 </label>
+                                <p class="text-sm text-gray-600 mb-2">
+                                    Testo personalizzato che apparirà nella parte superiore della ricevuta.
+                                    Lascia vuoto per usare automaticamente il nome della scuola.
+                                </p>
                                 <textarea name="receipt_header_text" id="receipt_header_text" rows="3"
                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200"
-                                          placeholder="Testo che apparirà nella parte superiore della ricevuta">{{ old('receipt_header_text', $settings['receipt_header_text']) }}</textarea>
+                                          placeholder="Es: Studio Danza [Nome Scuola] - Via Roma 123, 00100 Città">{{ old('receipt_header_text', $settings['receipt_header_text']) }}</textarea>
                                 @error('receipt_header_text')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -502,11 +509,15 @@
 
                             <div>
                                 <label for="receipt_footer_text" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Testo Footer Ricevuta
+                                    Piè di Pagina Ricevuta <span class="text-gray-500 font-normal">(opzionale)</span>
                                 </label>
+                                <p class="text-sm text-gray-600 mb-2">
+                                    Testo personalizzato che apparirà nella parte inferiore della ricevuta.
+                                    Lascia vuoto se non necessario.
+                                </p>
                                 <textarea name="receipt_footer_text" id="receipt_footer_text" rows="3"
                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200"
-                                          placeholder="Testo che apparirà nella parte inferiore della ricevuta">{{ old('receipt_footer_text', $settings['receipt_footer_text']) }}</textarea>
+                                          placeholder="Es: Grazie per la tua fiducia! Per informazioni: info@scuola.it - Tel: 123 456 789">{{ old('receipt_footer_text', $settings['receipt_footer_text']) }}</textarea>
                                 @error('receipt_footer_text')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -514,11 +525,15 @@
 
                             <div>
                                 <label for="receipt_notes" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Note Aggiuntive
+                                    Note Aggiuntive <span class="text-gray-500 font-normal">(opzionale)</span>
                                 </label>
+                                <p class="text-sm text-gray-600 mb-2">
+                                    Note o informazioni extra da includere nelle ricevute (es: modalità di pagamento, termini, ecc.).
+                                    Lascia vuoto se non necessario.
+                                </p>
                                 <textarea name="receipt_notes" id="receipt_notes" rows="3"
                                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200"
-                                          placeholder="Note che appariranno nelle ricevute">{{ old('receipt_notes', $settings['receipt_notes']) }}</textarea>
+                                          placeholder="Es: Pagamento ricevuto tramite bonifico bancario - IBAN: IT00...">{{ old('receipt_notes', $settings['receipt_notes']) }}</textarea>
                                 @error('receipt_notes')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
