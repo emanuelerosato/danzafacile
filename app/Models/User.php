@@ -91,6 +91,7 @@ class User extends Authenticatable
             'guest_token_expires_at' => 'datetime',
             'is_archived' => 'boolean',
             'archived_at' => 'datetime',
+            'is_minor' => 'boolean',  // SENIOR FIX: Task #4 - cast minor flag
         ];
     }
 
@@ -285,8 +286,82 @@ class User extends Authenticatable
         if ($this->first_name && $this->last_name) {
             return $this->first_name . ' ' . $this->last_name;
         }
-        
+
         return $this->name ?? '';
+    }
+
+    /**
+     * SENIOR FIX: Task #4 - Ottiene il nome completo del genitore/tutore
+     */
+    public function getGuardianFullNameAttribute(): ?string
+    {
+        if ($this->guardian_first_name && $this->guardian_last_name) {
+            return $this->guardian_first_name . ' ' . $this->guardian_last_name;
+        }
+
+        return null;
+    }
+
+    /**
+     * SENIOR FIX: Task #4 - Verifica se l'utente è minorenne basandosi sulla data di nascita
+     *
+     * @return bool True se minorenne (< 18 anni)
+     */
+    public function isMinor(): bool
+    {
+        if (!$this->date_of_birth) {
+            return false;
+        }
+
+        return \Carbon\Carbon::parse($this->date_of_birth)->age < 18;
+    }
+
+    /**
+     * SENIOR FIX: Task #4 - Ottiene l'email per comunicazioni (genitore se minore, altrimenti studente)
+     */
+    public function getContactEmailAttribute(): string
+    {
+        if ($this->is_minor && $this->guardian_email) {
+            return $this->guardian_email;
+        }
+
+        return $this->email;
+    }
+
+    /**
+     * SENIOR FIX: Task #4 - Ottiene il telefono per comunicazioni (genitore se minore, altrimenti studente)
+     */
+    public function getContactPhoneAttribute(): ?string
+    {
+        if ($this->is_minor && $this->guardian_phone) {
+            return $this->guardian_phone;
+        }
+
+        return $this->phone;
+    }
+
+    /**
+     * SENIOR FIX: Task #4 - Ottiene il nome per la fatturazione (genitore se minore, altrimenti studente)
+     */
+    public function getBillingNameAttribute(): string
+    {
+        if ($this->is_minor && $this->guardian_full_name) {
+            return $this->guardian_full_name;
+        }
+
+        return $this->full_name;
+    }
+
+    /**
+     * SENIOR FIX: Task #4 - Ottiene il codice fiscale per la fatturazione (genitore se minore, altrimenti studente)
+     */
+    public function getBillingFiscalCodeAttribute(): ?string
+    {
+        if ($this->is_minor && $this->guardian_fiscal_code) {
+            return $this->guardian_fiscal_code;
+        }
+
+        return $this->codice_fiscale;
     }
 
     /**

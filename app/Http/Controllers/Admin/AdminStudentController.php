@@ -94,8 +94,39 @@ class AdminStudentController extends AdminBaseController
             'emergency_contact_phone' => 'nullable|string|max:20',
             'medical_conditions' => 'nullable|string|max:1000',
             'active' => 'boolean',
-            'send_welcome_email' => 'boolean'
+            'send_welcome_email' => 'boolean',
+            'is_minor' => 'boolean',  // SENIOR FIX: Task #4
         ]);
+
+        // SENIOR FIX: Task #4 - Validazione condizionale campi genitore per minorenni
+        if ($request->boolean('is_minor')) {
+            $guardianValidation = $request->validate([
+                'guardian_first_name' => 'required|string|max:255',
+                'guardian_last_name' => 'required|string|max:255',
+                'guardian_fiscal_code' => [
+                    'required',
+                    'string',
+                    'size:16',
+                    'regex:/^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/',
+                ],
+                'guardian_email' => [
+                    'required',
+                    'email',
+                    'max:255',
+                ],
+                'guardian_phone' => 'required|string|max:20',
+            ], [
+                'guardian_first_name.required' => 'Il nome del genitore/tutore è obbligatorio per i minorenni.',
+                'guardian_last_name.required' => 'Il cognome del genitore/tutore è obbligatorio per i minorenni.',
+                'guardian_fiscal_code.required' => 'Il codice fiscale del genitore/tutore è obbligatorio per i minorenni.',
+                'guardian_fiscal_code.regex' => 'Il codice fiscale del genitore/tutore non è valido.',
+                'guardian_email.required' => 'L\'email del genitore/tutore è obbligatoria per i minorenni.',
+                'guardian_email.email' => 'L\'email del genitore/tutore non è valida.',
+                'guardian_phone.required' => 'Il telefono del genitore/tutore è obbligatorio per i minorenni.',
+            ]);
+
+            $validated = array_merge($validated, $guardianValidation);
+        }
 
         // Generate password
         $password = $this->generateStudentPassword();
@@ -105,6 +136,7 @@ class AdminStudentController extends AdminBaseController
         $validated['school_id'] = $this->school->id;
         $validated['email_verified_at'] = now();
         $validated['active'] = $validated['active'] ?? true;
+        $validated['is_minor'] = $validated['is_minor'] ?? false;  // SENIOR FIX: Task #4
 
         $student = User::create($validated);
 
@@ -223,8 +255,48 @@ class AdminStudentController extends AdminBaseController
             'emergency_contact_name' => 'nullable|string|max:255',
             'emergency_contact_phone' => 'nullable|string|max:20',
             'medical_conditions' => 'nullable|string|max:1000',
-            'active' => 'boolean'
+            'active' => 'boolean',
+            'is_minor' => 'boolean',  // SENIOR FIX: Task #4
         ]);
+
+        // SENIOR FIX: Task #4 - Validazione condizionale campi genitore per minorenni
+        if ($request->boolean('is_minor')) {
+            $guardianValidation = $request->validate([
+                'guardian_first_name' => 'required|string|max:255',
+                'guardian_last_name' => 'required|string|max:255',
+                'guardian_fiscal_code' => [
+                    'required',
+                    'string',
+                    'size:16',
+                    'regex:/^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$/',
+                ],
+                'guardian_email' => [
+                    'required',
+                    'email',
+                    'max:255',
+                ],
+                'guardian_phone' => 'required|string|max:20',
+            ], [
+                'guardian_first_name.required' => 'Il nome del genitore/tutore è obbligatorio per i minorenni.',
+                'guardian_last_name.required' => 'Il cognome del genitore/tutore è obbligatorio per i minorenni.',
+                'guardian_fiscal_code.required' => 'Il codice fiscale del genitore/tutore è obbligatorio per i minorenni.',
+                'guardian_fiscal_code.regex' => 'Il codice fiscale del genitore/tutore non è valido.',
+                'guardian_email.required' => 'L\'email del genitore/tutore è obbligatoria per i minorenni.',
+                'guardian_email.email' => 'L\'email del genitore/tutore non è valida.',
+                'guardian_phone.required' => 'Il telefono del genitore/tutore è obbligatorio per i minorenni.',
+            ]);
+
+            $validated = array_merge($validated, $guardianValidation);
+        } else {
+            // Se non è più minore, azzera i campi del genitore
+            $validated['guardian_first_name'] = null;
+            $validated['guardian_last_name'] = null;
+            $validated['guardian_fiscal_code'] = null;
+            $validated['guardian_email'] = null;
+            $validated['guardian_phone'] = null;
+        }
+
+        $validated['is_minor'] = $validated['is_minor'] ?? false;  // SENIOR FIX: Task #4
 
         $student->update($validated);
         $this->clearSchoolCache();
