@@ -197,10 +197,29 @@
                                name="date_of_birth"
                                id="date_of_birth"
                                x-model="form.date_of_birth"
+                               @change="checkIfMinor"
                                required
                                :max="maxDate"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors">
                         <div x-show="errors.date_of_birth" class="mt-1 text-sm text-red-600" x-text="errors.date_of_birth"></div>
+                    </div>
+
+                    <!-- SENIOR FIX: Task #4 - Is Minor Checkbox -->
+                    <div class="md:col-span-2">
+                        <div class="flex items-center">
+                            <input type="checkbox"
+                                   name="is_minor"
+                                   id="is_minor"
+                                   x-model="form.is_minor"
+                                   value="1"
+                                   class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded">
+                            <label for="is_minor" class="ml-2 block text-sm font-medium text-gray-700">
+                                È minorenne (< 18 anni)
+                            </label>
+                        </div>
+                        <p class="ml-6 mt-1 text-xs text-gray-500">
+                            Se selezionato, verranno richiesti i dati del genitore/tutore legale
+                        </p>
                     </div>
 
                     <!-- Address -->
@@ -258,6 +277,102 @@
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
                                placeholder="+39 123 456 7890">
                         <div x-show="errors.emergency_contact_phone" class="mt-1 text-sm text-red-600" x-text="errors.emergency_contact_phone"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SENIOR FIX: Task #4 - Guardian Information (Conditional) -->
+            <div x-show="form.is_minor" x-transition class="space-y-6">
+                <div class="border-b border-gray-200 pb-4">
+                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        Dati Genitore/Tutore Legale
+                    </h3>
+                    <p class="mt-1 text-sm text-gray-600">
+                        Informazioni obbligatorie per studenti minorenni (fatturazione e comunicazioni)
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Guardian First Name -->
+                    <div>
+                        <label for="guardian_first_name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Nome Genitore <span class="text-red-500" x-show="form.is_minor">*</span>
+                        </label>
+                        <input type="text"
+                               name="guardian_first_name"
+                               id="guardian_first_name"
+                               x-model="form.guardian_first_name"
+                               :required="form.is_minor"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
+                               placeholder="Nome del genitore/tutore">
+                        <div x-show="errors.guardian_first_name" class="mt-1 text-sm text-red-600" x-text="errors.guardian_first_name"></div>
+                    </div>
+
+                    <!-- Guardian Last Name -->
+                    <div>
+                        <label for="guardian_last_name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Cognome Genitore <span class="text-red-500" x-show="form.is_minor">*</span>
+                        </label>
+                        <input type="text"
+                               name="guardian_last_name"
+                               id="guardian_last_name"
+                               x-model="form.guardian_last_name"
+                               :required="form.is_minor"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
+                               placeholder="Cognome del genitore/tutore">
+                        <div x-show="errors.guardian_last_name" class="mt-1 text-sm text-red-600" x-text="errors.guardian_last_name"></div>
+                    </div>
+
+                    <!-- Guardian Fiscal Code -->
+                    <div>
+                        <label for="guardian_fiscal_code" class="block text-sm font-medium text-gray-700 mb-2">
+                            Codice Fiscale Genitore <span class="text-red-500" x-show="form.is_minor">*</span>
+                        </label>
+                        <input type="text"
+                               name="guardian_fiscal_code"
+                               id="guardian_fiscal_code"
+                               x-model="form.guardian_fiscal_code"
+                               :required="form.is_minor"
+                               maxlength="16"
+                               style="text-transform: uppercase"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors uppercase"
+                               placeholder="RSSMRA80A01H501U">
+                        <div x-show="errors.guardian_fiscal_code" class="mt-1 text-sm text-red-600" x-text="errors.guardian_fiscal_code"></div>
+                        <p class="mt-1 text-xs text-gray-500">Codice fiscale italiano (16 caratteri) - per fatturazione</p>
+                    </div>
+
+                    <!-- Guardian Email -->
+                    <div>
+                        <label for="guardian_email" class="block text-sm font-medium text-gray-700 mb-2">
+                            Email Genitore <span class="text-red-500" x-show="form.is_minor">*</span>
+                        </label>
+                        <input type="email"
+                               name="guardian_email"
+                               id="guardian_email"
+                               x-model="form.guardian_email"
+                               :required="form.is_minor"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
+                               placeholder="email@esempio.it">
+                        <div x-show="errors.guardian_email" class="mt-1 text-sm text-red-600" x-text="errors.guardian_email"></div>
+                        <p class="mt-1 text-xs text-gray-500">Email per comunicazioni e invio fatture</p>
+                    </div>
+
+                    <!-- Guardian Phone -->
+                    <div class="md:col-span-2">
+                        <label for="guardian_phone" class="block text-sm font-medium text-gray-700 mb-2">
+                            Telefono Genitore <span class="text-red-500" x-show="form.is_minor">*</span>
+                        </label>
+                        <input type="tel"
+                               name="guardian_phone"
+                               id="guardian_phone"
+                               x-model="form.guardian_phone"
+                               :required="form.is_minor"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
+                               placeholder="+39 333 1234567">
+                        <div x-show="errors.guardian_phone" class="mt-1 text-sm text-red-600" x-text="errors.guardian_phone"></div>
                     </div>
                 </div>
             </div>
@@ -385,7 +500,14 @@ document.addEventListener('alpine:init', () => {
             emergency_contact_phone: '',
             medical_conditions: '',
             active: true,
-            send_welcome_email: true
+            send_welcome_email: true,
+            // SENIOR FIX: Task #4 - Guardian/Tutor fields for minor students
+            is_minor: false,
+            guardian_first_name: '',
+            guardian_last_name: '',
+            guardian_fiscal_code: '',
+            guardian_email: '',
+            guardian_phone: ''
         },
 
         get maxDate() {
@@ -396,6 +518,26 @@ document.addEventListener('alpine:init', () => {
         updateFullName() {
             if (this.form.first_name && this.form.last_name) {
                 this.form.name = `${this.form.first_name} ${this.form.last_name}`;
+            }
+        },
+
+        /**
+         * SENIOR FIX: Task #4 - Auto-check if student is minor based on date of birth
+         * Automatically sets is_minor flag when date_of_birth changes
+         */
+        checkIfMinor() {
+            if (this.form.date_of_birth) {
+                const birthDate = new Date(this.form.date_of_birth);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+
+                // Adjust age if birthday hasn't occurred yet this year
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+
+                this.form.is_minor = age < 18;
             }
         },
 
