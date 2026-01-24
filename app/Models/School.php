@@ -221,6 +221,30 @@ class School extends Model
         return $this->storage_quota_expires_at->isPast();
     }
 
+    /**
+     * TASK #11: Ottiene la quota storage in bytes
+     */
+    public function getStorageQuotaBytesAttribute(): int
+    {
+        if ($this->storage_unlimited) {
+            return PHP_INT_MAX;
+        }
+
+        return $this->storage_quota_gb * (1024 ** 3);
+    }
+
+    /**
+     * TASK #11: Ottiene lo storage rimanente in bytes
+     */
+    public function getStorageRemainingBytesAttribute(): int
+    {
+        if ($this->storage_unlimited) {
+            return PHP_INT_MAX;
+        }
+
+        return max(0, $this->storage_quota_bytes - $this->storage_used_bytes);
+    }
+
     // MUTATORS
 
     /**
@@ -350,5 +374,43 @@ class School extends Model
         }
 
         return $this->is_storage_quota_expired ? 5 : $this->storage_quota_gb;
+    }
+
+    /**
+     * Verifica se la quota è scaduta (alias per accessor)
+     *
+     * @return bool
+     */
+    public function hasExpiredQuota(): bool
+    {
+        return $this->is_storage_quota_expired;
+    }
+
+    /**
+     * Verifica se lo storage è pieno (100%)
+     *
+     * @return bool
+     */
+    public function isStorageFull(): bool
+    {
+        if ($this->storage_unlimited) {
+            return false;
+        }
+
+        return $this->storage_used_bytes >= $this->storage_quota_bytes;
+    }
+
+    /**
+     * Verifica se lo storage è in warning (>= 80%)
+     *
+     * @return bool
+     */
+    public function isStorageWarning(): bool
+    {
+        if ($this->storage_unlimited) {
+            return false;
+        }
+
+        return $this->storage_usage_percentage >= 80;
     }
 }
