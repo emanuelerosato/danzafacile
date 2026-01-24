@@ -3,9 +3,18 @@
     'icon' => null
 ])
 
-<div x-data="{ open: true }" class="mb-4">
+<div x-data="{
+        groupId: '{{ md5($title) }}',
+        get open() {
+            return $store.sidebarState.getGroupState(this.groupId);
+        },
+        toggleGroup() {
+            $store.sidebarState.toggleGroup(this.groupId);
+        }
+     }"
+     class="mb-4">
     <!-- Group Header -->
-    <button @click="open = !open" 
+    <button @click="toggleGroup()" 
             class="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide hover:text-gray-700 focus:outline-none">
         <div class="flex items-center">
             @if($icon)

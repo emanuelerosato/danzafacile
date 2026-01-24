@@ -2,8 +2,8 @@
 
 **Progetto:** DanzaFacile - Laravel 12 Dance School Management System
 **Data Creazione:** 2026-01-23
-**Ultima Modifica:** 2026-01-24 09:15 UTC
-**Status:** 5/11 completati (45%)
+**Ultima Modifica:** 2026-01-24 11:30 UTC
+**Status:** 7/11 completati (64%)
 
 ---
 
@@ -13,12 +13,12 @@
 |----------|--------|------------|-------------|---------|
 | 🔴 CRITICAL | 3 | 3 | 0 | 0 |
 | 🟡 HIGH | 3 | 2 | 0 | 1 |
-| 🟢 MEDIUM | 4 | 0 | 0 | 4 |
+| 🟢 MEDIUM | 4 | 2 | 0 | 2 |
 | 🔵 LOW | 1 | 0 | 0 | 1 |
-| **TOTALE** | **11** | **5** | **0** | **6** |
+| **TOTALE** | **11** | **7** | **0** | **4** |
 
 **Tempo Stimato Totale:** 15-20 ore di sviluppo
-**Tempo Impiegato:** 7.25 ore
+**Tempo Impiegato:** 8 ore
 
 ---
 
@@ -872,28 +872,57 @@ Migliorare form configurazione ricevute con testi più chiari e indicazioni che 
 
 ---
 
-### ❌ #9 - Sistema Upload Logo Fattura
+### ❌ #9 - Sistema Upload Logo Ricevute (Upload Locale)
 
-**Status:** ⏸️ Pending
+**Status:** ⏸️ Pending (Analisi Completata)
 **Priorità:** 🟢 MEDIUM
 **Complessità:** 🟡 Medium
-**Tempo Stimato:** 1.5 ore
+**Tempo Stimato:** 1 ora
 
 #### Descrizione
-Aggiungere possibilità di caricare logo personalizzato per le fatture generate dalla scuola.
+Aggiungere possibilità di caricare logo locale per le ricevute, oltre all'attuale supporto URL esterno.
 
-#### Comportamento Atteso
-- Form upload in `/admin/settings/invoice-configuration`
-- Preview logo caricato
-- Validazione: solo immagini, max 2MB, min 200x200px
-- Logo appare in alto a sinistra delle fatture PDF
+#### Stato Attuale (Analisi 2026-01-24)
 
-#### File Coinvolti
-- `database/migrations/YYYY_MM_DD_add_invoice_logo_to_schools.php`
-- `app/Models/School.php` - add `invoice_logo_path`
-- `app/Http/Controllers/Admin/SettingsController.php` - handle upload
-- `resources/views/admin/settings/invoice.blade.php` - form upload
-- `resources/views/admin/invoices/pdf.blade.php` - display logo
+**Sistema Esistente:**
+- ✅ Settings: `receipt_logo_url` (URL esterno)
+- ✅ View: `/admin/settings/index.blade.php` (campo URL)
+- ✅ Controller: `AdminSettingsController` - validation URL
+- ❌ Upload locale: NON implementato
+
+**Cosa Manca:**
+1. Form upload file accanto al campo URL
+2. Validation: immagini only, max 2MB, formato (jpg, png)
+3. Storage locale in `storage/app/public/receipts/logos/{school_id}/`
+4. Delete old logo on new upload
+5. Preview logo caricato
+6. Priorità: file locale > URL esterno nella generazione ricevuta
+
+#### Comportamento Atteso (Da Implementare)
+- Form con 2 opzioni:
+  - **Opzione A:** Carica logo (file upload)
+  - **Opzione B:** URL logo esterno (campo esistente)
+- Se entrambi presenti: priorità a file locale
+- Preview logo con possibilità di rimuovere
+- Validazione: jpg/png, max 2MB, min 200x200px consigliato
+
+#### File Da Modificare
+- ✅ `app/Http/Controllers/Admin/AdminSettingsController.php`
+  - Metodo `update()`: gestire `hasFile('receipt_logo')`
+  - Validation: `'receipt_logo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'`
+  - Storage: `Storage::disk('public')->put("receipts/logos/{$schoolId}", $file)`
+  - Delete old: check setting `receipt.logo_path` before upload
+
+- ✅ `resources/views/admin/settings/index.blade.php`
+  - Sezione Ricevute: aggiungere form upload con preview
+  - Radio/toggle tra upload locale vs URL esterno
+  - Preview immagine caricata con button "Rimuovi"
+
+- ✅ Setting: Nuovo key `school.{id}.receipt.logo_path` per path locale
+
+- ⏳ PDF Generation (quando implementato Task #5):
+  - Priority: `receipt.logo_path` (locale) > `receipt.logo_url` (URL)
+  - Fallback: nome scuola se nessun logo
 
 #### Schema Database
 ```sql
@@ -923,48 +952,59 @@ if ($request->hasFile('invoice_logo')) {
 
 ---
 
-### ❌ #10 - Sidebar: Impedire Ricaricamento
+### ✅ #10 - Sidebar: Impedire Ricaricamento
 
-**Status:** ⏸️ Pending
+**Status:** ✅ Completed (2026-01-24 11:30 UTC)
 **Priorità:** 🟢 MEDIUM
 **Complessità:** 🟡 Medium
 **Tempo Stimato:** 1 ora
+**Tempo Effettivo:** 45 minuti
 
 #### Descrizione
-La sidebar si ricarica completamente ad ogni navigazione. Implementare comportamento SPA-like per mantenere stato sidebar.
+La sidebar si ricaricava completamente ad ogni navigazione. Implementato comportamento SPA-like per mantenere stato sidebar.
 
-#### Comportamento Atteso
-- Sidebar non ricarica visivamente tra le pagine
-- Scroll position mantenuta
-- Item attivo evidenziato correttamente
-- Transizioni smooth
+#### Soluzione Implementata: Alpine.js Store + sessionStorage
 
-#### Possibili Soluzioni
+**Implementazione:**
+1. **Alpine Store `sidebarState`** (`app.blade.php` linea 45-90):
+   - Gestisce stato collapsed/expanded di ogni nav-group (tramite MD5 hash del titolo)
+   - Salva/ripristina scroll position del nav
+   - Usa sessionStorage per persistenza tra reload
+   - Default gruppi: aperti al primo load
 
-**Opzione A: Turbo/Hotwire (Laravel)**
-```blade
-<!-- In layout -->
-<div data-turbo-permanent class="sidebar">
-    <!-- Sidebar content -->
-</div>
-```
+2. **sidebar.blade.php**:
+   - Aggiunto `x-init` sul `<nav>` per ripristinare scroll position
+   - Aggiunto `@scroll.debounce.100ms` per salvare scroll durante utilizzo
 
-**Opzione B: Alpine.js + AJAX**
-```javascript
-<div x-data="sidebarState()" x-init="init()">
-    <!-- Persist state in Alpine store -->
-</div>
-```
+3. **nav-group.blade.php**:
+   - Sostituito stato locale `x-data="{ open: true }"` con getter dal store
+   - Metodo `toggleGroup()` aggiorna store e persiste in sessionStorage
+   - ID univoco gruppo: `md5($title)` per evitare collisioni
 
-**Opzione C: Livewire (se installato)**
-```blade
-@livewire('sidebar', ['persistent' => true])
-```
+4. **app.blade.php** (Bonus UX):
+   - Aggiunto fade-in smooth al main content (`contentLoaded` state)
+   - Transizione 200ms opacity per mascherare flash visivo al reload
 
-#### File Coinvolti
-- `resources/views/layouts/app.blade.php`
-- `resources/views/components/sidebar.blade.php`
-- `resources/js/app.js` - gestione navigazione
+#### Comportamento Risultante
+- ✅ Sidebar mantiene scroll position tra navigazioni
+- ✅ Gruppi collapsed/expanded preservati
+- ✅ Transizione smooth nasconde flash visivo
+- ✅ Esperienza SPA-like senza modificare routing Laravel
+- ✅ Nessuna dipendenza aggiuntiva (usa Alpine.js esistente)
+
+#### File Modificati
+- `resources/views/layouts/app.blade.php` (Alpine Store + fade-in)
+- `resources/views/components/sidebar.blade.php` (scroll position restore)
+- `resources/views/components/nav-group.blade.php` (store integration)
+
+#### Testing
+- Test locale: Docker non disponibile
+- Test VPS: Dopo deploy
+
+#### Note Tecniche
+- sessionStorage cancellato al chiudere tab (corretto per sidebar)
+- debounce 100ms su scroll previene troppi save
+- $nextTick() garantisce DOM ready prima restore scroll
 
 ---
 

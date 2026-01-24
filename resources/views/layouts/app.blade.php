@@ -40,7 +40,55 @@
     
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
+    <!-- Sidebar State Store (must be before Alpine.js) -->
+    <script nonce="@cspNonce">
+        // Alpine Store per mantenere stato sidebar tra navigazioni
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('sidebarState', {
+                // Stato gruppi collapsed/expanded (key: groupId, value: boolean)
+                groups: JSON.parse(sessionStorage.getItem('sidebar_groups') || '{}'),
+
+                // Scroll position
+                scrollPosition: parseInt(sessionStorage.getItem('sidebar_scroll') || '0'),
+
+                // Inizializza stato gruppo (default: aperto)
+                getGroupState(groupId) {
+                    if (this.groups[groupId] === undefined) {
+                        this.groups[groupId] = true; // Default: aperto
+                    }
+                    return this.groups[groupId];
+                },
+
+                // Toggle stato gruppo
+                toggleGroup(groupId) {
+                    this.groups[groupId] = !this.getGroupState(groupId);
+                    this.persist();
+                },
+
+                // Salva scroll position
+                saveScrollPosition(navElement) {
+                    if (navElement) {
+                        this.scrollPosition = navElement.scrollTop;
+                        sessionStorage.setItem('sidebar_scroll', this.scrollPosition);
+                    }
+                },
+
+                // Ripristina scroll position
+                restoreScrollPosition(navElement) {
+                    if (navElement && this.scrollPosition > 0) {
+                        navElement.scrollTop = this.scrollPosition;
+                    }
+                },
+
+                // Persisti stato in sessionStorage
+                persist() {
+                    sessionStorage.setItem('sidebar_groups', JSON.stringify(this.groups));
+                }
+            });
+        });
+    </script>
+
     <!-- Alpine.js -->
     <script defer nonce="@cspNonce" src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
@@ -49,13 +97,14 @@
     
     @stack('styles')
 </head>
-<body class="font-sans antialiased bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50" x-data="{ sidebarOpen: false }">
+<body class="font-sans antialiased bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50" x-data="{ sidebarOpen: false, contentLoaded: false }" x-init="setTimeout(() => contentLoaded = true, 10)">
     <div class="min-h-screen flex">
         <!-- Sidebar -->
         <x-sidebar />
         
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col lg:ml-64">
+        <div class="flex-1 flex flex-col lg:ml-64 transition-opacity duration-200"
+             :class="{ 'opacity-0': !contentLoaded, 'opacity-100': contentLoaded }">
             <!-- Top Navigation -->
             <header class="bg-white/80 backdrop-blur-md border-b border-rose-100 shadow-sm sticky top-0 z-40">
                 <div class="px-4 sm:px-6 lg:px-8">

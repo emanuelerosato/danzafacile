@@ -7,7 +7,7 @@
        x-transition:enter-end="translate-x-0"
        x-transition:leave="transition ease-in-out duration-300"
        x-transition:leave-start="translate-x-0"
-       x-transition:leave-end="-translate-x-full">
+       x-transition:leave-end="-translate-x-full"
     
     <!-- Logo -->
     <div class="flex items-center justify-center p-6 border-b border-rose-100">
@@ -23,7 +23,9 @@
     </div>
     
     <!-- Navigation -->
-    <nav class="p-4 space-y-2 overflow-y-auto flex-1">
+    <nav class="p-4 space-y-2 overflow-y-auto flex-1"
+         @scroll.debounce.100ms="$store.sidebarState.saveScrollPosition($el)"
+         x-init="$nextTick(() => $store.sidebarState.restoreScrollPosition($el))">
         @if(Auth::user()->role === 'super_admin')
             <!-- Super Admin Menu -->
             <x-nav-item href="{{ route('super-admin.dashboard') }}" :active="request()->routeIs('super-admin.dashboard')" icon="home">
