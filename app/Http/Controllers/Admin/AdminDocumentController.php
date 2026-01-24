@@ -18,7 +18,11 @@ class AdminDocumentController extends AdminBaseController
      */
     public function index(Request $request)
     {
-        $query = Document::with(['uploadedBy', 'approvedBy']);
+        // SECURITY FIX: Multi-tenant isolation - only show documents from admin's school
+        $this->setupContext();
+
+        $query = Document::with(['uploadedBy', 'approvedBy'])
+            ->where('school_id', $this->schoolId);
 
         // Filtri
         if ($request->filled('status')) {
@@ -49,15 +53,16 @@ class AdminDocumentController extends AdminBaseController
 
         $documents = $query->orderBy($sortBy, $sortDirection)->paginate(15);
 
-        // Statistiche
+        // SECURITY FIX: Statistics only for current school
         $statistics = [
-            'total' => Document::count(),
-            'pending' => Document::pending()->count(),
-            'approved' => Document::approved()->count(),
-            'rejected' => Document::rejected()->count(),
-            'expired' => Document::expired()->count(),
-            'total_size' => $this->formatBytes(Document::sum('file_size')),
-            'categories' => Document::select('category')
+            'total' => Document::where('school_id', $this->schoolId)->count(),
+            'pending' => Document::where('school_id', $this->schoolId)->pending()->count(),
+            'approved' => Document::where('school_id', $this->schoolId)->approved()->count(),
+            'rejected' => Document::where('school_id', $this->schoolId)->rejected()->count(),
+            'expired' => Document::where('school_id', $this->schoolId)->expired()->count(),
+            'total_size' => $this->formatBytes(Document::where('school_id', $this->schoolId)->sum('file_size')),
+            'categories' => Document::where('school_id', $this->schoolId)
+                               ->select('category')
                                ->selectRaw('count(*) as count')
                                ->groupBy('category')
                                ->pluck('count', 'category')
@@ -80,9 +85,10 @@ class AdminDocumentController extends AdminBaseController
      */
     public function create()
     {
-        // Get all students from the current school for dropdown
+        // SECURITY: Get only students from current school (multi-tenant isolation)
+        // Use students() scope to support both 'student' and 'user' roles
         $students = auth()->user()->school->users()
-            ->where('role', 'student')
+            ->students()
             ->where('active', true)
             ->orderBy('first_name')
             ->orderBy('last_name')

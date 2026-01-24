@@ -26,11 +26,12 @@ class StoreDocumentRequest extends FormRequest
             'user_id' => [
                 'sometimes',
                 'exists:users,id',
-                // Additional validation for admin context
+                // SECURITY FIX: Multi-tenant validation - ensure user belongs to admin's school
                 function ($attribute, $value, $fail) {
                     if ($value && auth()->user()?->isAdmin()) {
                         $user = \App\Models\User::find($value);
-                        if (!$user || $user->school_id !== auth()->user()->school_id || $user->role !== 'user') {
+                        // Verify: user exists, belongs to same school, and is a student
+                        if (!$user || $user->school_id !== auth()->user()->school_id || !$user->isStudent()) {
                             $fail('Lo studente selezionato non è valido per la tua scuola.');
                         }
                     }
