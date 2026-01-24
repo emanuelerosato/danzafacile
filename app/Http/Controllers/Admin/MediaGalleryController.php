@@ -5,6 +5,7 @@ use App\Http\Requests\UploadMediaGalleryRequest;
 use App\Models\MediaGallery;
 use App\Models\MediaItem;
 use App\Models\Course;
+use App\Services\StorageQuotaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -13,11 +14,17 @@ use Illuminate\Support\Facades\Validator;
 class MediaGalleryController extends AdminBaseController
 {
     /**
+     * TASK #11: Storage Quota Service
+     */
+    protected StorageQuotaService $storageQuotaService;
+
+    /**
      * Constructor
      */
-    public function __construct()
+    public function __construct(StorageQuotaService $storageQuotaService)
     {
         parent::__construct();
+        $this->storageQuotaService = $storageQuotaService;
     }
 
     /**
@@ -178,18 +185,30 @@ class MediaGalleryController extends AdminBaseController
 
     /**
      * Remove the specified resource from storage.
+     *
+     * TASK #11: Aggiunto decremento storage quota
      */
     public function destroy(MediaGallery $gallery)
     {
+        $this->setupContext();
+
+        $totalDeletedSize = 0;
+
         // Elimina tutti i file fisici associati alla galleria
         foreach ($gallery->mediaItems as $mediaItem) {
             if ($mediaItem->is_file && $mediaItem->file_path) {
                 Storage::disk('public')->delete($mediaItem->file_path);
+                $totalDeletedSize += $mediaItem->file_size;
             }
         }
 
         // Elimina la galleria (i media items saranno eliminati a cascata)
         $gallery->delete();
+
+        // TASK #11: Decrementa usage dopo delete
+        if ($totalDeletedSize > 0) {
+            $this->storageQuotaService->decrementUsage($this->school, $totalDeletedSize);
+        }
 
         return redirect()->route('admin.galleries.index')
                         ->with('success', 'Galleria eliminata con successo!');
@@ -197,13 +216,35 @@ class MediaGalleryController extends AdminBaseController
 
     /**
      * Upload media files to gallery
+     *
+     * TASK #11: Aggiunto check quota storage
      */
     public function uploadMedia(UploadMediaGalleryRequest $request, MediaGallery $gallery)
     {
+        $this->setupContext();
+
         // SECURITY: Validation with magic bytes check done in UploadMediaGalleryRequest
 
-        $uploadedItems = [];
+        // TASK #11: Check storage quota PRIMA di iniziare upload
         $files = $request->file('files');
+        $totalSizeToUpload = 0;
+
+        foreach ($files as $file) {
+            $totalSizeToUpload += $file->getSize();
+        }
+
+        // Verifica se c'è spazio sufficiente
+        if (!$this->storageQuotaService->canUpload($this->school, $totalSizeToUpload)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Quota storage superata! Libera spazio o acquista GB aggiuntivi.',
+                'quota_exceeded' => true,
+                'storage_info' => $this->storageQuotaService->getStorageInfo($this->school)
+            ], 422);
+        }
+
+        $uploadedItems = [];
+        $uploadedSize = 0;
 
         foreach ($files as $index => $file) {
             $fileName = time() . '_' . $index . '.' . $file->getClientOriginalExtension();
@@ -227,12 +268,17 @@ class MediaGalleryController extends AdminBaseController
             ]);
 
             $uploadedItems[] = $mediaItem->load('user:id,name');
+            $uploadedSize += $file->getSize();
         }
+
+        // TASK #11: Incrementa usage dopo upload successful
+        $this->storageQuotaService->incrementUsage($this->school, $uploadedSize);
 
         return response()->json([
             'success' => true,
             'message' => count($uploadedItems) . ' file caricati con successo!',
-            'items' => $uploadedItems
+            'items' => $uploadedItems,
+            'storage_info' => $this->storageQuotaService->getStorageInfo($this->school)
         ]);
     }
 
@@ -374,6 +420,8 @@ class MediaGalleryController extends AdminBaseController
 
     /**
      * Delete media item
+     *
+     * TASK #11: Aggiunto decremento storage quota
      */
     public function deleteMediaItem(MediaGallery $gallery, $mediaItemId)
     {
@@ -387,6 +435,8 @@ class MediaGalleryController extends AdminBaseController
             return $this->jsonResponse(false, 'Non hai i permessi per eliminare questo media', [], 403);
         }
 
+        $fileSize = $mediaItem->file_size;
+
         // Elimina il file fisico se presente
         if ($mediaItem->is_file && $mediaItem->file_path) {
             Storage::disk('public')->delete($mediaItem->file_path);
@@ -394,7 +444,14 @@ class MediaGalleryController extends AdminBaseController
 
         $mediaItem->delete();
 
-        return $this->jsonResponse(true, 'Media eliminato con successo!');
+        // TASK #11: Decrementa usage dopo delete
+        if ($fileSize > 0) {
+            $this->storageQuotaService->decrementUsage($this->school, $fileSize);
+        }
+
+        return $this->jsonResponse(true, 'Media eliminato con successo!', [
+            'storage_info' => $this->storageQuotaService->getStorageInfo($this->school)
+        ]);
     }
 
     /**
