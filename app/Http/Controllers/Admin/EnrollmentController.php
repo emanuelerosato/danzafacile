@@ -78,7 +78,7 @@ class EnrollmentController extends Controller
     /**
      * Show the form for creating a new enrollment
      */
-    public function create()
+    public function create(Request $request)
     {
         $user = auth()->user();
         $school = $user->school;
@@ -95,7 +95,18 @@ class EnrollmentController extends Controller
                        ->orderBy('name')
                        ->get();
 
-        return view('admin.enrollments.create', compact('courses', 'students'));
+        // Pre-seleziona studente se user_id viene passato come parametro
+        $selectedStudentId = $request->get('user_id');
+
+        // Verifica che lo studente appartenga alla scuola dell'admin
+        if ($selectedStudentId) {
+            $selectedStudent = User::find($selectedStudentId);
+            if (!$selectedStudent || $selectedStudent->school_id !== $school->id) {
+                $selectedStudentId = null; // Reset se non valido
+            }
+        }
+
+        return view('admin.enrollments.create', compact('courses', 'students', 'selectedStudentId'));
     }
 
     /**

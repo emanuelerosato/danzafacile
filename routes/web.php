@@ -328,7 +328,11 @@ Route::middleware('auth')->group(function () {
         
         // Enrollments management
         Route::get('enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
+        Route::get('enrollments/create', [EnrollmentController::class, 'create'])->name('enrollments.create');
+        Route::post('enrollments', [EnrollmentController::class, 'store'])->name('enrollments.store');
         Route::get('enrollments/{enrollment}', [EnrollmentController::class, 'show'])->name('enrollments.show');
+        Route::get('enrollments/{enrollment}/edit', [EnrollmentController::class, 'edit'])->name('enrollments.edit');
+        Route::put('enrollments/{enrollment}', [EnrollmentController::class, 'update'])->name('enrollments.update');
         Route::patch('enrollments/{enrollment}/status', [EnrollmentController::class, 'updateStatus'])->name('enrollments.update-status');
         Route::post('enrollments/{enrollment}/cancel', [EnrollmentController::class, 'cancel'])->name('enrollments.cancel');
         Route::post('enrollments/{enrollment}/reactivate', [EnrollmentController::class, 'reactivate'])->name('enrollments.reactivate');
