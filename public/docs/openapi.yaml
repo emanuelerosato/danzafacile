@@ -1,0 +1,1875 @@
+openapi: 3.0.3
+info:
+  title: 'DanzaFacile Mobile API Documentation'
+  description: 'REST API for DanzaFacile mobile application (Flutter). Provides endpoints for authentication, student courses, payments, lessons, and notifications.'
+  version: 1.0.0
+servers:
+  -
+    url: 'http://localhost:8089'
+tags:
+  -
+    name: Endpoints
+    description: ''
+paths:
+  /api/mobile/v1/auth/login:
+    post:
+      summary: ''
+      operationId: postApiMobileV1AuthLogin
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: gbailey@example.net
+                password:
+                  type: string
+                  description: ''
+                  example: '|]|{+-'
+              required:
+                - email
+                - password
+      security: []
+  /api/mobile/v1/auth/register:
+    post:
+      summary: ''
+      operationId: postApiMobileV1AuthRegister
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  /api/mobile/v1/auth/logout:
+    post:
+      summary: ''
+      operationId: postApiMobileV1AuthLogout
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+  /api/mobile/v1/auth/profile:
+    put:
+      summary: ''
+      operationId: putApiMobileV1AuthProfile
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                first_name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: 'n'
+                last_name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: g
+                phone:
+                  type: string
+                  description: 'Must not be greater than 20 characters.'
+                  example: zmiyvdljnikhwayk
+                  nullable: true
+                date_of_birth:
+                  type: string
+                  description: 'Must be a valid date.'
+                  example: '2026-01-25T17:40:42'
+                  nullable: true
+                address:
+                  type: string
+                  description: 'Must not be greater than 500 characters.'
+                  example: c
+                  nullable: true
+      security: []
+  /api/mobile/v1/auth/password:
+    put:
+      summary: ''
+      operationId: putApiMobileV1AuthPassword
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                current_password:
+                  type: string
+                  description: ''
+                  example: architecto
+                password:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - current_password
+                - password
+      security: []
+  /api/mobile/v1/admin/courses:
+    post:
+      summary: ''
+      operationId: postApiMobileV1AdminCourses
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                description:
+                  type: string
+                  description: 'Must be at least 10 characters.'
+                  example: 'Et animi quos velit et fugiat.'
+                instructor_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the users table.'
+                  example: null
+                  nullable: true
+                level:
+                  type: string
+                  description: ''
+                  example: architecto
+                price:
+                  type: number
+                  description: 'Must be at least 0. Must not be greater than 999.99.'
+                  example: 22
+                max_students:
+                  type: integer
+                  description: 'Must be at least 1. Must not be greater than 100.'
+                  example: 7
+                  nullable: true
+                start_date:
+                  type: string
+                  description: 'Must be a valid date. Must be a date after <code>today</code>.'
+                  example: '2052-02-18'
+                end_date:
+                  type: string
+                  description: 'Must be a valid date. Must be a date after <code>start_date</code>.'
+                  example: '2052-02-18'
+                  nullable: true
+                location:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: 'n'
+                  nullable: true
+                duration_weeks:
+                  type: integer
+                  description: 'Must be at least 1. Must not be greater than 52.'
+                  example: 7
+                  nullable: true
+                schedule:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: z
+                  nullable: true
+                active:
+                  type: boolean
+                  description: ''
+                  example: false
+              required:
+                - name
+                - description
+                - level
+                - price
+                - start_date
+      security: []
+  '/api/mobile/v1/admin/courses/{id}':
+    put:
+      summary: ''
+      operationId: putApiMobileV1AdminCoursesId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                description:
+                  type: string
+                  description: ''
+                  example: 'Eius et animi quos velit et.'
+                  nullable: true
+                instructor:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: v
+                schedule:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: d
+                max_students:
+                  type: integer
+                  description: 'Must be at least 1. Must not be greater than 100.'
+                  example: 5
+                price:
+                  type: number
+                  description: 'Must be at least 0.'
+                  example: 9
+                duration_weeks:
+                  type: integer
+                  description: 'Must be at least 1. Must not be greater than 52.'
+                  example: 17
+                difficulty_level:
+                  type: string
+                  description: ''
+                  example: null
+                start_date:
+                  type: string
+                  description: 'Must be a valid date.'
+                  example: '2026-01-25T17:40:42'
+                end_date:
+                  type: string
+                  description: 'Must be a valid date. Must be a date after <code>start_date</code>.'
+                  example: '2052-02-18'
+                active:
+                  type: boolean
+                  description: ''
+                  example: false
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiMobileV1AdminCoursesId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the course.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  '/api/mobile/v1/admin/courses/{course_id}/toggle-status':
+    post:
+      summary: ''
+      operationId: postApiMobileV1AdminCoursesCourse_idToggleStatus
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: course_id
+        description: 'The ID of the course.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  '/api/mobile/v1/admin/courses/{course_id}/duplicate':
+    post:
+      summary: ''
+      operationId: postApiMobileV1AdminCoursesCourse_idDuplicate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: course_id
+        description: 'The ID of the course.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  /api/mobile/v1/admin/students:
+    post:
+      summary: ''
+      operationId: postApiMobileV1AdminStudents
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                first_name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: 'n'
+                last_name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: g
+                email:
+                  type: string
+                  description: 'Must be a valid email address. Must not be greater than 255 characters.'
+                  example: rowan.gulgowski@example.com
+                password:
+                  type: string
+                  description: 'Must be at least 8 characters.'
+                  example: 'BNvYgxwmi/#iw/kX'
+                phone:
+                  type: string
+                  description: 'Must not be greater than 20 characters.'
+                  example: wlvqwrsitcpscqld
+                  nullable: true
+                date_of_birth:
+                  type: string
+                  description: 'Must be a valid date. Must be a date before <code>today</code>.'
+                  example: '2022-02-18'
+                  nullable: true
+                address:
+                  type: string
+                  description: 'Must not be greater than 500 characters.'
+                  example: 'n'
+                  nullable: true
+                emergency_contact:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: g
+                  nullable: true
+                medical_notes:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                active:
+                  type: boolean
+                  description: ''
+                  example: true
+              required:
+                - name
+                - first_name
+                - last_name
+                - email
+                - password
+      security: []
+  '/api/mobile/v1/admin/students/{id}':
+    put:
+      summary: ''
+      operationId: putApiMobileV1AdminStudentsId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                email:
+                  type: string
+                  description: 'Must be a valid email address. Must not be greater than 255 characters.'
+                  example: zbailey@example.net
+                phone:
+                  type: string
+                  description: 'Must not be greater than 20 characters.'
+                  example: iyvdljnikhwaykcm
+                  nullable: true
+                date_of_birth:
+                  type: string
+                  description: 'Must be a valid date. Must be a date before <code>today</code>.'
+                  example: '2022-02-18'
+                  nullable: true
+                address:
+                  type: string
+                  description: 'Must not be greater than 500 characters.'
+                  example: 'n'
+                  nullable: true
+                emergency_contact:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: g
+                  nullable: true
+                medical_notes:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+                active:
+                  type: boolean
+                  description: ''
+                  example: true
+      security: []
+    delete:
+      summary: ''
+      operationId: deleteApiMobileV1AdminStudentsId
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the student.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  '/api/mobile/v1/admin/students/{student_id}/activate':
+    post:
+      summary: ''
+      operationId: postApiMobileV1AdminStudentsStudent_idActivate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: student_id
+        description: 'The ID of the student.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  '/api/mobile/v1/admin/students/{student_id}/deactivate':
+    post:
+      summary: ''
+      operationId: postApiMobileV1AdminStudentsStudent_idDeactivate
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: student_id
+        description: 'The ID of the student.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  '/api/mobile/v1/admin/students/{student_id}/reset-password':
+    post:
+      summary: ''
+      operationId: postApiMobileV1AdminStudentsStudent_idResetPassword
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - password
+      security: []
+    parameters:
+      -
+        in: path
+        name: student_id
+        description: 'The ID of the student.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  /api/mobile/v1/student/profile:
+    put:
+      summary: ''
+      operationId: putApiMobileV1StudentProfile
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                phone:
+                  type: string
+                  description: 'Must not be greater than 20 characters.'
+                  example: ngzmiyvdljnikhwa
+                  nullable: true
+                date_of_birth:
+                  type: string
+                  description: 'Must be a valid date. Must be a date before <code>today</code>.'
+                  example: '2022-02-18'
+                  nullable: true
+                address:
+                  type: string
+                  description: 'Must not be greater than 500 characters.'
+                  example: 'n'
+                  nullable: true
+                emergency_contact:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: g
+                  nullable: true
+                medical_notes:
+                  type: string
+                  description: ''
+                  example: architecto
+                  nullable: true
+      security: []
+  /api/mobile/v1/student/profile/password:
+    put:
+      summary: ''
+      operationId: putApiMobileV1StudentProfilePassword
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                current_password:
+                  type: string
+                  description: ''
+                  example: architecto
+                password:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - current_password
+                - password
+      security: []
+  /api/mobile/v1/student/profile/email:
+    put:
+      summary: ''
+      operationId: putApiMobileV1StudentProfileEmail
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 'Must be a valid email address. Must not be greater than 255 characters.'
+                  example: gbailey@example.net
+                current_password:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - email
+                - current_password
+      security: []
+  /api/mobile/v1/student/enrollments:
+    post:
+      summary: ''
+      operationId: postApiMobileV1StudentEnrollments
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                course_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the courses table.'
+                  example: architecto
+                payment_method:
+                  type: string
+                  description: ''
+                  example: null
+                notes:
+                  type: string
+                  description: 'Must not be greater than 500 characters.'
+                  example: 'n'
+                  nullable: true
+              required:
+                - course_id
+      security: []
+  '/api/mobile/v1/student/enrollments/{enrollment_id}/cancel':
+    post:
+      summary: ''
+      operationId: postApiMobileV1StudentEnrollmentsEnrollment_idCancel
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: 'Must not be greater than 500 characters.'
+                  example: b
+                  nullable: true
+      security: []
+    parameters:
+      -
+        in: path
+        name: enrollment_id
+        description: 'The ID of the enrollment.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  '/api/mobile/v1/student/payments/{payment_id}/paypal':
+    post:
+      summary: 'Create PayPal payment for mobile'
+      operationId: createPayPalPaymentForMobile
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: payment_id
+        description: 'The ID of the payment.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  /api/mobile/v1/attendance/check-in:
+    post:
+      summary: 'Manual check-in (without QR code)'
+      operationId: manualCheckInwithoutQRCode
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: ''
+                  example: course
+                  enum:
+                    - course
+                    - event
+                session_id:
+                  type: integer
+                  description: ''
+                  example: 16
+                session_date:
+                  type: string
+                  description: 'Must be a valid date.'
+                  example: '2026-01-25T17:40:43'
+                notes:
+                  type: string
+                  description: 'Must not be greater than 500 characters.'
+                  example: 'n'
+                  nullable: true
+              required:
+                - type
+                - session_id
+                - session_date
+      security: []
+  /api/mobile/v1/attendance/qr-code:
+    post:
+      summary: 'Generate QR code for check-in'
+      operationId: generateQRCodeForCheckIn
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  description: ''
+                  example: event
+                  enum:
+                    - course
+                    - event
+                session_id:
+                  type: integer
+                  description: ''
+                  example: 16
+                session_date:
+                  type: string
+                  description: 'Must be a valid date.'
+                  example: '2026-01-25T17:40:43'
+              required:
+                - type
+                - session_id
+                - session_date
+      security: []
+  /api/mobile/v1/attendance/qr-check-in:
+    post:
+      summary: "QR Code check-in (admin scans student's QR)"
+      operationId: qRCodeCheckInadminScansStudentsQR
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                qr_data:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - qr_data
+      security: []
+  /api/mobile/v1/attendance/qr-checkin:
+    post:
+      summary: 'Student QR check-in (student scans lesson QR code)'
+      operationId: studentQRCheckInstudentScansLessonQRCode
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                qr_code:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - qr_code
+      security: []
+  /api/mobile/v1/staff:
+    post:
+      summary: 'Create new staff member'
+      operationId: createNewStaffMember
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                email:
+                  type: string
+                  description: 'Must be a valid email address.'
+                  example: zbailey@example.net
+                password:
+                  type: string
+                  description: 'Must be at least 6 characters.'
+                  example: '-0pBNvYgxw'
+                first_name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: a
+                  nullable: true
+                last_name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: 'y'
+                  nullable: true
+                phone:
+                  type: string
+                  description: 'Must not be greater than 20 characters.'
+                  example: kcmyuwpwlvqwrsit
+                  nullable: true
+                date_of_birth:
+                  type: string
+                  description: 'Must be a valid date.'
+                  example: '2026-01-25T17:40:43'
+                  nullable: true
+                address:
+                  type: string
+                  description: 'Must not be greater than 1000 characters.'
+                  example: c
+                  nullable: true
+                emergency_contact:
+                  type: string
+                  description: 'Must not be greater than 1000 characters.'
+                  example: p
+                  nullable: true
+                medical_notes:
+                  type: string
+                  description: 'Must not be greater than 1000 characters.'
+                  example: s
+                  nullable: true
+                roles:
+                  type: array
+                  description: 'Must not be greater than 255 characters.'
+                  example:
+                    - c
+                  items:
+                    type: string
+              required:
+                - name
+                - email
+                - password
+      security: []
+  '/api/mobile/v1/staff/{staff_id}':
+    put:
+      summary: 'Update staff member'
+      operationId: updateStaffMember
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                email:
+                  type: string
+                  description: ''
+                  example: null
+                first_name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: 'n'
+                last_name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: g
+                phone:
+                  type: string
+                  description: 'Must not be greater than 20 characters.'
+                  example: zmiyvdljnikhwayk
+                date_of_birth:
+                  type: string
+                  description: 'Must be a valid date.'
+                  example: '2026-01-25T17:40:43'
+                address:
+                  type: string
+                  description: 'Must not be greater than 1000 characters.'
+                  example: c
+                emergency_contact:
+                  type: string
+                  description: 'Must not be greater than 1000 characters.'
+                  example: m
+                medical_notes:
+                  type: string
+                  description: 'Must not be greater than 1000 characters.'
+                  example: 'y'
+                active:
+                  type: boolean
+                  description: ''
+                  example: true
+                roles:
+                  type: array
+                  description: 'Must not be greater than 255 characters.'
+                  example:
+                    - u
+                  items:
+                    type: string
+      security: []
+    delete:
+      summary: 'Delete staff member'
+      operationId: deleteStaffMember
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: staff_id
+        description: 'The ID of the staff.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  '/api/mobile/v1/staff/{staff_id}/toggle-status':
+    post:
+      summary: 'Toggle staff member active status'
+      operationId: toggleStaffMemberActiveStatus
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: staff_id
+        description: 'The ID of the staff.'
+        example: 16
+        required: true
+        schema:
+          type: integer
+  /api/mobile/v1/tickets:
+    post:
+      summary: 'Create new ticket'
+      operationId: createNewTicket
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                description:
+                  type: string
+                  description: ''
+                  example: 'Eius et animi quos velit et.'
+                category:
+                  type: string
+                  description: ''
+                  example: account
+                  enum:
+                    - technical
+                    - payment
+                    - course
+                    - account
+                    - general
+                    - billing
+                    - feature
+                    - other
+                priority:
+                  type: string
+                  description: ''
+                  example: critical
+                  enum:
+                    - low
+                    - medium
+                    - high
+                    - critical
+                    - urgent
+              required:
+                - title
+                - description
+                - category
+                - priority
+      security: []
+  '/api/mobile/v1/tickets/{id}':
+    put:
+      summary: 'Update ticket (admin only - status, priority, assignment)'
+      operationId: updateTicketadminOnlyStatusPriorityAssignment
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  description: ''
+                  example: closed
+                  enum:
+                    - open
+                    - pending
+                    - closed
+                  nullable: true
+                priority:
+                  type: string
+                  description: ''
+                  example: urgent
+                  enum:
+                    - low
+                    - medium
+                    - high
+                    - critical
+                    - urgent
+                  nullable: true
+                assigned_to:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the users table.'
+                  example: null
+                  nullable: true
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the ticket.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/mobile/v1/tickets/{id}/reply':
+    post:
+      summary: 'Reply to ticket'
+      operationId: replyToTicket
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  description: 'Must not be greater than 2000 characters.'
+                  example: b
+              required:
+                - message
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the ticket.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/mobile/v1/tickets/{id}/close':
+    post:
+      summary: 'Close ticket'
+      operationId: closeTicket
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the ticket.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/mobile/v1/tickets/{id}/reopen':
+    post:
+      summary: 'Reopen ticket'
+      operationId: reopenTicket
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the ticket.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/mobile/v1/documents:
+    post:
+      summary: 'Upload new document'
+      operationId: uploadNewDocument
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                description:
+                  type: string
+                  description: ''
+                  example: 'Eius et animi quos velit et.'
+                  nullable: true
+                type:
+                  type: string
+                  description: ''
+                  example: other
+                  enum:
+                    - identity_card
+                    - tax_code
+                    - medical_certificate
+                    - privacy_consent
+                    - photo_consent
+                    - other
+                file:
+                  type: string
+                  format: binary
+                  description: 'Must be a file. Must not be greater than 10240 kilobytes.'
+                user_id:
+                  type: string
+                  description: 10MB.
+                  example: null
+              required:
+                - title
+                - type
+                - file
+      security: []
+  '/api/mobile/v1/documents/{id}':
+    put:
+      summary: 'Update document metadata (admin only)'
+      operationId: updateDocumentMetadataadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: true
+                description:
+                  type: string
+                  description: ''
+                  example: 'Eius et animi quos velit et.'
+                  nullable: true
+                type:
+                  type: string
+                  description: ''
+                  example: other
+                  enum:
+                    - identity_card
+                    - tax_code
+                    - medical_certificate
+                    - privacy_consent
+                    - photo_consent
+                    - other
+                  nullable: true
+                status:
+                  type: string
+                  description: ''
+                  example: approved
+                  enum:
+                    - pending
+                    - approved
+                    - rejected
+                  nullable: true
+      security: []
+    delete:
+      summary: 'Delete document'
+      operationId: deleteDocument
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the document.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/mobile/v1/documents/{id}/approve':
+    post:
+      summary: 'Approve document (admin only)'
+      operationId: approveDocumentadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the document.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/mobile/v1/documents/{id}/reject':
+    post:
+      summary: 'Reject document (admin only)'
+      operationId: rejectDocumentadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+                  description: 'Must not be greater than 500 characters.'
+                  example: b
+                  nullable: true
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the document.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/mobile/v1/documents/bulk-action:
+    post:
+      summary: 'Bulk actions (admin only)'
+      operationId: bulkActionsadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                  description: ''
+                  example: approve
+                  enum:
+                    - approve
+                    - reject
+                    - delete
+                document_ids:
+                  type: array
+                  description: 'The <code>id</code> of an existing record in the documents table.'
+                  example: null
+                  items:
+                    type: string
+              required:
+                - action
+      security: []
+  /api/mobile/v1/galleries:
+    post:
+      summary: 'Create new gallery (admin only)'
+      operationId: createNewGalleryadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                description:
+                  type: string
+                  description: ''
+                  example: 'Eius et animi quos velit et.'
+                  nullable: true
+                is_public:
+                  type: boolean
+                  description: ''
+                  example: false
+              required:
+                - title
+      security: []
+  '/api/mobile/v1/galleries/{id}':
+    put:
+      summary: 'Update gallery (admin only)'
+      operationId: updateGalleryadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: true
+                description:
+                  type: string
+                  description: ''
+                  example: 'Eius et animi quos velit et.'
+                  nullable: true
+                is_public:
+                  type: boolean
+                  description: ''
+                  example: true
+                  nullable: true
+      security: []
+    delete:
+      summary: 'Delete gallery (admin only)'
+      operationId: deleteGalleryadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the gallery.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/mobile/v1/galleries/{id}/upload':
+    post:
+      summary: 'Upload media to gallery (admin only)'
+      operationId: uploadMediaToGalleryadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: true
+                description:
+                  type: string
+                  description: ''
+                  example: 'Eius et animi quos velit et.'
+                  nullable: true
+                file:
+                  type: string
+                  format: binary
+                  description: 'Must be a file. Must not be greater than 20480 kilobytes.'
+              required:
+                - file
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the gallery.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/mobile/v1/galleries/{id}/external-link':
+    post:
+      summary: 'Add external link to gallery (admin only)'
+      operationId: addExternalLinkToGalleryadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                url:
+                  type: string
+                  description: 'Must be a valid URL. Must not be greater than 500 characters.'
+                  example: 'http://bailey.com/'
+                description:
+                  type: string
+                  description: ''
+                  example: 'Eius et animi quos velit et.'
+                  nullable: true
+              required:
+                - title
+                - url
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the gallery.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/mobile/v1/galleries/{galleryId}/media/{mediaId}':
+    put:
+      summary: 'Update media item (admin only)'
+      operationId: updateMediaItemadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: true
+                description:
+                  type: string
+                  description: ''
+                  example: 'Eius et animi quos velit et.'
+                  nullable: true
+      security: []
+    delete:
+      summary: 'Delete media item (admin only)'
+      operationId: deleteMediaItemadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: galleryId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+      -
+        in: path
+        name: mediaId
+        description: ''
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/mobile/v1/galleries/{id}/cover-image':
+    post:
+      summary: 'Set cover image for gallery (admin only)'
+      operationId: setCoverImageForGalleryadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                media_id:
+                  type: string
+                  description: 'The <code>id</code> of an existing record in the media_items table.'
+                  example: architecto
+              required:
+                - media_id
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the gallery.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/mobile/v1/rooms:
+    post:
+      summary: 'Create new room (admin only)'
+      operationId: createNewRoomadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                description:
+                  type: string
+                  description: ''
+                  example: 'Eius et animi quos velit et.'
+                  nullable: true
+                location:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: v
+                  nullable: true
+                capacity:
+                  type: integer
+                  description: 'Must be at least 1.'
+                  example: 26
+                active:
+                  type: boolean
+                  description: ''
+                  example: false
+              required:
+                - name
+                - capacity
+      security: []
+  '/api/mobile/v1/rooms/{id}':
+    put:
+      summary: 'Update room (admin only)'
+      operationId: updateRoomadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                  nullable: true
+                description:
+                  type: string
+                  description: ''
+                  example: 'Eius et animi quos velit et.'
+                  nullable: true
+                location:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: v
+                  nullable: true
+                capacity:
+                  type: integer
+                  description: 'Must be at least 1.'
+                  example: 26
+                  nullable: true
+                active:
+                  type: boolean
+                  description: ''
+                  example: false
+                  nullable: true
+      security: []
+    delete:
+      summary: 'Delete room (admin only)'
+      operationId: deleteRoomadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the room.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  '/api/mobile/v1/rooms/{id}/toggle-status':
+    post:
+      summary: 'Toggle room status (admin only)'
+      operationId: toggleRoomStatusadminOnly
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      security: []
+    parameters:
+      -
+        in: path
+        name: id
+        description: 'The ID of the room.'
+        example: architecto
+        required: true
+        schema:
+          type: string
+  /api/mobile/v1/notifications/preferences:
+    put:
+      summary: 'Update notification preferences'
+      operationId: updateNotificationPreferences
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                enabled:
+                  type: boolean
+                  description: ''
+                  example: false
+                lesson_reminders:
+                  type: boolean
+                  description: ''
+                  example: true
+                reminder_minutes_before:
+                  type: integer
+                  description: ''
+                  example: '60'
+                  enum:
+                    - '15'
+                    - '30'
+                    - '60'
+                    - '120'
+                    - '1440'
+                event_reminders:
+                  type: boolean
+                  description: ''
+                  example: false
+                payment_reminders:
+                  type: boolean
+                  description: ''
+                  example: true
+                system_notifications:
+                  type: boolean
+                  description: ''
+                  example: false
+      security: []
+  /api/mobile/v1/notifications/fcm-token:
+    post:
+      summary: 'Store or update FCM token'
+      operationId: storeOrUpdateFCMToken
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: b
+                device_type:
+                  type: string
+                  description: ''
+                  example: ios
+                  enum:
+                    - android
+                    - ios
+                    - web
+                device_id:
+                  type: string
+                  description: 'Must not be greater than 255 characters.'
+                  example: 'n'
+                  nullable: true
+              required:
+                - token
+                - device_type
+      security: []
+    delete:
+      summary: 'Delete FCM token (on logout)'
+      operationId: deleteFCMTokenonLogout
+      description: ''
+      parameters: []
+      responses: {  }
+      tags:
+        - Endpoints
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: ''
+                  example: architecto
+              required:
+                - token
+      security: []

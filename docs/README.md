@@ -64,12 +64,36 @@ Questi 3 file risolvono il problema di **context management** per AI coding assi
 
 ---
 
-## 🔌 API Documentation (api/)
+## 🔌 API Documentation
 
-### Endpoint Reference
-- **[API_ENDPOINTS.md](api/API_ENDPOINTS.md)** (8.5KB) - Lista endpoint backend
-- **[API_ENDPOINTS_REFERENCE.md](api/API_ENDPOINTS_REFERENCE.md)** (10KB) - Reference rapida API
-- **[FLUTTER_API_DOCUMENTATION.md](api/FLUTTER_API_DOCUMENTATION.md)** (21KB) - API per Flutter app
+### Auto-Generated Docs (Scribe) ⭐ NEW
+
+**Live Interactive Documentation:**
+- **Production:** https://www.danzafacile.it/docs
+- **Local Dev:** http://localhost:8089/docs
+
+**Features:**
+- ✅ 56 endpoints auto-documented
+- ✅ Interactive "Try it out" testing
+- ✅ Postman collection export
+- ✅ OpenAPI 3.0 spec
+- ✅ Always up-to-date with code
+
+**Regenerate Docs:**
+```bash
+php artisan scribe:generate
+```
+
+**Files:**
+- `public/docs/index.html` - Interactive HTML docs (304KB)
+- `public/docs/collection.json` - Postman collection (82KB)
+- `public/docs/openapi.yaml` - OpenAPI spec (52KB)
+
+**Config:** `config/scribe.php`
+
+### Manual Docs (Archived)
+- ⚠️ **DEPRECATED** - See `docs/archive/api/` for historical reference
+- Replaced by Scribe auto-documentation (2026-01-25)
 
 **Base URL Production:** `https://www.danzafacile.it/api/mobile/v1`
 
