@@ -2,8 +2,8 @@
 
 Istruzioni per Claude Code (claude.ai/code) su come lavorare con DanzaFacile.
 
-**Ultimo aggiornamento:** 2025-11-23
-**Versione:** 2.0.0
+**Ultimo aggiornamento:** 2026-01-25
+**Versione:** 2.1.0
 **Status:** ✅ PRODUCTION READY
 
 ---
@@ -54,6 +54,140 @@ Istruzioni per Claude Code (claude.ai/code) su come lavorare con DanzaFacile.
 - **HTTP Client:** Dio
 - **Push:** Firebase Cloud Messaging
 - **Storage:** Shared Preferences
+
+---
+
+## 📚 Architecture Documentation (IMPORTANTE - LEGGERE PRIMA DI SVILUPPARE)
+
+**Creati il 2026-01-25** per risolvere context management in AI coding.
+
+### 🎯 File Core da Consultare
+
+Questi 3 file contengono le **decisioni architetturali** e i **pattern fondamentali** del sistema. **DEVI consultarli** quando lavori su feature complesse o multi-tenant.
+
+#### 1. `docs/ARCHITECTURE.md` (900+ righe) 🏛️
+
+**Quando leggere:**
+- ✅ Prima di decisioni architetturali major (nuova integrazione, tecnologia, pattern)
+- ✅ Per capire il "WHY" dietro le scelte tecnologiche
+- ✅ Quando aggiungi external integrations (Firebase, PayPal, etc.)
+- ✅ Per problemi di performance/scalability
+
+**Contiene:**
+- System architecture overview (5 layers)
+- Technology stack completo
+- 6 Architecture Decision Records (ADR) - LEGGI QUESTI per capire scelte
+- Design patterns utilizzati (Service, Repository, Policy, etc.)
+- Data flow diagrams
+- External integrations details
+- Security architecture (CSP, HSTS, SSL/TLS)
+
+**Path:** `docs/ARCHITECTURE.md`
+
+---
+
+#### 2. `docs/MULTI_TENANT_GUIDE.md` (650+ righe) 🏢
+
+**Quando leggere (OBBLIGATORIO):**
+- ✅ **SEMPRE** quando crei nuova migration
+- ✅ **SEMPRE** quando crei nuovo Model
+- ✅ **SEMPRE** per feature che coinvolgono dati scuole
+- ✅ Per bug isolation (admin vede dati altre scuole)
+- ✅ Per query cross-school
+
+**Contiene:**
+- School-based data isolation strategy
+- HasSchoolScope trait implementation
+- Global scopes pattern
+- Migration checklist (14 items) - USA QUESTA
+- 5 usage patterns (automatic, explicit, bypass, creating, service)
+- Best practices OBBLIGATORIE
+- Common pitfalls & troubleshooting
+- Testing multi-tenant isolation
+
+**Path:** `docs/MULTI_TENANT_GUIDE.md`
+
+**⚠️ CRITICAL:** Violazione multi-tenant = SECURITY BREACH. Leggi SEMPRE questo file prima di toccare database.
+
+---
+
+#### 3. `docs/SERVICES_MAP.md` (800+ righe) 🗺️
+
+**Quando leggere:**
+- ✅ Prima di creare nuovo service (verifica se esiste già!)
+- ✅ Per business logic complessa (check pattern esistenti)
+- ✅ Per capire quale service usare per una funzionalità
+- ✅ Prima di refactoring controller → service
+
+**Contiene:**
+- 11 servizi mappati con dettagli completi:
+  - StorageQuotaService, PaymentService, FirebasePushService
+  - PayPalService, InvoiceService, NotificationService
+  - QRCodeService, FileUploadService, GuestRegistrationService
+  - CacheService, DatabaseOptimizationService
+- Key methods & signatures per ogni service
+- Dependencies graph
+- Usage examples concreti (payment flow, media upload, push)
+- Service creation template
+- "When to create service" checklist
+
+**Path:** `docs/SERVICES_MAP.md`
+
+---
+
+### 📋 Quick Reference per Task Comuni
+
+```bash
+# NUOVA FEATURE CON DATABASE
+1. Leggi: docs/MULTI_TENANT_GUIDE.md (Migration Checklist)
+2. Verifica: docs/SERVICES_MAP.md (se serve nuovo service)
+3. Implementa con global scope + school_id
+
+# BUG ISOLATION (admin vede dati altre scuole)
+1. Leggi: docs/MULTI_TENANT_GUIDE.md (Common Pitfalls section)
+2. Fix: Aggiungi global scope o filtra school_id
+3. Test: Verifica con 2+ scuole
+
+# NUOVA INTEGRAZIONE (es: Stripe, Twillio)
+1. Leggi: docs/ARCHITECTURE.md (ADR section)
+2. Documenta: Crea nuovo ADR per decisione
+3. Implementa: Segui pattern PayPalService/FirebasePushService
+
+# REFACTORING BUSINESS LOGIC
+1. Leggi: docs/SERVICES_MAP.md (Service creation guide)
+2. Verifica: Service esiste già? Evita duplicazione
+3. Crea: Usa template da SERVICES_MAP.md
+
+# MAJOR ARCHITECTURAL DECISION
+1. Leggi: docs/ARCHITECTURE.md (ADR section completa)
+2. Valuta: Pro/contro alternativa
+3. Documenta: Aggiungi nuovo ADR in ARCHITECTURE.md
+```
+
+---
+
+### 🎯 Quando NON Serve Leggere
+
+❌ **NON leggere** per:
+- Simple CRUD operations (usa Resource Controller)
+- UI-only changes (styling, layout)
+- Bug fix minori non multi-tenant
+- Feature già completamente documentata
+
+✅ **Principio:** Se tocchi database o business logic → leggi docs rilevanti
+
+---
+
+### 🔄 Workflow Consigliato
+
+```
+1. Ricevi task → Analizza tipo (feature/bug/refactoring)
+2. Identifica docs rilevanti (usa Quick Reference sopra)
+3. Leggi SOLO sezioni rilevanti (non interi file)
+4. Implementa seguendo pattern documentati
+5. Se major change → Aggiorna docs corrispondenti
+6. Commit con reference a docs consultati
+```
 
 ---
 
