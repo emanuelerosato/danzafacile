@@ -770,33 +770,32 @@ document.addEventListener('alpine:init', () => {
             this.errors = {};
 
             try {
-                // Create FormData for better Laravel compatibility
-                const formData = new FormData();
-                formData.append('_method', 'PUT');
-                formData.append('_token', '{{ csrf_token() }}');
+                // Prepare data object (not FormData - better for Laravel JSON handling)
+                const data = {
+                    _method: 'PUT',
+                    ...this.form
+                };
 
-                // Add all form fields
-                Object.keys(this.form).forEach(key => {
-                    if (this.form[key] !== null && this.form[key] !== undefined) {
-                        formData.append(key, this.form[key]);
-                    }
-                });
+                // Convert booleans to 0/1 for Laravel
+                data.active = this.form.active ? 1 : 0;
+                data.is_minor = this.form.is_minor ? 1 : 0;
 
                 const response = await fetch('/admin/students/{{ $student->id }}', {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: formData
+                    body: JSON.stringify(data)
                 });
 
-                const data = await response.json();
+                const result = await response.json();
 
-                if (data.success) {
+                if (result.success) {
                     const event = new CustomEvent('show-toast', {
                         detail: {
-                            message: data.message,
+                            message: result.message,
                             type: 'success'
                         }
                     });
@@ -807,12 +806,12 @@ document.addEventListener('alpine:init', () => {
                         window.location.href = '/admin/students/{{ $student->id }}';
                     }, 1000);
                 } else {
-                    if (data.errors) {
-                        this.errors = data.errors;
+                    if (result.errors) {
+                        this.errors = result.errors;
                     } else {
                         const event = new CustomEvent('show-toast', {
                             detail: {
-                                message: data.message || 'Errore durante l\'aggiornamento dello studente',
+                                message: result.message || 'Errore durante l\'aggiornamento dello studente',
                                 type: 'error'
                             }
                         });
