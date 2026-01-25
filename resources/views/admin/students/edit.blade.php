@@ -395,34 +395,17 @@
                     <p class="mt-1 text-sm text-gray-600">Informazioni per contatti di emergenza</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Emergency Contact Name -->
-                    <div>
-                        <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700 mb-2">
-                            Nome Contatto
-                        </label>
-                        <input type="text"
-                               name="emergency_contact_name"
-                               id="emergency_contact_name"
-                               x-model="form.emergency_contact_name"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
-                               placeholder="Nome e cognome">
-                        <div x-show="errors.emergency_contact_name" class="mt-1 text-sm text-red-600" x-text="errors.emergency_contact_name"></div>
-                    </div>
-
-                    <!-- Emergency Contact Phone -->
-                    <div>
-                        <label for="emergency_contact_phone" class="block text-sm font-medium text-gray-700 mb-2">
-                            Telefono Contatto
-                        </label>
-                        <input type="tel"
-                               name="emergency_contact_phone"
-                               id="emergency_contact_phone"
-                               x-model="form.emergency_contact_phone"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
-                               placeholder="+39 123 456 7890">
-                        <div x-show="errors.emergency_contact_phone" class="mt-1 text-sm text-red-600" x-text="errors.emergency_contact_phone"></div>
-                    </div>
+                <div>
+                    <label for="emergency_contact" class="block text-sm font-medium text-gray-700 mb-2">
+                        Contatto di Emergenza
+                    </label>
+                    <textarea name="emergency_contact"
+                              id="emergency_contact"
+                              x-model="form.emergency_contact"
+                              rows="2"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors resize-none"
+                              placeholder="Nome, cognome e numero di telefono del contatto di emergenza"></textarea>
+                    <div x-show="errors.emergency_contact" class="mt-1 text-sm text-red-600" x-text="errors.emergency_contact"></div>
                 </div>
             </div>
 
@@ -439,16 +422,16 @@
                 </div>
 
                 <div>
-                    <label for="medical_conditions" class="block text-sm font-medium text-gray-700 mb-2">
-                        Condizioni Mediche
+                    <label for="medical_notes" class="block text-sm font-medium text-gray-700 mb-2">
+                        Note Mediche
                     </label>
-                    <textarea name="medical_conditions"
-                              id="medical_conditions"
-                              x-model="form.medical_conditions"
+                    <textarea name="medical_notes"
+                              id="medical_notes"
+                              x-model="form.medical_notes"
                               rows="4"
                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors resize-none"
                               placeholder="Allergie, condizioni mediche particolari, farmaci assunti, ecc."></textarea>
-                    <div x-show="errors.medical_conditions" class="mt-1 text-sm text-red-600" x-text="errors.medical_conditions"></div>
+                    <div x-show="errors.medical_notes" class="mt-1 text-sm text-red-600" x-text="errors.medical_notes"></div>
                 </div>
             </div>
 
@@ -721,9 +704,8 @@ document.addEventListener('alpine:init', () => {
             codice_fiscale: '{{ $student->codice_fiscale ?? '' }}',
             date_of_birth: '{{ $student->date_of_birth ? $student->date_of_birth->format('Y-m-d') : '' }}',
             address: '{{ $student->address ?? '' }}',
-            emergency_contact_name: '{{ $student->emergency_contact_name ?? '' }}',
-            emergency_contact_phone: '{{ $student->emergency_contact_phone ?? '' }}',
-            medical_conditions: '{{ $student->medical_conditions ?? '' }}',
+            emergency_contact: '{{ $student->emergency_contact ?? '' }}',
+            medical_notes: '{{ $student->medical_notes ?? '' }}',
             active: {{ $student->active ? 'true' : 'false' }},
             // SENIOR FIX: Task #4 - Guardian/Tutor fields for minor students
             is_minor: {{ $student->is_minor ? 'true' : 'false' }},

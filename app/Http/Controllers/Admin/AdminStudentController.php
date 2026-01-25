@@ -90,9 +90,8 @@ class AdminStudentController extends AdminBaseController
             ],
             'date_of_birth' => 'required|date|before:today',
             'address' => 'nullable|string|max:500',
-            'emergency_contact_name' => 'nullable|string|max:255',
-            'emergency_contact_phone' => 'nullable|string|max:20',
-            'medical_conditions' => 'nullable|string|max:1000',
+            'emergency_contact' => 'nullable|string|max:500',
+            'medical_notes' => 'nullable|string|max:1000',
             'active' => 'boolean',
             'send_welcome_email' => 'boolean',
             'is_minor' => 'boolean',  // SENIOR FIX: Task #4
@@ -257,9 +256,8 @@ class AdminStudentController extends AdminBaseController
             ],
             'date_of_birth' => 'required|date|before:today',
             'address' => 'nullable|string|max:500',
-            'emergency_contact_name' => 'nullable|string|max:255',
-            'emergency_contact_phone' => 'nullable|string|max:20',
-            'medical_conditions' => 'nullable|string|max:1000',
+            'emergency_contact' => 'nullable|string|max:500',
+            'medical_notes' => 'nullable|string|max:1000',
             'active' => 'boolean',
             'is_minor' => 'boolean',  // SENIOR FIX: Task #4
         ]);
