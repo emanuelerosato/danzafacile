@@ -2,8 +2,8 @@
 
 Documentazione completa del progetto DanzaFacile, organizzata per categoria.
 
-**Totale documenti:** 28 file organizzati in 6 categorie
-**Ultimo aggiornamento:** 2025-11-23
+**Totale documenti:** 35 file organizzati in 8 categorie
+**Ultimo aggiornamento:** 2026-01-25
 
 ---
 
@@ -11,6 +11,7 @@ Documentazione completa del progetto DanzaFacile, organizzata per categoria.
 
 | Categoria | File | Descrizione |
 |-----------|------|-------------|
+| 🏛️ **Architecture** | 3 file | Architettura sistema e decisioni |
 | 📄 **Root** | 3 file | Guide principali e checklist |
 | 🔌 **API** | 3 file | Documentazione API REST |
 | 🚀 **Deployment** | 2 file | Guide deploy e VPS |
@@ -18,6 +19,40 @@ Documentazione completa del progetto DanzaFacile, organizzata per categoria.
 | 📱 **Flutter** | 5 file | Progress app mobile |
 | 🔔 **Push Notifications** | 4 file | Sistema notifiche |
 | ⚙️ **Features** | 5 file | Feature specifiche |
+| 📋 **Tasks** | 2 file + archive | Bug tracking e implementation |
+
+---
+
+## 🏛️ Architecture Documentation (NEW!)
+
+### Core Architecture Guides
+
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** (72KB) - 🏛️ **System Architecture Overview**
+  - Technology stack completo
+  - Layered architecture (5 layers)
+  - Design patterns utilizzati
+  - 6 Architecture Decision Records (ADR)
+  - Data flow diagrams
+  - External integrations
+  - Security & scalability
+
+- **[SERVICES_MAP.md](SERVICES_MAP.md)** (60KB) - 🗺️ **Service Layer Mapping**
+  - 11 servizi business logic mappati
+  - Key methods & signatures
+  - Dependencies graph
+  - Usage examples
+  - Service creation guide
+
+- **[MULTI_TENANT_GUIDE.md](MULTI_TENANT_GUIDE.md)** (48KB) - 🏢 **Multi-Tenant Architecture**
+  - School-based data isolation
+  - HasSchoolScope trait implementation
+  - Best practices & patterns
+  - Migration checklist
+  - Testing isolation
+  - Common pitfalls & troubleshooting
+
+**Why these docs?**
+Questi 3 file risolvono il problema di **context management** per AI coding assistants, fornendo architettura HIGH-LEVEL invece di massive function mapping (2,350 righe vs 20K+ mapping file).
 
 ---
 
@@ -109,45 +144,73 @@ Documentazione completa del progetto DanzaFacile, organizzata per categoria.
 
 ---
 
+## 📋 Tasks & Roadmaps (tasks/)
+
+### Active Tasks
+- **[BUG_FIXES_ROADMAP.md](tasks/BUG_FIXES_ROADMAP.md)** (60KB) - ✅ 11/11 Completed (100%)
+- **[TASK_11_STORAGE_QUOTA_IMPLEMENTATION.md](tasks/TASK_11_STORAGE_QUOTA_IMPLEMENTATION.md)** (104KB) - ✅ Completed & Deployed
+
+**Status:** Tutti i task completati al 100%
+**Last Update:** 2026-01-25
+
+### Archive
+Legacy task files (STAFF_*.md) sono in `archive/` per riferimento storico.
+
+---
+
 ## 🔍 Quick Reference
 
 ### Per Sviluppatori
+
+#### Architecture & Patterns
 ```bash
+# System architecture overview
+cat docs/ARCHITECTURE.md
+
+# Service layer mapping
+cat docs/SERVICES_MAP.md
+
+# Multi-tenant implementation
+cat docs/MULTI_TENANT_GUIDE.md
+
 # Istruzioni Claude AI
 cat ../CLAUDE.md
 
 # Getting started
 cat ../README.md
+```
 
+#### API Development
+```bash
 # API reference
-cat api/FLUTTER_API_DOCUMENTATION.md
+cat docs/api/FLUTTER_API_DOCUMENTATION.md
 
 # Push notifications
-cat push-notifications/PUSH_NOTIFICATIONS_GUIDE.md
+cat docs/push-notifications/PUSH_NOTIFICATIONS_GUIDE.md
 ```
 
 ### Per Deploy
 ```bash
 # Deploy guide
-cat deployment/DEPLOYMENT.md
+cat docs/deployment/DEPLOYMENT.md
 
 # Security audit
-cat security/SECURITY_AUDIT_REPORT_2025-11-22.md
+cat docs/security/SECURITY_AUDIT_REPORT_2025-11-22.md
 
 # CSP configuration
-cat security/CSP_FIX_APPLIED.md
+cat docs/security/CSP_FIX_APPLIED.md
 ```
 
 ### Per Flutter Development
 ```bash
 # App strategy
-cat flutter/FLUTTER_APP_STRATEGY.md
+cat docs/flutter/FLUTTER_APP_STRATEGY.md
 
 # API endpoints
-cat api/FLUTTER_API_DOCUMENTATION.md
+cat docs/api/FLUTTER_API_DOCUMENTATION.md
 
 # Firebase setup
-cat push-notifications/FIREBASE_SETUP_GUIDE.md
+cat docs/push-notifications/FIREBASE_SETUP_GUIDE.md
 ```
 
 ---
@@ -156,7 +219,12 @@ cat push-notifications/FIREBASE_SETUP_GUIDE.md
 
 ```
 docs/
-├── README.md (questo file)
+├── README.md (questo file - 6.9KB)
+│
+├── ARCHITECTURE.md (72KB) ⭐ NEW
+├── SERVICES_MAP.md (60KB) ⭐ NEW
+├── MULTI_TENANT_GUIDE.md (48KB) ⭐ NEW
+│
 ├── guida.md (37KB - guida completa IT)
 ├── PRE_PRODUCTION_CHECKLIST.md (10KB)
 │
@@ -190,15 +258,28 @@ docs/
 │   ├── PUSH_NOTIFICATIONS_IMPLEMENTATION_PLAN.md
 │   └── PUSH_NOTIFICATIONS_PROGRESS.md
 │
-└── features/ (5 file - 118KB)
-    ├── EMAIL-FUNNEL-SYSTEM.md
-    ├── PAYMENTS_ANALYSIS.md
-    ├── galleries-audit-report.md
-    ├── storage-implementation-roadmap.md
-    └── storage-limits-brainstorming.md
+├── features/ (5 file - 118KB)
+│   ├── EMAIL-FUNNEL-SYSTEM.md
+│   ├── PAYMENTS_ANALYSIS.md
+│   ├── galleries-audit-report.md
+│   ├── storage-implementation-roadmap.md
+│   └── storage-limits-brainstorming.md
+│
+├── tasks/ (2 file + README)
+│   ├── README.md
+│   ├── BUG_FIXES_ROADMAP.md (60KB)
+│   └── TASK_11_STORAGE_QUOTA_IMPLEMENTATION.md (104KB)
+│
+└── archive/ (6 file - legacy)
+    ├── STAFF_AJAX_JSON_FIX.md
+    ├── STAFF_CHECKBOX_FIX_FINALE.md
+    ├── STAFF_CHECKBOX_SELECTION_FIX.md
+    ├── STAFF_DELETE_FIX_EVIDENZE.md
+    ├── STAFF_MODULE_FIXES_2025-12-06.md
+    └── STAFF_SHOW_500_FIX.md
 ```
 
-**Totale:** 28 file, ~500KB di documentazione organizzata
+**Totale:** 35 file, ~700KB di documentazione organizzata
 
 ---
 
@@ -218,6 +299,36 @@ docs/
 
 ---
 
-**Versione:** 2.0.0
-**Ultimo aggiornamento:** 2025-11-23
-**Maintainer:** Claude Code AI
+## 🎯 Documentation Philosophy
+
+### Design Principles
+
+1. **High-Level Over Low-Level**: Documentare DECISIONI e ARCHITETTURA, non singole funzioni
+2. **Context-Aware**: Fornire contesto sufficiente senza drowning in details
+3. **Maintenance-Friendly**: Documentation che invecchia bene (95% accuracy dopo 6+ mesi)
+4. **Developer-Centric**: Rispondere a "WHY" prima di "WHAT" e "HOW"
+5. **AI-Friendly**: Ottimizzato per AI coding assistants (Claude Code, GitHub Copilot)
+
+### Documentation Layers
+
+```
+Layer 1: ARCHITECTURE.md        → WHY decisions were made (ADR style)
+Layer 2: SERVICES_MAP.md        → WHAT services exist & WHERE to use them
+Layer 3: MULTI_TENANT_GUIDE.md  → HOW to implement features correctly
+Layer 4: Feature-specific docs  → DEEP DIVE on specific domains
+```
+
+### Update Frequency
+
+| Doc Type | Update Frequency | Owner |
+|----------|------------------|-------|
+| Architecture core (3 files) | 6-12 months | Tech Lead |
+| Feature-specific | Per feature release | Feature developer |
+| API docs | Per API change | Backend team |
+| Tasks/Roadmaps | Weekly | Project Manager |
+
+---
+
+**Versione:** 3.0.0 (Restructured with Architecture docs)
+**Ultimo aggiornamento:** 2026-01-25
+**Maintainer:** Claude Code AI + DanzaFacile Team
