@@ -220,7 +220,7 @@
 
                 {{-- TASK #11: Storage Usage Widget --}}
                 @php
-                    $storageInfo = app(App\Services\StorageQuotaService::class)->getStorageInfo($currentSchool);
+                    $storageInfo = app(App\Services\StorageQuotaService::class)->getStorageInfo(auth()->user()->school);
                 @endphp
 
                 <div class="bg-white rounded-lg shadow p-6">
