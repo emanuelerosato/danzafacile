@@ -137,6 +137,9 @@ class AdminStudentController extends AdminBaseController
         $validated['active'] = $validated['active'] ?? true;
         $validated['is_minor'] = $validated['is_minor'] ?? false;  // SENIOR FIX: Task #4
 
+        // BUGFIX: Auto-compute name field from first_name + last_name to ensure consistency
+        $validated['name'] = $validated['first_name'] . ' ' . $validated['last_name'];
+
         $student = User::create($validated);
 
         // Send welcome email if requested
@@ -300,6 +303,10 @@ class AdminStudentController extends AdminBaseController
         }
 
         $validated['is_minor'] = $validated['is_minor'] ?? false;  // SENIOR FIX: Task #4
+
+        // BUGFIX: Auto-compute name field from first_name + last_name to ensure consistency
+        // Il form invia name ma non era validato, quindi non veniva salvato nel DB
+        $validated['name'] = $validated['first_name'] . ' ' . $validated['last_name'];
 
         $student->update($validated);
         $this->clearSchoolCache();
