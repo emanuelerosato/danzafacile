@@ -137,9 +137,17 @@ class StaffController extends Controller
                            ->withInput();
         }
 
+        // BUGFIX: Split name into first_name and last_name to avoid DB constraint violations
+        // Preserve existing form (no UI changes needed)
+        $nameParts = explode(' ', trim($request->name), 2);
+        $firstName = $nameParts[0] ?? '';
+        $lastName = $nameParts[1] ?? $nameParts[0] ?? ''; // Fallback to first name if no space
+
         // Crea l'utente
         $user = User::create([
             'name' => $request->name,
+            'first_name' => $firstName,
+            'last_name' => $lastName,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'admin', // Staff members sono admin della scuola
@@ -314,9 +322,16 @@ class StaffController extends Controller
                            ->withInput();
         }
 
+        // BUGFIX: Split name into first_name and last_name to avoid DB constraint violations
+        $nameParts = explode(' ', trim($request->name), 2);
+        $firstName = $nameParts[0] ?? '';
+        $lastName = $nameParts[1] ?? $nameParts[0] ?? ''; // Fallback to first name if no space
+
         // Aggiorna l'utente
         $staff->user->update([
             'name' => $request->name,
+            'first_name' => $firstName,
+            'last_name' => $lastName,
             'email' => $request->email,
         ]);
 
