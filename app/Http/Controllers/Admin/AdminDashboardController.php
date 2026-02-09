@@ -214,8 +214,12 @@ class AdminDashboardController extends Controller
         // Add recent enrollments to variable name expected by template
         $recent_enrollments = $recentEnrollments;
 
+        // BUGFIX: View expects $currentSchool but we pass $school
+        $currentSchool = $school;
+
         return view('admin.dashboard', compact(
             'school',
+            'currentSchool',
             'stats',
             'quickStats',
             'recent_enrollments',
