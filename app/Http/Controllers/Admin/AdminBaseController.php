@@ -277,6 +277,7 @@ abstract class AdminBaseController extends Controller
 
     /**
      * Handle bulk actions with proper validation
+     * SECURITY FIX: Multi-tenant isolation - solo risorse della propria scuola
      */
     protected function handleBulkAction(Request $request, $model, array $allowedActions = ['activate', 'deactivate', 'delete']): \Illuminate\Http\JsonResponse
     {
@@ -289,21 +290,33 @@ abstract class AdminBaseController extends Controller
         $action = $request->get('action');
         $ids = $request->get('ids');
 
+        // SECURITY: Ensure school context is initialized
+        $this->setupContext();
+
         try {
             switch ($action) {
                 case 'activate':
-                    $model::whereIn('id', $ids)->update(['active' => true]);
-                    $message = 'Elementi attivati con successo.';
+                    // SECURITY FIX: Multi-tenant isolation
+                    $affected = $model::whereIn('id', $ids)
+                        ->where('school_id', $this->school->id)
+                        ->update(['active' => true]);
+                    $message = "Elementi attivati con successo ($affected).";
                     break;
 
                 case 'deactivate':
-                    $model::whereIn('id', $ids)->update(['active' => false]);
-                    $message = 'Elementi disattivati con successo.';
+                    // SECURITY FIX: Multi-tenant isolation
+                    $affected = $model::whereIn('id', $ids)
+                        ->where('school_id', $this->school->id)
+                        ->update(['active' => false]);
+                    $message = "Elementi disattivati con successo ($affected).";
                     break;
 
                 case 'delete':
-                    $model::whereIn('id', $ids)->delete();
-                    $message = 'Elementi eliminati con successo.';
+                    // SECURITY FIX: Multi-tenant isolation
+                    $affected = $model::whereIn('id', $ids)
+                        ->where('school_id', $this->school->id)
+                        ->delete();
+                    $message = "Elementi eliminati con successo ($affected).";
                     break;
 
                 default:
