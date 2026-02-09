@@ -700,7 +700,7 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('studentEditForm', () => ({
         loading: false,
         errors: {},
-        // BUGFIX: Use @json() to properly escape special characters (apostrophes, quotes, etc)
+        // BUGFIX: Use JSON encoding to properly escape special characters (apostrophes, quotes, etc)
         // Prevents JavaScript syntax errors with names like "O'Brien", "Dell'Aquila"
         form: @json([
             'first_name' => $student->first_name,
