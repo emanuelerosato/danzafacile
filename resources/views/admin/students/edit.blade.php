@@ -695,32 +695,37 @@
     </div>
 </div>
 
+@php
+// BUGFIX: Prepare student form data as JSON variable to avoid Blade @json() truncation bug
+// Using php json_encode() directly prevents compilation issues with large arrays
+$studentFormData = json_encode([
+    'first_name' => $student->first_name,
+    'last_name' => $student->last_name,
+    'name' => $student->name,
+    'email' => $student->email,
+    'phone' => $student->phone ?? '',
+    'codice_fiscale' => $student->codice_fiscale ?? '',
+    'date_of_birth' => $student->date_of_birth ? $student->date_of_birth->format('Y-m-d') : '',
+    'address' => $student->address ?? '',
+    'emergency_contact' => $student->emergency_contact ?? '',
+    'medical_notes' => $student->medical_notes ?? '',
+    'active' => $student->active,
+    'is_minor' => $student->is_minor,
+    'guardian_first_name' => $student->guardian_first_name ?? '',
+    'guardian_last_name' => $student->guardian_last_name ?? '',
+    'guardian_fiscal_code' => $student->guardian_fiscal_code ?? '',
+    'guardian_email' => $student->guardian_email ?? '',
+    'guardian_phone' => $student->guardian_phone ?? ''
+], JSON_THROW_ON_ERROR | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+@endphp
+
 <script nonce="@cspNonce">
 document.addEventListener('alpine:init', () => {
     Alpine.data('studentEditForm', () => ({
         loading: false,
         errors: {},
-        // BUGFIX: Use JSON encoding to properly escape special characters (apostrophes, quotes, etc)
-        // Prevents JavaScript syntax errors with names like "O'Brien", "Dell'Aquila"
-        form: @json([
-            'first_name' => $student->first_name,
-            'last_name' => $student->last_name,
-            'name' => $student->name,
-            'email' => $student->email,
-            'phone' => $student->phone ?? '',
-            'codice_fiscale' => $student->codice_fiscale ?? '',
-            'date_of_birth' => $student->date_of_birth ? $student->date_of_birth->format('Y-m-d') : '',
-            'address' => $student->address ?? '',
-            'emergency_contact' => $student->emergency_contact ?? '',
-            'medical_notes' => $student->medical_notes ?? '',
-            'active' => $student->active,
-            'is_minor' => $student->is_minor,
-            'guardian_first_name' => $student->guardian_first_name ?? '',
-            'guardian_last_name' => $student->guardian_last_name ?? '',
-            'guardian_fiscal_code' => $student->guardian_fiscal_code ?? '',
-            'guardian_email' => $student->guardian_email ?? '',
-            'guardian_phone' => $student->guardian_phone ?? ''
-        ]),
+        // Student data properly encoded with special character escaping
+        form: {!! $studentFormData !!},
 
         get maxDate() {
             const today = new Date();
