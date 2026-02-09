@@ -52,6 +52,7 @@ class User extends Authenticatable
         'role',                  // Use assignRole() method instead
         'email_verified_at',     // Use markEmailAsVerified() instead
         'remember_token',        // Laravel internal field
+        'school_id',             // CRITICAL: Prevent cross-school assignment (multi-tenant security)
     ];
 
     /**

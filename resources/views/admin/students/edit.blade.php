@@ -219,15 +219,20 @@
                         <label for="codice_fiscale" class="block text-sm font-medium text-gray-700 mb-2">
                             Codice Fiscale <span class="text-red-500">*</span>
                         </label>
-                        <x-secure-input
+                        {{-- BUGFIX: Removed x-secure-input component to avoid Alpine.js x-data conflict --}}
+                        {{-- Using direct input with @input handler for proper two-way binding --}}
+                        <input
                             type="text"
                             name="codice_fiscale"
-                            :value="$student->codice_fiscale ?? ''"
+                            id="codice_fiscale"
+                            :value="form.codice_fiscale"
+                            @input="form.codice_fiscale = $event.target.value.toUpperCase()"
                             placeholder="RSSMRA80A01H501X"
-                            :required="true"
-                            :max-length="16"
-                            class="uppercase"
-                            x-model="form.codice_fiscale" />
+                            required
+                            maxlength="16"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200 uppercase"
+                            pattern="[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]"
+                            title="Codice fiscale italiano (es: RSSMRA80A01H501X)" />
                         <div x-show="errors.codice_fiscale" class="mt-1 text-sm text-red-600" x-text="errors.codice_fiscale"></div>
                         <p class="mt-1 text-xs text-gray-500">Inserisci il codice fiscale italiano (16 caratteri)</p>
                     </div>
@@ -695,26 +700,27 @@ document.addEventListener('alpine:init', () => {
     Alpine.data('studentEditForm', () => ({
         loading: false,
         errors: {},
-        form: {
-            first_name: '{{ $student->first_name }}',
-            last_name: '{{ $student->last_name }}',
-            name: '{{ $student->name }}',
-            email: '{{ $student->email }}',
-            phone: '{{ $student->phone ?? '' }}',
-            codice_fiscale: '{{ $student->codice_fiscale ?? '' }}',
-            date_of_birth: '{{ $student->date_of_birth ? $student->date_of_birth->format('Y-m-d') : '' }}',
-            address: '{{ $student->address ?? '' }}',
-            emergency_contact: '{{ $student->emergency_contact ?? '' }}',
-            medical_notes: '{{ $student->medical_notes ?? '' }}',
-            active: {{ $student->active ? 'true' : 'false' }},
-            // SENIOR FIX: Task #4 - Guardian/Tutor fields for minor students
-            is_minor: {{ $student->is_minor ? 'true' : 'false' }},
-            guardian_first_name: '{{ $student->guardian_first_name ?? '' }}',
-            guardian_last_name: '{{ $student->guardian_last_name ?? '' }}',
-            guardian_fiscal_code: '{{ $student->guardian_fiscal_code ?? '' }}',
-            guardian_email: '{{ $student->guardian_email ?? '' }}',
-            guardian_phone: '{{ $student->guardian_phone ?? '' }}'
-        },
+        // BUGFIX: Use @json() to properly escape special characters (apostrophes, quotes, etc)
+        // Prevents JavaScript syntax errors with names like "O'Brien", "Dell'Aquila"
+        form: @json([
+            'first_name' => $student->first_name,
+            'last_name' => $student->last_name,
+            'name' => $student->name,
+            'email' => $student->email,
+            'phone' => $student->phone ?? '',
+            'codice_fiscale' => $student->codice_fiscale ?? '',
+            'date_of_birth' => $student->date_of_birth ? $student->date_of_birth->format('Y-m-d') : '',
+            'address' => $student->address ?? '',
+            'emergency_contact' => $student->emergency_contact ?? '',
+            'medical_notes' => $student->medical_notes ?? '',
+            'active' => $student->active,
+            'is_minor' => $student->is_minor,
+            'guardian_first_name' => $student->guardian_first_name ?? '',
+            'guardian_last_name' => $student->guardian_last_name ?? '',
+            'guardian_fiscal_code' => $student->guardian_fiscal_code ?? '',
+            'guardian_email' => $student->guardian_email ?? '',
+            'guardian_phone' => $student->guardian_phone ?? ''
+        ]),
 
         get maxDate() {
             const today = new Date();
