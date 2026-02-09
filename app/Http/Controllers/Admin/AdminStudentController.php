@@ -188,12 +188,12 @@ class AdminStudentController extends AdminBaseController
             }
         ]);
 
-        // Calculate student stats
+        // Calculate student stats (usando collection già caricate per evitare N+1)
         $stats = [
             'total_courses' => $student->enrollments->count(),
-            'active_courses' => $student->enrollments()->whereIn('status', ['active', 'enrolled'])->count(),
+            'active_courses' => $student->enrollments->whereIn('status', ['active', 'enrolled'])->count(),
             'total_payments' => $student->payments->sum('amount'),
-            'pending_payments' => $student->payments()->where('status', 'pending')->sum('amount'),
+            'pending_payments' => $student->payments->where('status', 'pending')->sum('amount'),
             'attendance_rate' => $this->calculateAttendanceRate($student),
             'documents_status' => $this->getDocumentsStatus($student)
         ];
@@ -393,9 +393,11 @@ class AdminStudentController extends AdminBaseController
         $studentIds = $request->get('student_ids');
 
         // Ensure all students belong to current school
+        // PERFORMANCE FIX: Eager load relazioni per export
         $students = $this->school->users()
             ->where('role', 'student')
             ->whereIn('id', $studentIds)
+            ->with(['enrollments.course', 'payments'])
             ->get();
 
         if ($students->count() !== count($studentIds)) {
@@ -509,16 +511,18 @@ class AdminStudentController extends AdminBaseController
 
     /**
      * Calculate student attendance rate
+     * PERFORMANCE FIX: Usa collection già caricata per evitare N+1
      */
     private function calculateAttendanceRate(User $student): float
     {
-        $totalAttendance = $student->attendance()->count();
+        // Usa la collection già caricata invece di fare nuove query
+        $totalAttendance = $student->attendance->count();
 
         if ($totalAttendance === 0) {
             return 0;
         }
 
-        $presentCount = $student->attendance()
+        $presentCount = $student->attendance
             ->where('status', 'present')
             ->count();
 
