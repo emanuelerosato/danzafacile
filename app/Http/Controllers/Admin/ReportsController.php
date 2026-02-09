@@ -115,12 +115,17 @@ class ReportsController extends Controller
 
         return [
             // Studenti
+            // SECURITY FIX + PERFORMANCE: Added missing school_id filter (multi-tenant isolation)
             'students' => [
-                'total' => User::where('role', 'student')->count(),
+                'total' => User::where('role', 'student')
+                    ->where('school_id', $schoolId)
+                    ->count(),
                 'new' => User::where('role', 'student')
+                    ->where('school_id', $schoolId)
                     ->whereBetween('created_at', [$startDate, $endDate])
                     ->count(),
                 'active' => User::where('role', 'student')
+                    ->where('school_id', $schoolId)
                     ->where('active', true)
                     ->count(),
             ],
