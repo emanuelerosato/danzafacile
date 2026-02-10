@@ -397,6 +397,34 @@ class User extends Authenticatable
         $this->attributes['role'] = in_array($value, $allowedRoles) ? $value : 'user';
     }
 
+    /**
+     * Imposta il codice fiscale in maiuscolo automaticamente
+     *
+     * SERVER-SIDE FIX: Trasforma sempre il codice fiscale in uppercase
+     * Garantisce consistenza dati anche se:
+     * - Validazione frontend fallisce
+     * - API chiamata direttamente senza frontend
+     * - Dato inserito tramite seeder/console command
+     */
+    public function setCodiceFiscaleAttribute($value): void
+    {
+        $this->attributes['codice_fiscale'] = $value ? strtoupper($value) : null;
+    }
+
+    /**
+     * Imposta il codice fiscale del genitore/tutore in maiuscolo automaticamente
+     *
+     * SERVER-SIDE FIX: Trasforma sempre il codice fiscale in uppercase
+     * Garantisce consistenza dati anche se:
+     * - Validazione frontend fallisce
+     * - API chiamata direttamente senza frontend
+     * - Dato inserito tramite seeder/console command
+     */
+    public function setGuardianFiscalCodeAttribute($value): void
+    {
+        $this->attributes['guardian_fiscal_code'] = $value ? strtoupper($value) : null;
+    }
+
     // SECURITY: SAFE METHODS FOR SENSITIVE FIELDS
 
     /**

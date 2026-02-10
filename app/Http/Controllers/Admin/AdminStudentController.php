@@ -127,6 +127,10 @@ class AdminStudentController extends AdminBaseController
             $validated = array_merge($validated, $guardianValidation);
         }
 
+        // NOTE: codice_fiscale e guardian_fiscal_code vengono automaticamente trasformati
+        // in uppercase dal Model User tramite mutatori setCodiceFiscaleAttribute()
+        // e setGuardianFiscalCodeAttribute()
+
         // Generate password
         $password = $this->generateStudentPassword();
 
@@ -301,6 +305,10 @@ class AdminStudentController extends AdminBaseController
             $validated['guardian_email'] = null;
             $validated['guardian_phone'] = null;
         }
+
+        // NOTE: codice_fiscale e guardian_fiscal_code vengono automaticamente trasformati
+        // in uppercase dal Model User tramite mutatori setCodiceFiscaleAttribute()
+        // e setGuardianFiscalCodeAttribute()
 
         $validated['is_minor'] = $validated['is_minor'] ?? false;  // SENIOR FIX: Task #4
 
