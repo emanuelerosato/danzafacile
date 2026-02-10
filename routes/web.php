@@ -407,6 +407,11 @@ Route::middleware('auth')->group(function () {
             Route::put('students/{student}', [AdminStudentController::class, 'update'])->name('students.update');
             Route::patch('students/{student}', [AdminStudentController::class, 'update']);
             Route::patch('students/{student}/toggle-active', [AdminStudentController::class, 'toggleActive'])->name('students.toggle-active');
+        });
+
+        // Tier 2b: Bulk Operations (30 req/min)
+        // Higher limit for bulk operations to accommodate large schools (500+ students)
+        Route::middleware('throttle:30,1')->group(function () {
             Route::post('students/bulk-action', [AdminStudentController::class, 'bulkAction'])->name('students.bulk-action');
             Route::get('students-export', [AdminStudentController::class, 'export'])->name('students.export');
         });
