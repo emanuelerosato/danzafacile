@@ -3,17 +3,32 @@
 namespace App\Providers;
 
 use App\Models\Lead;
+use App\Models\User;
 use App\Observers\LeadObserver;
+use App\Policies\UserPolicy;
 use App\View\Composers\AppSettingsComposer;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /**
+     * The policy mappings for the application.
+     *
+     * AUTHORIZATION: Laravel Policies for resource authorization
+     * Maps models to their respective policy classes for Gate::allows() and $this->authorize()
+     *
+     * @var array<class-string, class-string>
+     */
+    protected $policies = [
+        User::class => UserPolicy::class,
+    ];
+
     /**
      * Register any application services.
      */
@@ -27,6 +42,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // AUTHORIZATION: Register policies
+        foreach ($this->policies as $model => $policy) {
+            Gate::policy($model, $policy);
+        }
+
         // SECURITY: Configure API rate limiters
         RateLimiter::for('api-public', function (Request $request) {
             return Limit::perMinute(10)->by($request->ip());

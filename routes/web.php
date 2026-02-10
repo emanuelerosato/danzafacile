@@ -384,11 +384,37 @@ Route::middleware('auth')->group(function () {
         Route::patch('users/{user}/toggle-active', [SchoolUserController::class, 'toggleActive'])->name('users.toggle-active');
         Route::post('users/bulk-action', [SchoolUserController::class, 'bulkAction'])->name('users.bulk-action');
 
-        // Students management
-        Route::resource('students', AdminStudentController::class);
-        Route::patch('students/{student}/toggle-active', [AdminStudentController::class, 'toggleActive'])->name('students.toggle-active');
-        Route::post('students/bulk-action', [AdminStudentController::class, 'bulkAction'])->name('students.bulk-action');
-        Route::get('students-export', [AdminStudentController::class, 'export'])->name('students.export');
+        // ============================================================================
+        // STUDENTS MANAGEMENT (Rate Limited)
+        // ============================================================================
+        // Rate Limiting Tiers:
+        // - Read operations (index, show, edit): 60 req/min - Tier 1 (Lenient)
+        // - Write operations (store, update): 10 req/min - Tier 2 (Moderate)
+        // - Sensitive operations (destroy): 5 req/min - Tier 3 (Strict)
+        // - Bulk/Export operations: 10 req/min - Tier 2 (Moderate)
+
+        // Tier 1: Read Operations (60 req/min)
+        Route::middleware('throttle:60,1')->group(function () {
+            Route::get('students', [AdminStudentController::class, 'index'])->name('students.index');
+            Route::get('students/create', [AdminStudentController::class, 'create'])->name('students.create');
+            Route::get('students/{student}', [AdminStudentController::class, 'show'])->name('students.show');
+            Route::get('students/{student}/edit', [AdminStudentController::class, 'edit'])->name('students.edit');
+        });
+
+        // Tier 2: Write Operations (10 req/min)
+        Route::middleware('throttle:10,1')->group(function () {
+            Route::post('students', [AdminStudentController::class, 'store'])->name('students.store');
+            Route::put('students/{student}', [AdminStudentController::class, 'update'])->name('students.update');
+            Route::patch('students/{student}', [AdminStudentController::class, 'update']);
+            Route::patch('students/{student}/toggle-active', [AdminStudentController::class, 'toggleActive'])->name('students.toggle-active');
+            Route::post('students/bulk-action', [AdminStudentController::class, 'bulkAction'])->name('students.bulk-action');
+            Route::get('students-export', [AdminStudentController::class, 'export'])->name('students.export');
+        });
+
+        // Tier 3: Sensitive Operations (5 req/min)
+        Route::middleware('throttle:5,1')->group(function () {
+            Route::delete('students/{student}', [AdminStudentController::class, 'destroy'])->name('students.destroy');
+        });
 
         // Documents management
         Route::resource('documents', AdminDocumentController::class);
