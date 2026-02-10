@@ -149,7 +149,12 @@
                                required
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
                                placeholder="Nome dello studente">
+                        <!-- Client-side Alpine.js error -->
                         <div x-show="errors.first_name" class="mt-1 text-sm text-red-600" x-text="errors.first_name"></div>
+                        <!-- Server-side Laravel error -->
+                        @error('first_name')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Last Name -->
@@ -165,7 +170,12 @@
                                required
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
                                placeholder="Cognome dello studente">
+                        <!-- Client-side Alpine.js error -->
                         <div x-show="errors.last_name" class="mt-1 text-sm text-red-600" x-text="errors.last_name"></div>
+                        <!-- Server-side Laravel error -->
+                        @error('last_name')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Full Name (auto-generated) -->
@@ -182,7 +192,12 @@
                                placeholder="Nome completo (generato automaticamente)"
                                readonly>
                         <p class="mt-1 text-sm text-gray-500">Questo campo viene generato automaticamente dal nome e cognome</p>
+                        <!-- Client-side Alpine.js error -->
                         <div x-show="errors.name" class="mt-1 text-sm text-red-600" x-text="errors.name"></div>
+                        <!-- Server-side Laravel error -->
+                        @error('name')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Email -->
@@ -197,7 +212,12 @@
                                required
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
                                placeholder="email@esempio.com">
+                        <!-- Client-side Alpine.js error -->
                         <div x-show="errors.email" class="mt-1 text-sm text-red-600" x-text="errors.email"></div>
+                        <!-- Server-side Laravel error -->
+                        @error('email')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Phone -->
@@ -211,7 +231,12 @@
                                x-model="form.phone"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
                                placeholder="+39 123 456 7890">
+                        <!-- Client-side Alpine.js error -->
                         <div x-show="errors.phone" class="mt-1 text-sm text-red-600" x-text="errors.phone"></div>
+                        <!-- Server-side Laravel error -->
+                        @error('phone')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Codice Fiscale -->
@@ -233,7 +258,12 @@
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200 uppercase"
                             pattern="[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]"
                             title="Codice fiscale italiano (es: RSSMRA80A01H501X)" />
+                        <!-- Client-side Alpine.js error -->
                         <div x-show="errors.codice_fiscale" class="mt-1 text-sm text-red-600" x-text="errors.codice_fiscale"></div>
+                        <!-- Server-side Laravel error -->
+                        @error('codice_fiscale')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                         <p class="mt-1 text-xs text-gray-500">Inserisci il codice fiscale italiano (16 caratteri)</p>
                     </div>
 
@@ -250,7 +280,12 @@
                                required
                                :max="maxDate"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors">
+                        <!-- Client-side Alpine.js error -->
                         <div x-show="errors.date_of_birth" class="mt-1 text-sm text-red-600" x-text="errors.date_of_birth"></div>
+                        <!-- Server-side Laravel error -->
+                        @error('date_of_birth')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- SENIOR FIX: Task #4 - Is Minor Checkbox -->
@@ -260,6 +295,7 @@
                                    name="is_minor"
                                    id="is_minor"
                                    x-model="form.is_minor"
+                                   @change="checkMinorStatus()"
                                    value="1"
                                    class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded">
                             <label for="is_minor" class="ml-2 block text-sm font-medium text-gray-700">
@@ -300,7 +336,12 @@
                                :required="form.is_minor"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
                                placeholder="Nome del genitore/tutore">
+                        <!-- Client-side Alpine.js error -->
                         <div x-show="errors.guardian_first_name" class="mt-1 text-sm text-red-600" x-text="errors.guardian_first_name"></div>
+                        <!-- Server-side Laravel error -->
+                        @error('guardian_first_name')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Guardian Last Name -->
@@ -315,7 +356,12 @@
                                :required="form.is_minor"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
                                placeholder="Cognome del genitore/tutore">
+                        <!-- Client-side Alpine.js error -->
                         <div x-show="errors.guardian_last_name" class="mt-1 text-sm text-red-600" x-text="errors.guardian_last_name"></div>
+                        <!-- Server-side Laravel error -->
+                        @error('guardian_last_name')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <!-- Guardian Fiscal Code -->
@@ -332,7 +378,12 @@
                                style="text-transform: uppercase"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors uppercase"
                                placeholder="RSSMRA80A01H501U">
+                        <!-- Client-side Alpine.js error -->
                         <div x-show="errors.guardian_fiscal_code" class="mt-1 text-sm text-red-600" x-text="errors.guardian_fiscal_code"></div>
+                        <!-- Server-side Laravel error -->
+                        @error('guardian_fiscal_code')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                         <p class="mt-1 text-xs text-gray-500">Codice fiscale italiano (16 caratteri) - per fatturazione</p>
                     </div>
 
@@ -348,7 +399,12 @@
                                :required="form.is_minor"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
                                placeholder="email@esempio.it">
+                        <!-- Client-side Alpine.js error -->
                         <div x-show="errors.guardian_email" class="mt-1 text-sm text-red-600" x-text="errors.guardian_email"></div>
+                        <!-- Server-side Laravel error -->
+                        @error('guardian_email')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                         <p class="mt-1 text-xs text-gray-500">Email per comunicazioni e invio fatture</p>
                     </div>
 
@@ -364,7 +420,12 @@
                                :required="form.is_minor"
                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors"
                                placeholder="+39 333 1234567">
+                        <!-- Client-side Alpine.js error -->
                         <div x-show="errors.guardian_phone" class="mt-1 text-sm text-red-600" x-text="errors.guardian_phone"></div>
+                        <!-- Server-side Laravel error -->
+                        @error('guardian_phone')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
             </div>
@@ -383,7 +444,12 @@
                                   rows="3"
                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors resize-none"
                                   placeholder="Via, numero civico, città, CAP"></textarea>
+                        <!-- Client-side Alpine.js error -->
                         <div x-show="errors.address" class="mt-1 text-sm text-red-600" x-text="errors.address"></div>
+                        <!-- Server-side Laravel error -->
+                        @error('address')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
             </div>
@@ -410,7 +476,12 @@
                               rows="2"
                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors resize-none"
                               placeholder="Nome, cognome e numero di telefono del contatto di emergenza"></textarea>
+                    <!-- Client-side Alpine.js error -->
                     <div x-show="errors.emergency_contact" class="mt-1 text-sm text-red-600" x-text="errors.emergency_contact"></div>
+                    <!-- Server-side Laravel error -->
+                    @error('emergency_contact')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
@@ -436,7 +507,12 @@
                               rows="4"
                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors resize-none"
                               placeholder="Allergie, condizioni mediche particolari, farmaci assunti, ecc."></textarea>
+                    <!-- Client-side Alpine.js error -->
                     <div x-show="errors.medical_notes" class="mt-1 text-sm text-red-600" x-text="errors.medical_notes"></div>
+                    <!-- Server-side Laravel error -->
+                    @error('medical_notes')
+                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
                 </div>
             </div>
 
@@ -756,6 +832,47 @@ document.addEventListener('alpine:init', () => {
 
                 this.form.is_minor = age < 18;
             }
+        },
+
+        /**
+         * CONFIRMATION FIX: Conferma prima di cancellare i dati del tutore
+         * Verifica se ci sono dati del tutore e chiede conferma prima di cancellarli
+         */
+        checkMinorStatus() {
+            // Se l'utente sta ATTIVANDO la checkbox (is_minor = true), non serve conferma
+            if (this.form.is_minor) {
+                return; // Permetti l'attivazione senza conferma
+            }
+
+            // Se l'utente sta DISATTIVANDO la checkbox (is_minor = false)
+            // Controlla se ci sono dati del tutore da perdere
+            const hasGuardianData = this.form.guardian_first_name ||
+                                   this.form.guardian_last_name ||
+                                   this.form.guardian_fiscal_code ||
+                                   this.form.guardian_email ||
+                                   this.form.guardian_phone;
+
+            // Se ci sono dati del tutore, chiedi conferma
+            if (hasGuardianData) {
+                const confirmDelete = confirm(
+                    'Attenzione: rimuovendo lo status di minorenne verranno cancellati tutti i dati del tutore. Continuare?'
+                );
+
+                // Se l'utente annulla, ripristina la checkbox a checked
+                if (!confirmDelete) {
+                    this.$nextTick(() => {
+                        this.form.is_minor = true; // Ripristina checkbox
+                    });
+                    return;
+                }
+            }
+
+            // Se l'utente conferma (o non ci sono dati), cancella i campi tutore
+            this.form.guardian_first_name = '';
+            this.form.guardian_last_name = '';
+            this.form.guardian_fiscal_code = '';
+            this.form.guardian_email = '';
+            this.form.guardian_phone = '';
         },
 
         async submitForm() {
