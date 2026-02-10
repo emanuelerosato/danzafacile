@@ -263,7 +263,8 @@ Route::middleware('auth')->group(function () {
     });
     
     // ADMIN ROUTES
-    Route::middleware(['role:admin', 'school.ownership'])->prefix('admin')->name('admin.')->group(function () {
+    // Middleware order: auth → role:admin → school.ownership → throttle (applied per route group below)
+    Route::middleware(['auth', 'role:admin', 'school.ownership'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'dashboard'])->name('dashboard');
         Route::get('/stats', [AdminDashboardController::class, 'stats'])->name('stats');
         Route::get('/export/{type}', [AdminDashboardController::class, 'export'])->name('export');
@@ -387,13 +388,14 @@ Route::middleware('auth')->group(function () {
         // ============================================================================
         // STUDENTS MANAGEMENT (Rate Limited)
         // ============================================================================
-        // Rate Limiting Tiers:
+        // Rate Limiting Tiers (applied AFTER auth/role/school.ownership checks):
         // - Read operations (index, show, edit): 60 req/min - Tier 1 (Lenient)
         // - Write operations (store, update): 10 req/min - Tier 2 (Moderate)
         // - Sensitive operations (destroy): 5 req/min - Tier 3 (Strict)
-        // - Bulk/Export operations: 10 req/min - Tier 2 (Moderate)
+        // - Bulk/Export operations: 30 req/min - Tier 2b (Higher limit for large schools)
 
         // Tier 1: Read Operations (60 req/min)
+        // Middleware order: auth → role:admin → school.ownership → throttle:60,1
         Route::middleware('throttle:60,1')->group(function () {
             Route::get('students', [AdminStudentController::class, 'index'])->name('students.index');
             Route::get('students/create', [AdminStudentController::class, 'create'])->name('students.create');
@@ -402,6 +404,7 @@ Route::middleware('auth')->group(function () {
         });
 
         // Tier 2: Write Operations (10 req/min)
+        // Middleware order: auth → role:admin → school.ownership → throttle:10,1
         Route::middleware('throttle:10,1')->group(function () {
             Route::post('students', [AdminStudentController::class, 'store'])->name('students.store');
             Route::put('students/{student}', [AdminStudentController::class, 'update'])->name('students.update');
@@ -410,6 +413,7 @@ Route::middleware('auth')->group(function () {
         });
 
         // Tier 2b: Bulk Operations (30 req/min)
+        // Middleware order: auth → role:admin → school.ownership → throttle:30,1
         // Higher limit for bulk operations to accommodate large schools (500+ students)
         Route::middleware('throttle:30,1')->group(function () {
             Route::post('students/bulk-action', [AdminStudentController::class, 'bulkAction'])->name('students.bulk-action');
@@ -417,6 +421,7 @@ Route::middleware('auth')->group(function () {
         });
 
         // Tier 3: Sensitive Operations (5 req/min)
+        // Middleware order: auth → role:admin → school.ownership → throttle:5,1
         Route::middleware('throttle:5,1')->group(function () {
             Route::delete('students/{student}', [AdminStudentController::class, 'destroy'])->name('students.destroy');
         });
