@@ -39,6 +39,12 @@ class User extends Authenticatable
     const ROLE_STUDENT = 'student';
 
     /**
+     * Età di maggiorenne per validazione tutore
+     * Fix #4: Costante per evitare magic numbers
+     */
+    const ADULT_AGE = 18;
+
+    /**
      * SECURITY: Mass Assignment Protection
      *
      * Using $guarded instead of $fillable for stronger protection.
@@ -52,6 +58,7 @@ class User extends Authenticatable
         'role',                  // Use assignRole() method instead
         'email_verified_at',     // Use markEmailAsVerified() instead
         'remember_token',        // Laravel internal field
+        'school_id',             // CRITICAL: Prevent cross-school assignment (multi-tenant security)
     ];
 
     /**
@@ -304,8 +311,9 @@ class User extends Authenticatable
 
     /**
      * SENIOR FIX: Task #4 - Verifica se l'utente è minorenne basandosi sulla data di nascita
+     * Fix #4: Usa costante ADULT_AGE invece di magic number
      *
-     * @return bool True se minorenne (< 18 anni)
+     * @return bool True se minorenne (< ADULT_AGE anni)
      */
     public function isMinor(): bool
     {
@@ -313,7 +321,7 @@ class User extends Authenticatable
             return false;
         }
 
-        return \Carbon\Carbon::parse($this->date_of_birth)->age < 18;
+        return \Carbon\Carbon::parse($this->date_of_birth)->age < self::ADULT_AGE;
     }
 
     /**
@@ -394,6 +402,34 @@ class User extends Authenticatable
     {
         $allowedRoles = ['super_admin', 'admin', 'user']; // Match database enum
         $this->attributes['role'] = in_array($value, $allowedRoles) ? $value : 'user';
+    }
+
+    /**
+     * Imposta il codice fiscale in maiuscolo automaticamente
+     *
+     * SERVER-SIDE FIX: Trasforma sempre il codice fiscale in uppercase
+     * Garantisce consistenza dati anche se:
+     * - Validazione frontend fallisce
+     * - API chiamata direttamente senza frontend
+     * - Dato inserito tramite seeder/console command
+     */
+    public function setCodiceFiscaleAttribute($value): void
+    {
+        $this->attributes['codice_fiscale'] = $value ? strtoupper($value) : null;
+    }
+
+    /**
+     * Imposta il codice fiscale del genitore/tutore in maiuscolo automaticamente
+     *
+     * SERVER-SIDE FIX: Trasforma sempre il codice fiscale in uppercase
+     * Garantisce consistenza dati anche se:
+     * - Validazione frontend fallisce
+     * - API chiamata direttamente senza frontend
+     * - Dato inserito tramite seeder/console command
+     */
+    public function setGuardianFiscalCodeAttribute($value): void
+    {
+        $this->attributes['guardian_fiscal_code'] = $value ? strtoupper($value) : null;
     }
 
     // SECURITY: SAFE METHODS FOR SENSITIVE FIELDS

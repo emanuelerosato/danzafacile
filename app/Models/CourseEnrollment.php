@@ -17,6 +17,7 @@ class CourseEnrollment extends Model
      */
     const STATUS_PENDING = 'pending';
     const STATUS_ACTIVE = 'active';
+    const STATUS_SUSPENDED = 'suspended';
     const STATUS_CANCELLED = 'cancelled';
     const STATUS_COMPLETED = 'completed';
 
@@ -39,6 +40,10 @@ class CourseEnrollment extends Model
         'status',
         'payment_status',
         'notes',
+        'status_changed_by',
+        'status_changed_at',
+        'payment_status_changed_by',
+        'payment_status_changed_at',
     ];
 
     /**
@@ -50,6 +55,8 @@ class CourseEnrollment extends Model
     {
         return [
             'enrollment_date' => 'date',
+            'status_changed_at' => 'datetime',
+            'payment_status_changed_at' => 'datetime',
         ];
     }
 
@@ -69,6 +76,22 @@ class CourseEnrollment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Ottiene l'utente che ha modificato lo status (audit trail)
+     */
+    public function statusChangedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'status_changed_by');
+    }
+
+    /**
+     * Ottiene l'utente che ha modificato il payment_status (audit trail)
+     */
+    public function paymentStatusChangedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'payment_status_changed_by');
     }
 
     /**
@@ -182,10 +205,11 @@ class CourseEnrollment extends Model
         $allowedStatuses = [
             self::STATUS_PENDING,
             self::STATUS_ACTIVE,
+            self::STATUS_SUSPENDED,
             self::STATUS_CANCELLED,
             self::STATUS_COMPLETED
         ];
-        
+
         $this->attributes['status'] = in_array($value, $allowedStatuses) ? $value : self::STATUS_PENDING;
     }
 
@@ -213,6 +237,7 @@ class CourseEnrollment extends Model
         return [
             self::STATUS_PENDING => 'In Attesa',
             self::STATUS_ACTIVE => 'Attiva',
+            self::STATUS_SUSPENDED => 'Sospesa',
             self::STATUS_CANCELLED => 'Annullata',
             self::STATUS_COMPLETED => 'Completata',
         ];

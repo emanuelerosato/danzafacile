@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\User;
+use App\Models\Course;
 use App\Models\CourseEnrollment;
 use App\Models\Payment;
 use App\Models\Document;
@@ -19,6 +20,10 @@ class AdminStudentController extends AdminBaseController
     public function index(Request $request)
     {
         $this->setupContext();
+
+        // AUTHORIZATION: Policy layer - verifica permessi prima di accedere ai dati
+        // Defense in depth: aggiunge controllo autorizzazione sopra il middleware
+        $this->authorize('viewAny', User::class);
 
         $query = $this->school->users()->where('role', 'student');
 
@@ -56,6 +61,9 @@ class AdminStudentController extends AdminBaseController
     {
         $this->setupContext();
 
+        // AUTHORIZATION: Policy layer - verifica permessi creazione studente
+        $this->authorize('create', User::class);
+
         return view('admin.students.create');
     }
 
@@ -65,6 +73,9 @@ class AdminStudentController extends AdminBaseController
     public function store(Request $request)
     {
         $this->setupContext();
+
+        // AUTHORIZATION: Policy layer - verifica permessi creazione studente
+        $this->authorize('create', User::class);
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -127,6 +138,10 @@ class AdminStudentController extends AdminBaseController
             $validated = array_merge($validated, $guardianValidation);
         }
 
+        // NOTE: codice_fiscale e guardian_fiscal_code vengono automaticamente trasformati
+        // in uppercase dal Model User tramite mutatori setCodiceFiscaleAttribute()
+        // e setGuardianFiscalCodeAttribute()
+
         // Generate password
         $password = $this->generateStudentPassword();
 
@@ -167,6 +182,11 @@ class AdminStudentController extends AdminBaseController
     public function show(User $student)
     {
         $this->setupContext();
+
+        // AUTHORIZATION: Policy layer - verifica permessi visualizzazione studente
+        // Defense in depth: controllo Policy + manual ownership check per sicurezza massima
+        $this->authorize('view', $student);
+
         $this->verifyResourceOwnership($student, 'Studente');
 
         // Ensure student belongs to current school
@@ -207,6 +227,11 @@ class AdminStudentController extends AdminBaseController
     public function edit(User $student)
     {
         $this->setupContext();
+
+        // AUTHORIZATION: Policy layer - verifica permessi modifica studente
+        // Defense in depth: controllo Policy + manual ownership check per sicurezza massima
+        $this->authorize('update', $student);
+
         $this->verifyResourceOwnership($student, 'Studente');
 
         // Ensure student belongs to current school
@@ -219,7 +244,40 @@ class AdminStudentController extends AdminBaseController
             $query->with('course')->latest('enrollment_date');
         }]);
 
-        return view('admin.students.edit', compact('student'));
+        // Fetch available courses for quick add enrollment
+        // Include: Corsi futuri + corsi in corso (non terminati)
+        // Exclude: Corsi già terminati
+        $availableCourses = Course::where('school_id', $this->school->id)
+                                  ->where('active', true)
+                                  ->where(function($query) {
+                                      $query->where('end_date', '>=', now()->startOfDay())
+                                            ->orWhereNull('end_date'); // Corsi senza end_date
+                                  })
+                                  ->orderBy('start_date', 'desc')
+                                  ->get(['id', 'name', 'start_date', 'end_date', 'max_students']); // Select only needed columns
+
+        // Filter out courses student is already enrolled in
+        $enrolledCourseIds = $student->enrollments->pluck('course_id')->toArray();
+        $availableCourses = $availableCourses->filter(function($course) use ($enrolledCourseIds) {
+            return !in_array($course->id, $enrolledCourseIds);
+        });
+
+        // Prepare enrollments data for Alpine.js (avoiding Blade @json() bug with closures)
+        // This prevents Blade compiler errors when using complex map() functions in @json()
+        $enrollmentsData = $student->enrollments->map(function($e) {
+            return [
+                'id' => $e->id,
+                'course_id' => $e->course_id,
+                'course_name' => $e->course->name,
+                'course_description' => $e->course->description,
+                'enrollment_date' => $e->enrollment_date->format('d/m/Y'),
+                'enrollment_date_human' => $e->enrollment_date->diffForHumans(),
+                'status' => $e->status,
+                'payment_status' => $e->payment_status,
+            ];
+        });
+
+        return view('admin.students.edit', compact('student', 'availableCourses', 'enrollmentsData'));
     }
 
     /**
@@ -228,6 +286,11 @@ class AdminStudentController extends AdminBaseController
     public function update(Request $request, User $student)
     {
         $this->setupContext();
+
+        // AUTHORIZATION: Policy layer - verifica permessi modifica studente
+        // Defense in depth: controllo Policy + manual ownership check per sicurezza massima
+        $this->authorize('update', $student);
+
         $this->verifyResourceOwnership($student, 'Studente');
 
         // Ensure student belongs to current school
@@ -302,6 +365,10 @@ class AdminStudentController extends AdminBaseController
             $validated['guardian_phone'] = null;
         }
 
+        // NOTE: codice_fiscale e guardian_fiscal_code vengono automaticamente trasformati
+        // in uppercase dal Model User tramite mutatori setCodiceFiscaleAttribute()
+        // e setGuardianFiscalCodeAttribute()
+
         $validated['is_minor'] = $validated['is_minor'] ?? false;  // SENIOR FIX: Task #4
 
         // BUGFIX: Auto-compute name field from first_name + last_name to ensure consistency
@@ -326,6 +393,10 @@ class AdminStudentController extends AdminBaseController
      */
     public function destroy(User $student)
     {
+        // AUTHORIZATION: Policy layer - verifica permessi eliminazione studente
+        // Defense in depth: controllo Policy + manual school ownership check
+        $this->authorize('delete', $student);
+
         // Ensure student belongs to current school
         if ($student->school_id !== $this->school->id || $student->role !== 'student') {
             abort(404, 'Studente non trovato.');
@@ -359,6 +430,9 @@ class AdminStudentController extends AdminBaseController
      */
     public function toggleActive(User $student)
     {
+        // AUTHORIZATION: Policy layer - toggle active status = update operation
+        $this->authorize('update', $student);
+
         // Ensure student belongs to current school
         if ($student->school_id !== $this->school->id || $student->role !== 'student') {
             abort(404, 'Studente non trovato.');
@@ -409,16 +483,28 @@ class AdminStudentController extends AdminBaseController
         try {
             switch ($action) {
                 case 'activate':
+                    // AUTHORIZATION: Verify update permission for each student
+                    foreach ($students as $student) {
+                        $this->authorize('update', $student);
+                    }
                     User::whereIn('id', $studentIds)->update(['active' => true]);
                     $message = 'Studenti attivati con successo.';
                     break;
 
                 case 'deactivate':
+                    // AUTHORIZATION: Verify update permission for each student
+                    foreach ($students as $student) {
+                        $this->authorize('update', $student);
+                    }
                     User::whereIn('id', $studentIds)->update(['active' => false]);
                     $message = 'Studenti disattivati con successo.';
                     break;
 
                 case 'delete':
+                    // AUTHORIZATION: Verify delete permission for each student
+                    foreach ($students as $student) {
+                        $this->authorize('delete', $student);
+                    }
                     // Check for active enrollments
                     $activeCount = CourseEnrollment::whereIn('user_id', $studentIds)
                         ->whereIn('status', ['active', 'enrolled'])
@@ -453,6 +539,9 @@ class AdminStudentController extends AdminBaseController
      */
     public function export()
     {
+        // AUTHORIZATION: Policy layer - export requires viewAny permission
+        $this->authorize('viewAny', User::class);
+
         $students = $this->school->users()
             ->where('role', 'student')
             ->with(['enrollments.course', 'payments'])
