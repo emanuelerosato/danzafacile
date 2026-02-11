@@ -920,7 +920,7 @@ document.addEventListener('alpine:init', () => {
             course_id: '',
             status: 'active'
         },
-        // FIX: Use pre-mapped data from controller to avoid Blade @json() compiler bug with closures
+        // FIX: Use pre-mapped data from controller to avoid Blade json encoder bug with closures
         enrollments: @json($enrollmentsData),
         updatingStatus: {},
 
