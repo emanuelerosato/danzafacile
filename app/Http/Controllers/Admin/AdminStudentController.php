@@ -262,7 +262,22 @@ class AdminStudentController extends AdminBaseController
             return !in_array($course->id, $enrolledCourseIds);
         });
 
-        return view('admin.students.edit', compact('student', 'availableCourses'));
+        // Prepare enrollments data for Alpine.js (avoiding Blade @json() bug with closures)
+        // This prevents Blade compiler errors when using complex map() functions in @json()
+        $enrollmentsData = $student->enrollments->map(function($e) {
+            return [
+                'id' => $e->id,
+                'course_id' => $e->course_id,
+                'course_name' => $e->course->name,
+                'course_description' => $e->course->description,
+                'enrollment_date' => $e->enrollment_date->format('d/m/Y'),
+                'enrollment_date_human' => $e->enrollment_date->diffForHumans(),
+                'status' => $e->status,
+                'payment_status' => $e->payment_status,
+            ];
+        });
+
+        return view('admin.students.edit', compact('student', 'availableCourses', 'enrollmentsData'));
     }
 
     /**

@@ -920,18 +920,8 @@ document.addEventListener('alpine:init', () => {
             course_id: '',
             status: 'active'
         },
-        enrollments: @json($student->enrollments->map(function($e) {
-            return [
-                'id' => $e->id,
-                'course_id' => $e->course_id,
-                'course_name' => $e->course->name,
-                'course_description' => $e->course->description,
-                'enrollment_date' => $e->enrollment_date->format('d/m/Y'),
-                'enrollment_date_human' => $e->enrollment_date->diffForHumans(),
-                'status' => $e->status,
-                'payment_status' => $e->payment_status,
-            ];
-        })),
+        // FIX: Use pre-mapped data from controller to avoid Blade @json() compiler bug with closures
+        enrollments: @json($enrollmentsData),
         updatingStatus: {},
 
         get maxDate() {
