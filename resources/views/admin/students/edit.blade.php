@@ -592,28 +592,110 @@
             </div>
         </div>
 
-        <div class="p-6">
-            @if($student->enrollments->isEmpty())
-                <!-- Empty State -->
-                <div class="text-center py-12">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        <!-- Quick Add Enrollment Form -->
+        <div class="border-b border-gray-200 bg-gray-50">
+            <div class="p-4">
+                <button @click="showAddForm = !showAddForm"
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    <svg x-show="!showAddForm" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                     </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">Nessun Corso</h3>
-                    <p class="mt-1 text-sm text-gray-500">
-                        Lo studente non è iscritto a nessun corso al momento.
-                    </p>
-                    <div class="mt-6">
-                        <a href="{{ route('admin.enrollments.create', ['user_id' => $student->id]) }}"
-                           class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    <svg x-show="showAddForm" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span x-text="showAddForm ? 'Annulla' : 'Aggiungi Iscrizione Rapida'"></span>
+                </button>
+
+                <!-- Inline Add Form -->
+                <div x-show="showAddForm"
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 transform -translate-y-2"
+                     x-transition:enter-end="opacity-100 transform translate-y-0"
+                     class="mt-4 bg-white border border-gray-200 rounded-lg p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Corso Select -->
+                        <div class="md:col-span-2">
+                            <label for="quick_course_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                Corso <span class="text-red-500">*</span>
+                            </label>
+                            <select x-model="newEnrollment.course_id"
+                                    id="quick_course_id"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                                <option value="">Seleziona un corso...</option>
+                                @foreach($availableCourses as $course)
+                                    <option value="{{ $course->id }}">
+                                        {{ $course->name }}
+                                        @if($course->start_date)
+                                            - {{ $course->start_date->format('d/m/Y') }}
+                                        @endif
+                                        @if($course->max_students)
+                                            ({{ $course->enrollments()->where('status', 'active')->count() }}/{{ $course->max_students }} posti)
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </select>
+                            @if(count($availableCourses) === 0)
+                                <p class="mt-1 text-sm text-gray-500">
+                                    Nessun corso disponibile. Lo studente è già iscritto a tutti i corsi attivi.
+                                </p>
+                            @endif
+                        </div>
+
+                        <!-- Status Select -->
+                        <div>
+                            <label for="quick_status" class="block text-sm font-medium text-gray-700 mb-2">
+                                Status <span class="text-red-500">*</span>
+                            </label>
+                            <select x-model="newEnrollment.status"
+                                    id="quick_status"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent">
+                                <option value="active">Attiva</option>
+                                <option value="pending">In Attesa</option>
+                                <option value="suspended">Sospesa</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="mt-4 flex justify-end">
+                        <button @click="addEnrollment()"
+                                type="button"
+                                :disabled="addingEnrollment || !newEnrollment.course_id"
+                                :class="{ 'opacity-50 cursor-not-allowed': addingEnrollment || !newEnrollment.course_id }"
+                                class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-rose-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-rose-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-105">
+                            <svg x-show="addingEnrollment" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            Aggiungi Corso
-                        </a>
+                            <svg x-show="!addingEnrollment" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span x-text="addingEnrollment ? 'Aggiunta...' : 'Aggiungi Iscrizione'"></span>
+                        </button>
                     </div>
                 </div>
-            @else
+            </div>
+        </div>
+
+        <div class="p-6">
+            <!-- Empty State -->
+            <div x-show="enrollments.length === 0"
+                 class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">Nessun Corso</h3>
+                <p class="mt-1 text-sm text-gray-500">
+                    Lo studente non è iscritto a nessun corso al momento.
+                </p>
+                <p class="mt-2 text-sm text-gray-600">
+                    Usa il pulsante "Aggiungi Iscrizione Rapida" qui sopra per iscrivere lo studente a un corso.
+                </p>
+            </div>
+
+            <!-- Enrollments Table -->
+            <div x-show="enrollments.length > 0">
                 <!-- Enrollments Table -->
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
@@ -637,83 +719,132 @@
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @foreach($student->enrollments as $enrollment)
+                            <template x-for="enrollment in enrollments" :key="enrollment.id">
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <!-- Corso -->
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-r from-rose-400 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
-                                                {{ strtoupper(substr($enrollment->course->name, 0, 2)) }}
+                                            <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-r from-rose-400 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold"
+                                                 x-text="enrollment.course_name.substring(0, 2).toUpperCase()">
                                             </div>
                                             <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">
-                                                    {{ $enrollment->course->name }}
+                                                <div class="text-sm font-medium text-gray-900" x-text="enrollment.course_name"></div>
+                                                <div x-show="enrollment.course_description"
+                                                     class="text-sm text-gray-500"
+                                                     x-text="enrollment.course_description ? (enrollment.course_description.length > 50 ? enrollment.course_description.substring(0, 50) + '...' : enrollment.course_description) : ''">
                                                 </div>
-                                                @if($enrollment->course->description)
-                                                    <div class="text-sm text-gray-500">
-                                                        {{ Str::limit($enrollment->course->description, 50) }}
-                                                    </div>
-                                                @endif
                                             </div>
                                         </div>
                                     </td>
 
                                     <!-- Data Iscrizione -->
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">
-                                            {{ $enrollment->enrollment_date->format('d/m/Y') }}
-                                        </div>
-                                        <div class="text-xs text-gray-500">
-                                            {{ $enrollment->enrollment_date->diffForHumans() }}
-                                        </div>
+                                        <div class="text-sm text-gray-900" x-text="enrollment.enrollment_date"></div>
+                                        <div class="text-xs text-gray-500" x-text="enrollment.enrollment_date_human"></div>
                                     </td>
 
-                                    <!-- Status Enrollment -->
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @php
-                                            $statusColors = [
-                                                'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
-                                                'active' => 'bg-green-100 text-green-800 border-green-200',
-                                                'cancelled' => 'bg-red-100 text-red-800 border-red-200',
-                                                'completed' => 'bg-blue-100 text-blue-800 border-blue-200',
-                                                'suspended' => 'bg-gray-100 text-gray-800 border-gray-200',
-                                            ];
-                                            $statusLabels = [
-                                                'pending' => 'In Attesa',
-                                                'active' => 'Attiva',
-                                                'cancelled' => 'Annullata',
-                                                'completed' => 'Completata',
-                                                'suspended' => 'Sospesa',
-                                            ];
-                                        @endphp
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border {{ $statusColors[$enrollment->status] ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
-                                            {{ $statusLabels[$enrollment->status] ?? ucfirst($enrollment->status) }}
-                                        </span>
+                                    <!-- Status Enrollment - DROPDOWN TOGGLE -->
+                                    <td class="px-6 py-4 whitespace-nowrap" x-data="{ statusOpen: false }">
+                                        <div class="relative">
+                                            <button @click="statusOpen = !statusOpen"
+                                                    type="button"
+                                                    :disabled="updatingStatus[enrollment.id]"
+                                                    :class="{
+                                                        'bg-yellow-100 text-yellow-800 border-yellow-200': enrollment.status === 'pending',
+                                                        'bg-green-100 text-green-800 border-green-200': enrollment.status === 'active',
+                                                        'bg-red-100 text-red-800 border-red-200': enrollment.status === 'cancelled',
+                                                        'bg-blue-100 text-blue-800 border-blue-200': enrollment.status === 'completed',
+                                                        'bg-gray-100 text-gray-800 border-gray-200': enrollment.status === 'suspended',
+                                                        'opacity-50 cursor-not-allowed': updatingStatus[enrollment.id]
+                                                    }"
+                                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border cursor-pointer hover:opacity-80 transition-opacity">
+                                                <svg x-show="updatingStatus[enrollment.id]" class="animate-spin h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                <span x-text="{
+                                                    'pending': 'In Attesa',
+                                                    'active': 'Attiva',
+                                                    'cancelled': 'Annullata',
+                                                    'completed': 'Completata',
+                                                    'suspended': 'Sospesa'
+                                                }[enrollment.status]"></span>
+                                                <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                                </svg>
+                                            </button>
+
+                                            <!-- Dropdown Menu -->
+                                            <div x-show="statusOpen"
+                                                 @click.away="statusOpen = false"
+                                                 x-transition:enter="transition ease-out duration-100"
+                                                 x-transition:enter-start="opacity-0 scale-95"
+                                                 x-transition:enter-end="opacity-100 scale-100"
+                                                 x-transition:leave="transition ease-in duration-75"
+                                                 x-transition:leave-start="opacity-100 scale-100"
+                                                 x-transition:leave-end="opacity-0 scale-95"
+                                                 class="absolute left-0 mt-2 w-40 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                                                <div class="py-1">
+                                                    <button @click="updateEnrollmentStatus(enrollment.id, 'active'); statusOpen = false"
+                                                            type="button"
+                                                            :class="{ 'bg-gray-100': enrollment.status === 'active' }"
+                                                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                                                        <span class="w-2 h-2 rounded-full bg-green-500 mr-2"></span>
+                                                        Attiva
+                                                    </button>
+                                                    <button @click="updateEnrollmentStatus(enrollment.id, 'pending'); statusOpen = false"
+                                                            type="button"
+                                                            :class="{ 'bg-gray-100': enrollment.status === 'pending' }"
+                                                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                                                        <span class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></span>
+                                                        In Attesa
+                                                    </button>
+                                                    <button @click="updateEnrollmentStatus(enrollment.id, 'suspended'); statusOpen = false"
+                                                            type="button"
+                                                            :class="{ 'bg-gray-100': enrollment.status === 'suspended' }"
+                                                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                                                        <span class="w-2 h-2 rounded-full bg-gray-500 mr-2"></span>
+                                                        Sospesa
+                                                    </button>
+                                                    <button @click="updateEnrollmentStatus(enrollment.id, 'completed'); statusOpen = false"
+                                                            type="button"
+                                                            :class="{ 'bg-gray-100': enrollment.status === 'completed' }"
+                                                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                                                        <span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                                                        Completata
+                                                    </button>
+                                                    <button @click="updateEnrollmentStatus(enrollment.id, 'cancelled'); statusOpen = false"
+                                                            type="button"
+                                                            :class="{ 'bg-gray-100': enrollment.status === 'cancelled' }"
+                                                            class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center">
+                                                        <span class="w-2 h-2 rounded-full bg-red-500 mr-2"></span>
+                                                        Annullata
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </td>
 
                                     <!-- Payment Status -->
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        @php
-                                            $paymentColors = [
-                                                'pending' => 'bg-yellow-100 text-yellow-800',
-                                                'paid' => 'bg-green-100 text-green-800',
-                                                'refunded' => 'bg-gray-100 text-gray-800',
-                                            ];
-                                            $paymentLabels = [
-                                                'pending' => 'In Attesa',
-                                                'paid' => 'Pagato',
-                                                'refunded' => 'Rimborsato',
-                                            ];
-                                        @endphp
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $paymentColors[$enrollment->payment_status] ?? 'bg-gray-100 text-gray-800' }}">
-                                            {{ $paymentLabels[$enrollment->payment_status] ?? ucfirst($enrollment->payment_status) }}
+                                        <span :class="{
+                                                'bg-yellow-100 text-yellow-800': enrollment.payment_status === 'pending',
+                                                'bg-green-100 text-green-800': enrollment.payment_status === 'paid',
+                                                'bg-gray-100 text-gray-800': enrollment.payment_status === 'refunded'
+                                              }"
+                                              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium">
+                                            <span x-text="{
+                                                'pending': 'In Attesa',
+                                                'paid': 'Pagato',
+                                                'refunded': 'Rimborsato'
+                                            }[enrollment.payment_status]"></span>
                                         </span>
                                     </td>
 
                                     <!-- Actions -->
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex items-center justify-end space-x-2">
-                                            <a href="{{ route('admin.enrollments.show', $enrollment) }}"
+                                            <a :href="`/admin/enrollments/${enrollment.id}`"
                                                class="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded transition-colors"
                                                title="Visualizza dettagli">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -721,14 +852,15 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                                 </svg>
                                             </a>
-                                            <a href="{{ route('admin.enrollments.edit', $enrollment) }}"
+                                            <a :href="`/admin/enrollments/${enrollment.id}/edit`"
                                                class="text-indigo-600 hover:text-indigo-900 p-1 hover:bg-indigo-50 rounded transition-colors"
                                                title="Modifica iscrizione">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                 </svg>
                                             </a>
-                                            <button @click="deleteEnrollment({{ $enrollment->id }}, '{{ $enrollment->course->name }}')"
+                                            <button @click="deleteEnrollment(enrollment.id, enrollment.course_name)"
+                                                    type="button"
                                                     class="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded transition-colors"
                                                     title="Rimuovi iscrizione">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -738,22 +870,12 @@
                                         </div>
                                     </td>
                                 </tr>
-                            @endforeach
+                            </template>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Action Button (if has enrollments) -->
-                <div class="mt-6 pt-6 border-t border-gray-200">
-                    <a href="{{ route('admin.enrollments.create', ['user_id' => $student->id]) }}"
-                       class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        Aggiungi Altro Corso
-                    </a>
-                </div>
-            @endif
+            </div>
         </div>
     </div>
 </div>
@@ -790,6 +912,27 @@ document.addEventListener('alpine:init', () => {
         errors: {},
         // Student data properly encoded with special character escaping
         form: {!! $studentFormData !!},
+
+        // Enrollment management
+        showAddForm: false,
+        addingEnrollment: false,
+        newEnrollment: {
+            course_id: '',
+            status: 'active'
+        },
+        enrollments: @json($student->enrollments->map(function($e) {
+            return [
+                'id' => $e->id,
+                'course_id' => $e->course_id,
+                'course_name' => $e->course->name,
+                'course_description' => $e->course->description,
+                'enrollment_date' => $e->enrollment_date->format('d/m/Y'),
+                'enrollment_date_human' => $e->enrollment_date->diffForHumans(),
+                'status' => $e->status,
+                'payment_status' => $e->payment_status,
+            ];
+        })),
+        updatingStatus: {},
 
         get maxDate() {
             const today = new Date();
@@ -975,6 +1118,150 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        /**
+         * FEATURE: Quick Add Enrollment - Inline form submission
+         */
+        async addEnrollment() {
+            if (!this.newEnrollment.course_id) {
+                const event = new CustomEvent('show-toast', {
+                    detail: {
+                        message: 'Seleziona un corso',
+                        type: 'error'
+                    }
+                });
+                window.dispatchEvent(event);
+                return;
+            }
+
+            this.addingEnrollment = true;
+
+            try {
+                const response = await fetch('/admin/enrollments', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: {{ $student->id }},
+                        course_id: this.newEnrollment.course_id,
+                        status: this.newEnrollment.status,
+                        enrollment_date: new Date().toISOString().split('T')[0]
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.enrollment) {
+                    // Add to reactive array
+                    this.enrollments.push({
+                        id: data.enrollment.id,
+                        course_id: data.enrollment.course_id,
+                        course_name: data.enrollment.course.name,
+                        course_description: data.enrollment.course.description,
+                        enrollment_date: new Date(data.enrollment.enrollment_date).toLocaleDateString('it-IT'),
+                        enrollment_date_human: 'Oggi',
+                        status: data.enrollment.status,
+                        payment_status: data.enrollment.payment_status
+                    });
+
+                    // Reset form
+                    this.newEnrollment.course_id = '';
+                    this.newEnrollment.status = 'active';
+                    this.showAddForm = false;
+
+                    const event = new CustomEvent('show-toast', {
+                        detail: {
+                            message: data.message || 'Iscrizione aggiunta con successo',
+                            type: 'success'
+                        }
+                    });
+                    window.dispatchEvent(event);
+                } else {
+                    const event = new CustomEvent('show-toast', {
+                        detail: {
+                            message: data.message || 'Errore durante l\'aggiunta dell\'iscrizione',
+                            type: 'error'
+                        }
+                    });
+                    window.dispatchEvent(event);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                const event = new CustomEvent('show-toast', {
+                    detail: {
+                        message: 'Errore di connessione. Riprova più tardi.',
+                        type: 'error'
+                    }
+                });
+                window.dispatchEvent(event);
+            } finally {
+                this.addingEnrollment = false;
+            }
+        },
+
+        /**
+         * FEATURE: Status Toggle - Update enrollment status inline
+         */
+        async updateEnrollmentStatus(enrollmentId, newStatus) {
+            // Set loading state for this specific enrollment
+            this.updatingStatus[enrollmentId] = true;
+
+            try {
+                const response = await fetch(`/admin/enrollments/${enrollmentId}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Update reactive array
+                    const index = this.enrollments.findIndex(e => e.id === enrollmentId);
+                    if (index !== -1) {
+                        this.enrollments[index].status = newStatus;
+                    }
+
+                    const event = new CustomEvent('show-toast', {
+                        detail: {
+                            message: data.message || 'Status aggiornato con successo',
+                            type: 'success'
+                        }
+                    });
+                    window.dispatchEvent(event);
+                } else {
+                    const event = new CustomEvent('show-toast', {
+                        detail: {
+                            message: data.message || 'Errore durante l\'aggiornamento dello status',
+                            type: 'error'
+                        }
+                    });
+                    window.dispatchEvent(event);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                const event = new CustomEvent('show-toast', {
+                    detail: {
+                        message: 'Errore di connessione. Riprova più tardi.',
+                        type: 'error'
+                    }
+                });
+                window.dispatchEvent(event);
+            } finally {
+                // Remove loading state
+                delete this.updatingStatus[enrollmentId];
+            }
+        },
+
+        /**
+         * FEATURE: Delete Enrollment - Remove with reactive update
+         */
         async deleteEnrollment(enrollmentId, courseName) {
             // Conferma eliminazione
             if (!confirm(`Sei sicuro di voler rimuovere l'iscrizione al corso "${courseName}"?\n\nQuesta azione non può essere annullata.`)) {
@@ -993,6 +1280,12 @@ document.addEventListener('alpine:init', () => {
                 const data = await response.json();
 
                 if (data.success) {
+                    // Remove from reactive array
+                    const index = this.enrollments.findIndex(e => e.id === enrollmentId);
+                    if (index !== -1) {
+                        this.enrollments.splice(index, 1);
+                    }
+
                     const event = new CustomEvent('show-toast', {
                         detail: {
                             message: data.message || 'Iscrizione rimossa con successo',
@@ -1000,11 +1293,6 @@ document.addEventListener('alpine:init', () => {
                         }
                     });
                     window.dispatchEvent(event);
-
-                    // Ricarica la pagina per aggiornare la lista
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 800);
                 } else {
                     const event = new CustomEvent('show-toast', {
                         detail: {
