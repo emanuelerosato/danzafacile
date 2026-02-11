@@ -572,10 +572,9 @@
                 </button>
             </div>
         </form>
-    </div>
 
-    <!-- Corsi Iscritti Section -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <!-- Corsi Iscritti Section -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 mt-6">
         <div class="p-6 border-b border-gray-200">
             <div class="flex items-center justify-between">
                 <div>
@@ -876,6 +875,7 @@
                 </div>
 
             </div>
+        </div>
         </div>
     </div>
 </div>
