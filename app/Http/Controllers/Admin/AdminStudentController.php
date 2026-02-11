@@ -243,7 +243,25 @@ class AdminStudentController extends AdminBaseController
             $query->with('course')->latest('enrollment_date');
         }]);
 
-        return view('admin.students.edit', compact('student'));
+        // Fetch available courses for quick add enrollment
+        // Include: Corsi futuri + corsi in corso (non terminati)
+        // Exclude: Corsi già terminati
+        $availableCourses = Course::where('school_id', $this->school->id)
+                                  ->where('active', true)
+                                  ->where(function($query) {
+                                      $query->where('end_date', '>=', now()->startOfDay())
+                                            ->orWhereNull('end_date'); // Corsi senza end_date
+                                  })
+                                  ->orderBy('start_date', 'desc')
+                                  ->get(['id', 'name', 'start_date', 'end_date', 'max_students']); // Select only needed columns
+
+        // Filter out courses student is already enrolled in
+        $enrolledCourseIds = $student->enrollments->pluck('course_id')->toArray();
+        $availableCourses = $availableCourses->filter(function($course) use ($enrolledCourseIds) {
+            return !in_array($course->id, $enrolledCourseIds);
+        });
+
+        return view('admin.students.edit', compact('student', 'availableCourses'));
     }
 
     /**

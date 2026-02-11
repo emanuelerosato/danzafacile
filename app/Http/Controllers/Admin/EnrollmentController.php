@@ -278,6 +278,68 @@ class EnrollmentController extends Controller
     }
 
     /**
+     * Update enrollment status - Quick inline action
+     *
+     * @param Request $request
+     * @param CourseEnrollment $enrollment
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateStatus(Request $request, CourseEnrollment $enrollment)
+    {
+        // AUTHORIZATION: Policy check
+        $this->authorize('update', $enrollment);
+
+        // VALIDATION
+        $validated = $request->validate([
+            'status' => 'required|in:pending,active,suspended,cancelled,completed'
+        ]);
+
+        $newStatus = $validated['status'];
+        $oldStatus = $enrollment->status;
+
+        // BUSINESS LOGIC: Check course capacity if activating
+        if ($newStatus === 'active' && $oldStatus !== 'active') {
+            $course = $enrollment->course;
+
+            $currentActiveEnrollments = CourseEnrollment::where('course_id', $course->id)
+                                                        ->where('status', 'active')
+                                                        ->where('id', '!=', $enrollment->id) // Exclude current
+                                                        ->count();
+
+            if ($currentActiveEnrollments >= $course->max_students) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Il corso ha raggiunto il numero massimo di studenti (' . $course->max_students . ').'
+                ], 422);
+            }
+        }
+
+        // UPDATE with audit trail
+        $enrollment->update([
+            'status' => $newStatus,
+            'status_changed_by' => auth()->id(),
+            'status_changed_at' => now()
+        ]);
+
+        // AUDIT LOG (Laravel log for additional tracking)
+        \Log::info("Enrollment status changed", [
+            'enrollment_id' => $enrollment->id,
+            'student_id' => $enrollment->user_id,
+            'course_id' => $enrollment->course_id,
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
+            'changed_by' => auth()->user()->email,
+            'school_id' => auth()->user()->school_id
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Status iscrizione aggiornato con successo.',
+            'enrollment' => $enrollment->fresh()->load('course')
+        ]);
+    }
+
+    /**
      * Cancel enrollment
      */
     public function cancel(CourseEnrollment $enrollment)

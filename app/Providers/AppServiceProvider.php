@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\CourseEnrollment;
 use App\Models\Lead;
 use App\Models\User;
 use App\Observers\LeadObserver;
+use App\Policies\EnrollmentPolicy;
 use App\Policies\UserPolicy;
 use App\View\Composers\AppSettingsComposer;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -27,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
      */
     protected $policies = [
         User::class => UserPolicy::class,
+        CourseEnrollment::class => EnrollmentPolicy::class,
     ];
 
     /**
