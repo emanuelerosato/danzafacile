@@ -264,12 +264,13 @@ class AdminStudentController extends AdminBaseController
 
         // Prepare enrollments data for Alpine.js (avoiding Blade @json() bug with closures)
         // This prevents Blade compiler errors when using complex map() functions in @json()
+        // FIX: Null-safe operators to handle deleted/missing courses
         $enrollmentsData = $student->enrollments->map(function($e) {
             return [
                 'id' => $e->id,
                 'course_id' => $e->course_id,
-                'course_name' => $e->course->name,
-                'course_description' => $e->course->description,
+                'course_name' => $e->course?->name ?? 'Corso eliminato',
+                'course_description' => $e->course?->description ?? '',
                 'enrollment_date' => $e->enrollment_date->format('d/m/Y'),
                 'enrollment_date_human' => $e->enrollment_date->diffForHumans(),
                 'status' => $e->status,
