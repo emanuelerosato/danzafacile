@@ -39,6 +39,12 @@ class User extends Authenticatable
     const ROLE_STUDENT = 'student';
 
     /**
+     * Età di maggiorenne per validazione tutore
+     * Fix #4: Costante per evitare magic numbers
+     */
+    const ADULT_AGE = 18;
+
+    /**
      * SECURITY: Mass Assignment Protection
      *
      * Using $guarded instead of $fillable for stronger protection.
@@ -305,8 +311,9 @@ class User extends Authenticatable
 
     /**
      * SENIOR FIX: Task #4 - Verifica se l'utente è minorenne basandosi sulla data di nascita
+     * Fix #4: Usa costante ADULT_AGE invece di magic number
      *
-     * @return bool True se minorenne (< 18 anni)
+     * @return bool True se minorenne (< ADULT_AGE anni)
      */
     public function isMinor(): bool
     {
@@ -314,7 +321,7 @@ class User extends Authenticatable
             return false;
         }
 
-        return \Carbon\Carbon::parse($this->date_of_birth)->age < 18;
+        return \Carbon\Carbon::parse($this->date_of_birth)->age < self::ADULT_AGE;
     }
 
     /**

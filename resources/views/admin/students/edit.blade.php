@@ -75,48 +75,6 @@
         </div>
     </div>
 
-    <!-- Breadcrumbs -->
-    <nav class="flex" aria-label="Breadcrumb">
-        <ol class="inline-flex items-center space-x-1 md:space-x-3">
-            <li class="inline-flex items-center">
-                <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-rose-600">
-                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
-                    </svg>
-                    Dashboard
-                </a>
-            </li>
-            <li>
-                <div class="flex items-center">
-                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-                    </svg>
-                    <a href="{{ route('admin.students.index') }}" class="ml-1 text-sm font-medium text-gray-700 hover:text-rose-600 md:ml-2">
-                        Studenti
-                    </a>
-                </div>
-            </li>
-            <li>
-                <div class="flex items-center">
-                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-                    </svg>
-                    <a href="{{ route('admin.students.show', $student) }}" class="ml-1 text-sm font-medium text-gray-700 hover:text-rose-600 md:ml-2">
-                        {{ $student->name }}
-                    </a>
-                </div>
-            </li>
-            <li aria-current="page">
-                <div class="flex items-center">
-                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
-                    </svg>
-                    <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Modifica</span>
-                </div>
-            </li>
-        </ol>
-    </nav>
-
     <!-- Form -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200" x-data="studentEditForm">
         <form @submit.prevent="submitForm" class="p-6 space-y-8">
@@ -323,6 +281,22 @@
                     </p>
                 </div>
 
+                <!-- Fix #7: Info box guardian fields obbligatori -->
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-blue-700">
+                                <strong>Attenzione:</strong> I seguenti campi sono obbligatori per studenti minorenni (età inferiore a 18 anni).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Guardian First Name -->
                     <div>
@@ -372,12 +346,14 @@
                         <input type="text"
                                name="guardian_fiscal_code"
                                id="guardian_fiscal_code"
-                               x-model="form.guardian_fiscal_code"
+                               :value="form.guardian_fiscal_code"
+                               @input="form.guardian_fiscal_code = $event.target.value.toUpperCase()"
                                :required="form.is_minor"
                                maxlength="16"
-                               style="text-transform: uppercase"
-                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition-colors uppercase"
-                               placeholder="RSSMRA80A01H501U">
+                               pattern="[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]"
+                               title="Codice fiscale italiano (es: RSSMRA80A01H501X)"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors duration-200 uppercase"
+                               placeholder="RSSMRA80A01H501X">
                         <!-- Client-side Alpine.js error -->
                         <div x-show="errors.guardian_fiscal_code" class="mt-1 text-sm text-red-600" x-text="errors.guardian_fiscal_code"></div>
                         <!-- Server-side Laravel error -->
@@ -542,6 +518,9 @@
                                    name="active"
                                    id="active"
                                    x-model="form.active"
+                                   role="switch"
+                                   :aria-checked="form.active.toString()"
+                                   aria-label="Attiva o disattiva account studente"
                                    class="sr-only peer">
                             <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-rose-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-600"></div>
                         </label>
@@ -560,14 +539,22 @@
                         Annulla
                     </a>
 
-                    <!-- Danger Zone -->
+                    <!-- Danger Zone - Fix #10: Added loading state -->
                     <button type="button"
-                            @click="if(confirm('Sei sicuro di voler eliminare questo studente?')) { deleteStudent() }"
+                            @click="if(confirm('Sei sicuro di voler eliminare questo studente? Questa azione è irreversibile.')) { deleteStudent() }"
+                            :disabled="deleting"
+                            :class="{ 'opacity-50 cursor-not-allowed': deleting }"
                             class="inline-flex items-center px-4 py-2 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <!-- Spinner icon when deleting -->
+                        <svg x-show="deleting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-red-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <!-- Trash icon when not deleting -->
+                        <svg x-show="!deleting" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
-                        Elimina
+                        <span x-text="deleting ? 'Eliminazione...' : 'Elimina'"></span>
                     </button>
                 </div>
 
@@ -799,6 +786,7 @@ $studentFormData = json_encode([
 document.addEventListener('alpine:init', () => {
     Alpine.data('studentEditForm', () => ({
         loading: false,
+        deleting: false,  // Fix #10: Loading state per delete button
         errors: {},
         // Student data properly encoded with special character escaping
         form: {!! $studentFormData !!},
@@ -830,7 +818,8 @@ document.addEventListener('alpine:init', () => {
                     age--;
                 }
 
-                this.form.is_minor = age < 18;
+                // Fix #4: Usa costante ADULT_AGE dal backend invece di magic number
+                this.form.is_minor = age < {{ \App\Models\User::ADULT_AGE }};
             }
         },
 
@@ -943,6 +932,9 @@ document.addEventListener('alpine:init', () => {
         },
 
         async deleteStudent() {
+            // Fix #10: Set loading state
+            this.deleting = true;
+
             try {
                 const response = await fetch('/admin/students/{{ $student->id }}', {
                     method: 'DELETE',
@@ -960,17 +952,21 @@ document.addEventListener('alpine:init', () => {
                     });
                     window.dispatchEvent(event);
 
-                    // Redirect to students list
+                    // Redirect to students list (non reset deleting perché redirect)
                     setTimeout(() => {
                         window.location.href = '/admin/students';
-                    }, 1000);
+                    }, 1500);
                 } else {
+                    // Fix #10: Reset loading state on error
+                    this.deleting = false;
                     const event = new CustomEvent('show-toast', {
                         detail: { message: data.message || 'Errore durante l\'eliminazione dello studente', type: 'error' }
                     });
                     window.dispatchEvent(event);
                 }
             } catch (error) {
+                // Fix #10: Reset loading state on error
+                this.deleting = false;
                 console.error('Error:', error);
                 const event = new CustomEvent('show-toast', {
                     detail: { message: 'Errore di connessione', type: 'error' }
