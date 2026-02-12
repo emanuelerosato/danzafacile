@@ -41,7 +41,13 @@
         </div>
 
         <div class="bg-white rounded-lg shadow">
-            <form action="{{ route('admin.events.store') }}" method="POST" id="createEventForm" class="p-6" enctype="multipart/form-data">
+            <form action="{{ route('admin.events.store') }}"
+                  method="POST"
+                  id="createEventForm"
+                  class="p-6"
+                  enctype="multipart/form-data"
+                  x-data="{ ...eventFormValidation(), submitting: false }"
+                  @submit="if(validateDates($event)) { submitting = true }">
                 @csrf
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -166,11 +172,12 @@
                         </div>
 
                         <!-- Data Limite Registrazione -->
-                        <div x-data="{ requiresRegistration: {{ old('requires_registration', 'true') === 'true' ? 'true' : 'false' }} }">
+                        <div x-data="{ requiresRegistration: {{ old('requires_registration', 1) ? 'true' : 'false' }} }">
                             <div class="flex items-center mb-2">
                                 <input type="checkbox" id="requires_registration" name="requires_registration" value="1"
                                        class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded"
-                                       x-model="requiresRegistration" {{ old('requires_registration', true) ? 'checked' : '' }}>
+                                       :checked="requiresRegistration"
+                                       @change="requiresRegistration = $event.target.checked">
                                 <label for="requires_registration" class="ml-2 text-sm font-medium text-gray-700">
                                     Richiede Registrazione
                                 </label>
@@ -309,13 +316,22 @@
                 <!-- Pulsanti Azione -->
                 <div class="mt-8 flex items-center justify-end space-x-3 border-t pt-6">
                     <a href="{{ route('admin.events.index') }}"
+                       :class="{ 'pointer-events-none opacity-50': submitting }"
                        class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors duration-200">
                         Annulla
                     </a>
                     <button type="submit"
+                            :disabled="submitting"
+                            :class="{ 'opacity-50 cursor-not-allowed': submitting }"
                             class="px-6 py-2 bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-600 hover:to-purple-700 text-white rounded-lg transition-all duration-200 transform hover:scale-105 shadow-lg">
-                        <i class="fas fa-save mr-2"></i>
-                        Crea Evento
+                        <span x-show="!submitting">
+                            <i class="fas fa-save mr-2"></i>
+                            Crea Evento
+                        </span>
+                        <span x-show="submitting">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>
+                            Creazione in corso...
+                        </span>
                     </button>
                 </div>
             </form>
@@ -367,6 +383,54 @@ function previewImage(event) {
     } else {
         preview.classList.add('hidden');
         previewImg.src = '';
+    }
+}
+
+// Event form date validation
+function eventFormValidation() {
+    return {
+        validateDates(event) {
+            const startDate = document.getElementById('start_date').value;
+            const endDate = document.getElementById('end_date').value;
+            const registrationDeadline = document.getElementById('registration_deadline').value;
+            const requiresRegistration = document.querySelector('[name="requires_registration"]').checked;
+
+            // Validation 1: end_date >= start_date
+            if (startDate && endDate && new Date(endDate) < new Date(startDate)) {
+                event.preventDefault();
+                alert('La data di fine deve essere successiva o uguale alla data di inizio.');
+                return false;
+            }
+
+            // Validation 2: registration_deadline < start_date (se richiesta registrazione)
+            if (requiresRegistration && registrationDeadline && startDate) {
+                if (new Date(registrationDeadline) >= new Date(startDate)) {
+                    event.preventDefault();
+                    alert('La scadenza registrazione deve essere precedente alla data di inizio evento.');
+                    return false;
+                }
+
+                // Validation 3: registration_deadline >= today
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (new Date(registrationDeadline) < today) {
+                    event.preventDefault();
+                    alert('La scadenza registrazione non può essere nel passato.');
+                    return false;
+                }
+            }
+
+            // Validation 4: start_date >= today (solo per create, non edit)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (startDate && new Date(startDate) < today) {
+                event.preventDefault();
+                alert('La data di inizio deve essere oggi o nel futuro.');
+                return false;
+            }
+
+            return true;
+        }
     }
 }
 </script>
