@@ -22,7 +22,7 @@
                                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                                     </svg>
                                     <a href="{{ route('admin.documents.show', $document) }}" class="ml-1 text-sm font-medium text-gray-500 hover:text-gray-700 md:ml-2">
-                                        {{ Str::limit($document->title, 20) }}
+                                        {{ Str::limit($document->name, 20) }}
                                     </a>
                                 </div>
                             </li>
@@ -67,8 +67,8 @@
                             </div>
                             <div class="ml-4">
                                 <h3 class="text-sm font-medium text-blue-900">File Attuale</h3>
-                                <p class="text-sm text-blue-700">{{ $document->original_filename }}</p>
-                                <p class="text-xs text-blue-600">{{ $document->formatted_size }} • {{ $document->mime_type }}</p>
+                                <p class="text-sm text-blue-700">{{ $document->name }}</p>
+                                <p class="text-xs text-blue-600">{{ $document->formatted_size }}</p>
                             </div>
                             <div class="ml-auto">
                                 <a href="{{ route('admin.documents.download', $document) }}"
@@ -143,36 +143,20 @@
                         @enderror
                     </div>
 
-                    <!-- Title -->
+                    <!-- Name -->
                     <div>
-                        <label for="title" class="block text-sm font-medium text-gray-700 mb-2">
-                            Titolo Documento <span class="text-red-500">*</span>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Nome Documento <span class="text-red-500">*</span>
                         </label>
                         <input type="text"
-                               id="title"
-                               name="title"
-                               value="{{ old('title', $document->title) }}"
+                               id="name"
+                               name="name"
+                               value="{{ old('name', $document->name) }}"
                                required
                                maxlength="255"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('title') border-red-300 @enderror"
-                               placeholder="Inserisci il titolo del documento">
-                        @error('title')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <!-- Description -->
-                    <div>
-                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-                            Descrizione
-                        </label>
-                        <textarea id="description"
-                                  name="description"
-                                  rows="4"
-                                  maxlength="1000"
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('description') border-red-300 @enderror"
-                                  placeholder="Aggiungi una descrizione opzionale del documento">{{ old('description', $document->description) }}</textarea>
-                        @error('description')
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('name') border-red-300 @enderror"
+                               placeholder="Inserisci il nome del documento">
+                        @error('name')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -196,55 +180,6 @@
                         @error('category')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                    </div>
-
-                    <!-- Settings -->
-                    <div class="space-y-4">
-                        <h3 class="text-lg font-medium text-gray-900">Impostazioni</h3>
-
-                        <!-- Is Public -->
-                        <div class="flex items-center">
-                            <input id="is_public"
-                                   name="is_public"
-                                   type="checkbox"
-                                   value="1"
-                                   {{ old('is_public', $document->is_public) ? 'checked' : '' }}
-                                   class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded">
-                            <label for="is_public" class="ml-2 block text-sm text-gray-700">
-                                Documento pubblico
-                            </label>
-                        </div>
-                        <p class="text-xs text-gray-500 ml-6">Se abilitato, il documento sarà visibile a tutti gli utenti della scuola</p>
-
-                        <!-- Requires Approval -->
-                        <div class="flex items-center">
-                            <input id="requires_approval"
-                                   name="requires_approval"
-                                   type="checkbox"
-                                   value="1"
-                                   {{ old('requires_approval', $document->requires_approval) ? 'checked' : '' }}
-                                   class="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300 rounded">
-                            <label for="requires_approval" class="ml-2 block text-sm text-gray-700">
-                                Richiede approvazione
-                            </label>
-                        </div>
-                        <p class="text-xs text-gray-500 ml-6">Se abilitato, il documento dovrà essere approvato prima di essere pubblicato</p>
-
-                        <!-- Expires At -->
-                        <div>
-                            <label for="expires_at" class="block text-sm font-medium text-gray-700 mb-2">
-                                Data di Scadenza (opzionale)
-                            </label>
-                            <input type="datetime-local"
-                                   id="expires_at"
-                                   name="expires_at"
-                                   value="{{ old('expires_at', $document->expires_at ? $document->expires_at->format('Y-m-d\TH:i') : '') }}"
-                                   min="{{ now()->format('Y-m-d\TH:i') }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('expires_at') border-red-300 @enderror">
-                            @error('expires_at')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                            @enderror
-                        </div>
                     </div>
 
                     <!-- Status Warning -->

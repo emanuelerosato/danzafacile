@@ -21,12 +21,12 @@
                                     <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                                     </svg>
-                                    <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">{{ Str::limit($document->title, 30) }}</span>
+                                    <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">{{ Str::limit($document->name, 30) }}</span>
                                 </div>
                             </li>
                         </ol>
                     </nav>
-                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 mt-1">{{ $document->title }}</h1>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-900 mt-1">{{ $document->name }}</h1>
                     <div class="flex items-center space-x-4 mt-2">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $document->status_class }}">
                             {{ $document->status_name }}
@@ -34,16 +34,6 @@
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                             {{ $document->category_name }}
                         </span>
-                        @if($document->is_public)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                Pubblico
-                            </span>
-                        @endif
-                        @if($document->is_expired)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                Scaduto
-                            </span>
-                        @endif
                     </div>
                 </div>
                 <div class="flex space-x-3">
@@ -80,7 +70,7 @@
                         </form>
 
                         <!-- Reject Button -->
-                        <button onclick="showRejectModal({{ $document->id }}, '{{ $document->title }}')"
+                        <button onclick="showRejectModal({{ $document->id }}, '{{ $document->name }}')"
                                 class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -102,7 +92,7 @@
                         <div class="flex items-center justify-center bg-gray-50 rounded-lg h-96">
                             @if($document->is_image)
                                 <img src="{{ route('admin.documents.download', $document) }}"
-                                     alt="{{ $document->title }}"
+                                     alt="{{ $document->name }}"
                                      class="max-w-full max-h-full object-contain rounded-lg">
                             @elseif($document->is_pdf)
                                 <div class="text-center">
@@ -112,7 +102,7 @@
                                         </svg>
                                     </div>
                                     <h3 class="text-lg font-medium text-gray-900 mb-2">Documento PDF</h3>
-                                    <p class="text-gray-600 mb-4">{{ $document->original_filename }}</p>
+                                    <p class="text-gray-600 mb-4">{{ $document->name }}</p>
                                     <a href="{{ route('admin.documents.download', $document) }}"
                                        target="_blank"
                                        class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
@@ -127,8 +117,8 @@
                                     <div class="w-20 h-20 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-4">
                                         <i class="{{ $document->file_icon }} text-3xl text-gray-600"></i>
                                     </div>
-                                    <h3 class="text-lg font-medium text-gray-900 mb-2">{{ strtoupper(pathinfo($document->original_filename, PATHINFO_EXTENSION)) }} File</h3>
-                                    <p class="text-gray-600 mb-4">{{ $document->original_filename }}</p>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-2">{{ strtoupper(pathinfo($document->name, PATHINFO_EXTENSION)) }} File</h3>
+                                    <p class="text-gray-600 mb-4">{{ $document->name }}</p>
                                     <a href="{{ route('admin.documents.download', $document) }}"
                                        class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -141,18 +131,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Description -->
-                @if($document->description)
-                    <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-                            <h2 class="text-lg font-medium text-gray-900">Descrizione</h2>
-                        </div>
-                        <div class="p-6">
-                            <p class="text-gray-700 whitespace-pre-wrap">{{ $document->description }}</p>
-                        </div>
-                    </div>
-                @endif
 
                 <!-- Rejection Reason -->
                 @if($document->status === 'rejected' && $document->rejection_reason)
@@ -178,7 +156,7 @@
                         <!-- File Info -->
                         <div>
                             <dt class="text-sm font-medium text-gray-500">Nome File</dt>
-                            <dd class="mt-1 text-sm text-gray-900">{{ $document->original_filename }}</dd>
+                            <dd class="mt-1 text-sm text-gray-900">{{ $document->name }}</dd>
                         </div>
 
                         <div>
@@ -241,32 +219,6 @@
                             </div>
                         @endif
 
-                        <!-- Expiry -->
-                        @if($document->expires_at)
-                            <div class="border-t border-gray-100 pt-4">
-                                <dt class="text-sm font-medium text-gray-500">Scadenza</dt>
-                                <dd class="mt-1 text-sm {{ $document->is_expired ? 'text-red-600' : 'text-gray-900' }}">
-                                    {{ $document->expires_at->format('d/m/Y H:i') }}
-                                    @if($document->is_expired)
-                                        <span class="block text-xs text-red-500">(Scaduto {{ $document->expires_at->diffForHumans() }})</span>
-                                    @else
-                                        <span class="block text-xs text-gray-500">({{ $document->expires_at->diffForHumans() }})</span>
-                                    @endif
-                                </dd>
-                            </div>
-                        @endif
-
-                        <!-- Settings -->
-                        <div class="border-t border-gray-100 pt-4 space-y-2">
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm font-medium text-gray-500">Pubblico</span>
-                                <span class="text-sm text-gray-900">{{ $document->is_public ? 'Sì' : 'No' }}</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm font-medium text-gray-500">Richiede Approvazione</span>
-                                <span class="text-sm text-gray-900">{{ $document->requires_approval ? 'Sì' : 'No' }}</span>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -325,7 +277,7 @@
             </div>
 
             <p class="text-sm text-gray-600 mb-4">
-                Stai per rifiutare il documento: <strong id="rejectDocumentTitle">{{ $document->title }}</strong>
+                Stai per rifiutare il documento: <strong id="rejectDocumentTitle">{{ $document->name }}</strong>
             </p>
 
             <form id="rejectForm" method="POST" action="{{ route('admin.documents.reject', $document) }}">

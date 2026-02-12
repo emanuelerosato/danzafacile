@@ -20,20 +20,21 @@ class UpdateDocumentRequest extends FormRequest
      */
     public function rules(): array
     {
+        $categories = array_keys(\App\Models\Document::getAvailableCategories());
+
         return [
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'category' => 'required|in:general,medical,contract,identification,other',
+            'name' => 'required|string|max:255',
+            'category' => 'required|in:' . implode(',', $categories),
             'file' => [
                 'nullable',
                 'file',
                 'max:10240', // 10MB
-                'mimes:pdf,jpg,jpeg,png,gif,doc,docx,txt',
+                'mimes:pdf,jpg,jpeg,png,doc,docx',
                 // SECURITY: Magic bytes validation
                 function ($attribute, $value, $fail) {
                     if ($value) {
                         $mimeType = $value->getMimeType();
-                        $category = str_starts_with($mimeType, 'image/') ? 'image' : 'document';
+                        $category = str_starts_with($mimeType, 'image/') ? 'images' : 'documents';
 
                         $validation = FileUploadHelper::validateFile($value, $category, 10);
 
@@ -49,9 +50,6 @@ class UpdateDocumentRequest extends FormRequest
                     }
                 },
             ],
-            'is_public' => 'boolean',
-            'requires_approval' => 'boolean',
-            'expires_at' => 'nullable|date|after:now'
         ];
     }
 
@@ -61,15 +59,13 @@ class UpdateDocumentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required' => 'Il titolo del documento è obbligatorio.',
-            'title.max' => 'Il titolo non può superare 255 caratteri.',
-            'description.max' => 'La descrizione non può superare 1000 caratteri.',
+            'name.required' => 'Il nome del documento è obbligatorio.',
+            'name.max' => 'Il nome non può superare 255 caratteri.',
             'category.required' => 'La categoria è obbligatoria.',
             'category.in' => 'Categoria non valida.',
             'file.file' => 'Devi caricare un file valido.',
-            'file.mimes' => 'Il file deve essere in formato PDF, JPG, PNG, GIF, DOC, DOCX o TXT.',
+            'file.mimes' => 'Il file deve essere in formato PDF, JPG, PNG, DOC o DOCX.',
             'file.max' => 'Il file non può superare 10MB.',
-            'expires_at.after' => 'La data di scadenza deve essere futura.',
         ];
     }
 }
