@@ -103,7 +103,7 @@ class AdminEventController extends AdminBaseController
                 'price_students' => 'nullable|numeric|min:0|max:999999.99',
                 'price_guests' => 'nullable|numeric|min:0|max:999999.99',
                 'requires_registration' => 'boolean',
-                'registration_deadline' => 'nullable|date|before:start_date',
+                'registration_deadline' => 'nullable|date|after_or_equal:today|before:start_date',
                 'requirements' => 'nullable|array',
                 'requirements.*' => 'string|max:255',
                 'external_link' => 'nullable|url|max:500',
@@ -123,7 +123,16 @@ class AdminEventController extends AdminBaseController
                     }
                 ],
                 'is_public' => 'boolean',
-                'active' => 'boolean'
+                'active' => 'boolean',
+
+                // Additional fields validation
+                'short_description' => 'nullable|string|max:500',
+                'landing_description' => 'nullable|string|max:2000',
+                'landing_cta_text' => 'nullable|string|max:100',
+                'qr_checkin_enabled' => 'boolean',
+                'payment_method' => 'nullable|in:cash,card,bank_transfer,paypal',
+                'requires_payment' => 'boolean',
+                'additional_info' => 'nullable|string|max:1000',
             ]);
 
             $validated['school_id'] = $this->school->id;
@@ -269,7 +278,7 @@ class AdminEventController extends AdminBaseController
             'price_students' => 'nullable|numeric|min:0|max:999999.99',
             'price_guests' => 'nullable|numeric|min:0|max:999999.99',
             'requires_registration' => 'boolean',
-            'registration_deadline' => 'nullable|date|before:start_date',
+            'registration_deadline' => 'nullable|date|after_or_equal:today|before:start_date',
             'requirements' => 'nullable|array',
             'requirements.*' => 'string|max:255',
             'external_link' => 'nullable|url|max:500',
@@ -289,7 +298,16 @@ class AdminEventController extends AdminBaseController
                 }
             ],
             'is_public' => 'boolean',
-            'active' => 'boolean'
+            'active' => 'boolean',
+
+            // Additional fields validation
+            'short_description' => 'nullable|string|max:500',
+            'landing_description' => 'nullable|string|max:2000',
+            'landing_cta_text' => 'nullable|string|max:100',
+            'qr_checkin_enabled' => 'boolean',
+            'payment_method' => 'nullable|in:cash,card,bank_transfer,paypal',
+            'requires_payment' => 'boolean',
+            'additional_info' => 'nullable|string|max:1000',
         ]);
 
         $validated['price_students'] = $validated['price_students'] ?? 0.00;
@@ -460,7 +478,12 @@ class AdminEventController extends AdminBaseController
     public function export()
     {
         $events = $this->school->events()
-            ->with(['registrations'])
+            ->withCount([
+                'registrations as active_registrations_count' => function($query) {
+                    $query->where('status', 'registered')
+                          ->orWhere('status', 'confirmed');
+                }
+            ])
             ->orderBy('start_date', 'desc')
             ->get();
 
@@ -548,7 +571,7 @@ class AdminEventController extends AdminBaseController
                 $event->end_date ? $event->end_date->format('d/m/Y H:i') : '',
                 $event->location ?? '',
                 $event->max_participants ?? 'Illimitato',
-                $event->registrations()->active()->count(),
+                $event->active_registrations_count ?? 0,
                 $event->price ? '€' . number_format($event->price, 2, ',', '.') : 'Gratuito',
                 $event->requires_registration ? 'Sì' : 'No',
                 $event->is_public ? 'Pubblico' : 'Privato',
