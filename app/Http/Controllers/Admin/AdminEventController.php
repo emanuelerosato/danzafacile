@@ -7,6 +7,9 @@ use App\Models\EventRegistration;
 use App\Models\User;
 use App\Helpers\QueryHelper;
 use App\Helpers\FileUploadHelper;
+use App\Http\Requests\Admin\StoreEventRequest;
+use App\Http\Requests\Admin\UpdateEventRequest;
+use App\Services\EventService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +18,20 @@ use Illuminate\Support\Facades\Log;
 
 class AdminEventController extends AdminBaseController
 {
+    /**
+     * EventService per business logic eventi
+     */
+    protected EventService $eventService;
+
+    /**
+     * Dependency injection del service
+     */
+    public function __construct(EventService $eventService)
+    {
+        parent::__construct();
+        $this->eventService = $eventService;
+    }
+
     /**
      * Display a listing of events for the current school
      */
@@ -81,86 +98,64 @@ class AdminEventController extends AdminBaseController
     }
 
     /**
-     * Store a newly created event in storage
+     * Store a newly created event in storage.
+     *
+     * Usa StoreEventRequest per validation, EventPolicy per authorization,
+     * EventService per business logic (image upload, slug generation, cache).
      */
-    public function store(Request $request)
+    public function store(StoreEventRequest $request)
     {
-        if (!$this->school) {
-            abort(403, 'Nessuna scuola associata al tuo account.');
-        }
+        // Authorization tramite EventPolicy (già verificata in StoreEventRequest::authorize())
+        $this->authorize('create', Event::class);
 
         try {
             DB::beginTransaction();
 
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'description' => 'nullable|string',
-                'type' => 'required|in:saggio,workshop,competizione,seminario,altro',
-                'start_date' => 'required|date|after_or_equal:today',
-                'end_date' => 'required|date|after_or_equal:start_date',
-                'location' => 'nullable|string|max:255',
-                'max_participants' => 'nullable|integer|min:1',
-                'price_students' => 'nullable|numeric|min:0|max:999999.99',
-                'price_guests' => 'nullable|numeric|min:0|max:999999.99',
-                'requires_registration' => 'boolean',
-                'registration_deadline' => 'nullable|date|after_or_equal:today|before:start_date',
-                'requirements' => 'nullable|array',
-                'requirements.*' => 'string|max:255',
-                'external_link' => 'nullable|url|max:500',
-                'social_link' => 'nullable|url|max:500',
-                'image' => [
-                    'nullable',
-                    'file',
-                    'max:5120', // 5MB
-                    'mimes:jpg,jpeg,png,gif,webp',
-                    function ($attribute, $value, $fail) {
-                        if ($value) {
-                            $validation = FileUploadHelper::validateFile($value, 'image', 5);
-                            if (!$validation['valid']) {
-                                $fail(implode(' ', $validation['errors']));
-                            }
-                        }
-                    }
-                ],
-                'is_public' => 'boolean',
-                'active' => 'boolean',
+            // Ottieni dati validati con school_id incluso
+            $validated = $request->validatedWithSchool();
 
-                // Additional fields validation
-                'short_description' => 'nullable|string|max:500',
-                'landing_description' => 'nullable|string|max:2000',
-                'landing_cta_text' => 'nullable|string|max:100',
-                'qr_checkin_enabled' => 'boolean',
-                'payment_method' => 'nullable|in:cash,card,bank_transfer,paypal',
-                'requires_payment' => 'boolean',
-                'additional_info' => 'nullable|string|max:1000',
-            ]);
+            // Prepara dati evento (slug, defaults) usando EventService
+            $validated = $this->eventService->prepareEventData($validated);
 
-            $validated['school_id'] = $this->school->id;
-            $validated['requires_registration'] = $validated['requires_registration'] ?? false;
-            $validated['is_public'] = $validated['is_public'] ?? true;
-            $validated['active'] = $validated['active'] ?? true;
-            $validated['price_students'] = $validated['price_students'] ?? 0.00;
-            $validated['price_guests'] = $validated['price_guests'] ?? 0.00;
-
-            // Handle image upload
+            // Handle image upload con EventService (3 dimensioni + compressione)
             if ($request->hasFile('image')) {
-                $result = FileUploadHelper::uploadFile(
-                    $request->file('image'),
-                    'events',
-                    'image',
-                    5
-                );
+                try {
+                    $imagePaths = $this->eventService->handleImageUpload(
+                        $request->file('image'),
+                        null // eventId null perché ancora non creato, verrà spostato dopo create
+                    );
 
-                if ($result['success']) {
-                    $validated['image_path'] = $result['path'];
-                } else {
-                    return back()->withErrors(['image' => implode(' ', $result['errors'])])->withInput();
+                    // Salva path della versione original (EventService crea 3 dimensioni)
+                    $validated['image_path'] = $imagePaths['original'];
+
+                } catch (\RuntimeException $e) {
+                    return back()->withErrors(['image' => $e->getMessage()])->withInput();
                 }
             }
 
+            // Crea evento
             $event = Event::create($validated);
 
-            $this->clearSchoolCache();
+            // Logging dettagliato per audit trail
+            Log::info('Event created successfully', [
+                'event_id' => $event->id,
+                'event_name' => $event->name,
+                'event_type' => $event->type,
+                'school_id' => $event->school_id,
+                'school_name' => $event->school->name ?? 'N/A',
+                'user_id' => auth()->id(),
+                'user_email' => auth()->user()->email,
+                'user_name' => auth()->user()->name,
+                'is_public' => $event->is_public,
+                'requires_registration' => $event->requires_registration,
+                'price_students' => $event->price_students,
+                'price_guests' => $event->price_guests,
+                'start_date' => $event->start_date->toDateTimeString(),
+                'created_at' => now()->toDateTimeString(),
+            ]);
+
+            // Invalida cache usando EventService con Redis tags
+            $this->eventService->clearEventCache($event->school_id, $event->is_public);
 
             DB::commit();
 
@@ -176,15 +171,18 @@ class AdminEventController extends AdminBaseController
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // Cleanup uploaded file if exists
+            // Cleanup uploaded images se esistono (tutte e 3 le dimensioni)
             if (isset($validated['image_path'])) {
-                Storage::disk('public')->delete($validated['image_path']);
+                $this->eventService->deleteEventImage($validated['image_path']);
             }
 
+            // Logging errore per debugging
             Log::error('Event creation failed', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
                 'school_id' => $this->school->id ?? null,
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
+                'request_data' => $request->except(['image', '_token'])
             ]);
 
             return back()
@@ -254,124 +252,169 @@ class AdminEventController extends AdminBaseController
     }
 
     /**
-     * Update the specified event in storage
+     * Update the specified event in storage.
+     *
+     * Usa UpdateEventRequest per validation, EventPolicy per authorization,
+     * EventService per business logic.
      */
-    public function update(Request $request, Event $event)
+    public function update(UpdateEventRequest $request, Event $event)
     {
-        if (!$this->school) {
-            abort(403, 'Nessuna scuola associata al tuo account.');
-        }
+        // Authorization tramite EventPolicy
+        $this->authorize('update', $event);
 
-        // Ensure event belongs to current school
-        if ($event->school_id !== $this->school->id) {
-            abort(404, 'Evento non trovato.');
-        }
+        try {
+            // Salva valori originali per audit log
+            $originalValues = [
+                'name' => $event->name,
+                'active' => $event->active,
+                'price_students' => $event->price_students,
+                'price_guests' => $event->price_guests,
+                'start_date' => $event->start_date->toDateTimeString(),
+            ];
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'type' => 'required|in:saggio,workshop,competizione,seminario,altro',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'location' => 'nullable|string|max:255',
-            'max_participants' => 'nullable|integer|min:1',
-            'price_students' => 'nullable|numeric|min:0|max:999999.99',
-            'price_guests' => 'nullable|numeric|min:0|max:999999.99',
-            'requires_registration' => 'boolean',
-            'registration_deadline' => 'nullable|date|after_or_equal:today|before:start_date',
-            'requirements' => 'nullable|array',
-            'requirements.*' => 'string|max:255',
-            'external_link' => 'nullable|url|max:500',
-            'social_link' => 'nullable|url|max:500',
-            'image' => [
-                'nullable',
-                'file',
-                'max:5120', // 5MB
-                'mimes:jpg,jpeg,png,gif,webp',
-                function ($attribute, $value, $fail) {
-                    if ($value) {
-                        $validation = FileUploadHelper::validateFile($value, 'image', 5);
-                        if (!$validation['valid']) {
-                            $fail(implode(' ', $validation['errors']));
-                        }
+            // Ottieni dati validati
+            $validated = $request->validated();
+
+            // Prepara dati (defaults, slug se cambia nome)
+            $validated = $this->eventService->prepareEventData($validated, $event->id);
+
+            // Handle image upload con EventService
+            if ($request->hasFile('image')) {
+                try {
+                    // Elimina vecchia immagine (tutte le 3 dimensioni)
+                    if ($event->image_path) {
+                        $this->eventService->deleteEventImage($event->image_path);
                     }
+
+                    // Upload nuova immagine (3 dimensioni + compressione)
+                    $imagePaths = $this->eventService->handleImageUpload(
+                        $request->file('image'),
+                        $event->id
+                    );
+
+                    $validated['image_path'] = $imagePaths['original'];
+
+                } catch (\RuntimeException $e) {
+                    return back()->withErrors(['image' => $e->getMessage()])->withInput();
                 }
-            ],
-            'is_public' => 'boolean',
-            'active' => 'boolean',
-
-            // Additional fields validation
-            'short_description' => 'nullable|string|max:500',
-            'landing_description' => 'nullable|string|max:2000',
-            'landing_cta_text' => 'nullable|string|max:100',
-            'qr_checkin_enabled' => 'boolean',
-            'payment_method' => 'nullable|in:cash,card,bank_transfer,paypal',
-            'requires_payment' => 'boolean',
-            'additional_info' => 'nullable|string|max:1000',
-        ]);
-
-        $validated['price_students'] = $validated['price_students'] ?? 0.00;
-        $validated['price_guests'] = $validated['price_guests'] ?? 0.00;
-
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            // Delete old image if exists
-            if ($event->image_path && Storage::disk('public')->exists($event->image_path)) {
-                Storage::disk('public')->delete($event->image_path);
             }
 
-            $result = FileUploadHelper::uploadFile(
-                $request->file('image'),
-                'events',
-                'image',
-                5
-            );
+            // Update evento
+            $event->update($validated);
 
-            if ($result['success']) {
-                $validated['image_path'] = $result['path'];
-            } else {
-                return back()->withErrors(['image' => implode(' ', $result['errors'])])->withInput();
+            // Logging dettagliato per audit trail
+            $changes = [];
+            foreach ($originalValues as $key => $originalValue) {
+                if ($event->{$key} != $originalValue) {
+                    $changes[$key] = [
+                        'old' => $originalValue,
+                        'new' => $event->{$key}
+                    ];
+                }
             }
-        }
 
-        $event->update($validated);
-        $this->clearSchoolCache();
-
-        if ($request->ajax()) {
-            return $this->jsonResponse(true, 'Evento aggiornato con successo.', [
-                'event' => $event->fresh()->load(['registrations.user'])
+            Log::info('Event updated successfully', [
+                'event_id' => $event->id,
+                'event_name' => $event->name,
+                'school_id' => $event->school_id,
+                'school_name' => $event->school->name ?? 'N/A',
+                'user_id' => auth()->id(),
+                'user_email' => auth()->user()->email,
+                'user_name' => auth()->user()->name,
+                'changes' => $changes,
+                'updated_at' => now()->toDateTimeString(),
             ]);
-        }
 
-        return redirect()->route('admin.events.show', $event)
-                        ->with('success', 'Evento aggiornato con successo.');
+            // Invalida cache
+            $this->eventService->clearEventCache($event->school_id, $event->is_public);
+
+            if ($request->ajax()) {
+                return $this->jsonResponse(true, 'Evento aggiornato con successo.', [
+                    'event' => $event->fresh()->load(['registrations.user'])
+                ]);
+            }
+
+            return redirect()->route('admin.events.show', $event)
+                            ->with('success', 'Evento aggiornato con successo.');
+
+        } catch (\Exception $e) {
+            // Logging errore
+            Log::error('Event update failed', [
+                'event_id' => $event->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+                'request_data' => $request->except(['image', '_token'])
+            ]);
+
+            return back()
+                ->withErrors(['error' => 'Si è verificato un errore durante l\'aggiornamento dell\'evento. Riprova.'])
+                ->withInput();
+        }
     }
 
     /**
-     * Remove the specified event from storage
+     * Remove the specified event from storage.
+     *
+     * Usa EventPolicy per authorization, verifica business rules,
+     * logging dettagliato per audit trail.
      */
     public function destroy(Event $event)
     {
-        if (!$this->school) {
-            abort(403, 'Nessuna scuola associata al tuo account.');
+        // Authorization tramite EventPolicy
+        $this->authorize('delete', $event);
+
+        // Verifica business rule: no delete se ci sono registrazioni confermate
+        $deleteCheck = $this->eventService->canDeleteEvent($event);
+
+        if (!$deleteCheck['can_delete']) {
+            Log::warning('Event deletion blocked - has confirmed registrations', [
+                'event_id' => $event->id,
+                'event_name' => $event->name,
+                'school_id' => $event->school_id,
+                'user_id' => auth()->id(),
+                'reason' => $deleteCheck['reason']
+            ]);
+
+            if (request()->ajax() || request()->wantsJson()) {
+                return $this->jsonResponse(false, $deleteCheck['reason'], [], 422);
+            }
+
+            return back()->withErrors(['error' => $deleteCheck['reason']]);
         }
 
-        // Ensure event belongs to current school
-        if ($event->school_id !== $this->school->id) {
-            abort(404, 'Evento non trovato.');
-        }
-
-        // Check if event has confirmed registrations
-        $confirmedRegistrations = $event->registrations()->confirmed()->count();
-
-        if ($confirmedRegistrations > 0) {
-            return $this->jsonResponse(false, 'Impossibile eliminare l\'evento. Ci sono ' . $confirmedRegistrations . ' registrazioni confermate.', [], 422);
-        }
+        // Salva dati per logging prima della delete
+        $eventData = [
+            'id' => $event->id,
+            'name' => $event->name,
+            'type' => $event->type,
+            'school_id' => $event->school_id,
+            'school_name' => $event->school->name ?? 'N/A',
+            'start_date' => $event->start_date->toDateTimeString(),
+            'created_at' => $event->created_at->toDateTimeString(),
+        ];
 
         $eventName = $event->name;
+
+        // Elimina immagine se esiste (tutte le 3 dimensioni)
+        if ($event->image_path) {
+            $this->eventService->deleteEventImage($event->image_path);
+        }
+
+        // Elimina evento
         $event->delete();
 
-        $this->clearSchoolCache();
+        // Logging dettagliato per audit trail
+        Log::info('Event deleted successfully', [
+            'event_data' => $eventData,
+            'user_id' => auth()->id(),
+            'user_email' => auth()->user()->email,
+            'user_name' => auth()->user()->name,
+            'deleted_at' => now()->toDateTimeString(),
+        ]);
+
+        // Invalida cache
+        $this->eventService->clearEventCache($eventData['school_id']);
 
         if (request()->ajax() || request()->wantsJson()) {
             return $this->jsonResponse(true, "Evento {$eventName} eliminato con successo.");
@@ -392,7 +435,16 @@ class AdminEventController extends AdminBaseController
         }
 
         $event->update(['active' => !$event->active]);
-        $this->clearSchoolCache();
+
+        // Logging per toggleActive
+        Log::info('Event active status toggled', [
+            'event_id' => $event->id,
+            'event_name' => $event->name,
+            'new_status' => $event->active ? 'active' : 'inactive',
+            'user_id' => auth()->id(),
+        ]);
+
+        $this->eventService->clearEventCache($event->school_id);
 
         $status = $event->active ? 'attivato' : 'disattivato';
         $message = "Evento {$status} con successo.";
@@ -463,7 +515,18 @@ class AdminEventController extends AdminBaseController
                     return $this->jsonResponse(false, 'Azione non supportata.', [], 400);
             }
 
-            $this->clearSchoolCache();
+            // Invalida cache dopo bulk action
+            $this->eventService->clearEventCache($this->school->id);
+
+            // Logging bulk action
+            Log::info('Event bulk action executed', [
+                'action' => $action,
+                'event_ids' => $eventIds,
+                'count' => count($eventIds),
+                'school_id' => $this->school->id,
+                'user_id' => auth()->id(),
+            ]);
+
             return $this->jsonResponse(true, $message);
 
         } catch (\Exception $e) {
@@ -701,7 +764,16 @@ class AdminEventController extends AdminBaseController
             'additional_info' => $additionalInfo,
         ]);
 
-        $this->clearSchoolCache();
+        // Logging landing page customization
+        Log::info('Event landing page customized', [
+            'event_id' => $event->id,
+            'event_name' => $event->name,
+            'school_id' => $event->school_id,
+            'user_id' => auth()->id(),
+            'has_meta' => isset($validated['meta_title']) || isset($validated['meta_description']),
+        ]);
+
+        $this->eventService->clearEventCache($event->school_id, true); // publicOnly = true
 
         return redirect()->route('admin.events.show', $event)
             ->with('success', 'Landing page personalizzata aggiornata con successo!');
