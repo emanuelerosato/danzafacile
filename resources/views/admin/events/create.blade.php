@@ -24,7 +24,7 @@
 
 
 
-<div class="py-6">
+<div class="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50 py-8">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-6 flex items-center justify-between">
@@ -40,7 +40,7 @@
             </a>
         </div>
 
-        <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20-md">
+        <div class="bg-white rounded-lg shadow">
             <form action="{{ route('admin.events.store') }}" method="POST" id="createEventForm" class="p-6" enctype="multipart/form-data">
                 @csrf
 
@@ -228,7 +228,7 @@
                             </label>
                             <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent @error('image') border-red-500 @enderror"
-                                   onchange="previewImage(event)">
+                                   onchange="window.previewImage && window.previewImage(event)">
                             <p class="mt-1 text-xs text-gray-500">
                                 Formati supportati: JPG, PNG, GIF, WEBP. Max 5MB
                             </p>

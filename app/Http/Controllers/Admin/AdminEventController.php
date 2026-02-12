@@ -10,6 +10,8 @@ use App\Helpers\FileUploadHelper;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class AdminEventController extends AdminBaseController
 {
@@ -18,6 +20,10 @@ class AdminEventController extends AdminBaseController
      */
     public function index(Request $request)
     {
+        if (!$this->school) {
+            abort(403, 'Nessuna scuola associata al tuo account.');
+        }
+
         $query = $this->school->events()->with(['registrations.user']);
 
         // SECURE: allowed sort fields for events
@@ -59,6 +65,10 @@ class AdminEventController extends AdminBaseController
      */
     public function create()
     {
+        if (!$this->school) {
+            abort(403, 'Nessuna scuola associata al tuo account.');
+        }
+
         $eventTypes = [
             'saggio' => 'Saggio',
             'workshop' => 'Workshop',
@@ -75,73 +85,103 @@ class AdminEventController extends AdminBaseController
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'type' => 'required|in:saggio,workshop,competizione,seminario,altro',
-            'start_date' => 'required|date|after_or_equal:today',
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'location' => 'nullable|string|max:255',
-            'max_participants' => 'nullable|integer|min:1',
-            'price' => 'nullable|numeric|min:0',
-            'requires_registration' => 'boolean',
-            'registration_deadline' => 'nullable|date|before:start_date',
-            'requirements' => 'nullable|array',
-            'requirements.*' => 'string|max:255',
-            'external_link' => 'nullable|url|max:500',
-            'social_link' => 'nullable|url|max:500',
-            'image' => [
-                'nullable',
-                'file',
-                'max:5120', // 5MB
-                'mimes:jpg,jpeg,png,gif,webp',
-                function ($attribute, $value, $fail) {
-                    if ($value) {
-                        $validation = FileUploadHelper::validateFile($value, 'image', 5);
-                        if (!$validation['valid']) {
-                            $fail(implode(' ', $validation['errors']));
+        if (!$this->school) {
+            abort(403, 'Nessuna scuola associata al tuo account.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'type' => 'required|in:saggio,workshop,competizione,seminario,altro',
+                'start_date' => 'required|date|after_or_equal:today',
+                'end_date' => 'required|date|after_or_equal:start_date',
+                'location' => 'nullable|string|max:255',
+                'max_participants' => 'nullable|integer|min:1',
+                'price_students' => 'nullable|numeric|min:0|max:999999.99',
+                'price_guests' => 'nullable|numeric|min:0|max:999999.99',
+                'requires_registration' => 'boolean',
+                'registration_deadline' => 'nullable|date|before:start_date',
+                'requirements' => 'nullable|array',
+                'requirements.*' => 'string|max:255',
+                'external_link' => 'nullable|url|max:500',
+                'social_link' => 'nullable|url|max:500',
+                'image' => [
+                    'nullable',
+                    'file',
+                    'max:5120', // 5MB
+                    'mimes:jpg,jpeg,png,gif,webp',
+                    function ($attribute, $value, $fail) {
+                        if ($value) {
+                            $validation = FileUploadHelper::validateFile($value, 'image', 5);
+                            if (!$validation['valid']) {
+                                $fail(implode(' ', $validation['errors']));
+                            }
                         }
                     }
-                }
-            ],
-            'is_public' => 'boolean',
-            'active' => 'boolean'
-        ]);
-
-        $validated['school_id'] = $this->school->id;
-        $validated['requires_registration'] = $validated['requires_registration'] ?? false;
-        $validated['is_public'] = $validated['is_public'] ?? true;
-        $validated['active'] = $validated['active'] ?? true;
-        $validated['price'] = $validated['price'] ?? 0.00;
-
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            $result = FileUploadHelper::uploadFile(
-                $request->file('image'),
-                'events',
-                'image',
-                5
-            );
-
-            if ($result['success']) {
-                $validated['image_path'] = $result['path'];
-            } else {
-                return back()->withErrors(['image' => implode(' ', $result['errors'])])->withInput();
-            }
-        }
-
-        $event = Event::create($validated);
-
-        $this->clearSchoolCache();
-
-        if ($request->ajax()) {
-            return $this->jsonResponse(true, 'Evento creato con successo.', [
-                'event' => $event->load(['registrations.user'])
+                ],
+                'is_public' => 'boolean',
+                'active' => 'boolean'
             ]);
-        }
 
-        return redirect()->route('admin.events.show', $event)
-                        ->with('success', 'Evento creato con successo.');
+            $validated['school_id'] = $this->school->id;
+            $validated['requires_registration'] = $validated['requires_registration'] ?? false;
+            $validated['is_public'] = $validated['is_public'] ?? true;
+            $validated['active'] = $validated['active'] ?? true;
+            $validated['price_students'] = $validated['price_students'] ?? 0.00;
+            $validated['price_guests'] = $validated['price_guests'] ?? 0.00;
+
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                $result = FileUploadHelper::uploadFile(
+                    $request->file('image'),
+                    'events',
+                    'image',
+                    5
+                );
+
+                if ($result['success']) {
+                    $validated['image_path'] = $result['path'];
+                } else {
+                    return back()->withErrors(['image' => implode(' ', $result['errors'])])->withInput();
+                }
+            }
+
+            $event = Event::create($validated);
+
+            $this->clearSchoolCache();
+
+            DB::commit();
+
+            if ($request->ajax()) {
+                return $this->jsonResponse(true, 'Evento creato con successo.', [
+                    'event' => $event->load(['registrations.user'])
+                ]);
+            }
+
+            return redirect()->route('admin.events.show', $event)
+                            ->with('success', 'Evento creato con successo.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Cleanup uploaded file if exists
+            if (isset($validated['image_path'])) {
+                Storage::disk('public')->delete($validated['image_path']);
+            }
+
+            Log::error('Event creation failed', [
+                'error' => $e->getMessage(),
+                'school_id' => $this->school->id ?? null,
+                'user_id' => auth()->id()
+            ]);
+
+            return back()
+                ->withErrors(['error' => 'Si è verificato un errore durante la creazione dell\'evento. Riprova.'])
+                ->withInput();
+        }
     }
 
     /**
@@ -149,6 +189,10 @@ class AdminEventController extends AdminBaseController
      */
     public function show(Event $event)
     {
+        if (!$this->school) {
+            abort(403, 'Nessuna scuola associata al tuo account.');
+        }
+
         // Ensure event belongs to current school
         if ($event->school_id !== $this->school->id) {
             abort(404, 'Evento non trovato.');
@@ -180,6 +224,10 @@ class AdminEventController extends AdminBaseController
      */
     public function edit(Event $event)
     {
+        if (!$this->school) {
+            abort(403, 'Nessuna scuola associata al tuo account.');
+        }
+
         // Ensure event belongs to current school
         if ($event->school_id !== $this->school->id) {
             abort(404, 'Evento non trovato.');
@@ -201,6 +249,10 @@ class AdminEventController extends AdminBaseController
      */
     public function update(Request $request, Event $event)
     {
+        if (!$this->school) {
+            abort(403, 'Nessuna scuola associata al tuo account.');
+        }
+
         // Ensure event belongs to current school
         if ($event->school_id !== $this->school->id) {
             abort(404, 'Evento non trovato.');
@@ -214,7 +266,8 @@ class AdminEventController extends AdminBaseController
             'end_date' => 'required|date|after_or_equal:start_date',
             'location' => 'nullable|string|max:255',
             'max_participants' => 'nullable|integer|min:1',
-            'price' => 'nullable|numeric|min:0',
+            'price_students' => 'nullable|numeric|min:0|max:999999.99',
+            'price_guests' => 'nullable|numeric|min:0|max:999999.99',
             'requires_registration' => 'boolean',
             'registration_deadline' => 'nullable|date|before:start_date',
             'requirements' => 'nullable|array',
@@ -239,7 +292,8 @@ class AdminEventController extends AdminBaseController
             'active' => 'boolean'
         ]);
 
-        $validated['price'] = $validated['price'] ?? 0.00;
+        $validated['price_students'] = $validated['price_students'] ?? 0.00;
+        $validated['price_guests'] = $validated['price_guests'] ?? 0.00;
 
         // Handle image upload
         if ($request->hasFile('image')) {
@@ -280,6 +334,10 @@ class AdminEventController extends AdminBaseController
      */
     public function destroy(Event $event)
     {
+        if (!$this->school) {
+            abort(403, 'Nessuna scuola associata al tuo account.');
+        }
+
         // Ensure event belongs to current school
         if ($event->school_id !== $this->school->id) {
             abort(404, 'Evento non trovato.');

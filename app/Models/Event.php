@@ -13,7 +13,6 @@ class Event extends Model
     use HasFactory;
 
     protected $fillable = [
-        'school_id',
         'name',
         'description',
         'short_description',
@@ -48,7 +47,6 @@ class Event extends Model
         'registration_deadline' => 'datetime',
         'requirements' => 'array',
         'additional_info' => 'array',
-        'price' => 'decimal:2',
         'price_students' => 'decimal:2',
         'price_guests' => 'decimal:2',
         'requires_registration' => 'boolean',
