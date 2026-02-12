@@ -37,9 +37,8 @@ class AdminDocumentController extends AdminBaseController
         if ($request->filled('search')) {
             $search = \App\Helpers\QueryHelper::sanitizeLikeInput($request->search);
             $query->where(function($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%")
-                  ->orWhere('original_filename', 'like', "%{$search}%")
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('file_path', 'like', "%{$search}%")
                   ->orWhereHas('uploadedBy', function($q) use ($search) {
                       $q->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%");
@@ -136,7 +135,7 @@ class AdminDocumentController extends AdminBaseController
 
             Log::info('Document uploaded successfully', [
                 'document_id' => $document->id,
-                'title' => $document->title,
+                'name' => $document->name,
                 'uploaded_by' => auth()->user()->name,
                 'school_id' => auth()->user()->school_id
             ]);
@@ -196,50 +195,40 @@ class AdminDocumentController extends AdminBaseController
 
         try {
             $data = [
-                'title' => $request->title,
-                'description' => $request->description,
+                'name' => $request->name,
                 'category' => $request->category,
-                'is_public' => $request->boolean('is_public'),
-                'requires_approval' => $request->boolean('requires_approval'),
-                'expires_at' => $request->expires_at ? now()->parse($request->expires_at) : null,
             ];
 
             // Se viene caricato un nuovo file
             if ($request->hasFile('file')) {
                 $file = $request->file('file');
-                $originalName = $file->getClientOriginalName();
                 $extension = $file->getClientOriginalExtension();
-                $storedName = Str::uuid() . '.' . $extension;
 
                 // Elimina il file precedente se esiste
                 if ($document->file_path && Storage::disk('private')->exists($document->file_path)) {
                     Storage::disk('private')->delete($document->file_path);
                 }
 
+                // Secure filename generation (consistent with store method)
+                $safeName = Str::slug($request->name) . '-' . time() . '-' . Str::random(8);
+                $filename = $safeName . '.' . $extension;
+
                 // Salva il nuovo file
-                $filePath = $file->storeAs('documents', $storedName, 'private');
+                $schoolId = auth()->user()->school_id;
+                $filePath = $file->storeAs("documents/{$schoolId}/admin", $filename, 'private');
 
                 $data = array_merge($data, [
-                    'original_filename' => $originalName,
-                    'stored_filename' => $storedName,
                     'file_path' => $filePath,
-                    'mime_type' => $file->getMimeType(),
+                    'file_type' => $extension,
                     'file_size' => $file->getSize(),
                 ]);
-
-                // Se il documento era approvato e ora richiede approvazione, rimettilo in pending
-                if ($document->status === 'approved' && $request->boolean('requires_approval')) {
-                    $data['status'] = 'pending';
-                    $data['approved_by'] = null;
-                    $data['approved_at'] = null;
-                }
             }
 
             $document->update($data);
 
             Log::info('Document updated successfully', [
                 'document_id' => $document->id,
-                'title' => $document->title,
+                'name' => $document->name,
                 'updated_by' => auth()->user()->name,
                 'school_id' => auth()->user()->school_id
             ]);
@@ -276,11 +265,11 @@ class AdminDocumentController extends AdminBaseController
                 Storage::disk('private')->delete($document->file_path);
             }
 
-            $title = $document->title;
+            $name = $document->name;
             $document->delete();
 
             Log::info('Document deleted successfully', [
-                'document_title' => $title,
+                'document_name' => $name,
                 'deleted_by' => auth()->user()->name,
                 'school_id' => auth()->user()->school_id
             ]);
@@ -314,7 +303,7 @@ class AdminDocumentController extends AdminBaseController
             abort(404, 'File non trovato');
         }
 
-        return Storage::disk('private')->download($document->file_path, $document->original_filename);
+        return Storage::disk('private')->download($document->file_path, $document->name);
     }
 
     /**
@@ -335,7 +324,7 @@ class AdminDocumentController extends AdminBaseController
 
         Log::info('Document approved', [
             'document_id' => $document->id,
-            'title' => $document->title,
+            'name' => $document->name,
             'approved_by' => auth()->user()->name,
             'school_id' => auth()->user()->school_id
         ]);
@@ -365,7 +354,7 @@ class AdminDocumentController extends AdminBaseController
 
         Log::info('Document rejected', [
             'document_id' => $document->id,
-            'title' => $document->title,
+            'name' => $document->name,
             'rejection_reason' => $request->rejection_reason,
             'rejected_by' => auth()->user()->name,
             'school_id' => auth()->user()->school_id
