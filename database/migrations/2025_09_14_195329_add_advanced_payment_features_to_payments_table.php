@@ -11,69 +11,119 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('payments', function (Blueprint $table) {
-            // Enhanced payment features
-            $table->foreignId('event_id')->nullable()->after('course_id')->constrained('events')->cascadeOnDelete();
-            $table->enum('payment_type', ['course_enrollment', 'event_registration', 'membership_fee', 'material', 'other'])
-                  ->default('course_enrollment')->after('status');
-            $table->datetime('due_date')->nullable()->after('payment_date');
-            $table->text('notes')->nullable()->after('due_date');
+        $driver = Schema::getConnection()->getDriverName();
 
-            // Receipt management
-            $table->string('receipt_number')->nullable()->unique()->after('notes');
-            $table->timestamp('receipt_sent_at')->nullable()->after('receipt_number');
+        // BUGFIX: SQLite richiede ricostruzione completa tabella per modifiche enum
+        if ($driver === 'sqlite') {
+            // Per SQLite: Aggiungi solo le nuove colonne senza modificare enum esistenti
+            Schema::table('payments', function (Blueprint $table) {
+                // Enhanced payment features
+                $table->foreignId('event_id')->nullable()->after('course_id')->constrained('events')->cascadeOnDelete();
+                $table->string('payment_type')->default('course_enrollment')->after('status');
+                $table->datetime('due_date')->nullable()->after('payment_date');
+                $table->text('notes')->nullable()->after('due_date');
 
-            // Installment support
-            $table->boolean('is_installment')->default(false)->after('receipt_sent_at');
-            $table->foreignId('parent_payment_id')->nullable()->after('is_installment')->constrained('payments')->cascadeOnDelete();
-            $table->integer('installment_number')->nullable()->after('parent_payment_id');
-            $table->integer('total_installments')->nullable()->after('installment_number');
-            $table->enum('installment_frequency', ['monthly', 'quarterly', 'biannual', 'annual', 'custom'])
-                  ->nullable()->after('total_installments');
+                // Receipt management
+                $table->string('receipt_number')->nullable()->unique()->after('notes');
+                $table->timestamp('receipt_sent_at')->nullable()->after('receipt_number');
 
-            // Financial details
-            $table->decimal('tax_amount', 10, 2)->default(0)->after('installment_frequency');
-            $table->decimal('discount_amount', 10, 2)->default(0)->after('tax_amount');
-            $table->decimal('net_amount', 10, 2)->nullable()->after('discount_amount');
-            $table->decimal('payment_gateway_fee', 10, 2)->default(0)->after('net_amount');
+                // Installment support
+                $table->boolean('is_installment')->default(false)->after('receipt_sent_at');
+                $table->foreignId('parent_payment_id')->nullable()->after('is_installment')->constrained('payments')->cascadeOnDelete();
+                $table->integer('installment_number')->nullable()->after('parent_payment_id');
+                $table->integer('total_installments')->nullable()->after('installment_number');
+                $table->string('installment_frequency')->nullable()->after('total_installments');
 
-            // Additional tracking
-            $table->string('reference_number')->nullable()->after('payment_gateway_fee');
-            $table->string('refund_reason')->nullable()->after('reference_number');
-            $table->foreignId('processed_by_user_id')->nullable()->after('refund_reason')->constrained('users')->nullOnDelete();
-            $table->json('gateway_response')->nullable()->after('processed_by_user_id');
+                // Financial details
+                $table->decimal('tax_amount', 10, 2)->default(0)->after('installment_frequency');
+                $table->decimal('discount_amount', 10, 2)->default(0)->after('tax_amount');
+                $table->decimal('net_amount', 10, 2)->nullable()->after('discount_amount');
+                $table->decimal('payment_gateway_fee', 10, 2)->default(0)->after('net_amount');
 
+                // Additional tracking
+                $table->string('reference_number')->nullable()->after('payment_gateway_fee');
+                $table->string('refund_reason')->nullable()->after('reference_number');
+                $table->foreignId('processed_by_user_id')->nullable()->after('refund_reason')->constrained('users')->nullOnDelete();
+                $table->json('gateway_response')->nullable()->after('processed_by_user_id');
+            });
+
+            // Add new indexes for performance
+            Schema::table('payments', function (Blueprint $table) {
+                $table->index(['event_id', 'status']);
+                $table->index(['payment_type', 'status']);
+                $table->index(['due_date', 'status']);
+                $table->index(['is_installment', 'parent_payment_id']);
+                $table->index(['receipt_number']);
+                $table->index(['processed_by_user_id']);
+            });
+        } else {
+            // Per MySQL: Gestione completa con enum
             // Update existing status enum to include new statuses
-            $table->dropColumn('status');
-        });
+            Schema::table('payments', function (Blueprint $table) {
+                $table->dropColumn('status');
+            });
 
-        // Re-add status column with enhanced enum values
-        Schema::table('payments', function (Blueprint $table) {
-            $table->enum('status', ['pending', 'completed', 'failed', 'refunded', 'cancelled', 'processing', 'partial'])
-                  ->default('pending')->after('payment_type');
-        });
+            Schema::table('payments', function (Blueprint $table) {
+                $table->enum('status', ['pending', 'completed', 'failed', 'refunded', 'cancelled', 'processing', 'partial'])
+                      ->default('pending')->after('transaction_id');
+            });
 
-        // Update existing payment_method column to include new methods
-        Schema::table('payments', function (Blueprint $table) {
-            $table->dropColumn('payment_method');
-        });
+            // Update existing payment_method column to include new methods
+            Schema::table('payments', function (Blueprint $table) {
+                $table->dropColumn('payment_method');
+            });
 
-        Schema::table('payments', function (Blueprint $table) {
-            $table->enum('payment_method', [
-                'cash', 'credit_card', 'debit_card', 'bank_transfer',
-                'paypal', 'stripe', 'online', 'check'
-            ])->nullable()->after('net_amount');
-        });
+            Schema::table('payments', function (Blueprint $table) {
+                $table->enum('payment_method', [
+                    'cash', 'credit_card', 'debit_card', 'bank_transfer',
+                    'paypal', 'stripe', 'online', 'check'
+                ])->nullable()->after('currency');
+            });
 
-        // Add new indexes for performance
-        Schema::table('payments', function (Blueprint $table) {
-            $table->index(['event_id', 'status']);
-            $table->index(['payment_type', 'status']);
-            $table->index(['due_date', 'status']);
-            $table->index(['is_installment', 'parent_payment_id']);
-            $table->index(['receipt_number']);
-            $table->index(['processed_by_user_id']);
-        });
+            // Now add new columns
+            Schema::table('payments', function (Blueprint $table) {
+                // Enhanced payment features
+                $table->foreignId('event_id')->nullable()->after('course_id')->constrained('events')->cascadeOnDelete();
+                $table->enum('payment_type', ['course_enrollment', 'event_registration', 'membership_fee', 'material', 'other'])
+                      ->default('course_enrollment')->after('status');
+                $table->datetime('due_date')->nullable()->after('payment_date');
+                $table->text('notes')->nullable()->after('due_date');
+
+                // Receipt management
+                $table->string('receipt_number')->nullable()->unique()->after('notes');
+                $table->timestamp('receipt_sent_at')->nullable()->after('receipt_number');
+
+                // Installment support
+                $table->boolean('is_installment')->default(false)->after('receipt_sent_at');
+                $table->foreignId('parent_payment_id')->nullable()->after('is_installment')->constrained('payments')->cascadeOnDelete();
+                $table->integer('installment_number')->nullable()->after('parent_payment_id');
+                $table->integer('total_installments')->nullable()->after('installment_number');
+                $table->enum('installment_frequency', ['monthly', 'quarterly', 'biannual', 'annual', 'custom'])
+                      ->nullable()->after('total_installments');
+
+                // Financial details
+                $table->decimal('tax_amount', 10, 2)->default(0)->after('installment_frequency');
+                $table->decimal('discount_amount', 10, 2)->default(0)->after('tax_amount');
+                $table->decimal('net_amount', 10, 2)->nullable()->after('discount_amount');
+                $table->decimal('payment_gateway_fee', 10, 2)->default(0)->after('net_amount');
+
+                // Additional tracking
+                $table->string('reference_number')->nullable()->after('payment_gateway_fee');
+                $table->string('refund_reason')->nullable()->after('reference_number');
+                $table->foreignId('processed_by_user_id')->nullable()->after('refund_reason')->constrained('users')->nullOnDelete();
+                $table->json('gateway_response')->nullable()->after('processed_by_user_id');
+            });
+
+            // Add new indexes for performance
+            Schema::table('payments', function (Blueprint $table) {
+                $table->index(['event_id', 'status']);
+                $table->index(['payment_type', 'status']);
+                $table->index(['due_date', 'status']);
+                $table->index(['is_installment', 'parent_payment_id']);
+                $table->index(['receipt_number']);
+                $table->index(['processed_by_user_id']);
+            });
+        }
     }
 
     /**
