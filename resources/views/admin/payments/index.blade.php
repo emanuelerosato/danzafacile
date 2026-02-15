@@ -202,7 +202,7 @@
             <div class="relative inline-block text-left">
                 <button type="button" id="bulkActionBtn" disabled
                         class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                        onclick="toggleBulkDropdown()">
+                        @click="toggleBulkDropdown()">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                     </svg>
@@ -340,17 +340,7 @@
                                 <div class="relative inline-block text-left">
                                     <button type="button"
                                             class="inline-flex items-center justify-center w-8 h-8 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-all duration-200"
-                                            data-dropdown-toggle="paymentDropdown{{ $payment->id }}"
-                                            onclick="
-                                                if(typeof togglePaymentDropdown !== 'undefined') {
-                                                    togglePaymentDropdown({{ $payment->id }});
-                                                } else {
-                                                    const dropdown = document.getElementById('paymentDropdown{{ $payment->id }}');
-                                                    if (dropdown) {
-                                                        dropdown.classList.toggle('hidden');
-                                                    }
-                                                }
-                                            "
+                                            @click="toggleDropdown({{ $payment->id }})"
                                             title="Azioni disponibili">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
@@ -376,7 +366,7 @@
                                             <!-- Separatore -->
                                             <div class="border-t border-gray-100 my-1"></div>
                                             <!-- Azioni di stato -->
-                                            <a href="#" onclick="markCompleted({{ $payment->id }})" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-all duration-200">
+                                            <a href="#" @click.prevent="markCompleted({{ $payment->id }})" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition-all duration-200">
                                                 <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                                 </svg>
@@ -401,7 +391,7 @@
                                                 </svg>
                                                 <span class="font-medium">Scarica Ricevuta</span>
                                             </a>
-                                            <a href="#" onclick="sendReceipt({{ $payment->id }})" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200">
+                                            <a href="#" @click.prevent="sendReceipt({{ $payment->id }})" class="group flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200">
                                                 <svg class="mr-3 h-4 w-4 text-gray-400 group-hover:text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                                 </svg>
@@ -438,7 +428,7 @@
                                             <!-- Separatore per azioni pericolose -->
                                             <div class="border-t border-gray-100 my-1"></div>
                                             <!-- Azioni pericolose -->
-                                            <a href="#" onclick="deletePayment({{ $payment->id }})" class="group flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200">
+                                            <a href="#" @click.prevent="deletePayment({{ $payment->id }})" class="group flex items-center px-4 py-3 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200">
                                                 <svg class="mr-3 h-4 w-4 text-red-400 group-hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                                 </svg>
