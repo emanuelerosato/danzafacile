@@ -529,10 +529,24 @@ class AdminPaymentController extends AdminBaseController
                 'generated_by' => $this->user
             ]);
 
-            // Send email (implement your mail logic here)
-            // Mail::to($payment->user->email)->send(new PaymentReceiptMail($payment, $pdf->output()));
+            // Get PDF content
+            $pdfContent = $pdf->output();
 
+            // Send email with PDF attachment
+            \Mail::to($payment->user->email)->send(
+                new \App\Mail\PaymentReceiptMail($payment, $pdfContent)
+            );
+
+            // Update receipt_sent_at timestamp
             $payment->update(['receipt_sent_at' => now()]);
+
+            Log::info('Receipt email sent successfully', [
+                'payment_id' => $payment->id,
+                'receipt_number' => $payment->receipt_number,
+                'recipient' => $payment->user->email,
+                'school_id' => $this->school->id,
+                'sent_by' => $this->user->id
+            ]);
 
             return $this->jsonResponse(true, 'Receipt sent successfully.');
 
@@ -591,9 +605,57 @@ class AdminPaymentController extends AdminBaseController
                         break;
 
                     case 'send_receipts':
-                        // Implement receipt sending logic
-                        $payment->update(['receipt_sent_at' => now()]);
-                        $count++;
+                        // Validate user has email
+                        if (!$payment->user || !$payment->user->email) {
+                            Log::warning('Cannot send receipt - user has no email', [
+                                'payment_id' => $payment->id,
+                                'user_id' => $payment->user_id
+                            ]);
+                            continue 2; // Skip this payment
+                        }
+
+                        try {
+                            // Generate PDF with settings
+                            $settings = [
+                                'school_name' => Setting::get("school.{$this->school->id}.name", $this->school->name),
+                                'school_address' => Setting::get("school.{$this->school->id}.address", $this->school->address ?? ''),
+                                'school_city' => Setting::get("school.{$this->school->id}.city", $this->school->city ?? ''),
+                                'school_postal_code' => Setting::get("school.{$this->school->id}.postal_code", $this->school->postal_code ?? ''),
+                                'school_phone' => Setting::get("school.{$this->school->id}.phone", $this->school->phone ?? ''),
+                                'school_email' => Setting::get("school.{$this->school->id}.email", $this->school->email ?? ''),
+                                'school_website' => Setting::get("school.{$this->school->id}.website", $this->school->website ?? ''),
+                                'vat_number' => Setting::get("school.{$this->school->id}.vat_number", ''),
+                                'tax_code' => Setting::get("school.{$this->school->id}.tax_code", ''),
+                            ];
+
+                            $pdf = PDF::loadView('admin.payments.receipt', [
+                                'payment' => $payment,
+                                'school' => $this->school,
+                                'settings' => $settings,
+                                'generated_at' => now(),
+                                'generated_by' => $this->user
+                            ]);
+
+                            // Send email
+                            \Mail::to($payment->user->email)->send(
+                                new \App\Mail\PaymentReceiptMail($payment, $pdf->output())
+                            );
+
+                            $payment->update(['receipt_sent_at' => now()]);
+                            $count++;
+
+                            Log::info('Bulk receipt sent', [
+                                'payment_id' => $payment->id,
+                                'recipient' => $payment->user->email
+                            ]);
+
+                        } catch (\Exception $e) {
+                            Log::error('Failed to send bulk receipt', [
+                                'payment_id' => $payment->id,
+                                'error' => $e->getMessage()
+                            ]);
+                            // Continue with next payment
+                        }
                         break;
                 }
             }
