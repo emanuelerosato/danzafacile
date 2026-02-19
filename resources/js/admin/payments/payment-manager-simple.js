@@ -48,6 +48,113 @@ window.paymentManager = function() {
             }
         },
 
+        // Toggle bulk dropdown
+        toggleBulkDropdown() {
+            const dropdown = document.getElementById('bulkDropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('hidden');
+            }
+        },
+
+        // Mark payment as completed
+        async markCompleted(paymentId) {
+            if (!confirm('Sei sicuro di voler segnare questo pagamento come completato?')) {
+                return;
+            }
+
+            this.isLoading = true;
+
+            try {
+                const response = await fetch(`/admin/payments/${paymentId}/mark-completed`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message || 'Pagamento completato con successo!');
+                    location.reload();
+                } else {
+                    alert('Errore: ' + (data.message || 'Operazione fallita'));
+                }
+            } catch (error) {
+                console.error('Mark completed error:', error);
+                alert('Errore durante l\'operazione');
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        // Send receipt
+        async sendReceipt(paymentId) {
+            if (!confirm('Vuoi inviare la ricevuta via email?')) {
+                return;
+            }
+
+            this.isLoading = true;
+
+            try {
+                const response = await fetch(`/admin/payments/${paymentId}/send-receipt`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message || 'Ricevuta inviata con successo!');
+                    location.reload();
+                } else {
+                    alert('Errore: ' + (data.message || 'Invio fallito'));
+                }
+            } catch (error) {
+                console.error('Send receipt error:', error);
+                alert('Errore durante l\'invio');
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
+        // Delete payment
+        async deletePayment(paymentId) {
+            if (!confirm('Sei sicuro di voler eliminare questo pagamento? Questa azione non può essere annullata.')) {
+                return;
+            }
+
+            this.isLoading = true;
+
+            try {
+                const response = await fetch(`/admin/payments/${paymentId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(data.message || 'Pagamento eliminato con successo!');
+                    location.reload();
+                } else {
+                    alert('Errore: ' + (data.message || 'Eliminazione fallita'));
+                }
+            } catch (error) {
+                console.error('Delete payment error:', error);
+                alert('Errore durante l\'eliminazione');
+            } finally {
+                this.isLoading = false;
+            }
+        },
+
         // Azioni multiple
         openBulkModal() {
             if (this.selectedPayments.length === 0) {
