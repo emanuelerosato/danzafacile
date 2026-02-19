@@ -1,6 +1,3 @@
-{{-- Usa la versione semplificata del PaymentManager --}}
-@vite('resources/js/admin/payments/payment-manager-simple.js')
-
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -632,4 +629,8 @@ function sendReceipt(paymentId) {
     });
 }
 </script>
+
+@push('scripts')
+@vite('resources/js/admin/payments/payment-manager-simple.js')
+@endpush
 </x-app-layout>

@@ -7,9 +7,9 @@
  * @version 1.0.0
  */
 
-// Alpine.js data function per gestire la pagina payments
-window.paymentManager = function() {
-    return {
+// Registra il componente Alpine.js nel momento giusto (prima dell'init di Alpine)
+document.addEventListener('alpine:init', () => {
+    Alpine.data('paymentManager', () => ({
         selectedPayments: [],
         isLoading: false,
         showBulkModal: false,
@@ -277,7 +277,7 @@ window.paymentManager = function() {
         get selectedCount() {
             return this.selectedPayments.length;
         }
-    };
-};
+    }));
+});
 
 console.log('[PaymentManager] Simple version loaded');
