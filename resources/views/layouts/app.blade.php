@@ -89,6 +89,9 @@
         });
     </script>
 
+    <!-- Alpine component data (deve essere caricato PRIMA di Alpine.js) -->
+    @stack('alpine-data')
+
     <!-- Alpine.js -->
     <script defer nonce="@cspNonce" src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 

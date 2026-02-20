@@ -630,7 +630,7 @@ function sendReceipt(paymentId) {
 }
 </script>
 
-@push('scripts')
+@push('alpine-data')
 @vite('resources/js/admin/payments/payment-manager-simple.js')
 @endpush
 </x-app-layout>

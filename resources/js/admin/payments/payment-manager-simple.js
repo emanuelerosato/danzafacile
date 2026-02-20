@@ -7,9 +7,10 @@
  * @version 1.0.0
  */
 
-// Registra il componente Alpine.js nel momento giusto (prima dell'init di Alpine)
-document.addEventListener('alpine:init', () => {
-    Alpine.data('paymentManager', () => ({
+// Alpine.js data function per gestire la pagina payments
+// Caricato nella head tramite @stack('alpine-data'), PRIMA di Alpine CDN
+window.paymentManager = function() {
+    return {
         selectedPayments: [],
         isLoading: false,
         showBulkModal: false,
@@ -277,7 +278,7 @@ document.addEventListener('alpine:init', () => {
         get selectedCount() {
             return this.selectedPayments.length;
         }
-    }));
-});
+    };
+};
 
 console.log('[PaymentManager] Simple version loaded');
