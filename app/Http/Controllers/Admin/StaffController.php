@@ -143,17 +143,20 @@ class StaffController extends Controller
         $firstName = $nameParts[0] ?? '';
         $lastName = $nameParts[1] ?? $nameParts[0] ?? ''; // Fallback to first name if no space
 
-        // Crea l'utente
+        // Crea l'utente (role e school_id esclusi da $guarded nel model)
         $user = User::create([
             'name' => $request->name,
             'first_name' => $firstName,
             'last_name' => $lastName,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'admin', // Staff members sono admin della scuola
-            'school_id' => Auth::user()->school_id,
             'email_verified_at' => now(),
         ]);
+
+        // Assegna role e school_id bypassando $guarded
+        $user->role = 'admin';
+        $user->school_id = Auth::user()->school_id;
+        $user->save();
 
         // Genera employee ID
         $employeeId = Staff::generateEmployeeId(Auth::user()->school_id);
