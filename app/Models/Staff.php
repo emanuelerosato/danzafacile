@@ -419,7 +419,7 @@ class Staff extends Model
     public static function generateEmployeeId(int $schoolId): string
     {
         $prefix = 'EMP';
-        $number = static::where('school_id', $schoolId)->count() + 1;
+        $number = static::where('school_id', $schoolId)->withTrashed()->count() + 1;
         return $prefix . str_pad($number, 4, '0', STR_PAD_LEFT);
     }
 
